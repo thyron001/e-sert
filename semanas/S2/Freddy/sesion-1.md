@@ -66,11 +66,21 @@ Swagger útil y tests de cada ruta.
 8. **Evidencia** `evidencias/s1_swagger.png`: captura de `/docs` con todas las rutas
    desplegadas (Playwright, `page.screenshot(full_page=True)`).
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. Deja el backend **listo para el VPS** (app `esert-demo` en Dokploy):
+- Toda la configuración por variables de entorno (`ESERT_DB_URL`, `ESERT_TOKEN_SIM`, `ESERT_CORS_ORIGENES`) con `pydantic-settings`; valores por defecto para local.
+- `GET /salud` → `{"ok": true, "version": ..., "contrato": 1}`.
+- `POST /api/v1/interno/snapshot` exige `Authorization: Bearer $ESERT_TOKEN_SIM` (401 sin token; test).
+- Si existe `proyecto/visor/`, móntalo como estático en `/visor` (`StaticFiles(html=True)`), para servir visor y API desde el mismo dominio.
+- `backend/Dockerfile` (contexto = raíz del repo): `python:3.11-slim`, copia `proyecto/backend`, `proyecto/comun`, `proyecto/ia` (solo `inferencia.py`, `ventanas.py`, `caracteristicas.py`, `umbral.py` y `modelos/`) y `proyecto/visor`; `uvicorn app:app --host 0.0.0.0 --port 8000 --proxy-headers`.
+- Rutas de copia relativas a la raíz del repo (`COPY proyecto/backend ...`), porque Dokploy construye con `Docker File = proyecto/backend/Dockerfile` y contexto `.`.
+
 ## Dónde escribir
 `semanas/S2/Freddy/codigo/backend/` (salvo `pagos/` y `asistente/`),
 `semanas/S2/Freddy/codigo/comun/CONTRATO.propuesto.md` si hace falta, y `evidencias/`.
 
 ## Hecho cuando
+- [ ] El backend arranca con `docker build -f semanas/S2/Freddy/codigo/backend/Dockerfile .` (o, si no hay Docker, el Dockerfile queda revisado y documentado), `/salud` responde y el snapshot sin token da 401.
 - [ ] `pytest backend/tests` pasa, con cobertura mayor al 85 % en `backend/api/` y
   `backend/nucleo/`.
 - [ ] `backend/api/` no contiene reglas de cobro ni de ocupación: todo llama al núcleo

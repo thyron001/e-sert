@@ -64,11 +64,15 @@ liberaciones, error de cobro y latencia hasta el visor.
    - `s2_campo-visor.png`: captura del visor con los teléfonos entre los autos simulados
      (pídela al usuario o tómala en la laptop).
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. La prueba de campo final va **contra el VPS** (`https://demo.e-sert.tesisucuenca.com`) con datos móviles, con la simulación corriendo en una laptop y el visor público abierto. Documenta la cobertura y la latencia por punto del recorrido, y graba el video de respaldo desde el visor público y desde el teléfono a la vez.
+
 ## Dónde escribir
 `semanas/S4/Miguel/codigo/datos/campo_final/` y `evidencias/`. Las trazas crudas grandes
 (más de 5 MB) van en `.gitignore`; publica las recortadas y anonimizadas.
 
 ## Hecho cuando
+- [ ] La prueba de campo se hizo contra el VPS (o queda documentado por qué no) y hay video de respaldo.
 - [ ] `protocolo.md` y `registro_campo.md` existen y describen lo que de verdad pasó.
 - [ ] Hay al menos 6 sesiones completas con marcas de verdad, en iPhone y en Android.
 - [ ] `python datos/campo_final/analizar_campo.py` genera `resultados.json` con las cinco

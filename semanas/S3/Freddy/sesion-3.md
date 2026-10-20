@@ -68,11 +68,15 @@ la simulación y cerrar la sesión automáticamente, sin falsas liberaciones en 
    `modo_real` vs modo detectado, distancia al puesto, estados de la sesión y una línea vertical
    en el cierre.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. Esta sesión **pone la demo en línea**: verifica que `esert-demo` se construya desde `main` (si la unificación aún no la desplegó, pide a Tyrone crear la app en Dokploy con la tabla de `DESPLIEGUE.md`; no necesitas acceso a Dokploy para preparar todo). Prueba en vivo: un teléfono real **con datos móviles** camina en el Centro, la clasificación en el VPS cierra su sesión, y el visor público lo muestra. Mide la latencia de punta a punta, el uso de CPU/RAM del contenedor (`docker stats` o el panel de Dokploy) y que el volumen `/data` conserve la billetera tras un redeploy.
+
 ## Dónde escribir
 `semanas/S3/Freddy/codigo/backend/`, `semanas/S3/Freddy/codigo/traci/` (solo el import de
 `estados.py`), `semanas/S3/Freddy/codigo/comun/` y `evidencias/`.
 
 ## Hecho cuando
+- [ ] `https://demo.e-sert.tesisucuenca.com/salud` responde y la prueba con teléfono real con datos móviles queda documentada (latencia, recursos y persistencia tras redeploy). Si el VPS no estaba listo, estado `parcial` con el motivo.
 - [ ] `pytest backend/tests/test_en_vivo.py` pasa y los tests de TraCI siguen en verde.
 - [ ] En las grabaciones de `proyecto/datos/`: 0 falsas liberaciones y, en al menos el 80 %,
   cierre a menos de 60 s de la salida real.

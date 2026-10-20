@@ -9,6 +9,9 @@ Lee siempre estos documentos:
 - `docs/CONTEXTO.md`: alcance acordado y lo que queda fuera de alcance.
 - `docs/EQUIPO.md`: personas, colores, módulos con sus dueños y calendario.
 - `docs/CONTRATO.md`: formato de eventos y API entre TraCI, el backend, la IA y la app.
+- `docs/DESPLIEGUE.md`: la demo en línea en el VPS (backend + visor en
+  `demo.e-sert.tesisucuenca.com`). Léelo si tu sesión toca el backend, el visor, la app o la
+  demo.
 
 Idioma: español para documentación, bitácoras, comentarios y mensajes de commit. Los
 identificadores de código pueden ir en inglés o español, pero de forma consistente dentro de

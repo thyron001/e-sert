@@ -66,11 +66,15 @@ su destino, abren sesión al llegar, cobran al salir y el libro de la billetera 
    - `s3_cobros-simulados.png`: minutos reales frente a cobrados por sesión, con la escalera
      de fracciones de 5 min.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. `--publicar` acepta la URL del VPS: `--publicar https://demo.e-sert.tesisucuenca.com --token $ESERT_TOKEN_SIM` (token desde variable de entorno, nunca en el código). Usa una sesión `httpx` con *keep-alive*, envíos en un hilo aparte con cola de tamaño 1 (si la red se atrasa, se descarta el snapshot viejo: **la simulación nunca espera a la red**) y reintento con *backoff*.
+
 ## Dónde escribir
 `semanas/S2/Freddy/codigo/traci/` y `semanas/S2/Freddy/evidencias/`. No edites `sumo/`
 (es de Tyrone): lo que falte en la demanda va como pedido.
 
 ## Hecho cuando
+- [ ] Con `--publicar` hacia una URL caída, la simulación sigue a la misma velocidad (prueba con una URL inválida).
 - [ ] `app50_s1` corre 75 min simulados sin errores con guiado, sesiones y cobro activos.
 - [ ] Cada auto con app que estacionó tiene una sesión; ninguna queda abierta al final (o
   se explica).

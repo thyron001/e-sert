@@ -54,6 +54,11 @@ ocupación en vivo, guía al puesto libre más cercano al destino y cobra el tie
     `{destino, duración}`. Nunca va dentro del lazo de SUMO/TraCI.
   - Un teléfono real que aparece en el mismo mapa que la simulación.
 
+- **VPS (Dokploy):** backend y visor publicados en `https://demo.e-sert.tesisucuenca.com`,
+  para que el teléfono real funcione con datos móviles, Payphone tenga su URL de retorno y el
+  visor se vea desde cualquier pantalla. SUMO sigue corriendo en la laptop de la demo.
+  Detalles en `docs/DESPLIEGUE.md`.
+
 ## Reglas de cobro
 
 Se retiene al llegar y se debita al salir:

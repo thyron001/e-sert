@@ -75,11 +75,18 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
    `sumo-gui` (`PIL.ImageGrab` tras 60 s), captura del visor (Playwright *headless* si está;
    si no, pide la captura al usuario) y barras con el tiempo de arranque por componente.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. La demo tiene **dos modos**:
+- `--remoto` (el principal): la laptop corre SUMO, `sumo-gui` y el controlador, y publica en `https://demo.e-sert.tesisucuenca.com` con `ESERT_TOKEN_SIM`; abre `https://demo.e-sert.tesisucuenca.com/visor` en el navegador. El teléfono real usa la misma URL.
+- `--local` (plan B, sin internet): backend `uvicorn` local + visor local, como ya estaba.
+Al arrancar en `--remoto`, comprueba `/salud` y, si falla en 5 s, ofrece pasar a `--local` automáticamente.
+
 ## Dónde escribir
 `semanas/S4/Tyrone/codigo/demo/` (y tus copias de `sumo/`, `kpis/`, `visor/`) y
 `semanas/S4/Tyrone/evidencias/`. No edites `proyecto/backend/` ni `proyecto/traci/`.
 
 ## Hecho cuando
+- [ ] Los dos modos arrancan con un comando, y el modo remoto cae al local si el VPS no responde.
 - [ ] `python demo/demo.py` arranca las tres piezas en menos de 60 s y el visor muestra autos
   y puestos en verde/rojo.
 - [ ] Ctrl+C deja libres los puertos 8000 y 8080 y sin procesos `sumo-gui` vivos.

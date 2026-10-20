@@ -70,11 +70,15 @@ falsas liberaciones evitables).
    duración, verdes si pasan y rojas si fallan, leídas de `e2e.xml`, y en el título el total
    y el tiempo.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. Añade una prueba de humo contra la demo en línea (`pytest -m vps`, opcional en CI): `/salud`, `GET /puestos`, conexión WS de 5 s y el rechazo del snapshot sin token. URL por `ESERT_URL_PUBLICA` (por defecto `https://demo.e-sert.tesisucuenca.com`).
+
 ## Dónde escribir
 `semanas/S4/Freddy/codigo/backend/`, `semanas/S4/Freddy/codigo/traci/` y `evidencias/`.
 No edites `backend/pagos/` ni `backend/asistente/` (son de Miguel).
 
 ## Hecho cuando
+- [ ] `pytest -m vps` pasa contra la URL pública (o queda omitido con el motivo si el VPS no está accesible).
 - [ ] `pytest -m e2e` pasa completo en una máquina con SUMO, en menos de 5 min.
 - [ ] Sin SUMO, la suite se salta limpiamente (sin errores) y los tests HTTP siguen corriendo.
 - [ ] `pytest` sin marcador sigue pasando y no tarda más de 60 s.

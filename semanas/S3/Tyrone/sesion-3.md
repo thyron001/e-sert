@@ -58,11 +58,15 @@ reales con su modo y un modo presentación a pantalla completa, robusto ante cor
 8. **Evidencias:** `evidencias/s3_visor-final.png` (vista normal con panel y un teléfono
    visible) y `evidencias/s3_visor-presentacion.png` (modo presentación).
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. El visor final se publica en `https://demo.e-sert.tesisucuenca.com/visor` (lo sirve el backend). Añade un enlace "Demo en vivo" al roadmap (`roadmap/templates/base.html`, que es tuyo) que apunte ahí. El modo presentación debe verse bien en el proyector (1920×1080) y en un teléfono (para que el profesor lo abra con un QR: genera `evidencias/s3_qr-demo.png` con `qrcode`).
+
 ## Dónde escribir
 `semanas/S3/Tyrone/codigo/visor/`, `semanas/S3/Tyrone/codigo/kpis/` (solo el exportador de
 `base.json`) y `evidencias/`.
 
 ## Hecho cuando
+- [ ] El visor funciona en la URL pública (o, si la demo aún no está desplegada, servido desde el backend local en `/visor/`), y existe el QR.
 - [ ] El panel se actualiza con mensajes `kpi` del servidor de prueba y del backend real.
 - [ ] La capa de teléfonos muestra modo, rastro y precisión, y retira los teléfonos sin datos.
 - [ ] El modo presentación funciona con `P`, `T` y `H`.

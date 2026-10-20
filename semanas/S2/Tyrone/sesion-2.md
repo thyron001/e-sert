@@ -62,11 +62,18 @@ Un visor web estático (sin *build*) que muestre en vivo autos, peatones, teléf
    tomada con Playwright (`page.screenshot`, 1600×1000) desde un script
    `visor/captura.py`; si no hay Playwright, captura manual del navegador.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. El visor se servirá desde el backend en `https://demo.e-sert.tesisucuenca.com/visor`:
+- **Por defecto** conecta al WS **del mismo origen** (`(location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws/estado"`); `?ws=` sigue sirviendo para pruebas locales o con el mock.
+- Solo rutas **relativas** a sus propios archivos (`./visor.js`, `./estilo.css`), para que funcione bajo `/visor/`.
+- Leaflet y las teselas por HTTPS (sin contenido mixto).
+
 ## Dónde escribir
 `semanas/S2/Tyrone/codigo/visor/` y `semanas/S2/Tyrone/evidencias/`. `snapshots.jsonl` grande
 va en `.gitignore`; publica una muestra de 60 snapshots.
 
 ## Hecho cuando
+- [ ] El visor funciona abierto como `/visor/` detrás de otro servidor (prueba: `python -m http.server` en la carpeta padre y abrir `/visor/`), conectando por defecto al WS del mismo origen.
 - [ ] `python -m visor.servidor_prueba` levanta y el visor muestra autos moviéndose y
   puestos que cambian de verde a rojo.
 - [ ] El visor mantiene más de 20 FPS con el snapshot de hora pico (mídelo en DevTools).

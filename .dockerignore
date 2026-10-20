@@ -2,7 +2,11 @@
 **/node_modules
 **/.venv
 **/__pycache__
-proyecto/
 **/datos/crudos/
+**/datos/procesados/
 **/sumo/salidas/
+**/kpis/resultados/vehiculos/
+proyecto/app/
+proyecto/datos/
 .env
+.env.*

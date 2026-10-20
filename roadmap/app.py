@@ -59,6 +59,7 @@ DOCS = {
     "plan": ("PLAN.md", "Plan de 4 semanas"),
     "equipo": ("EQUIPO.md", "Equipo y calendario"),
     "contrato": ("CONTRATO.md", "Contrato de interfaces"),
+    "despliegue": ("DESPLIEGUE.md", "Demo en el VPS"),
 }
 
 ESTADOS = {

@@ -72,12 +72,16 @@ credenciales.
 7. **Evidencia** `evidencias/s2_billetera-recarga.png`: tira de capturas del teléfono
    (billetera antes, Payphone en pruebas o mock, billetera después) unida con Pillow.
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. Payphone exige una `responseUrl` **pública HTTPS**: usa `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno` (en local, déjala configurable con `ESERT_URL_PUBLICA`). Las credenciales de prueba (`PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`) van como variables de entorno en Dokploy y en `.env` local; nunca en el repo. Si la demo aún no está desplegada, deja todo listo y la prueba de punta a punta queda para S3 (estado `parcial` documentado).
+
 ## Dónde escribir
 `semanas/S2/Miguel/codigo/backend/pagos/`, `semanas/S2/Miguel/codigo/app/` y
 `semanas/S2/Miguel/evidencias/`. Comprueba con `git status` que ningún `.env` queda
 preparado para commit.
 
 ## Hecho cuando
+- [ ] La `responseUrl` se arma desde `ESERT_URL_PUBLICA`, y existe un test del retorno idempotente que no depende de Payphone real.
 - [ ] `pytest backend/pagos/tests` pasa, incluida la idempotencia.
 - [ ] La recarga funciona de punta a punta en modo mock desde Expo Go.
 - [ ] El modo `pruebas` de Payphone funciona o queda documentado qué falta (credenciales,

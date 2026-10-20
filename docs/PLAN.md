@@ -39,6 +39,17 @@ es el mapa general: qué hace cada persona, en qué orden y qué necesita de los
 | 🟢 Pablo | Modelo final congelado + *model card* | Sección de IA final + preguntas probables del profesor | Integración del informe completo (`proyecto/informe/`) |
 | 🔴 Miguel | Pulido final de la app + manual de usuario | Prueba de campo final en el Centro con la simulación en vivo | Sección de la app en el informe + plan B de la demo (video) |
 
+## Demo en línea (VPS)
+
+Ver `docs/DESPLIEGUE.md`.
+
+- **S2:** Freddy deja el backend desplegable (Dockerfile, `/salud`, token).
+- **Después de la unificación de S2 (dom 1 nov):** Tyrone crea la app `esert-demo` en Dokploy
+  con `demo.e-sert.tesisucuenca.com`.
+- **S3:** Freddy prueba en línea con un teléfono real con datos móviles, y Tyrone publica el
+  visor final con su QR.
+- **S4:** demo `--remoto` con plan B `--local`, y prueba de campo de Miguel contra el VPS.
+
 ## Dependencias críticas
 
 - La red y los puestos de Tyrone (S1) los necesitan Freddy y Pablo en S1-3 y S2-1.

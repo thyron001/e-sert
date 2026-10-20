@@ -65,12 +65,16 @@ junto a los autos simulados y sumar grabaciones etiquetadas de los casos difíci
      coloreadas por `modo_real` (matplotlib + `contextily` si está, o la red de SUMO de
      fondo).
 
+## VPS (demo en línea)
+Lee `docs/DESPLIEGUE.md`. Si `https://demo.e-sert.tesisucuenca.com/salud` ya responde, haz la prueba **con datos móviles** (sin Wi-Fi ni túnel): `EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com` y el visor abierto en `https://demo.e-sert.tesisucuenca.com/visor` desde otra pantalla. Mide y anota la latencia teléfono → visor (marca de tiempo del evento frente al momento en que se pinta). Si aún no está en línea, usa la red local o el túnel y anótalo.
+
 ## Dónde escribir
 `semanas/S2/Miguel/codigo/app/`, `semanas/S2/Miguel/codigo/datos/` y
 `semanas/S2/Miguel/evidencias/`. Revisa que las grabaciones no incluyan datos personales
 (domicilios): recorta los primeros y últimos 2 min si empiezan en casa.
 
 ## Hecho cuando
+- [ ] Queda anotado en la bitácora si la prueba fue contra el VPS o en local, y la latencia medida.
 - [ ] El backend recibe la ubicación del teléfono a ~1 Hz (cuéntalo en los logs durante
   5 min: ≥ 270 eventos).
 - [ ] El teléfono aparece en el visor junto a la simulación (o el pedido a Freddy está
