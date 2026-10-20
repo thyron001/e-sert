@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Roadmap del proyecto — e-sert{% endblock %}
+
+{#
+  Todo se pinta en el servidor a partir de los archivos del repo (sesion-K.md, estado.json,
+  unificacion-resultado.md). El JS solo abre los popups, copia los prompts y filtra.
+#}
+
+{% block content %}
+<div class="doc doc-ancho cr">
+
+  <h1>Roadmap del proyecto</h1>
+  <p class="lead">Cuatro semanas, cuatro personas, tres sesiones por persona por semana. Cada
+    tarjeta abre el prompt listo para copiar en Claude Code; el estado se actualiza solo con
+    cada commit que llega a <code>main</code> tras la unificación del domingo.</p>
+
+  <!-- Cifras -->
+  <div class="cr-cifras">
+    <div><b>{{ p.hechas }} / {{ p.total }}</b><span>sesiones hechas</span></div>
+    <div><b>{{ p.pct }} %</b><span>avance del proyecto</span></div>
+    <div><b>{{ p.semana_actual or '—' }}</b><span>semana en curso</span></div>
+    <div><b>{{ p.dias_entrega if p.dias_entrega > 0 else 0 }}</b><span>días para la entrega</span></div>
+    <div><b>{{ p.linea.tiempo_pct }} %</b><span>del tiempo transcurrido</span></div>
+    <div><b>Sáb 23:59</b><span>plazo semanal de commits</span></div>
+  </div>
+
+  <!-- ============================ LÍNEA DE PROGRESO ============================ -->
+  <section class="es-linea" aria-label="Línea de progreso">
+    <div class="es-linea-cab">
+      <h2>Línea de progreso</h2>
+      <span>19 oct → 16 nov 2026 · hoy {{ p.hoy.day }}/{{ p.hoy.month }}</span>
+    </div>
+    <div class="es-pista">
+      {% for t in p.linea.tramos %}
+      <div class="es-tramo {{ 'actual' if t.es_actual else '' }}" style="left: {{ t.izq }}%; width: {{ t.ancho }}%">
+        <div><i style="--v: {{ t.pct }}%"></i><b>{{ t.clave }}<em>{{ t.pct }} %</em></b></div>
+      </div>
+      {% endfor %}
+      {% if p.linea.hoy is not none %}
+      <div class="es-hoy" style="left: {{ p.linea.hoy }}%"><span>Hoy</span></div>
+      {% endif %}
+      {% for h in p.linea.hitos %}
+      <div class="es-hito {{ 'hecho' if h.hecho else '' }} {{ 'final' if h.final else '' }}" style="left: {{ h.pos }}%">
+        <span>{{ h.txt }}</span><small>{{ h.fecha }}</small>
+      </div>
+      {% endfor %}
+    </div>
+    {% set adelanto = p.pct - p.linea.tiempo_pct %}
+    <div class="es-ritmo">
+      <div><span>Tiempo transcurrido</span><i style="--v: {{ p.linea.tiempo_pct }}%; --c: var(--muted-2)"></i><b>{{ p.linea.tiempo_pct }} %</b></div>
+      <div><span>Trabajo hecho</span><i style="--v: {{ p.pct }}%; --c: var(--green)"></i><b>{{ p.pct }} %</b></div>
+    </div>
+    <p class="es-veredicto">
+      {% if p.semana_actual is none %}El proyecto aún no empieza.
+      {% elif adelanto >= 0 %}<b style="--c: var(--green-dk)">Al día</b>: el trabajo hecho va igual o por delante del calendario.
+      {% elif adelanto > -10 %}<b style="--c: #A07800)">Ligeramente atrasados</b> ({{ -adelanto }} puntos): conviene cerrar las sesiones pendientes antes del sábado.
+      {% else %}<b style="--c: var(--warn)">Atrasados</b> ({{ -adelanto }} puntos): revisen los pendientes y pedidos cruzados en las bitácoras.
+      {% endif %}
+    </p>
+  </section>
+
+  <!-- ============================ ESTADO DEL EQUIPO ============================ -->
+  <div class="es-equipo">
+    {% for e in p.personas %}
+    <article class="es-persona" style="--p: {{ e.color }}; --pt: {{ e.tinte }}">
+      <div class="es-persona-cab">
+        <div class="es-avatar">{{ e.persona[0] }}</div>
+        <div>
+          <h3><a href="{{ url_for('persona', nombre=e.persona|lower) }}">{{ e.persona }} {{ e.emoji }}</a></h3>
+          <div class="rol">{{ e.rol }}</div>
+        </div>
+      </div>
+      <span class="es-frase {{ e.tono }}">{{ e.frase }}</span>
+      {% if e.atraso %}<span class="es-atraso">⚠ {{ e.atraso }}</span>{% endif %}
+      <div class="es-barra"><i style="--v: {{ e.pct }}%"></i><b>{{ e.hechas }}/{{ e.total }}</b></div>
+      <div class="es-puntos">
+        {% for sk in ['S1','S2','S3','S4'] %}
+        <div><small>{{ sk }}</small>
+          {% for pt in e.puntos if pt.sem == sk %}
+          <button class="es-punto {{ pt.estado }}" data-abrir="{{ pt.id }}" title="{{ pt.id }} · {{ pt.titulo }}"></button>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      {% if e.siguiente %}
+      <div class="es-sig"><span>Siguiente</span>Sesión {{ e.siguiente.k }}: {{ e.siguiente.titulo }}</div>
+      <button class="boton boton-persona" data-copiar="{{ e.siguiente.comando }}">Copiar comando</button>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+
+  <!-- Pestañas / filtros -->
+  <div class="cr-tabs">
+    <div class="cr-filtros" style="margin: 0">
+      <span>Ver:</span>
+      <button class="cr-chip activo" data-persona="">Todos</button>
+      {% for n, pi in PERSONAS.items() %}
+      <button class="cr-chip" data-persona="{{ n }}" style="--c: {{ pi.color }}; --t: {{ pi.tinte }}">{{ n }}</button>
+      {% endfor %}
+    </div>
+    <span class="cr-tabs-sep"></span>
+    <button class="tool-btn" id="ir-actual">Semana actual</button>
+    <button class="tool-btn" id="plegar-todo">Plegar todo</button>
+  </div>
+
+  <!-- ============================ SEMANAS ============================ -->
+  {% for s in p.semanas %}
+  <article class="cr-semana es-semana {{ 'actual' if s.es_actual else '' }}" id="sem-{{ s.clave }}">
+    <header class="cr-sem-cab">
+      <div class="cr-sem-n">{{ s.clave }}</div>
+      <div class="cr-sem-txt">
+        <h2>{{ s.titulo }}{% if s.es_actual %}<span class="es-chip-actual">EN CURSO</span>{% endif %}</h2>
+        <p class="cr-sem-fechas">{{ s.larga }} · 3 sesiones por persona · unificación el domingo a las 09:00</p>
+      </div>
+      <div class="cr-sem-prog"><i style="--p: {{ (100 * s.hechas / s.total)|round|int }}%"></i><span>{{ s.hechas }} / {{ s.total }}</span></div>
+      <button class="cr-sem-toggle" type="button" title="Plegar la semana">▾</button>
+    </header>
+
+    <div class="cr-sem-cuerpo">
+      <div class="es-carriles">
+        {% for c in s.carriles %}
+        <div class="es-carril" data-persona="{{ c.persona }}" style="--p: {{ c.color }}; --pt: {{ c.tinte }}">
+          <div class="es-carril-cab">
+            <a href="{{ url_for('persona', nombre=c.persona|lower) }}">{{ c.emoji }} {{ c.persona }}</a>
+            <span>{{ c.hechas }}/3{% if c.pdf_semanal %} · <a href="{{ url_for('archivo', ruta=c.pdf_semanal) }}" target="_blank">PDF</a>{% endif %}</span>
+          </div>
+          {% for ses in c.sesiones %}
+          <button class="es-ses {{ ses.estado_css }}" data-abrir="{{ ses.id }}" type="button">
+            <span class="es-ses-cab"><span class="es-ses-n">Sesión {{ ses.k }}</span><span class="es-est {{ ses.estado_css }}">{{ ses.estado_txt }}</span></span>
+            <h4>{{ ses.titulo }}</h4>
+            <span class="es-ses-meta">{{ ses.horas }} h · {{ ses.modulo }}{% if ses.fecha %} · {{ ses.fecha }}{% endif %}{% if ses.criterios.total %} · {{ ses.criterios.cumplidos }}/{{ ses.criterios.total }} criterios{% endif %}</span>
+            {% if ses.evidencias %}
+            <span class="es-miniaturas">
+              {% for ev in ses.evidencias[:3] if ev.lower().endswith(('.png', '.jpg', '.jpeg')) %}<img src="{{ url_for('archivo', ruta=ev) }}" alt="" loading="lazy">{% endfor %}
+            </span>
+            {% endif %}
+          </button>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="es-unif">
+        <b>🤖 Unificación automática</b>
+        <span>{% if s.unificada %}Hecha: el código de la semana ya está en <code>proyecto/</code>.{% else %}Domingo {{ s.fin.day }} de {{ 'octubre' if s.fin.month == 10 else 'noviembre' }} a las 09:00 · fusiona las ramas <code>*/{{ s.clave|lower }}</code> en <code>main</code>.{% endif %}</span>
+        {% if s.unificacion_prompt %}<button class="boton boton-suave" data-abrir="UNI-{{ s.clave }}">Ver prompt</button>{% endif %}
+        {% if s.unificada %}<button class="boton boton-primario" data-abrir="UNIR-{{ s.clave }}">Ver resultado</button>{% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+
+  <p class="nota-mini">Fuente de verdad: los archivos del repositorio. Las sesiones se marcan
+    al escribir <code>semanas/SN/&lt;Nombre&gt;/estado.json</code> en el protocolo de cierre
+    (<code>CLAUDE.md</code>). Hoy: {{ p.hoy.isoformat() }}.</p>
+</div>
+
+{# ============================ CONTENIDO DE LOS POPUPS ============================ #}
+<div id="es-datos" hidden>
+  {% for s in p.semanas %}{% for c in s.carriles %}{% for ses in c.sesiones %}
+  <section data-id="{{ ses.id }}" data-color="{{ c.color }}" data-tinte="{{ c.tinte }}"
+           data-etiqueta="{{ s.clave }} · {{ c.emoji }} {{ c.persona }} · Sesión {{ ses.k }}"
+           data-tipo="{{ ses.estado_txt }}" data-titulo="{{ ses.titulo }}">
+    <textarea class="es-crudo">{{ ses.prompt }}</textarea>
+    <div class="es-p-prompt">
+      <div class="es-copiar">
+        <button class="boton boton-primario" data-copiar-prompt>Copiar prompt completo</button>
+        <button class="boton boton-suave" data-copiar="{{ ses.comando }}">Copiar comando corto</button>
+      </div>
+      <p class="nota-mini" style="margin-top:0">Con el repo abierto en Claude Code basta el comando corto: <code>CLAUDE.md</code> le dice dónde está este prompt. El prompt completo sirve para pegarlo en cualquier otra sesión.</p>
+      <div class="es-comando">{{ ses.comando }}</div>
+      {% if ses.existe %}<div class="es-prompt">{{ ses.prompt_html }}</div>
+      {% else %}<div class="es-vacio">El prompt de esta sesión todavía no está escrito.</div>{% endif %}
+    </div>
+    <div class="es-p-resultado">
+      {% if ses.estado == 'pendiente' %}
+        <div class="es-vacio">Todavía no hay resultados. Aparecen aquí cuando {{ c.persona }} cierre la sesión (estado, resumen, evidencias y el PDF explicativo).</div>
+      {% else %}
+        <h3>Resumen</h3><p>{{ ses.resumen or '—' }}</p>
+        <p><strong>Estado:</strong> {{ ses.estado_txt }} · <strong>Fecha:</strong> {{ ses.fecha }}{% if ses.criterios.total %} · <strong>Criterios:</strong> {{ ses.criterios.cumplidos }}/{{ ses.criterios.total }}{% endif %}</p>
+        {% if ses.explicacion %}<p><a class="boton boton-primario" href="{{ url_for('archivo', ruta=ses.explicacion) }}" target="_blank" rel="noopener">Abrir explicación (PDF)</a></p>{% endif %}
+        {% if ses.pendientes %}<h3>Pendientes</h3><ul>{% for x in ses.pendientes %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+        <h3>Evidencias</h3>
+        {% if ses.evidencias %}
+        <div class="es-galeria">
+          {% for ev in ses.evidencias %}
+          <a href="{{ url_for('archivo', ruta=ev) }}" target="_blank" rel="noopener">
+            {% if ev.lower().endswith(('.png', '.jpg', '.jpeg')) %}<img src="{{ url_for('archivo', ruta=ev) }}" alt="" loading="lazy">{% endif %}
+            <small>{{ ev.split('/')[-1] }}</small>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}<div class="es-vacio">Sin evidencias registradas.</div>{% endif %}
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}{% endfor %}
+  {% if s.unificacion_prompt %}
+  <section data-id="UNI-{{ s.clave }}" data-color="#1E54E0" data-tinte="#EEF3FE" data-etiqueta="{{ s.clave }} · Unificación" data-tipo="Domingo 09:00" data-titulo="Unificación automática de {{ s.clave }}">
+    <textarea class="es-crudo">{{ s.unificacion_prompt }}</textarea>
+    <div class="es-p-prompt"><div class="es-copiar"><button class="boton boton-primario" data-copiar-prompt>Copiar prompt</button></div>
+      <div class="es-prompt">{{ s.unificacion_prompt|markdown }}</div></div>
+    <div class="es-p-resultado">{% if s.unificada %}<div class="es-prompt">{{ s.unificacion_html }}</div>{% else %}<div class="es-vacio">Aún no se ejecuta.</div>{% endif %}</div>
+  </section>
+  {% endif %}
+  {% if s.unificada %}
+  <section data-id="UNIR-{{ s.clave }}" data-color="#1E54E0" data-tinte="#EEF3FE" data-etiqueta="{{ s.clave }} · Unificación" data-tipo="Resultado" data-titulo="Resultado de la unificación {{ s.clave }}" data-tab="resultado">
+    <textarea class="es-crudo"></textarea>
+    <div class="es-p-prompt"><div class="es-vacio">Abre la pestaña Resultado.</div></div>
+    <div class="es-p-resultado"><div class="es-prompt">{{ s.unificacion_html }}</div></div>
+  </section>
+  {% endif %}
+  {% endfor %}
+</div>
+
+{# Popup #}
+<div class="modal rm-modal es-modal" id="es-modal" hidden>
+  <div class="modal-fondo" data-cerrar></div>
+  <div class="modal-caja rm-caja" role="dialog" aria-modal="true" aria-labelledby="es-titulo">
+    <div class="modal-header rm-cabecera">
+      <div class="rm-cabecera-txt">
+        <div class="rm-etiquetas"><span class="rm-chip-etapa" id="es-etq"></span><span class="rm-chip-tipo" id="es-tipo"></span></div>
+        <h2 id="es-titulo"></h2>
+      </div>
+      <button class="rm-cerrar" type="button" data-cerrar aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="es-tabs">
+      <button class="es-tab activo" data-tab="prompt">Prompt</button>
+      <button class="es-tab" data-tab="resultado">Resultado</button>
+    </div>
+    <div class="modal-body rm-cuerpo" id="es-cuerpo"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script defer src="{{ url_for('static', filename='js/roadmap.js') }}"></script>
+{% endblock %}

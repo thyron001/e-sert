@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ nombre }} — e-sert{% endblock %}
+
+{% block content %}
+<div class="doc" style="--p: {{ info.color }}; --pt: {{ info.tinte }}">
+
+  <div class="es-persona-cab" style="margin-top: 8px">
+    <div class="es-avatar" style="width:52px;height:52px;font-size:24px">{{ nombre[0] }}</div>
+    <div>
+      <h1 style="margin:0">{{ nombre }} {{ info.emoji }}</h1>
+      <p class="lead" style="margin:0">{{ info.rol }} · color {{ info.color_nombre|lower }} <code>{{ info.color }}</code></p>
+    </div>
+  </div>
+
+  <div class="cr-cifras" style="margin-top: 20px">
+    <div><b>{{ info.hechas }} / {{ info.total }}</b><span>sesiones hechas</span></div>
+    <div><b>{{ info.pct }} %</b><span>avance personal</span></div>
+    <div><b style="font-size:15px">{{ info.frase }}</b><span>estado actual</span></div>
+  </div>
+  {% if info.atraso %}<div class="cr-aviso"><div class="cr-aviso-etq">Atraso</div><p>{{ info.atraso }}</p></div>{% endif %}
+
+  <h2>Sesiones y entregables</h2>
+  {% for s in p.semanas %}
+    {% set c = (s.carriles|selectattr('persona', 'equalto', nombre)|first) %}
+    <h3>{{ s.clave }} · {{ s.titulo }} <span class="muted" style="font-weight:700">({{ c.hechas }}/3)</span>
+      {% if c.pdf_semanal %}· <a href="{{ url_for('archivo', ruta=c.pdf_semanal) }}" target="_blank">PDF semanal</a>{% endif %}</h3>
+    <div class="es-carriles" style="grid-template-columns: repeat(3, 1fr); margin-top: 6px">
+      {% for ses in c.sesiones %}
+      <a class="es-ses {{ ses.estado_css }}" href="{{ url_for('inicio') }}#{{ ses.id }}" style="display:block">
+        <span class="es-ses-cab"><span class="es-ses-n">Sesión {{ ses.k }}</span><span class="es-est {{ ses.estado_css }}">{{ ses.estado_txt }}</span></span>
+        <h4>{{ ses.titulo }}</h4>
+        <span class="es-ses-meta">{% if ses.fecha %}{{ ses.fecha }} · {% endif %}{{ ses.evidencias|length }} evidencias{% if ses.explicacion %} · <span style="color:var(--p)">explicación PDF</span>{% endif %}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% set evs = [] %}{% for ses in c.sesiones %}{% for ev in ses.evidencias %}{% set _ = evs.append(ev) %}{% endfor %}{% endfor %}
+    {% if evs %}
+    <div class="es-galeria">
+      {% for ev in evs %}
+      <a href="{{ url_for('archivo', ruta=ev) }}" target="_blank" rel="noopener">
+        {% if ev.lower().endswith(('.png', '.jpg', '.jpeg')) %}<img src="{{ url_for('archivo', ruta=ev) }}" alt="" loading="lazy">{% endif %}
+        <small>{{ ev.split('/')[-1] }}</small>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  <h2>Bitácora</h2>
+  <div class="tarjeta es-md">{{ bitacora }}</div>
+</div>
+{% endblock %}

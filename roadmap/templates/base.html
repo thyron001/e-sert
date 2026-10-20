@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}e-sert · Roadmap del proyecto{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/esert.css') }}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <header class="header">
+    <div class="marca">
+      <div class="logo">e</div>
+      <div>
+        <h1>e-sert · Parqueo SERT inteligente</h1>
+        <div class="sub">Redes Vehiculares · SUMO + TraCI + IA · Universidad de Cuenca</div>
+      </div>
+    </div>
+    <nav>
+      <a href="{{ url_for('inicio') }}" class="{{ 'activo' if request.endpoint == 'inicio' else '' }}">Roadmap</a>
+      <a href="{{ url_for('doc', clave='plan') }}" class="{{ 'activo' if request.endpoint == 'doc' else '' }}">Documentos</a>
+      <span class="nav-personas">
+        {% for n, pi in PERSONAS.items() %}
+        <a class="nav-p {{ 'activo' if request.view_args and request.view_args.get('nombre', '')|capitalize == n else '' }}"
+           href="{{ url_for('persona', nombre=n|lower) }}" style="--p: {{ pi.color }}; --pt: {{ pi.tinte }}" title="Bitácora de {{ n }}"><i></i>{{ n }}</a>
+        {% endfor %}
+      </span>
+    </nav>
+  </header>
+  {% block content %}{% endblock %}
+  <div class="es-toast" id="toast"></div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

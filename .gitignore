@@ -1,0 +1,24 @@
+# Entornos y dependencias
+.venv/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+.expo/
+.env
+.env.*
+!.env.ejemplo
+
+# Datos pesados y salidas de simulación
+*.osm.xml
+**/datos/crudos/
+**/datos/procesados/*.parquet
+**/sumo/salidas/
+**/trazas/*.csv
+!**/trazas/*muestra*.csv
+*.joblib.tmp
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
