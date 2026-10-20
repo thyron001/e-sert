@@ -73,7 +73,7 @@ credenciales.
    (billetera antes, Payphone en pruebas o mock, billetera después) unida con Pillow.
 
 ## VPS (demo en línea)
-Lee `docs/DESPLIEGUE.md`. Payphone exige una `responseUrl` **pública HTTPS**: usa `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno` (en local, déjala configurable con `ESERT_URL_PUBLICA`). Las credenciales de prueba (`PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`) van como variables de entorno en Dokploy y en `.env` local; nunca en el repo. Si la demo aún no está desplegada, deja todo listo y la prueba de punta a punta queda para S3 (estado `parcial` documentado).
+Lee `docs/DESPLIEGUE.md`. Payphone exige una `responseUrl` **pública HTTPS**: usa `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno` (en local, déjala configurable con `ESERT_URL_PUBLICA`). Las credenciales de prueba (`PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`) **solo las tiene Tyrone**: él las carga en Dokploy y, si hace falta probar en local, te las pasa por privado para tu `.env`. Nunca van en el repo ni se piden en el chat de la sesión. Mientras no las tengas, trabaja con `PAYPHONE_MODO=mock` y deja el pedido `@Tyrone [Payphone]` en la bitácora. Si la demo aún no está desplegada, deja todo listo y la prueba de punta a punta queda para S3 (estado `parcial` documentado).
 
 ## Dónde escribir
 `semanas/S2/Miguel/codigo/backend/pagos/`, `semanas/S2/Miguel/codigo/app/` y

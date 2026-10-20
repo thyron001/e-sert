@@ -69,7 +69,7 @@ la simulación y cerrar la sesión automáticamente, sin falsas liberaciones en 
    en el cierre.
 
 ## VPS (demo en línea)
-Lee `docs/DESPLIEGUE.md`. Esta sesión **pone la demo en línea**: verifica que `esert-demo` se construya desde `main` (si la unificación aún no la desplegó, pide a Tyrone crear la app en Dokploy con la tabla de `DESPLIEGUE.md`; no necesitas acceso a Dokploy para preparar todo). Prueba en vivo: un teléfono real **con datos móviles** camina en el Centro, la clasificación en el VPS cierra su sesión, y el visor público lo muestra. Mide la latencia de punta a punta, el uso de CPU/RAM del contenedor (`docker stats` o el panel de Dokploy) y que el volumen `/data` conserve la billetera tras un redeploy.
+Lee `docs/DESPLIEGUE.md`. Esta sesión **pone la demo en línea**: verifica que `esert-demo` se construya desde `main` (si la unificación aún no la desplegó, pide a Tyrone crear la app en Dokploy con la tabla de `DESPLIEGUE.md`; no necesitas acceso a Dokploy para preparar todo). Prueba en vivo: un teléfono real **con datos móviles** camina en el Centro, la clasificación en el VPS cierra su sesión, y el visor público lo muestra. Mide la latencia de punta a punta desde tu lado. El acceso al VPS y a Dokploy **solo lo tiene Tyrone**: pídele en la bitácora (`@Tyrone [VPS]`) las variables de entorno que necesites, el uso de CPU/RAM del contenedor y un redeploy para comprobar que el volumen `/data` conserva la billetera.
 
 ## Dónde escribir
 `semanas/S3/Freddy/codigo/backend/`, `semanas/S3/Freddy/codigo/traci/` (solo el import de

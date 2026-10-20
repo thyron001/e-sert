@@ -101,6 +101,10 @@ Toda sesión se ejecuta así, sin que el usuario tenga que pedirlo:
   - Excepción: Freddy, como custodio, puede proponer cambios al contrato en
     `semanas/SN/Freddy/codigo/comun/CONTRATO.propuesto.md`.
 - Credenciales (Payphone, APIs) solo en `.env`, que está en `.gitignore`. Nunca en el repo.
+- **Solo Tyrone tiene acceso al VPS/Dokploy, al DNS y a la cuenta de Payphone.** Si una sesión
+  de otra persona necesita algo ahí, no lo intenta ni pide credenciales: deja un pedido
+  `@Tyrone [VPS]` o `@Tyrone [Payphone]` en la bitácora, con instrucciones exactas, y sigue con
+  un mock o en local (ver `docs/DESPLIEGUE.md`).
 - No hagas nada que `docs/CONTEXTO.md` marque como fuera de alcance.
 
 ## Protocolo de cierre (obligatorio al final de cada sesión)
