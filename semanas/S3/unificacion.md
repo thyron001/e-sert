@@ -18,8 +18,9 @@ sigue. Lee primero `CLAUDE.md`, `docs/EQUIPO.md`, `docs/CONTRATO.md`, `docs/PLAN
   `origin/miguel/s3`.
 - **Lo propio de S3:** esta unificación deja en `main` los **resultados de los
   experimentos** (penetración × clasificador × semillas) con los KPIs de búsqueda y de
-  sistema, las figuras finales de Tyrone, el servicio de inferencia robusto de Pablo, la
-  clasificación en vivo y el cierre automático, y el primer borrador del informe
+  sistema, las figuras finales de Tyrone, el servicio de inferencia robusto de Pablo, el
+  modo espejo del backend (candidatos, `WS /ws/espejo/{veh_id}`, recibo y `espejos` en el
+  snapshot), el cierre automático con recibo en la app, y el primer borrador del informe
   (`informe/pablo.md`). La semana que viene es la última: todo lo que falte hoy es riesgo
   directo para la entrega del lunes 16.
 
@@ -124,7 +125,8 @@ Escribe `semanas/S3/unificacion-resultado.md`:
   final congelado de Pablo (S4-1), del que depende la corrida final de Tyrone (S4-2); la
   demo en un comando de Tyrone (S4-1), que necesita backend y controlador estables; las
   pruebas e2e de Freddy (S4-1); las cuatro secciones del informe y la integración de Pablo
-  (S4-3); la prueba de campo y el video de plan B de Miguel. Indica qué falta hoy.
+  (S4-3); el ensayo con el teléfono espejo contra el VPS y el video de plan B de Miguel (no hay
+  pruebas de campo: todo es simulado). Indica qué falta hoy.
 
 Agrega al final de `bitacoras/unificacion.md`:
 ```markdown

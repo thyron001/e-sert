@@ -78,4 +78,5 @@ reduce `n_estimators` o usa `compress=3`.
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S1, sesión 3, Pablo), **incluido el PDF
 semanal**. En "Pedidos a otros": @Freddy, la firma y la ruta de `clasificar` y las variables
-de entorno; @Miguel, cuántos minutos por clase necesitas de las grabaciones.
+de entorno; @Miguel, que las grabaciones caseras son opcionales y cuántos minutos por clase
+servirían como validación extra si hay tiempo.

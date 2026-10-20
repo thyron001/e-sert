@@ -29,8 +29,9 @@ lado (backend y controlador), dejando registradas las fallas y su arreglo.
    - **Controlador TraCI:** bucle, suscripciones, *hooks*, peatones que hacen diligencias y
      rendimiento (ms por paso con 0/20/50/80 % de penetración, medido ahora).
    - **Emulador GPS:** el proceso AR(1) en LaTeX,
-     `e_t = ρ e_{t-1} + sqrt(1-ρ²) σ ε_t` con ρ = 0,8 y σ = 5 m, pérdidas de muestra y
-     velocidad derivada como en un teléfono; una figura de traza verdadera frente a ruidosa.
+     `e_t = ρ e_{t-1} + sqrt(1-ρ²) σ ε_t` con los valores de `ia/calibracion/ruido_literatura.json`
+     (σ de 3 a 15 m en cañón urbano, tomados de la literatura, y el análisis de sensibilidad de
+     Pablo), pérdidas de muestra y velocidad derivada como en un teléfono; una figura de traza verdadera frente a ruidosa.
    - **Máquina de estados:** tabla de transiciones con umbrales y por qué el puesto **sigue
      ocupado** en `A_PIE`; figura `estados_sesion`.
    - **Guiado:** recomendación con ocupación actual, `setParkingAreaStop` /
@@ -52,7 +53,8 @@ lado (backend y controlador), dejando registradas las fallas y su arreglo.
    **sin editarla**. Prueba:
    - arranque en frío y tiempo hasta el primer `snapshot`;
    - reiniciar el backend en medio de la demo: ¿el controlador reintenta o se cae?;
-   - un teléfono que se desconecta y vuelve: la sesión sigue abierta y aparece el aviso;
+   - el teléfono espejo pierde el WS y se reconecta: retoma el mismo vehículo, la sesión sigue
+     abierta y el recibo no se duplica;
    - 80 % de penetración con GUI: ¿se mantiene fluido? (ms por paso);
    - Ctrl+C: ¿quedan procesos o puertos ocupados?
    Lo que falle en `traci/` o `backend/` lo arreglas en tu copia y vuelves a ensayar; lo que

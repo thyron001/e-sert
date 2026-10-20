@@ -28,23 +28,26 @@ tablas y referencias, listo para revisión en S4.
 1. Estructura de `informe/pablo.md`:
    1. **Problema:** por qué un clasificador de movimiento y qué es una falsa liberación.
    2. **Datos:** GeoLife (usuarios, horas, remuestreo a 1 Hz y derivación de la clase `quieto`),
-      SUMO (semillas, ruido AR(1) con σ y ρ, casos de tráfico lento) y Cuenca (grabaciones,
-      teléfonos, protocolo y horas). Tabla de clases por fuente.
+      SUMO (semillas, ruido AR(1) con σ y ρ tomados de la literatura y análisis de sensibilidad) y
+      la partición fija de usuarios de prueba; grabaciones caseras solo si existieron. Tabla de
+      clases por fuente.
    3. **Preprocesamiento y características:** ventanas de 30 s con paso de 5 s y la lista de
       características con su fórmula.
    4. **Modelos:** línea base por umbral (8 y 0,5 km/h) y Random Forest con los hiperparámetros
       de `rf_v1.meta.json`; validación con `GroupKFold` por usuario y por qué.
-   5. **Evaluación:** macro-F1, recall por clase y matriz de confusión; generalización a Cuenca y
-      el caso de auto en tráfico lento.
+   5. **Evaluación:** macro-F1, recall por clase y matriz de confusión; generalización a usuarios
+      de GeoLife no vistos y a escenarios difíciles de SUMO, curvas frente a σ y el caso de auto en
+      tráfico lento.
    6. **Suavizado temporal y falsas liberaciones:** la tabla de las 12 combinaciones y el k elegido.
    7. **Servicio de inferencia:** latencia p95, lote y *fallback*.
    8. **Efecto en el sistema:** falsas /100 y retardo de cierre con IC 95 % por penetración (Tyrone).
-   9. **Limitaciones y trabajo futuro:** sin acelerómetro (SHL como opción), segundo plano en
-      iPhone, tamaño del conjunto de Cuenca.
+   9. **Limitaciones y trabajo futuro:** sin acelerómetro (SHL como opción), todo es simulado (sin
+      datos de campo; GeoLife es Beijing), el ruido de SUMO no modela el multitrayecto real.
 2. **Trazabilidad:** cada cifra lleva al lado un comentario `<!-- fuente: ia/reportes/suavizado_k.csv -->`
    con el archivo del que sale. Crea `informe/verificar_cifras.py`, que lee esos comentarios,
    abre cada fuente y reporta las cifras que no encuentra.
-3. **Figuras** en `informe/figuras/ia/` (PNG a 300 dpi y PDF): matriz de confusión rf en Cuenca,
+3. **Figuras** en `informe/figuras/ia/` (PNG a 300 dpi y PDF): matriz de confusión rf en usuarios no vistos, curvas
+   frente a σ (S2-3),
    importancia de características, recall por contexto (S3-2), suavizado vs falsas liberaciones
    (S3-2) y latencia (S3-1). Numéralas y ponles pie de figura en el texto; no copies figuras de
    otros, enlázalas desde `proyecto/kpis/figuras/` con ruta relativa.

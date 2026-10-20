@@ -102,10 +102,13 @@ diferencia como pedido. Commit: `[S2-U] Contrato v1.x`.
      ese backend (penetración 20 %, semilla 1, flags según su README);
    - un cliente WS en `/ws/estado` recibe `snapshot` y valida cada uno con
      `proyecto/comun/esquemas.py`;
-   - un "teléfono" simulado por HTTP con los ejemplos de `proyecto/comun/ejemplos/`:
-     recarga, `/guia`, `POST /sesiones`, `/eventos/ubicacion` con `origen: "app"`,
-     `/eventos/modo`, `cerrar`; comprueba la billetera y que el teléfono aparece en
-     `telefonos` del `snapshot`;
+   - un cliente HTTP con los ejemplos de `proyecto/comun/ejemplos/`: recarga, `/guia`,
+     `POST /sesiones`, `/eventos/modo`, `cerrar`; comprueba la billetera y que el `snapshot`
+     trae el campo `espejos` (lista, aunque esté vacía);
+   - informativo: si ya existe `GET /api/v1/espejo/candidatos`, que responda una lista (el
+     modo espejo completo es de Freddy S3-3);
+   - informativo: `ia/particion_usuarios.json` existe y ningún usuario de prueba aparece en
+     `ia/datos/ventanas_v2.parquet` (o en su muestra);
    - informativo: `npx tsc --noEmit` en `proyecto/app/` si hay Node, y que el visor tenga
      la URL del WS configurable.
    Registra cada sub-paso como ok, falla o no verificable.
@@ -127,8 +130,8 @@ Escribe `semanas/S2/unificacion-resultado.md`:
   siguen abiertos.
 - **Riesgos para S3**, según `docs/PLAN.md`: el controlador con KPIs de sistema de Freddy
   (S3-1) que Tyrone necesita para el ejecutor de experimentos; `inferencia.py` robusto de
-  Pablo para la clasificación en vivo (S3-3 de Freddy); el flujo de la app y la ubicación
-  real para el cierre automático de Miguel (S3-1). Indica qué falta y qué mock se usará.
+  Pablo (S3-1) para el controlador; el modo espejo del backend (Freddy S3-3: candidatos, WS por
+  vehículo y recibo), que necesitan la app de Miguel (S3) y el visor de Tyrone (S3-3). Indica qué falta y qué mock se usará.
 
 Agrega al final de `bitacoras/unificacion.md`:
 ```markdown

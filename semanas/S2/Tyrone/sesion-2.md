@@ -19,8 +19,9 @@ avanzar**: trabajarás contra un servidor de prueba que reproduce snapshots grab
 mismo formato del contrato. Valida los mensajes con `proyecto/comun/esquemas.py`.
 
 ## Objetivo
-Un visor web estático (sin *build*) que muestre en vivo autos, peatones, teléfonos y puestos
-(verde con lugar, rojo lleno) sobre el Centro Histórico, alimentado por `/ws/estado`.
+Un visor web estático (sin *build*) que muestre en vivo autos, peatones y puestos
+(verde con lugar, rojo lleno) sobre el Centro Histórico, alimentado por `/ws/estado`, y que resalte los vehículos seguidos por
+un teléfono espejo (`espejos`).
 
 ## Pasos
 1. Crea `visor/grabar_snapshots.py`: corre `proyecto/sumo/centro_base.sumocfg` con TraCI
@@ -47,7 +48,9 @@ Un visor web estático (sin *build*) que muestre en vivo autos, peatones, teléf
    - puestos como `circleMarker` en `#2E9E4F` si `ocupados < capacidad` y `#C62828` si
      están llenos, con *popup* `calle · ocupados/capacidad`;
    - autos coloreados por `estado` (paleta fija en `visor.js`), con borde grueso si
-     `con_app`; peatones como puntos pequeños; teléfonos con un ícono distinto y su `modo`;
+     `con_app`; peatones como puntos pequeños; los IDs de `snapshot.espejos` (vehículos que sigue un
+     teléfono espejo) con un halo o ícono distinto; en `grabar_snapshots.py` pon
+     `espejos: []` o un vehículo con app al azar marcado `# MOCK`;
    - panel lateral: `t_sim`, conteos, últimos KPIs y estado de la conexión;
    - URL del WS configurable: `index.html?ws=ws://localhost:8000/ws/estado`; por defecto el
      servidor de prueba. Reconexión con espera exponencial (1, 2, 4… hasta 30 s).
@@ -83,5 +86,5 @@ va en `.gitignore`; publica una muestra de 60 snapshots.
 
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S2, sesión 2, Tyrone). En "Pedidos a
-otros": @Freddy, el visor espera `telefonos` y `con_app` en cada snapshot; @Miguel, la URL
-del visor para ver tu teléfono en S2-3.
+otros": @Freddy, el visor espera `espejos` y `con_app` en cada snapshot; @Miguel, la URL
+del visor para ver resaltado el auto que sigue tu modo espejo en S2-3.

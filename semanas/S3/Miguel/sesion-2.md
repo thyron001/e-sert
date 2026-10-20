@@ -23,8 +23,9 @@ Avisar a tiempo cuando el saldo cubre menos de 10 min, antes de llegar al tope S
 nuevas sesiones con saldo negativo hasta recargar.
 
 ## Pasos
-1. Instala con `npx expo install expo-notifications`. En Expo Go **funcionan las notificaciones
-   locales**, no las *push* remotas: usa solo locales.
+1. `expo-notifications` ya se instaló en S2-3 (`app/src/espejo/notificaciones.ts`): reutiliza su
+   canal y su *handler* (si falta, `npx expo install expo-notifications`). En Expo Go **funcionan
+   las notificaciones locales**, no las *push* remotas: usa solo locales.
    - permisos con `Notifications.requestPermissionsAsync()` al iniciar la primera sesión;
    - Android: canal `Notifications.setNotificationChannelAsync("avisos", { importance: AndroidImportance.HIGH })`;
    - `Notifications.setNotificationHandler` para mostrarlas también en primer plano (usa los
@@ -43,7 +44,10 @@ nuevas sesiones con saldo negativo hasta recargar.
      trigger: { type: SchedulableTriggerInputTypes.DATE, date } })` y guarda los IDs;
    - al cerrar la sesión, `cancelScheduledNotificationAsync(id)` para cada uno;
    - tras una recarga, cancela y reprograma;
-   - en primer plano, banner propio dentro de la app con el mismo texto.
+   - en primer plano, banner propio dentro de la app con el mismo texto;
+   - en modo espejo, los avisos que trae `avisos` del mensaje `espejo` (6b) se muestran con el
+     mismo banner y notificación, sin duplicar los que ya calculó `calcularAvisos` (clave
+     `tipo + sesion_id`).
 4. **Bloqueo** (`app/src/pantallas/Bloqueo.tsx`):
    - si la billetera tiene `saldo < 0` o `POST /sesiones` devuelve `SESIONES_BLOQUEADAS`, el botón
      "Buscar puesto" se desactiva y se muestra la deuda con el botón "Recargar" (flujo Payphone de

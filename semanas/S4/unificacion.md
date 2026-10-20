@@ -127,8 +127,8 @@ Escribe `semanas/S4/unificacion-resultado.md`:
   proyecto.
 - **Riesgos para la entrega y la exposición del lunes 16** (no hay semana siguiente):
   qué no se pudo verificar aquí y debe probarse a mano en la laptop de la demo (SUMO con
-  GUI, teléfonos en la LAN, Payphone en modo de prueba), secciones débiles del informe y el
-  plan B (video). Termina con una lista de comprobación de 10 puntos para el lunes por la
+  GUI, el teléfono espejo contra el VPS y en la LAN para el plan B `--local`, Payphone en
+  modo de prueba), secciones débiles del informe y el plan B (video). Termina con una lista de comprobación de 10 puntos para el lunes por la
   mañana.
 
 Agrega al final de `bitacoras/unificacion.md`:

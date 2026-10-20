@@ -12,11 +12,12 @@ evidencias: [s2_grabador-pantalla.png, s2_primera-grabacion.png]
 # S1 · Sesión 2 · Miguel 🔴: Grabador de sensores etiquetado
 
 ## Contexto
-Lee `CLAUDE.md` y `docs/CONTRATO.md` (sección 7, formato de trazas). Esto arregla la debilidad
-principal del plan original: **evaluar el clasificador con datos reales de Cuenca**, no solo
-con datos inventados por SUMO. Pablo usará estas grabaciones como conjunto de prueba en S2.
-El caso que ningún dataset trae, *auto en tráfico lento a velocidad de peatón*, solo lo
-pueden grabar ustedes.
+Lee `CLAUDE.md` y `docs/CONTRATO.md` (sección 7, formato de trazas). **Todo el proyecto es
+simulado**: la evaluación del clasificador se hace con GeoLife y escenarios de SUMO. Este
+grabador sirve solo para **grabaciones caseras opcionales** (caminando o en auto, donde sea:
+casa, barrio, campus; **nadie va al Centro**), que Pablo usará en S2-3 como validación extra
+únicamente si existen. El caso *auto en tráfico lento a velocidad de peatón* puede grabarse en
+cualquier calle con tráfico.
 
 ## Objetivo
 Una pantalla para grabar sesiones etiquetadas de GPS (1 Hz) y acelerómetro (10 Hz) que
@@ -36,7 +37,9 @@ exporte CSV en el formato exacto del contrato.
      datos si la app se cierra.
 2. Pantalla `grabador`:
    - Selector de etiqueta: `a_pie`, `quieto`, `vehiculo` y **`vehiculo_lento`** (se exporta
-     como `modo_real=vehiculo` con la columna extra `escenario=trafico_lento`).
+     como `modo_real=vehiculo` con la columna extra `escenario=trafico_lento`). Las etiquetas de
+     vehículo las graba siempre **el acompañante**, nunca quien maneja: muestra ese recordatorio
+     en pantalla al elegirlas.
    - Selector de quién graba (Tyrone, Freddy, Pablo o Miguel) y de teléfono (iOS o Android).
    - Botones grandes Iniciar y Detener.
    - Contador de muestras, precisión GPS actual y duración.
@@ -51,7 +54,8 @@ exporte CSV en el formato exacto del contrato.
    - dibuja la traza coloreada por etiqueta y la velocidad en el tiempo con las franjas de
      etiqueta;
    - reporta la duración por etiqueta y la precisión media.
-5. **Prueba real corta:** graba 5 min caminando y 5 min quieto, exporta y grafica.
+5. **Prueba corta, donde sea** (casa, patio o campus): graba 5 min caminando y 5 min quieto,
+   exporta y grafica. No hace falta salir en auto ni ir al Centro.
 6. **Evidencias:**
    - `s2_grabador-pantalla.png`: captura de la pantalla de grabación.
    - `s2_primera-grabacion.png`: la salida del script de graficado.
@@ -63,9 +67,10 @@ exporte CSV en el formato exacto del contrato.
 - [ ] La grabación funciona en iOS y Android; el CSV tiene las columnas del contrato y una
   frecuencia de unos 1 Hz.
 - [ ] El cambio de etiqueta en caliente queda reflejado en el CSV.
-- [ ] El script de graficado valida y dibuja la prueba real.
+- [ ] El script de graficado valida y dibuja la prueba corta.
 - [ ] Existen las dos evidencias PNG.
 
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S1, sesión 2, Miguel). En "Pedidos a
-otros": todo el grupo debe instalar Expo Go para la jornada de grabación de la sesión 3.
+otros": todo el grupo debe instalar Expo Go para probar la app y el modo espejo; las
+grabaciones caseras son opcionales.

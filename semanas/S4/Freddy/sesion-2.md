@@ -28,16 +28,20 @@ operación.
    las funciones TraCI de guiado (`setParkingAreaStop` / `rerouteParkingArea`).
 2. Diagramas como texto Mermaid en `comun/docs/diagramas/`:
    - `componentes.mmd`: SUMO + controlador TraCI (con GPS, máquina de estados, peatones,
-     guiado e IA), núcleo, API FastAPI, WS, visor, app Expo, Payphone en modo prueba;
+     guiado e IA), núcleo, API FastAPI, WS, modo espejo (`/espejo/candidatos`, `/ws/espejo/{veh_id}`), visor,
+     app Expo como teléfono espejo, Payphone en modo prueba;
      flechas con el mensaje del contrato que viaja;
-   - `despliegue.mmd`: la laptop de la demo (procesos y puertos) y los teléfonos por LAN;
+   - `despliegue.mmd`: la laptop de la demo (SUMO, `sumo-gui` y controlador) publicando al VPS
+     (`demo.e-sert.tesisucuenca.com`, Dokploy y Traefik), el visor y el teléfono espejo conectados
+     por internet, y el plan B `--local`;
    - `estados_sesion.mmd`: `stateDiagram-v2` con las transiciones y umbrales de la sección 3
      del contrato (15 m, 30 m, 20 m, 2 ventanas);
    - secuencias: `seq_llegada.mmd` (guía → confirmación → retención),
      `seq_falsa_liberacion_evitada.mmd` (ESTACIONADO → A_PIE → REGRESANDO → SALIENDO →
      CERRADA con las ventanas de la IA), `seq_vehiculo_simulado.mmd` (el controlador usa el
      núcleo directo frente a la app que usa HTTP), `seq_recarga_payphone.mmd` (pide a Miguel
-     que lo valide) y `seq_snapshot_ws.mmd`.
+     que lo valide), `seq_snapshot_ws.mmd` y `seq_espejo.mmd` (snapshot con bloque interno →
+     registro → WS del vehículo seguido → recibo).
 3. `comun/docs/generar_diagramas.py`: renderiza cada `.mmd` a PNG y SVG con una versión fija
    de `@mermaid-js/mermaid-cli` (`npx -y @mermaid-js/mermaid-cli@<versión> -i x.mmd -o x.png
    -s 2`). Si no hay Node, cae a Graphviz o avisa con claridad. Anota la versión usada.

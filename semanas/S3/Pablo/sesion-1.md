@@ -15,8 +15,8 @@ evidencias: [s1_latencia-inferencia.png]
 Lee `CLAUDE.md` y `docs/CONTRATO.md` (sección 2, firma de `clasificar`). Es la primera sesión de
 S3: copia `proyecto/ia/` a `semanas/S3/Pablo/codigo/ia/` si no está. Desde esta semana
 `inferencia.py` corre **en dos lugares exigentes**: dentro de TraCI con cientos de usuarios
-(Freddy S3-2, 80 % de penetración) y en el backend con teléfonos reales que pierden señal
-(Freddy S3-3). Debe ser rápido y **no fallar nunca** por datos sucios.
+(Freddy S3-2, 80 % de penetración, con pérdida de GPS y usuarios que dejan de reportar) y detrás
+del modo espejo del backend (Freddy S3-3). Debe ser rápido y **no fallar nunca** por datos sucios.
 
 ## Objetivo
 Dejar `clasificar` robusto ante huecos, duplicados y ruido, con latencia p95 < 5 ms por ventana,
@@ -48,7 +48,7 @@ una versión en lote y un *fallback* al umbral cuando falten datos o el modelo.
 4. Crea `ia/modelos/rf_v1.meta.json`: orden de características, versión de scikit-learn, SHA-256
    del `.joblib`, fecha, hiperparámetros y métricas de S2. Al cargar, avisa si la versión de
    scikit-learn no coincide.
-5. Crea `ia/bench_inferencia.py`: 10 000 ventanas reales (SUMO y Cuenca), `time.perf_counter_ns`,
+5. Crea `ia/bench_inferencia.py`: 10 000 ventanas de prueba (GeoLife no vistos y SUMO), `time.perf_counter_ns`,
    descarta las 100 primeras de calentamiento y reporta p50, p95 y p99, individual y en lote.
 6. **Tests** (`ia/tests/test_inferencia.py`, pytest + `hypothesis`):
    - propiedad: para ventanas aleatorias, `clasificar` no lanza, `modo` está en el enum y la
@@ -76,4 +76,4 @@ una versión en lote y un *fallback* al umbral cuando falten datos o el modelo.
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S3, sesión 1, Pablo). En "Pedidos a otros":
 @Freddy, firma de `clasificar_lote`, el parámetro `previo` y las cifras de latencia; @Miguel, la
-precisión máxima aceptada (50 m) por si quieres filtrarla en la app.
+precisión máxima aceptada (50 m) por si validas grabaciones caseras (opcionales).

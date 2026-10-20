@@ -29,6 +29,8 @@ de la ocupación real de cada `parkingArea`, probados de punta a punta con 8 cor
      Así los usuarios del 20 % están contenidos en los del 50 % y del 80 % (escenarios
      anidados) y la demanda es idéntica entre escenarios de la misma semilla.
    - El tráfico de paso siempre lleva `con_app = 0`.
+   - Cada vehículo que busca lleva `param destino` y `param destino_nombre` (el `nombre` de
+     `destinos.csv`): el modo espejo de Freddy (S3-3) los muestra en la lista de candidatos.
 2. Crea `sumo/escenarios/generar_escenarios.py`: produce `{base,app20,app50,app80}_s{1,2}`
    con su `.rou.xml` y su `.sumocfg` (salidas en `sumo/salidas/<escenario>_s<N>/`) y un
    `escenarios.json` con la lista, la semilla, el porcentaje y el *hash* SHA-256 de la

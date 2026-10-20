@@ -27,14 +27,16 @@ local, Tyrone las pasa por privado y van en su `.env`.
 
 ## Por qué el backend va en el VPS
 
-1. **El teléfono real funciona con datos móviles** en el Centro, sin túneles (`ngrok`,
-   `expo --tunnel`) ni estar en la misma red Wi-Fi. La app usa
-   `EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`.
+1. **El teléfono espejo se conecta sin depender del Wi-Fi del aula**, sin túneles (`ngrok`,
+   `expo --tunnel`) ni estar en la misma red que la laptop: le basta con datos móviles o
+   cualquier Wi-Fi. La app usa `EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`.
+   El teléfono **no se mueve**: sigue a un auto simulado (modo espejo, `CONTRATO.md` 6b).
 2. **Payphone necesita una URL pública HTTPS** de retorno (*responseUrl*) para confirmar la
    recarga de prueba. En local no existe.
 3. **El visor queda en línea**: el proyector, el profesor o cualquier teléfono abre
    `https://demo.e-sert.tesisucuenca.com/visor` y ve en vivo los autos y peatones de SUMO, los
-   puestos y el teléfono real en el mismo mapa.
+   puestos y el auto que sigue el teléfono espejo, resaltado. Con un QR (solo un enlace
+   abreviado) el profesor lo abre en su celular sin escribir la URL.
 
 ## Arquitectura de la demo
 
@@ -43,8 +45,8 @@ local, Tyrone las pasa por privado y van en su `.env`.
  ───────────────────────────────────────────           ─────────────────────────────────
  traci/controlador.py --publicar https://demo...  ──►  POST /api/v1/interno/snapshot   (token)
                                                        FastAPI + núcleo + SQLite (volumen)
- Teléfono (Expo Go, datos móviles)              ──►    POST /api/v1/eventos/ubicacion
-                                                ◄──    WS /ws/estado (sesión, avisos)
+ Teléfono espejo (Expo Go, quieto en la mano)   ──►    GET /api/v1/espejo/candidatos
+                                                ◄──    WS /ws/espejo/{veh_id} (guiado, sesión, costo)
  Proyector / cualquier navegador                ◄──    GET /visor  +  WS /ws/estado
  Payphone (modo de pruebas)                     ──►    GET /api/v1/pagos/retorno
 ```

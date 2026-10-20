@@ -30,10 +30,11 @@ dos veces desde cero y un plan B escalonado si algo falla delante del profesor.
    - arquitectura (usa el diagrama de Freddy de `origin/freddy/s4:.../comun/docs/`);
    - escenario SUMO y línea base;
    - IA: falsas liberaciones, RF frente a umbral (figuras de Pablo);
-   - app y cobro real frente a tarjeta SERT (gráfica de S1-2 de Freddy);
+   - app en modo espejo y cobro por tiempo real frente a tarjeta SERT (gráfica de S1-2 de Freddy);
    - **resultados**: una diapositiva con 3 cifras grandes (búsqueda, CO₂, falsas
      liberaciones al 50 %) con su IC, y la figura 2×2;
-   - demo en vivo, limitaciones y conclusiones.
+   - demo en vivo (simulación + teléfono espejo), limitaciones (todo es simulado, sin pruebas
+     de campo) y conclusiones.
    Toda cifra sale de `resumen.csv`; nada escrito a mano. Las figuras se leen de las ramas
    con `git archive` si aún no están en `proyecto/`.
 3. Genera `diapositivas.pdf` con una versión fija de `@marp-team/marp-cli`
@@ -41,11 +42,11 @@ dos veces desde cero y un plan B escalonado si algo falla delante del profesor.
    versión en `ensayo.md`.
 4. Escribe `guion.md`: una tabla por diapositiva con minuto de inicio, quién habla (Tyrone:
    intro, escenario y resultados; Freddy: arquitectura, TraCI y backend; Pablo: IA; Miguel:
-   app y teléfono en vivo), la frase clave y la transición.
+   app y teléfono espejo), la frase clave y la transición.
 5. **Ensayo de la demo**, dos veces desde arranque en frío, con `python demo/demo.py
    --cronometro`:
-   - mide arranque, demo guiada (auto buscando, teléfono de Miguel apareciendo, sesión
-     cerrada con cobro) y apagado;
+   - mide arranque, demo guiada (auto buscando, el teléfono de Miguel siguiéndolo en modo
+     espejo y resaltado en el visor, sesión cerrada con recibo) y apagado;
    - en la primera vuelta graba los mensajes WS a `demo/plan_b/snapshots_demo.jsonl` (unos
      5 min) para el plan B;
    - anota en `ensayo.md` cada tropiezo, su causa y la corrección.

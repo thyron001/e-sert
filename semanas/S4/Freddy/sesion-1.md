@@ -60,6 +60,9 @@ falsas liberaciones evitables).
    - `saldo = Σ recargas − Σ débitos` para todos los usuarios y ningún saldo bajo
      `−saldo_negativo_max_usd`;
    - la precisión del mapa de ocupación supera el valor de S3 menos 5 puntos;
+   - **modo espejo**: un cliente toma un vehículo de `GET /espejo/candidatos`, lo sigue por
+     `WS /ws/espejo/{veh_id}` hasta `CERRADA`, recibe el `recibo` una sola vez y el vehículo
+     aparece en `espejos` del snapshot mientras lo sigue;
    - el log del controlador no tiene excepciones.
 7. `traci/tests/e2e/test_cierre_automatico.py`: un peatón que hace diligencias y vuelve no
    provoca cierre; el auto que sale sí, con retardo de cierre menor que 30 s.
@@ -71,7 +74,7 @@ falsas liberaciones evitables).
    y el tiempo.
 
 ## VPS (demo en línea)
-Lee `docs/DESPLIEGUE.md`. Añade una prueba de humo contra la demo en línea (`pytest -m vps`, opcional en CI): `/salud`, `GET /puestos`, conexión WS de 5 s y el rechazo del snapshot sin token. URL por `ESERT_URL_PUBLICA` (por defecto `https://demo.e-sert.tesisucuenca.com`).
+Lee `docs/DESPLIEGUE.md`. Añade una prueba de humo contra la demo en línea (`pytest -m vps`, opcional en CI): `/salud`, `GET /puestos`, `GET /espejo/candidatos`, conexión WS de 5 s y el rechazo del snapshot sin token. URL por `ESERT_URL_PUBLICA` (por defecto `https://demo.e-sert.tesisucuenca.com`).
 
 ## Dónde escribir
 `semanas/S4/Freddy/codigo/backend/`, `semanas/S4/Freddy/codigo/traci/` y `evidencias/`.

@@ -117,7 +117,8 @@ a esa persona según `docs/EQUIPO.md`:
 4. Lo propio de S1, comprueba que existen en `proyecto/` los cimientos que S2 necesita:
    `sumo/red/centro.net.xml`, `sumo/parqueos/puestos.csv`, `comun/esquemas.py`,
    `comun/esquemas.ts`, la muestra de trazas de `traci/trazas/`, `ia/inferencia.py`,
-   `app/package.json` y las grabaciones de `datos/`.
+   `app/package.json` y el protocolo de grabaciones caseras de `datos/` (las grabaciones son
+   opcionales: su ausencia no es un riesgo).
 5. **Las pruebas pasan** si ningún pytest falla y SUMO (si está) sale con 0. "No verificable"
    y "sin tests" no cuentan como fallo, pero se reportan.
 
@@ -134,8 +135,8 @@ Escribe `semanas/S1/unificacion-resultado.md`:
 - **Contrato:** aplicado o no, versión y lista de incoherencias.
 - **Pedidos cruzados** recogidos de las bitácoras: de, para, pedido, sesión.
 - **Riesgos para S2**, revisando las dependencias críticas de `docs/PLAN.md`: red y puestos
-  para Freddy (S2-2) y Pablo (S2-1); trazas de Freddy para Pablo (S2-1); grabaciones de
-  Miguel para Pablo; `inferencia.py` para Freddy (S2-2); la API que Miguel y el visor
+  para Freddy (S2-2) y Pablo (S2-1); trazas de Freddy para Pablo (S2-1); las grabaciones
+  caseras de Miguel son opcionales (todo es simulado) y no cuentan como riesgo; `inferencia.py` para Freddy (S2-2); la API que Miguel y el visor
   necesitan en S2. Indica cuáles faltan en `proyecto/` y cuál será el mock.
 
 Agrega al final de `bitacoras/unificacion.md` (créalo si no existe):

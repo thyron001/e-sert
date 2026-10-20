@@ -13,8 +13,9 @@ evidencias: [s2_rendimiento-80.png, s2_robustez-perdida-gps.png]
 
 ## Contexto
 Lee `CLAUDE.md`, tu bitácora de S3-1 y `docs/CONTRATO.md` (sección 3). Tyrone corre 24
-corridas con tu controlador y la de 80 % es la más pesada; la demo además tiene teléfonos reales
-que pierden señal en las calles estrechas del Centro. La inferencia robusta de Pablo (S3-1,
+corridas con tu controlador y la de 80 % es la más pesada. Todo es simulado: la pérdida de señal en
+las calles estrechas del Centro se emula en el `EmuladorGPS`, y el "teléfono apagado" es un usuario
+simulado que deja de reportar. La inferencia robusta de Pablo (S3-1,
 `clasificar_lote` y *fallback*) se lee de `origin/pablo/s3:semanas/S3/Pablo/codigo/ia/inferencia.py`;
 si no existe, usa la de `proyecto/ia/` y un `clasificar_lote` mock marcado
 `# MOCK: reemplazar cuando Pablo entregue clasificar_lote (S3-1)`.
@@ -47,7 +48,8 @@ libera puestos por error cuando el GPS falla o el teléfono se apaga.
    las muestras esperadas, o la inferencia usó *fallback* con confianza < 0,5, **no hay
    transición**: se mantiene el estado. Test: con 30 % de pérdida en ráfagas no aparece ninguna
    falsa liberación nueva atribuible a ventanas incompletas.
-5. **Teléfono apagado:** en el 10 % de las sesiones el teléfono deja de emitir en `A_PIE`.
+5. **Teléfono apagado** (usuario simulado que deja de reportar): en el 10 % de las sesiones el
+   emulador deja de emitir puntos GPS del usuario en `A_PIE`.
    - El silencio **nunca** cierra la sesión: el puesto sigue ocupado. Tras 120 s sin datos la
      sesión se marca `sin_senal`.
    - Si el auto se va sin teléfono, la sesión se cierra al llegar al tope (`tiempo_maximo_min`)

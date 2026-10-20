@@ -51,8 +51,9 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
      Espera a que el WS `/ws/estado` emita el primer `snapshot` (máximo 30 s).
    - **Visor:** `python -m http.server 8080` sobre la carpeta del visor y
      `webbrowser.open("http://localhost:8080/?ws=ws://localhost:8000/ws/estado")`.
-   - Imprime la **IP de la LAN** (para la app de Miguel en Expo Go) y una tabla con el tiempo
-     de arranque de cada componente.
+   - Imprime la URL que debe usar el teléfono espejo de Miguel en Expo Go (la del VPS en
+     `--remoto`; la **IP de la LAN** solo en `--local`), los primeros candidatos de
+     `GET /api/v1/espejo/candidatos` y una tabla con el tiempo de arranque de cada componente.
    - Logs de cada proceso en `demo/logs/<AAAAMMDD-HHMMSS>/<componente>.log` (en `.gitignore`).
    - **Apagado:** Ctrl+C o el cierre de `sumo-gui` termina todo en orden inverso. En Windows
      usa `CREATE_NEW_PROCESS_GROUP` y `CTRL_BREAK_EVENT`; en Linux, `start_new_session=True`
@@ -77,7 +78,7 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
 
 ## VPS (demo en línea)
 Lee `docs/DESPLIEGUE.md`. La demo tiene **dos modos**:
-- `--remoto` (el principal): la laptop corre SUMO, `sumo-gui` y el controlador, y publica en `https://demo.e-sert.tesisucuenca.com` con `ESERT_TOKEN_SIM`; abre `https://demo.e-sert.tesisucuenca.com/visor` en el navegador. El teléfono real usa la misma URL.
+- `--remoto` (el principal): la laptop corre SUMO, `sumo-gui` y el controlador, y publica en `https://demo.e-sert.tesisucuenca.com` con `ESERT_TOKEN_SIM`; abre `https://demo.e-sert.tesisucuenca.com/visor` en el navegador. El teléfono espejo (que sigue a un auto simulado; no envía GPS) usa la misma URL.
 - `--local` (plan B, sin internet): backend `uvicorn` local + visor local, como ya estaba.
 Al arrancar en `--remoto`, comprueba `/salud` y, si falla en 5 s, ofrece pasar a `--local` automáticamente.
 
@@ -97,4 +98,4 @@ Al arrancar en `--remoto`, comprueba `/salud` y, si falla en 5 s, ofrece pasar a
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S4, sesión 1, Tyrone). En "Pedidos a
 otros": @Freddy, cualquier flag del controlador o del backend que tuviste que suponer;
-@Miguel, la IP y el puerto que debe usar la app en la demo.
+@Miguel, la URL que debe usar el modo espejo de la app en la demo (VPS y, en plan B, IP y puerto locales).

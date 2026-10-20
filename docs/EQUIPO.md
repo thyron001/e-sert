@@ -24,7 +24,7 @@ cambio, se deja como **pedido** en la bitácora y en la nota de entrega.
 | `proyecto/ia/` | Pablo | Preprocesamiento, ventanas, características, modelos e inferencia |
 | `proyecto/informe/` | Pablo (editor) | Informe final; cada persona aporta su sección como archivo propio |
 | `proyecto/app/` | Miguel | App Expo (React Native) |
-| `proyecto/datos/` | Miguel | Grabaciones reales etiquetadas hechas con los teléfonos en el Centro |
+| `proyecto/datos/` | Miguel | Grabaciones caseras etiquetadas (opcionales; sin salir al Centro) |
 | `proyecto/backend/pagos/` | Miguel | Adaptador de Payphone en modo de pruebas |
 | `proyecto/backend/asistente/` | Miguel | Entrada por lenguaje natural (LLM), opcional |
 

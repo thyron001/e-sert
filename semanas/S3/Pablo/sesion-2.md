@@ -25,11 +25,12 @@ Entender **dónde** se equivoca el clasificador y elegir, con datos, el suavizad
 (k = 1, 3 o 5 ventanas) que minimiza las falsas liberaciones sin disparar el retardo de cierre.
 
 ## Pasos
-1. **Análisis de errores** (`ia/analisis_errores.py`) sobre el conjunto de Cuenca (nunca visto) y
-   las semillas de prueba de SUMO, con umbral y rf:
+1. **Análisis de errores** (`ia/analisis_errores.py`) sobre los usuarios de GeoLife de prueba
+   (`ia/particion_usuarios.json`) y los escenarios difíciles de SUMO (semillas 101–105), con umbral y rf:
    - matriz de confusión y recall por clase en cada contexto: velocidad media de la ventana
      (0–3, 3–8, 8–15, > 15 km/h), `precision_m` (< 10, 10–25, > 25 m), ventanas que contienen una
-     transición de modo y tipo de teléfono (iPhone/Android, si está en los metadatos);
+     transición de modo, nivel de σ del escenario (3–15 m) y escenario (`trafico_lento`,
+     `peaton_rapido`, `normal`);
    - los 20 peores errores con la gráfica de su traza: separa **errores de etiqueta** (anotación
      mal hecha) de **errores del modelo**;
    - resultado en `ia/reportes/errores_contexto.csv`.
@@ -38,8 +39,9 @@ Entender **dónde** se equivoca el clasificador y elegir, con datos, el suavizad
      ventanas (en empate gana la más reciente) o media de `predict_proba`;
    - `k = 1` equivale a no suavizar; la salida respeta `ResultadoModo`.
 3. **Simulación de sesiones fuera de línea** (`ia/simular_falsas.py`):
-   - toma episodios de parqueo completos: trazas de SUMO con estacionamiento y grabaciones de
-     Cuenca del protocolo (estacionar → caminar → volver → manejar), con el puesto conocido;
+   - toma episodios de parqueo completos: trazas de SUMO con estacionamiento (estacionar →
+     caminar → volver → manejar) de las semillas 101–105, con el puesto conocido y σ ∈ {5, 10, 15} m;
+     si hay grabaciones caseras de ese tipo en `proyecto/datos/`, añádelas como validación extra;
    - ventanas de 30 s con paso 5 s → clasificador → suavizador → máquina de estados, con la
      distancia al puesto calculada desde el GPS ruidoso;
    - **falsa liberación:** `CERRADA` cuando `modo_real` en ese instante no es `vehiculo` (el auto
@@ -75,5 +77,5 @@ Entender **dónde** se equivoca el clasificador y elegir, con datos, el suavizad
 
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S3, sesión 2, Pablo). En "Pedidos a otros":
-@Freddy, el k y el método recomendados para el controlador y el backend en vivo; @Tyrone, usar
+@Freddy, el k y el método recomendados para el controlador y el modo espejo; @Tyrone, usar
 ese k en la corrida final de S4.

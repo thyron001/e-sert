@@ -16,7 +16,8 @@ Lee `CLAUDE.md`, `docs/CONTEXTO.md` (sección IA) y `docs/CONTRATO.md` (seccione
 clasificador de movimiento es **la IA evaluable del proyecto**. Distingue `a_pie`, `quieto` y
 `vehiculo` con ventanas de GPS, y evita las *falsas liberaciones* de puesto. GeoLife
 (Microsoft Research) da trazas GPS reales etiquetadas por modo de transporte. Es la base del
-entrenamiento, junto con las trazas de SUMO (Freddy) y las grabaciones de Cuenca (Miguel).
+entrenamiento, junto con las trazas de SUMO (Freddy). Todo el proyecto es simulado: la prueba
+final (S2-3) usará usuarios de GeoLife nunca vistos y escenarios difíciles generados en SUMO.
 
 ## Objetivo
 Descargar GeoLife 1.3, quedarte solo con las trayectorias etiquetadas, mapear los modos a las

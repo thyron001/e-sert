@@ -25,10 +25,13 @@ trazable, y un banco de preguntas probables del profesor con respuestas cortas.
 1. Crea `ia/figuras_informe.py`, que regenera desde los datos (sin reentrenar) todas las
    figuras de la sección en `informe/figuras/pablo/` con `dpi=300`, ejes en español y verde
    del equipo para RF:
-   - conteo de ventanas por clase y fuente (GeoLife, SUMO, Cuenca);
+   - conteo de ventanas por clase y fuente (GeoLife entrenamiento, GeoLife prueba, SUMO,
+     escenarios difíciles y, si existen, caseras);
    - distribución de velocidad por clase con la línea de 8 km/h del umbral;
-   - importancia de características (permutación sobre Cuenca, no `feature_importances_`);
-   - matrices de confusión RF frente a umbral en Cuenca;
+   - importancia de características (permutación sobre usuarios no vistos, no
+     `feature_importances_`);
+   - matrices de confusión RF frente a umbral en usuarios no vistos;
+   - F1 y tasa `vehiculo → a_pie` frente a σ (S2-3);
    - F1 de `vehiculo` en tráfico lento, RF frente a umbral;
    - efecto del suavizado temporal sobre las falsas liberaciones (de S3-2);
    - falsas liberaciones por 100 sesiones por penetración (lee
@@ -38,14 +41,15 @@ trazable, y un banco de preguntas probables del profesor con respuestas cortas.
    - **Problema:** qué es una falsa liberación y por qué una regla de velocidad falla (auto
      en tráfico lento, peatón trotando, saltos de GPS).
    - **Datos:** GeoLife (ingesta, remuestreo a 1 Hz, cómo se derivó `quieto`), trazas de
-     SUMO con ruido AR(1) calibrado, grabaciones de Cuenca (minutos y ventanas por clase y
-     teléfono). Tabla resumen.
+     SUMO con ruido AR(1) calibrado con literatura (σ 3–15 m) y su análisis de sensibilidad, la
+     partición fija de usuarios de prueba y, si existieron, las grabaciones caseras. Tabla resumen.
    - **Ventanas y características:** 30 s, paso 5 s; tabla con cada característica y su
      fórmula (velocidad media, p85, varianza, aceleración, rumbo, *stop rate*, etc.).
    - **Modelo:** Random Forest, hiperparámetros, por qué **GroupKFold por usuario** (evita
      filtrar el mismo trayecto en entrenamiento y prueba).
    - **Línea base** y **suavizado temporal**.
-   - **Resultados:** Cuenca como prueba nunca vista; tráfico lento; latencia; impacto en las
+   - **Resultados:** usuarios de GeoLife nunca vistos y escenarios difíciles de SUMO;
+     curvas frente a σ; tráfico lento; latencia; impacto en las
      falsas liberaciones del sistema.
    - **Discusión, limitaciones y trabajo futuro** (acelerómetro con SHL).
    Cada cifra con `<!-- fuente: ia/modelos/rf_final.json:metricas.f1_macro -->` o similar.
@@ -55,7 +59,8 @@ trazable, y un banco de preguntas probables del profesor con respuestas cortas.
    una con respuesta de 3 a 5 líneas, la evidencia (archivo o figura) y quién responde en la
    exposición:
    - IA (Pablo): ¿por qué RF y no una LSTM?, ¿hay fuga de datos?, ¿cómo se derivó `quieto`?,
-     ¿transfiere GeoLife a Cuenca?, ¿qué pasa si el teléfono queda dentro del auto?, ¿por qué
+     ¿transfiere GeoLife (Beijing) a un centro histórico simulado?, ¿por qué no
+     hay datos de campo?, ¿qué pasa si el teléfono queda dentro del auto?, ¿por qué
      no el acelerómetro?, ¿por qué 30 s?, ¿qué pasa en un semáforo largo?
    - Sistema (Freddy), escenario y KPIs (Tyrone), app y cobro (Miguel): al menos 4 por
      persona; márcalas como "a confirmar con <Nombre>" y déjalo como pedido.

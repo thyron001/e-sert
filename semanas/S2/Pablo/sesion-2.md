@@ -16,7 +16,9 @@ Lee `CLAUDE.md` y `docs/CONTRATO.md` (sección 2: la firma de `clasificar` **no 
 Trabaja sobre `ventanas_v2.parquet` de S2-1. Freddy usa `inferencia.py` en S2-2 y S3-1
 dentro del bucle de TraCI, así que importa tanto la calidad como la latencia. La métrica
 principal es **macro-F1** con validación agrupada por usuario; nunca dividas al azar por
-ventana (ventanas solapadas del mismo usuario filtran información).
+ventana (ventanas solapadas del mismo usuario filtran información). Los usuarios de prueba de
+`ia/particion_usuarios.json` y las semillas SUMO 101–105 **no se usan aquí** (ni para elegir
+hiperparámetros ni `k`): son la prueba de S2-3. Añade un test que lo compruebe.
 
 ## Objetivo
 Entrenar `rf_v1` con hiperparámetros ajustados, entender qué características pesan, añadir

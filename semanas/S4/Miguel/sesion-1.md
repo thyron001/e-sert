@@ -31,9 +31,13 @@ usuario.
    - recarga con Payphone en **modo de prueba** (éxito, cancelación, error);
    - buscar → guiar → confirmar (placa + puesto) → sesión activa;
    - avisos de saldo bajo (< 10 min) y de tiempo máximo SERT próximo;
-   - cierre automático por detección y recibo ("con tarjeta habrías pagado X");
+   - modo espejo: selector de candidatos, seguimiento GUIADO → CERRADA, reconexión del WS tras
+     cortar la red 15 s y `espejo_fin`;
+   - cierre automático disparado por la simulación (vía espejo) y recibo ("con tarjeta habrías
+     pagado X");
    - bloqueo por saldo negativo y desbloqueo al recargar;
-   - sin red, backend caído, cambio de WiFi a datos y app vuelta al primer plano.
+   - sin red, backend caído, cambio de Wi-Fi a datos y app vuelta al primer plano (el teléfono
+     queda quieto: todo es simulado, no hay pruebas en la calle).
 2. Ejecuta la batería y corrige cada falla. Los arreglos en el backend van solo en
    `backend/pagos/` y `backend/asistente/`; lo demás del backend es de Freddy (pedido).
 3. Crea `app/src/errores.ts`: traduce cada código del contrato (`SALDO_INSUFICIENTE`,
@@ -41,22 +45,24 @@ usuario.
    en español con una acción ("Recargar", "Buscar otro puesto", "Reintentar"). Ningún error
    técnico crudo llega a la pantalla.
 4. Crea `app/src/config/demo.ts` y una pantalla oculta **Ajustes de demo** (mantener
-   pulsado el logo 3 s): URL del backend editable (por defecto `EXPO_PUBLIC_API_URL`), botón
-   "Probar conexión" que llama a `GET /api/v1/puestos` y muestra la latencia, e indicador
-   del estado del WebSocket. La URL se guarda en `AsyncStorage`. Así, el lunes basta con
-   escribir la IP que imprime `demo.py` de Tyrone.
+   pulsado el logo 3 s): URL del backend editable con dos atajos, **VPS**
+   (`https://demo.e-sert.tesisucuenca.com`, por defecto) y **Local** (la IP que imprime
+   `demo.py --local` de Tyrone); botón "Probar conexión" que llama a `GET /salud` y
+   `GET /api/v1/espejo/candidatos` y muestra la latencia; e indicador del estado del WebSocket
+   espejo. La URL se guarda en `AsyncStorage`.
 5. Pulido de UX: estados de carga y vacío en todas las listas, botones de al menos 44×44 pt,
    `accessibilityLabel` en los controles, contraste AA, nombre y color de la app
    consistentes, formato de moneda `$0,50` y horas en la zona de Ecuador.
 6. Calidad: `npx tsc --noEmit` sin errores, `npx expo-doctor` sin problemas críticos y el
    *linter* del proyecto limpio. Anota las versiones de Expo SDK y Node usadas.
-7. Pide al usuario capturas reales de 8 pantallas (inicio, mapa con puestos, guía, confirmar,
-   sesión activa, aviso, recibo, billetera) y guárdalas en `app/capturas/` con nombres
-   `01_inicio.png`, `02_mapa.png`, etc.
+7. Pide al usuario capturas reales de 8 pantallas (inicio, mapa con puestos, selector espejo,
+   espejo GUIADO, espejo A_PIE, aviso, recibo, billetera) y guárdalas en `app/capturas/` con
+   nombres `01_inicio.png`, `02_mapa.png`, etc.
 8. Escribe `app/MANUAL.md` para el usuario final: qué hace la app, instalación con Expo Go
    (QR), cada pantalla con su captura, cómo funciona el cobro por tiempo real frente a la
-   tarjeta SERT, preguntas frecuentes (¿por qué debo dejar la app abierta?, ¿qué pasa si me
-   quedo sin saldo?) y una sección **Modo demo** con los Ajustes de demo.
+   tarjeta SERT, el **modo espejo** (el teléfono sigue a un conductor simulado y no usa tu GPS),
+   preguntas frecuentes (¿por qué debo dejar la app abierta?, ¿qué pasa si me quedo sin
+   saldo?) y una sección **Modo demo** con los Ajustes de demo.
 9. **Evidencia** `evidencias/s1_app-pantallas.png`: montaje 4×2 de las 8 capturas, hecho con
    Pillow, con el nombre de cada pantalla debajo.
 

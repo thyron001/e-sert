@@ -29,8 +29,11 @@ ocupación en vivo, guía al puesto libre más cercano al destino y cobra el tie
   - Datos:
     - Entrenamiento: GeoLife (solo GPS; hay que derivar la clase "quieto" y remuestrear)
       más ventanas generadas en SUMO.
-    - Prueba: grabaciones propias en el Centro con los teléfonos, incluido el caso
-      difícil de auto en tráfico lento.
+    - Prueba: **usuarios de GeoLife nunca vistos** (partición fija por usuario) y
+      **escenarios difíciles generados en SUMO**: auto en tráfico lento a velocidad de
+      peatón, peatón rápido y GPS con ruido de σ entre 3 y 15 m.
+    - Opcional: **grabaciones caseras** con los teléfonos (caminando o en auto, donde sea,
+      **sin salir al Centro**) como validación extra, si hay tiempo.
     - SHL (Sussex-Huawei) queda como opción si después se suma el acelerómetro.
 - **Escenarios:** búsqueda a ciegas (línea base) frente a la app con 20, 50 y 80 % de
   usuarios, con al menos 2 semillas.
@@ -52,11 +55,13 @@ ocupación en vivo, guía al puesto libre más cercano al destino y cobra el tie
 - **Extras:**
   - Entrada por LLM en la app (opcional): "cerca de la Catedral Nueva una hora" → JSON
     `{destino, duración}`. Nunca va dentro del lazo de SUMO/TraCI.
-  - Un teléfono real que aparece en el mismo mapa que la simulación.
+  - **Teléfono espejo:** la app sigue a un auto simulado elegido en SUMO y muestra lo que
+    vería su conductor: guiado al puesto, sesión, costo en vivo, avisos y recibo. El teléfono
+    no se mueve: **todo es simulado**, y no hay pruebas de campo en el Centro.
 
 - **VPS (Dokploy):** backend y visor publicados en `https://demo.e-sert.tesisucuenca.com`,
-  para que el teléfono real funcione con datos móviles, Payphone tenga su URL de retorno y el
-  visor se vea desde cualquier pantalla. SUMO sigue corriendo en la laptop de la demo.
+  para que el teléfono espejo se conecte sin depender del Wi-Fi del aula, Payphone tenga su
+  URL de retorno y el visor se vea desde cualquier pantalla. SUMO sigue corriendo en la laptop de la demo.
   Detalles en `docs/DESPLIEGUE.md`.
 
 ## Reglas de cobro

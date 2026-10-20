@@ -2,89 +2,94 @@
 semana: S2
 persona: Miguel
 sesion: 3
-titulo: Teléfono real enviando ubicación al visor y más grabaciones
+titulo: Modo espejo conectado a la simulación
 horas: 3-4
 modulo: app
-depende: [S2-Miguel-1, S2-Freddy-1, S2-Tyrone-2, S1-Miguel-3]
-entrega: [app/src/servicios/ubicacion.ts, app/src/servicios/cola.ts, datos/grabaciones/, datos/metadatos.csv, datos/validar.py]
-evidencias: [s3_telefono-en-visor.png, s3_grabaciones-mapa.png]
+depende: [S1-Miguel-3, S2-Miguel-1, S2-Freddy-1]
+entrega: [app/src/api/espejo.ts, app/src/espejo/socketEspejo.ts, app/src/espejo/usarEspejo.ts, app/src/espejo/notificaciones.ts, app/src/espejo/latencia.ts, app/src/espejo/__tests__/, app/mock_espejo/servidor_mock.py, app/mock_espejo/README.md]
+evidencias: [s3_espejo-en-vivo.png, s3_latencia-espejo.png]
 ---
-# S2 · Sesión 3 · Miguel 🔴: Teléfono real enviando ubicación al visor y más grabaciones
+# S2 · Sesión 3 · Miguel 🔴: Modo espejo conectado a la simulación
 
 ## Contexto
-Lee `CLAUDE.md` y `docs/CONTRATO.md` (secciones 1, 4, 6 y 7). Esta sesión tiene dos partes:
-que un teléfono real aparezca en el mismo mapa que la simulación (lo verá el profesor en la
-demo) y ampliar las grabaciones, que Pablo usa **hoy mismo** para su evaluación (S2-3). El
-backend está en `proyecto/backend/` o `origin/freddy/s2`; el visor de Tyrone en
-`proyecto/visor/` o `origin/tyrone/s2` (léelos sin editar). El protocolo de grabación de S1-3
-está en `proyecto/datos/`. Recuerda: en iPhone la app debe estar abierta en primer plano.
+Lee `CLAUDE.md`, `docs/CONTRATO.md` (secciones 3, 6 y **6b**) y `docs/DESPLIEGUE.md`. **Todo es
+simulado**: el teléfono no se mueve ni envía su GPS; sigue a un vehículo de SUMO con app y muestra lo
+que vería su conductor. Las pantallas y el recorrido mock son de S1-3 (`proyecto/app/`). Hoy se
+cambia el mock interno por la red: `GET /api/v1/espejo/candidatos` y `WS /ws/espejo/{veh_id}` de
+Freddy (`proyecto/backend/` o `origin/freddy/s2`, solo lectura). Si aún no existen (el espejo del
+backend es de S3-Freddy-3), usa un **servidor mock local** que reproduce `recorrido_mock.json`,
+marcado `# MOCK: reemplazar cuando Freddy publique el modo espejo (S3-3)`.
 
 ## Objetivo
-Enviar la ubicación del teléfono al backend a 1 Hz con una cola robusta, verla en el visor
-junto a los autos simulados y sumar grabaciones etiquetadas de los casos difíciles.
+Que la app elija un vehículo real de la simulación (o del mock), lo siga en vivo con un WebSocket
+robusto, avise con notificaciones locales en las transiciones clave y mida la latencia
+evento → pantalla, contra el VPS si está en línea o en local.
 
 ## Pasos
-1. **Identidad**: `usuario_id = "app_" + uuid4` generado una vez y guardado en AsyncStorage.
-2. Crea `app/src/servicios/ubicacion.ts`:
-   - `Location.watchPositionAsync({accuracy: Location.Accuracy.BestForNavigation,
-     timeInterval: 1000, distanceInterval: 0})`;
-   - por cada lectura construye el cuerpo de `POST /eventos/ubicacion` con
-     `origen: "app"`, `ts` ISO UTC, `lat`, `lon`, `velocidad_mps` (`coords.speed`, `null` si
-     es negativa) y `precision_m` (`coords.accuracy`);
-   - interruptor "Compartir ubicación" en la pantalla de sesión, activo por defecto durante
-     una sesión.
-3. Crea `app/src/servicios/cola.ts`: cola en memoria con respaldo en AsyncStorage (máximo
-   600 eventos), envío por lotes cada 5 s con reintento exponencial, y descarte de los más
-   antiguos si se llena. Muestra en pantalla "en cola: N". Si el backend acepta lotes, úsalos;
-   si no, envía uno por uno y deja el pedido a Freddy.
-4. **Prueba con el visor**: laptop y teléfono en la misma red (o `npx expo start --tunnel`
-   y el backend expuesto según indique Freddy), backend con `uvicorn --host 0.0.0.0`
-   **en segundo plano**, visor abierto con `?ws=ws://<ip>:8000/ws/estado`. Camina por el
-   Centro con la simulación corriendo y comprueba que el teléfono aparece en `telefonos`
-   del snapshot y se mueve en el mapa. Si el snapshot no incluye `telefonos`, deja el pedido
-   a Freddy y verifica al menos con `GET` o los logs del backend.
-5. **Más grabaciones** con el grabador de S1-2 y el protocolo de S1-3 (mínimo de esta
-   sesión):
-   - 3 recorridos de auto en tráfico lento (≥ 10 min cada uno, Gran Colombia o Mariscal
-     Lamar en hora pico);
-   - 4 secuencias "estacionar → bajarse → caminar 200–400 m → volver → irse" (el caso de
-     falsa liberación), con la hora de estacionamiento marcada;
-   - 2 de quieto dentro del auto estacionado (≥ 5 min) y 2 de caminata lenta;
-   - al menos 2 personas y los dos sistemas (iPhone y Android).
-6. Crea `datos/validar.py`: cada CSV cumple la sección 7 del contrato, la frecuencia
-   mediana es 1 Hz ± 0,1, la etiqueta `modo_real` no está vacía en más del 5 % de las filas,
-   y `metadatos.csv` (`grabacion_id,persona,telefono,so,fecha,escenario,minutos,notas`) lista
-   todas las grabaciones. Nombra los archivos
-   `<fecha>_<persona>_<escenario>_<n>.csv`.
-   Paraleliza: un subagente escribe `validar.py` y el mapa de evidencia mientras tú haces
-   la cola de envío; las grabaciones de campo las hace el usuario.
-7. **Evidencias**:
-   - `s3_telefono-en-visor.png`: captura del visor con el teléfono real entre los autos
-     simulados (y, si se puede, una foto de la pantalla del teléfono al lado);
-   - `s3_grabaciones-mapa.png`: todas las grabaciones nuevas sobre el mapa del Centro,
-     coloreadas por `modo_real` (matplotlib + `contextily` si está, o la red de SUMO de
-     fondo).
+1. **Servidor mock** `app/mock_espejo/servidor_mock.py` (FastAPI + `uvicorn`, `# MOCK` en la
+   cabecera): `GET /api/v1/espejo/candidatos` devuelve 3 vehículos; `WS /ws/espejo/{veh_id}`
+   reproduce el JSON grabado a 1 Hz (`asyncio.sleep(1)`), añade `ts` ISO con milisegundos y termina
+   con `espejo_fin`; `--bucle` repite el recorrido y `--cortar-en N` cierra el socket a los N s para
+   probar la reconexión. Se lanza con `uvicorn ... --host 0.0.0.0 --port 8001` **en segundo plano**.
+   Si el backend de Freddy ya trae el espejo, graba 2 min reales a `app/mock_espejo/grabacion.jsonl`
+   y reprodúcelos en vez del mock de S1-3.
+2. **Cliente REST** `app/src/api/espejo.ts`: `getCandidatos(): Promise<CandidatoEspejo[]>` con los
+   tipos de `comun/esquemas.ts` (copia en `app/src/contrato/`), *timeout* de 8 s y `ErrorApi`.
+   La base sale de `EXPO_PUBLIC_API_URL` o de Ajustes; la URL WS se deriva (`https` → `wss`).
+3. **WebSocket** `app/src/espejo/socketEspejo.ts`, clase `SocketEspejo` con
+   `conectar(vehId, {onMensaje, onFin, onEstado})` y `cerrar()`:
+   - reconexión exponencial 1, 2, 4, 8, 16 s con tope de 30 s y *jitter* ±20 %; reinicia el
+     contador al recibir el primer mensaje;
+   - vigilancia: si pasan 5 s sin mensaje (se esperan 1 Hz), cierra y reconecta;
+   - `AppState`: en segundo plano cierra; al volver a primer plano reconecta enseguida;
+   - con `espejo_fin` o `cerrar()` manual no reconecta; mensajes inválidos (`esMensajeEspejo`) se
+     descartan con `console.warn`; cada mensaje es completo, así que no hace falta reproducir huecos;
+   - `onEstado("en_vivo" | "reconectando" | "sin_conexion", intento)` alimenta un indicador en la
+     cabecera de la pantalla.
+4. **Hook** `usarEspejo(vehId)` sustituye a `suscribirMock` en `app/espejo/[vehId].tsx` y en el
+   selector; `EXPO_PUBLIC_USE_MOCK=1` conserva el mock interno de S1-3 sin red.
+5. **Notificaciones** `app/src/espejo/notificaciones.ts` con `expo-notifications` (`npx expo install
+   expo-notifications`; en Expo Go solo **locales**): permisos con `requestPermissionsAsync()`, canal
+   Android `"espejo"` con `AndroidImportance.HIGH` y `setNotificationHandler` para verlas en primer
+   plano. Dispara `scheduleNotificationAsync({content, trigger: null})` una sola vez por
+   `(veh_id, estado)` en GUIADO ("Puesto asignado a N m"), ESTACIONADO ("Sesión iniciada, retenido
+   $X"), SALIENDO y CERRADA ("Cobrado $X, ahorraste $Z"), y al aparecer `saldo_bajo` en `avisos`.
+6. **Latencia** `app/src/espejo/latencia.ts`: al pintar (`requestAnimationFrame` tras el `setState`)
+   registra `t_pintado − ts_mensaje − desfase`. El desfase de reloj se estima con el método de
+   Cristian (5 peticiones a `GET /salud`, mitad del RTT; usa `ts` del servidor si existe, si no el
+   header `Date`). Registra también recepción → pintado, que no depende del reloj. Exporta CSV
+   (`modo,t_sim,lat_total_ms,lat_cliente_ms`) con `expo-sharing`.
+7. **Tests** (`jest-expo`, `jest.useFakeTimers()` y un `WebSocket` falso): la secuencia de
+   reconexión es 1, 2, 4, 8, 16, 30, 30 s (sin *jitter* en el test); el silencio de 5 s fuerza la
+   reconexión; `espejo_fin` no reconecta; cada transición notifica una sola vez. Un subagente escribe
+   los tests y el servidor mock mientras tú haces el socket y el hook.
+8. **Pruebas**: corta el mock con `--cortar-en 20` y comprueba que la app reconecta sola en ≤ 30 s;
+   pasa la app a segundo plano 30 s y vuelve. Luego sigue 3 recorridos completos y exporta las
+   latencias.
+9. **Evidencias**: `s3_espejo-en-vivo.png` (captura del teléfono siguiendo al auto junto a sumo-gui
+   o el visor con el mismo vehículo, unidas con Pillow) y `s3_latencia-espejo.png` (histograma con
+   p50 y p95 por modo, matplotlib `dpi=150`).
 
 ## VPS (demo en línea)
-Lee `docs/DESPLIEGUE.md`. Si `https://demo.e-sert.tesisucuenca.com/salud` ya responde, haz la prueba **con datos móviles** (sin Wi-Fi ni túnel): `EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com` y el visor abierto en `https://demo.e-sert.tesisucuenca.com/visor` desde otra pantalla. Mide y anota la latencia teléfono → visor (marca de tiempo del evento frente al momento en que se pinta). Si aún no está en línea, usa la red local o el túnel y anótalo.
+Antes de probar, `curl -s https://demo.e-sert.tesisucuenca.com/salud`. Si responde y existe
+`/api/v1/espejo/candidatos`, apunta `EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com` y
+pide que una corrida publique en el VPS: el token `ESERT_TOKEN_SIM` lo tiene **solo Tyrone**, así que
+coordínalo o deja `@Tyrone [VPS]` en la bitácora; nunca pidas el token. Si no responde, todo en
+local: backend o mock en la laptop y el teléfono con la IP de la laptop en la misma red (nunca
+`localhost` en el teléfono). Compara las latencias de ambos modos si puedes.
 
 ## Dónde escribir
-`semanas/S2/Miguel/codigo/app/`, `semanas/S2/Miguel/codigo/datos/` y
-`semanas/S2/Miguel/evidencias/`. Revisa que las grabaciones no incluyan datos personales
-(domicilios): recorta los primeros y últimos 2 min si empiezan en casa.
+`semanas/S2/Miguel/codigo/app/` y `semanas/S2/Miguel/evidencias/`. Ningún `.env` en el commit.
 
 ## Hecho cuando
-- [ ] Queda anotado en la bitácora si la prueba fue contra el VPS o en local, y la latencia medida.
-- [ ] El backend recibe la ubicación del teléfono a ~1 Hz (cuéntalo en los logs durante
-  5 min: ≥ 270 eventos).
-- [ ] El teléfono aparece en el visor junto a la simulación (o el pedido a Freddy está
-  documentado y el envío está verificado en el backend).
-- [ ] La cola sobrevive a 1 min sin red y luego vacía todo.
-- [ ] Hay al menos 11 grabaciones nuevas que pasan `python datos/validar.py`.
+- [ ] La app lista candidatos y sigue un vehículo de principio a fin (backend real o mock, anotado).
+- [ ] Tras cortar el servidor, la app reconecta sola en ≤ 30 s y el indicador lo refleja.
+- [ ] Las notificaciones de GUIADO, ESTACIONADO, SALIENDO y CERRADA llegan una sola vez cada una.
+- [ ] La latencia evento → pantalla (p50 y p95) queda en la bitácora, con el modo (VPS o local).
+- [ ] `npx jest app/src/espejo` y `npx tsc --noEmit` pasan.
 - [ ] Existen las dos evidencias PNG y el PDF semanal.
 
 ## Cierre
 Ejecuta el **Protocolo de cierre** de `CLAUDE.md` (S2, sesión 3, Miguel), **incluido el PDF
-semanal**. En "Pedidos a otros": @Pablo, ruta y lista de las grabaciones nuevas con sus
-minutos por clase; @Freddy, si `telefonos` llega en el snapshot; @Tyrone, cómo se ve el
-teléfono en el visor.
+semanal**. En "Pedidos a otros": @Freddy, añadir `ts` a los mensajes `espejo` y las diferencias con
+6b que encontraste; @Tyrone, resaltar en el visor los ids de `espejos`.

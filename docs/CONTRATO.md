@@ -102,15 +102,42 @@ Cada mensaje es JSON con `tipo`:
  "vehiculos": [{"id": "sim_veh42", "lat": -2.897, "lon": -79.004, "estado": "BUSCANDO", "con_app": true}],
  "peatones":  [{"id": "ped_veh42", "lat": ..., "lon": ...}],
  "puestos":   [{"puesto_id": "pa_...", "ocupados": 3, "capacidad": 5}],
- "telefonos": [{"usuario_id": "app_...", "lat": ..., "lon": ..., "modo": "a_pie"}]}
+ "espejos":  ["sim_veh42"]}
 {"tipo": "kpi", "t_sim": 1234.0, "valores": {"busqueda_media_s": 210.5, "falsas_liberaciones_100": 1.2}}
 ```
 
-El snapshot se envía 1 vez por segundo de simulación como máximo.
+El snapshot se envía 1 vez por segundo de simulación como máximo. `espejos` lista los
+vehículos que algún teléfono está siguiendo; el visor los resalta.
+
+## 6b. Modo espejo (teléfono = pantalla de un conductor simulado)
+
+Todo el proyecto es simulado. El teléfono no envía su GPS: **sigue a un vehículo de SUMO** y
+muestra lo que vería su conductor.
+
+| Método y ruta | Respuesta |
+|---|---|
+| `GET /api/v1/espejo/candidatos` | Vehículos con app que aún no estacionan: `[{id, destino_nombre, estado, t_sim}]` |
+| `WS /ws/espejo/{veh_id}` | Mensajes `{"tipo": "espejo", ...}` a 1 Hz, solo de ese vehículo |
+
+```json
+{"tipo": "espejo", "veh_id": "sim_veh42", "t_sim": 1234.0, "ts": "2026-11-05T15:04:05.120Z",
+ "estado": "GUIADO", "lat": -2.897, "lon": -79.004, "modo": "vehiculo",
+ "destino": {"nombre": "Parque Calderón", "lat": ..., "lon": ...},
+ "puesto": {"puesto_id": "pa_...", "lat": ..., "lon": ..., "distancia_m": 180},
+ "ruta": [[-2.897, -79.004], ...],
+ "sesion": {"sesion_id": "ses_...", "minutos": 12.5, "costo_usd": 0.15, "retenido_usd": 0.25},
+ "billetera": {"saldo": 4.85, "disponible": 4.60},
+ "avisos": ["saldo_bajo"],
+ "recibo": null}
+```
+
+- Al pasar a `CERRADA`, `recibo` trae `{minutos_reales, minutos_cobrados, cobrado_usd, tarjeta_sert_usd, ahorro_usd}`.
+- `ts` es la hora UTC en que el backend emitió el mensaje (para medir la latencia hasta la pantalla).
+- Si el vehículo sale de la simulación, llega `{"tipo": "espejo_fin", "veh_id": ...}`.
 
 ## 7. Trazas GPS (archivos)
 
-El emulador GPS de SUMO, las grabaciones de la app y GeoLife ya procesado usan el mismo CSV:
+El emulador GPS de SUMO, GeoLife ya procesado y las grabaciones caseras opcionales usan el mismo CSV:
 
 ```
 usuario_id,t,lat,lon,precision_m,velocidad_mps,modo_real

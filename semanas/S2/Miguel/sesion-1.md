@@ -17,6 +17,8 @@ Lee `CLAUDE.md`, `docs/CONTEXTO.md` (reglas de cobro) y `docs/CONTRATO.md` (secc
 aún no existe la copia (sin `node_modules/`). La API real de Freddy se hace esta misma semana
 (S2-1): léela de `proyecto/backend/` o de `origin/freddy/s2` y, mientras no responda, usa el
 cliente mock de S1-1, marcado `// MOCK`. Los tipos vienen de `proyecto/comun/esquemas.ts`.
+**Todo es simulado:** el teléfono no se mueve ni hace pruebas en la calle; el avance hacia el
+puesto se simula en la app (y en S2-3 el modo espejo sigue a un auto de SUMO).
 
 ## Objetivo
 El flujo completo de una sesión en Expo Go: elegir destino, recibir un puesto, llegar
@@ -37,16 +39,16 @@ guiado, confirmar placa y puesto, y ver la sesión activa con su costo en vivo.
    del contrato que ve el usuario (`BUSCANDO`, `GUIADO`, `ESTACIONADO`…) y persistencia con
    `@react-native-async-storage/async-storage`, para que recargar la app no pierda la sesión.
 4. **Pantallas** con `expo-router`:
-   - `buscar.tsx`: permiso con `Location.requestForegroundPermissionsAsync()`; posición con
-     `getCurrentPositionAsync({accuracy: Location.Accuracy.High})`; destino desde una lista
+   - `buscar.tsx`: punto de partida simulado (pulsación en el mapa o, por defecto, una esquina
+     del Centro como Gran Colombia y Benigno Malo); no se usa el GPS del teléfono; destino desde una lista
      (copia de `destinos.csv` de Tyrone) o pulsación larga en el mapa (`react-native-maps`,
      que funciona en Expo Go). Antes de `GET /guia`, consulta la billetera: si
      `disponible < bloque mínimo`, lleva a la recarga (S2-2; por ahora una pantalla
      "Próximamente").
-   - `sesion/guiar.tsx`: mapa con tu posición, el puesto y la línea recta;
-     `watchPositionAsync({timeInterval: 1000, distanceInterval: 0})`; distancia *haversine*
-     en vivo; botón "Abrir en Google Maps / Apple Maps" con `Linking.openURL`. Si
-     `distancia < 25 m`, pasa a confirmar. Libera la suscripción con `remove()` al salir.
+   - `sesion/guiar.tsx`: mapa con la posición simulada, el puesto y la línea recta
+     (`Polyline`); un temporizador a 1 Hz avanza la posición hacia el puesto a ~8 m/s
+     (`simularAvance`, con botón "Llegar ya" para la demo); distancia *haversine* en vivo. Si
+     `distancia < 25 m`, pasa a confirmar. Limpia el `setInterval` al salir.
    - `sesion/confirmar.tsx`: placa con validación ecuatoriana
      `^[A-Z]{3}-?\d{3,4}$` (mayúsculas automáticas), puesto prellenado y editable;
      `POST /sesiones` → muestra `retenido`.
@@ -60,7 +62,8 @@ guiado, confirmar placa y puesto, y ver la sesión activa con su costo en vivo.
    Delega en un subagente los tests y el script `verificar-contrato` mientras haces las
    pantallas.
 6. Prueba en Expo Go (`npx expo start`; `--tunnel` si la red de la universidad bloquea) en
-   un iPhone y en el Android, contra el backend real si ya existe.
+   un iPhone y en el Android, contra el backend real si ya existe, con el teléfono quieto en la
+   mano: todo el recorrido es simulado.
 7. **Evidencia** `evidencias/s1_flujo-sesion.png`: pide al usuario 4 capturas del teléfono
    (buscar, guiar, confirmar, activa) y únelas en una tira horizontal con Pillow, con un
    script `app/scripts/montaje.py` que también usarás en S2-2.
