@@ -35,7 +35,7 @@ semanas/SN/    trabajo de cada semana
 bitacoras/     una bitácora por persona, más la de las unificaciones
 docs/          CONTEXTO, PLAN, EQUIPO y CONTRATO
 herramientas/  generadores de PDF (semanal y explicativo por sesión)
-roadmap/       sitio Flask del roadmap (Dockerfile para Dokploy)
+roadmap/       sitio Flask del roadmap (Dockerfile en la raíz, para Dokploy)
 ```
 
 ## Correr el roadmap en local

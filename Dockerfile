@@ -2,12 +2,12 @@
 #  e-sert — Roadmap del proyecto (Flask + Gunicorn) para Dokploy
 # ==========================================================================================
 #  El sitio lee los archivos del propio repo (prompts, estado.json, bitácoras, evidencias),
-#  así que el contexto de build es la RAÍZ del repositorio:
+#  por eso este Dockerfile vive en la RAÍZ del repositorio:
 #
-#     docker build -f roadmap/Dockerfile -t esert-roadmap .
+#     docker build -t esert-roadmap .
 #
-#  En Dokploy: Build Type = Dockerfile, Dockerfile Path = roadmap/Dockerfile,
-#  Docker Context Path = . (raíz), puerto 5000, dominio e-sert.tesisucuenca.com.
+#  En Dokploy: Build Path = /, Build Type = Dockerfile, Docker File = Dockerfile,
+#  Docker Context Path = . , puerto 5000, dominio e-sert.tesisucuenca.com.
 #  Con "Autodeploy" activo, cada push a main (por ejemplo la unificación del domingo)
 #  reconstruye la imagen y el progreso de la página se actualiza solo.
 # ==========================================================================================
