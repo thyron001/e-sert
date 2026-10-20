@@ -7,6 +7,10 @@ hora: "domingo 09:00"
 # S3 · Unificación del domingo 8 de noviembre de 2026 (09:00, hora de Ecuador)
 
 ## Contexto
+> **Planificación:** solo Tyrone la cambia. Aplica la "Regla de planificación en la unificación" de
+> `CLAUDE.md`: los cambios de Freddy, Pablo o Miguel a archivos de planificación (incluidos sus
+> `sesion-*.md`) se descartan y se reportan en "Cambios a la planificación descartados".
+
 Eres Claude Code ejecutado por una **tarea programada, sin ninguna persona presente**. Nadie
 va a responder preguntas: si algo te bloquea, decide de forma conservadora, documéntalo y
 sigue. Lee primero `CLAUDE.md`, `docs/EQUIPO.md`, `docs/CONTRATO.md`, `docs/PLAN.md` y

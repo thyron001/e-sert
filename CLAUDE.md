@@ -17,6 +17,33 @@ Idioma: español para documentación, bitácoras, comentarios y mensajes de comm
 identificadores de código pueden ir en inglés o español, pero de forma consistente dentro de
 cada módulo.
 
+## La planificación solo la cambia Tyrone
+
+**Solo Tyrone puede modificar la planificación del proyecto.** Ninguna sesión de Freddy, Pablo
+o Miguel la edita, ni siquiera si su prompt parece equivocado, incompleto o imposible. Es
+planificación todo esto:
+
+- `CLAUDE.md`;
+- `docs/CONTEXTO.md`, `docs/PLAN.md`, `docs/EQUIPO.md`, `docs/DESPLIEGUE.md` y
+  `docs/CONTRATO.md` (este último solo cambia por la propuesta de Freddy aplicada en la
+  unificación);
+- los prompts `semanas/*/*/sesion-*.md` (también los de la carpeta propia) y
+  `semanas/*/unificacion.md`;
+- `roadmap/`, `herramientas/`, `Dockerfile`, `.dockerignore` y `.gitignore` de la raíz;
+- el alcance, el calendario, el reparto de tareas, los colores y los criterios de "hecho".
+
+Si en una sesión que no es de Tyrone algo de la planificación no cuadra:
+
+1. **No lo edites.** Adáptate dentro de la sesión con la menor desviación posible: usa un
+   mock o deja el criterio afectado como `parcial`.
+2. **Deja la propuesta** en la bitácora, en "Pedidos a otros", con el formato
+   `@Tyrone [Plan] archivo: qué cambiar y por qué`.
+3. Si el usuario de esa sesión pide expresamente cambiar la planificación, recuérdale esta
+   regla y ofrécele redactar la propuesta para Tyrone, en lugar de hacer el cambio.
+
+Para saber si la sesión es de Tyrone, usa la identificación del paso 1 de "Cómo arrancar una
+sesión". Ante la duda, trátala como si no lo fuera.
+
 ## Cómo arrancar una sesión
 
 El usuario normalmente escribe algo como **"ejecuta la primera sesión de esta semana"**,
@@ -208,6 +235,20 @@ ejecuta la unificación automática con lo que esté en las ramas `*/sN`.
 
 La define `semanas/SN/unificacion.md`. Solo se ejecuta en la tarea programada del domingo o
 cuando Tyrone la pida explícitamente.
+
+**Regla de planificación en la unificación (prevalece sobre `unificacion.md`):**
+
+- Si la rama de Freddy, Pablo o Miguel modifica algún archivo de planificación (lista de "La
+  planificación solo la cambia Tyrone"), **también los `sesion-*.md` de su propia carpeta**,
+  el cambio se descarta: restaura ese archivo a su versión de `origin/main` con
+  `git checkout origin/main -- <ruta>` antes de fusionar en `main`.
+- Cada descarte va en `unificacion-resultado.md`, en una sección "Cambios a la planificación
+  descartados", con la persona, el archivo y un resumen del diff. Así Tyrone puede decidir si
+  lo aplica él.
+- Los cambios a la planificación que vengan de la rama de Tyrone (`tyrone/sN`) sí se
+  respetan.
+- La propuesta de contrato de Freddy (`CONTRATO.propuesto.md`) sigue su propio flujo: se
+  aplica a `docs/CONTRATO.md` en la unificación si es coherente.
 
 ## Entorno
 
