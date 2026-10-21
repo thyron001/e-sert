@@ -20,6 +20,16 @@ generados en SUMO** con las semillas reservadas 101–105. La red y la demanda s
 `proyecto/sumo/`; el emulador, de `proyecto/traci/gps.py` (o tu `ia/ruido.py`). Las
 grabaciones caseras de Miguel son **opcionales**: solo se usan si existen en `proyecto/datos/`.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+
 ## Objetivo
 Medir con honestidad cómo rinden `umbral`, `rf_v1` y `rf_v1 + suavizado` fuera de la
 distribución de entrenamiento, por fuente, frente al ruido GPS y en el caso de auto en tráfico

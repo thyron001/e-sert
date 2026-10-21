@@ -16,6 +16,18 @@ Lee `CLAUDE.md` y `docs/CONTEXTO.md` (en especial la sección de escenarios). La
 es lo que demuestra que el sistema mejora algo: son los mismos autos llegando al Centro, pero
 buscando parqueo a ciegas (dan vueltas hasta encontrar). Sin línea base no hay KPIs.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+
 ## Objetivo
 Generar una demanda realista de hora pico, con autos que buscan parqueo a ciegas, y tener el
 escenario base corriendo y produciendo las salidas que luego usarán los KPIs.

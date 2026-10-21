@@ -14,9 +14,32 @@ con **SUMO + TraCI** y con un **clasificador de movimiento (Random Forest)**.
 | 🟢 | Pablo | IA: dataset, clasificador e inferencia |
 | 🔴 | Miguel | App Expo: sensores, sesión, billetera y Payphone |
 
+## Dónde clonar el repo (los cuatro)
+
+Todos usamos el SUMO del contenedor `van3twin`. El contenedor solo ve la carpeta `results/`
+de `van3twin-docker`, así que el repo se clona **ahí, en la misma computadora que tiene el
+contenedor**. Desde la terminal (Ubuntu/WSL en Windows), con el contenedor encendido:
+
+```bash
+cd "$(docker inspect van3twin --format '{{range .Mounts}}{{if eq .Destination "/home/vanet/results"}}{{.Source}}{{end}}{{end}}')"
+git clone https://github.com/thyron001/e-sert.git
+cd e-sert
+```
+
+El primer comando entra en la carpeta `results/` que usa tu contenedor. Si falla, entra a
+mano: `cd ~/van3twin-docker/results` (o donde hayas clonado `van3twin-docker`). Para comprobar
+que el contenedor ve el repo:
+
+```bash
+docker exec van3twin ls /home/vanet/results/e-sert
+```
+
+Claude Code se abre en esa carpeta (`results/e-sert`). Claude corre `git` y edita en la
+computadora, y ejecuta SUMO dentro del contenedor con `docker exec` (ver `CLAUDE.md`).
+
 ## Cómo trabajar una sesión
 
-1. Clona el repo y ábrelo en Claude Code.
+1. Abre en Claude Code el repo clonado en `results/e-sert`.
 2. Escribe, por ejemplo: **`Soy Pablo. Ejecuta la primera sesión de esta semana.`**
 3. Claude lee `CLAUDE.md`, abre tu rama (`pablo/s1`) y ejecuta el prompt de
    `semanas/S1/Pablo/sesion-1.md`. Trabaja con agentes y en bucle hasta cumplir los criterios

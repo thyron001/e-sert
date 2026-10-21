@@ -95,7 +95,9 @@ diferencia como pedido. Commit: `[S2-U] Contrato v1.x`.
 2. `python -m pytest -q` en cada módulo con tests (`comun/`, `backend/` incluido
    `backend/pagos/`, `traci/`, `ia/`, `kpis/`), con `PYTHONPATH=proyecto` y sin las pruebas
    marcadas `e2e`. Registra pasados, fallados, saltados y duración.
-3. Si hay SUMO, `sumo -c proyecto/sumo/centro_base.sumocfg --end 60 --no-step-log` debe salir
+3. Si hay SUMO (en esta computadora, el del contenedor `van3twin`: los comandos de SUMO se
+   ejecutan con `docker exec`, como explica la sección "SUMO en el contenedor `van3twin`" de
+   `CLAUDE.md`), `sumo -c proyecto/sumo/centro_base.sumocfg --end 60 --no-step-log` debe salir
    con 0; si no hay, **no verificable en este entorno**.
 4. **Humo de integración backend ↔ TraCI ↔ app** (lo propio de S2), con un script temporal
    fuera del repo:

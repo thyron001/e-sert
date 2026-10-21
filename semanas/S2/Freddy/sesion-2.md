@@ -20,6 +20,18 @@ de Tyrone está en `proyecto/sumo/centro_base.sumocfg` y los destinos en
 de umbral del contrato en `traci/clasificacion.py` marcada `# MOCK`. **Aquí nace la falsa
 liberación**: el conductor se baja, camina y el sistema no debe liberar el puesto.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+
 ## Objetivo
 Que cada auto estacionado genere un peatón que hace una diligencia y vuelve, y que una
 máquina de estados por usuario siga la sesión con las reglas del contrato usando el GPS

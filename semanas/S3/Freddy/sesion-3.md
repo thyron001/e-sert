@@ -19,6 +19,19 @@ mock (S2-Miguel-3, en `proyecto/app/` o `origin/miguel/s3`, solo lectura) y espe
 real. El controlador TraCI ya publica snapshots con `--publicar <url> --token $ESERT_TOKEN_SIM`
 (S2-3); esta sesión amplía lo que publica y lo sirve por vehículo.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- El controlador TraCI corre en el contenedor, junto a SUMO, y el backend en la computadora
+  (`--host 0.0.0.0`). Desde el contenedor, la URL del backend usa `host.docker.internal` o la
+  puerta de enlace, como explica `CLAUDE.md`.
+
 ## Objetivo
 Implementar la sección 6b del contrato de punta a punta: candidatos, WS por vehículo alimentado
 desde los snapshots del controlador, recibo al cerrar y el campo `espejos` del snapshot, y

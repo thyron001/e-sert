@@ -18,6 +18,16 @@ Es la primera sesión de S2: copia `proyecto/sumo/` y `proyecto/kpis/` (si exist
 domingo 25 está en `proyecto/sumo/centro_base.sumocfg`. El cálculo provisional de S1-3 se
 convierte aquí en un módulo formal: **los mismos números alimentarán el informe y el visor**.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+
 ## Objetivo
 Un módulo `kpis/` que, a partir de las salidas XML de SUMO, calcule por vehículo y por
 escenario el tiempo y la distancia de búsqueda, el CO₂ de búsqueda y la ocupación de los

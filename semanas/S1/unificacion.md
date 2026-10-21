@@ -114,7 +114,9 @@ a esa persona según `docs/EQUIPO.md`:
    `backend/tests`, `traci/tests`, `ia/tests`, `kpis/tests` si existen), con
    `PYTHONPATH=proyecto`. Si el módulo trae su propio comando en un README, úsalo. Registra
    pasados, fallados, saltados y duración. Un módulo sin tests es "sin tests", no un fallo.
-3. Si hay SUMO (`SUMO_HOME` definido y `sumo` en el `PATH`), corre
+3. Si hay SUMO (en esta computadora, el del contenedor `van3twin`: los comandos de SUMO se
+   ejecutan con `docker exec`, como explica la sección "SUMO en el contenedor `van3twin`" de
+   `CLAUDE.md`), corre
    `sumo -c <cfg> --end 60 --no-step-log` con el primero que exista de
    `proyecto/sumo/centro_base.sumocfg`, `centro_parqueos.sumocfg` y `centro_red.sumocfg`; debe
    salir con código 0. Si no hay SUMO, anótalo como **no verificable en este entorno**.

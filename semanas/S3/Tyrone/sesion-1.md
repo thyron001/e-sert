@@ -21,6 +21,16 @@ Freddy (S3-Freddy-1) se escriben esta misma semana: léelos sin editar de
 `# MOCK: reemplazar cuando Freddy entregue kpis_sistema.py (S3-1)` que devuelva `NaN` en sus
 columnas. Todo el análisis de S3-2 y la corrida final de S4 dependen de este ejecutor.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+
 ## Objetivo
 Un ejecutor reproducible, paralelo y **reanudable** que corra la matriz completa
 penetración {0, 20, 50, 80} % × clasificador {umbral, rf} × semillas {1, 2, 3} = 24 corridas y

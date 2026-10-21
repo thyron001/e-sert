@@ -19,6 +19,21 @@ en el proyector y el teléfono espejo en la mano siguiendo a un auto simulado. L
 `git archive` a una carpeta temporal y córrela **sin editarla**. Solo Tyrone toca el VPS: si algo
 falla ahí, `@Tyrone [VPS]` con el síntoma exacto. Plazo: sábado 14, 23:59.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+- El controlador TraCI corre en el contenedor, junto a SUMO, y el backend en la computadora
+  (`--host 0.0.0.0`). Desde el contenedor, la URL del backend usa `host.docker.internal` o la
+  puerta de enlace, como explica `CLAUDE.md`.
+
 ## Objetivo
 Ensayar la demo completa dos veces (VPS y local) con un guion cronometrado, medir lo que ve el
 público y grabar el video de respaldo crudo que S4-3 edita.

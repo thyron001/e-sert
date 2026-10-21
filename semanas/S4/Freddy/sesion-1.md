@@ -18,6 +18,19 @@ tus módulos (`traci/`, `backend/` **sin** `pagos/` ni `asistente/`, y `comun/`)
 falta probar que **todas juntas** cumplen el contrato. La demo del lunes 16 y la unificación
 final (domingo 15, 09:00) correrán esta suite. Plazo real: sábado 14, 23:59.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- El controlador TraCI corre en el contenedor, junto a SUMO, y el backend en la computadora
+  (`--host 0.0.0.0`). Desde el contenedor, la URL del backend usa `host.docker.internal` o la
+  puerta de enlace, como explica `CLAUDE.md`.
+
 ## Objetivo
 Una suite `pytest -m e2e` que levanta el backend real y SUMO sin GUI, ejerce el flujo de la
 app por HTTP y WebSocket y comprueba los invariantes del sistema (cobro, ocupación y cero
@@ -36,8 +49,10 @@ falsas liberaciones evitables).
    - `servidor`: arranca `uvicorn` en un hilo en un puerto libre (`socket.bind(("",0))`) con
      una SQLite temporal (`tmp_path`); espera a `GET /api/v1/puestos` y lo apaga al final;
    - `cliente`: `httpx.Client` con el header `X-Contrato-Version: 1`;
-   - `requiere_sumo`: `pytest.skip` limpio si `shutil.which("sumo")` es `None` o falta
-     `SUMO_HOME`;
+   - `requiere_sumo`: `pytest.skip` limpio si el contenedor `van3twin` no está corriendo
+     (`docker exec van3twin which sumo` falla). Las pruebas corren en la computadora: el
+     backend se levanta ahí y el controlador con SUMO, dentro del contenedor con `docker exec`
+     (ver `CLAUDE.md`). Al terminar, comprueba que no queden procesos `sumo` en el contenedor;
    - `usuario_app`: crea `app_<uuid4>` y lo recarga con $5 por el adaptador de Payphone de
      Miguel en modo prueba si existe (`backend/pagos/`); si no, `POST /recarga` con
      `referencia_payphone="PRUEBA"` y un `# MOCK` explicado.

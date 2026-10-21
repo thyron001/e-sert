@@ -92,7 +92,9 @@ rompa a alguien no se aplica y queda documentado. Comprueba además que
    red, **no verificable**.
 2. `python -m pytest -q` en cada módulo con tests (`comun/`, `backend/`, `traci/`, `ia/`,
    `kpis/`), con `PYTHONPATH=proyecto`.
-3. Si hay SUMO:
+3. Si hay SUMO (en esta computadora, el del contenedor `van3twin`: los comandos de SUMO se
+   ejecutan con `docker exec`, como explica la sección "SUMO en el contenedor `van3twin`" de
+   `CLAUDE.md`):
    - `sumo -c proyecto/sumo/centro_base.sumocfg --end 60 --no-step-log` sale con 0;
    - `python -m pytest -m e2e -q` en `proyecto/backend/` y `proyecto/traci/`;
    - `python proyecto/demo/verificar_demo.py` (la demo sin GUI, unos 2 min) sale con 0.

@@ -20,6 +20,21 @@ comando** y cerrarse limpia con Ctrl+C. Primero copia tus módulos (`sumo/`, `kp
 `visor/`) desde `proyecto/` a `semanas/S4/Tyrone/codigo/` según la regla de copia;
 `demo/` es nuevo. El backend y el controlador son de Freddy: se **leen** desde `proyecto/`.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+- El controlador TraCI corre en el contenedor, junto a SUMO, y el backend en la computadora
+  (`--host 0.0.0.0`). Desde el contenedor, la URL del backend usa `host.docker.internal` o la
+  puerta de enlace, como explica `CLAUDE.md`.
+
 ## Objetivo
 Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador TraCI con
 `sumo-gui` y el visor Leaflet, comprueba que cada pieza responde y lo apaga todo junto.
@@ -36,21 +51,27 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
    ```yaml
    rutas: {backend: proyecto/backend, traci: proyecto/traci, sumo: proyecto/sumo, visor: proyecto/visor}
    sumocfg: sumo/centro_base.sumocfg
-   puertos: {backend: 8000, visor: 8080, traci: 8813}
+   puertos: {backend: 8000, visor: 8088, traci: 8813}
    escenario: {penetracion: 0.5, clasificador: rf, semilla: 1, hasta_s: 3600, delay_ms: 100}
    db: demo/demo.db          # se borra y recrea en cada arranque
    ```
    Durante la semana permite `--ruta visor=semanas/S4/Tyrone/codigo/visor` para usar tu copia.
 3. Crea `demo/demo.py` (`argparse`, `subprocess.Popen`, `pathlib`, sin rutas absolutas):
-   - **Prerrequisitos:** `SUMO_HOME` definido, `sumo-gui` en el `PATH`, Python ≥ 3.11,
-     puertos libres (`socket.bind`). Si algo falla, mensaje en español con la solución.
+   - **Prerrequisitos:** contenedor `van3twin` corriendo (`docker ps`) con `sumo-gui`
+     (`docker exec van3twin which sumo-gui`), repo dentro de `results/e-sert`, Python ≥ 3.11
+     en la computadora y puertos libres (`socket.bind`). El 8080 no se usa porque lo publica
+     el contenedor. Si algo falla, mensaje en español con la solución.
    - **Backend:** `uvicorn <modulo>:app --host 0.0.0.0 --port 8000` con la base SQLite de la
      demo recién creada. Espera *healthcheck* sondeando `GET /api/v1/puestos` cada 0,5 s
      (máximo 20 s).
-   - **Controlador:** con `--gui`, el `sumocfg`, la penetración y la URL del backend.
+   - **Controlador:** dentro del contenedor, con
+     `docker exec -w /home/vanet/results/e-sert/<ruta> van3twin bash -lc "..."`, con `--gui`,
+     el `sumocfg`, la penetración y la URL del backend vista desde el contenedor
+     (`host.docker.internal` o la puerta de enlace, ver `CLAUDE.md`). `sumo-gui` se ve por VNC
+     en `127.0.0.1:5901`.
      Espera a que el WS `/ws/estado` emita el primer `snapshot` (máximo 30 s).
-   - **Visor:** `python -m http.server 8080` sobre la carpeta del visor y
-     `webbrowser.open("http://localhost:8080/?ws=ws://localhost:8000/ws/estado")`.
+   - **Visor:** `python -m http.server 8088` sobre la carpeta del visor y
+     `webbrowser.open("http://localhost:8088/?ws=ws://localhost:8000/ws/estado")`.
    - Imprime la URL que debe usar el teléfono espejo de Miguel en Expo Go (la del VPS en
      `--remoto`; la **IP de la LAN** solo en `--local`), los primeros candidatos de
      `GET /api/v1/espejo/candidatos` y una tabla con el tiempo de arranque de cada componente.
@@ -58,6 +79,8 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
    - **Apagado:** Ctrl+C o el cierre de `sumo-gui` termina todo en orden inverso. En Windows
      usa `CREATE_NEW_PROCESS_GROUP` y `CTRL_BREAK_EVENT`; en Linux, `start_new_session=True`
      y `os.killpg`. Tras 5 s, `kill()` a lo que siga vivo.
+     Matar el `docker exec` no detiene lo que corre dentro del contenedor: al apagar, termina
+     también el controlador y SUMO con `docker exec van3twin pkill -f <patrón>`.
    - Flags: `--sin-gui`, `--penetracion`, `--semilla`, `--sin-navegador`, `--cronometro`
      (escribe `logs/.../tiempos.json`; lo usarás en la sesión 3).
 4. Crea los envoltorios `demo/demo.ps1` y `demo/demo.sh`, que activan el `.venv` del backend
@@ -68,12 +91,14 @@ Crear `demo/demo.py`, que levanta en orden el backend FastAPI, el controlador Tr
      por segundo de simulación;
    - `GET /puestos` coincide en número con `proyecto/sumo/parqueos/puestos.csv`;
    - al menos una sesión pasa a `CERRADA` y la billetera cumple `saldo = Σrecargas − Σdébitos`;
-   - después del apagado, los puertos 8000 y 8080 quedan libres y no quedan procesos `sumo`.
+   - después del apagado, los puertos 8000 y 8088 quedan libres y no quedan procesos `sumo`
+     (tampoco dentro del contenedor: `docker exec van3twin pgrep -f sumo`).
    Sale con código 0 o 1 y escribe `verificacion.json`.
 6. Escribe `demo/README.md`: prerrequisitos, el comando, qué se ve, IP para teléfonos,
    firewall de Windows (permitir Python en red privada) y una tabla de errores frecuentes.
 7. **Evidencia** `evidencias/s1_demo-un-comando.png` (matplotlib, 3 paneles): captura de
-   `sumo-gui` (`PIL.ImageGrab` tras 60 s), captura del visor (Playwright *headless* si está;
+   `sumo-gui` (`traci.gui.screenshot` tras 60 s; `PIL.ImageGrab` no ve la pantalla del
+   contenedor), captura del visor (Playwright *headless* si está;
    si no, pide la captura al usuario) y barras con el tiempo de arranque por componente.
 
 ## VPS (demo en línea)
@@ -90,7 +115,8 @@ Al arrancar en `--remoto`, comprueba `/salud` y, si falla en 5 s, ofrece pasar a
 - [ ] Los dos modos arrancan con un comando, y el modo remoto cae al local si el VPS no responde.
 - [ ] `python demo/demo.py` arranca las tres piezas en menos de 60 s y el visor muestra autos
   y puestos en verde/rojo.
-- [ ] Ctrl+C deja libres los puertos 8000 y 8080 y sin procesos `sumo-gui` vivos.
+- [ ] Ctrl+C deja libres los puertos 8000 y 8088 y sin procesos `sumo-gui` vivos, tampoco
+  dentro del contenedor.
 - [ ] `python demo/verificar_demo.py` sale con código 0 y deja `verificacion.json`.
 - [ ] Funciona en PowerShell (Windows); el camino Linux está documentado en el README.
 - [ ] Existe la evidencia `s1_demo-un-comando.png`.

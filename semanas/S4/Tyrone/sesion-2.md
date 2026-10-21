@@ -17,6 +17,16 @@ Lee `CLAUDE.md`, `docs/CONTEXTO.md` (escenarios y KPIs) y el ejecutor de experim
 diapositivas**: deben ser reproducibles y trazables a versiones concretas del código y del
 modelo. Plazo real: sábado 14 de noviembre, 23:59.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+
 ## Objetivo
 Correr la matriz completa de escenarios con el `rf_final` congelado de Pablo y el controlador
 de `proyecto/traci/`, calcular estadísticas con intervalos de confianza y escribir tu sección

@@ -93,7 +93,9 @@ Si rompe el código de alguien, no lo apliques y deja el pedido. Commit: `[S3-U]
    red, **no verificable**.
 2. `python -m pytest -q` en cada módulo con tests (`comun/`, `backend/`, `traci/`, `ia/`,
    `kpis/`), con `PYTHONPATH=proyecto` y sin las pruebas `e2e`.
-3. Si hay SUMO, `sumo -c proyecto/sumo/centro_base.sumocfg --end 60 --no-step-log` debe salir
+3. Si hay SUMO (en esta computadora, el del contenedor `van3twin`: los comandos de SUMO se
+   ejecutan con `docker exec`, como explica la sección "SUMO en el contenedor `van3twin`" de
+   `CLAUDE.md`), `sumo -c proyecto/sumo/centro_base.sumocfg --end 60 --no-step-log` debe salir
    con 0; si no, **no verificable en este entorno**.
 4. **Resultados de experimentos** (lo propio de S3):
    - localiza los agregados en `proyecto/kpis/` (por ejemplo `resultados/`) y construye la

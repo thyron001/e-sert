@@ -18,6 +18,18 @@ integra Freddy en esta misma sesión (S2-3) y el ejecutor completo es de S3-1, a
 dejas **los escenarios y la verdad de referencia** listos. La ocupación real es la base del
 KPI "precisión del mapa" que Freddy calcula en S3-1.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+
 ## Objetivo
 Generar escenarios comparables (misma demanda, distinto `con_app`) y un registrador TraCI
 de la ocupación real de cada `parkingArea`, probados de punta a punta con 8 corridas.

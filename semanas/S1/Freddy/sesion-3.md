@@ -18,6 +18,18 @@ Lee `CLAUDE.md` y `docs/CONTRATO.md` (secciones 2 y 7). La red de Tyrone todaví
 existe, usa un mock: una red pequeña generada con `netgenerate --grid` y veredas, marcada
 como `# MOCK`. **Pablo depende de estas trazas en S2** para entrenar con datos de SUMO.
 
+## SUMO en el contenedor
+Esta sesión usa SUMO. Sigue la sección **"SUMO en el contenedor `van3twin`"** de `CLAUDE.md`:
+- Antes de empezar, comprueba que el repo está clonado en `van3twin-docker/results/e-sert` y
+  que `docker ps` muestra `van3twin`. Si no, avisa al usuario y no sigas con la parte de SUMO.
+- `git` y la edición de archivos van en la computadora. `sumo`, `netconvert`, `randomTrips.py`
+  y los scripts que importan `traci` o `sumolib` van dentro del contenedor:
+  `docker exec -w /home/vanet/results/e-sert/<carpeta> van3twin bash -lc "<comando>"`.
+- Es SUMO 1.12 con Python 3.10. Si algo de este prompt no existe en esa versión, adáptalo y
+  anótalo en la bitácora.
+- `sumo-gui` se abre en la pantalla virtual del contenedor y el usuario lo ve por VNC en
+  `127.0.0.1:5901`. Las capturas se hacen con `traci.gui.screenshot` o `--screenshot`.
+
 ## Objetivo
 Tener el bucle TraCI funcionando y un emulador de GPS realista que, para cada vehículo o
 peatón, genere trazas con ruido en el formato CSV del contrato y con la **etiqueta
