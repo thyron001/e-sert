@@ -1,0 +1,22 @@
+{
+  "persona": "Tyrone",
+  "semana": "S1",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-21",
+      "resumen": "Script reproducible que descarga el OSM del Centro Histórico y genera la red SUMO para autos y peatones (veredas, 775 cruces, 129 semáforos, UTM 17S) con edificios de fondo; la red de autos queda en una sola componente fuertemente conexa y se valida con sumo y 20 peatones sin teletransporte.",
+      "evidencias": [
+        "evidencias/s1_red-centro.png",
+        "evidencias/s1_componentes-podadas.png",
+        "evidencias/s1_red-centro-gui.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Islas peatonales menores tras la poda (6 de 60 viajes sorteados sin ruta): revisar si afectan a los puestos SERT en la sesión 2."
+      ]
+    }
+  }
+}
