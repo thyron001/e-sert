@@ -96,3 +96,55 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 
 **Evidencias:**
 ![Características por clase](../semanas/S1/Pablo/evidencias/s2_caracteristicas-por-clase.png)
+
+---
+
+## S1 · Sesión 3 · 2026-10-22 · Línea base por umbral y primer Random Forest
+**Estado:** hecha
+**Qué hice:**
+- Creé `ia/umbral.py` con la regla del contrato: vel_media > 8 km/h = vehiculo, < 0.5 km/h = quieto, resto = a_pie.
+- Creé `ia/entrenar.py` con Pipeline(SimpleImputer + RandomForest), validación GroupKFold(5) por usuario_id.
+- Creé `ia/evaluar.py` con métricas por fold (accuracy, macro-F1, recall, matrices de confusión, tasas de error críticas).
+- Creé `ia/inferencia.py` con `clasificar()` del contrato §2: caché de modelo, fallback a umbral, variables ESERT_MODELO y ESERT_CLASIFICADOR.
+- Escribí 6 tests de inferencia (auto→vehiculo, peatón→a_pie, modelo ausente→umbral, latencia <10ms, formato).
+- Generé las 2 evidencias PNG: matrices de confusión lado a lado y F1 por clase con barras de error.
+
+**Archivos creados o modificados:**
+- `semanas/S1/Pablo/codigo/ia/umbral.py`
+- `semanas/S1/Pablo/codigo/ia/entrenar.py`
+- `semanas/S1/Pablo/codigo/ia/evaluar.py`
+- `semanas/S1/Pablo/codigo/ia/inferencia.py`
+- `semanas/S1/Pablo/codigo/ia/tests/test_inferencia.py`
+- `semanas/S1/Pablo/codigo/ia/modelos/rf_v0.joblib` (197 MB, no va a git)
+- `semanas/S1/Pablo/codigo/ia/modelos/rf_v0_info.json`
+- `semanas/S1/Pablo/codigo/ia/resultados/s1_metricas.json`
+- `semanas/S1/Pablo/codigo/ia/README.md` (actualizado con GroupKFold e inferencia)
+- `semanas/S1/Pablo/codigo/ia/requirements.txt` (añadido scikit-learn, joblib)
+- `semanas/S1/Pablo/evidencias/s3_matrices-umbral-vs-rf.png`
+- `semanas/S1/Pablo/evidencias/s3_f1-por-clase.png`
+- `semanas/S1/Pablo/explicaciones/s3_explicacion.md`
+- `semanas/S1/Pablo/explicaciones/s3_explicacion.pdf`
+- `semanas/S1/Pablo/evidencias/resumen_S1_Pablo.pdf`
+
+**Decisiones y por qué:**
+- **50 árboles en vez de 300:** los 300 árboles consumían >6 GB de RAM y causaban cierres de sesión (OOM). La validación cruzada se hizo con 300 árboles (métricas correctas), el modelo final con 50.
+- **Modelo fuera de git:** pesa 197 MB (>50 MB). Se versiona rf_v0_info.json con metadatos y se regenera con `python -m ia.entrenar`.
+- **n_jobs=2 para el modelo final:** evita OOM al no lanzar tantos procesos paralelos.
+
+**Problemas encontrados:**
+- El entrenamiento con n_jobs=-1 y 300 árboles causaba cierre de Claude por OOM (>6 GB). Resuelto reduciendo a 50 árboles y n_jobs=2.
+- La compresión a nivel 9 del joblib tardaba demasiado.
+
+**Pedidos a otros:**
+- @Freddy: la firma de inferencia es `from ia.inferencia import clasificar`. Recibe `list[PuntoGPS]` (con t, lat, lon, precision_m) y devuelve `{"modo": str, "confianza": float, "fuente": "rf"|"umbral"}`. Variables: `ESERT_MODELO` para elegir modelo, `ESERT_CLASIFICADOR=umbral|rf` para forzar uno.
+- @Miguel: las grabaciones caseras son opcionales. Si hay tiempo, ~10 minutos por clase (caminando, en auto, parado) servirían como validación extra independiente de GeoLife.
+
+**Bucle y verificación:** 1 vuelta de código + 3 intentos de entrenamiento por OOM. El verificador independiente reportó 4/4 criterios cumplidos.
+
+**Pendientes para S2:**
+- Mejorar tasa vehiculo→a_pie (14%) con features de acelerómetro o datos SUMO difíciles.
+- Integrar con trazas SUMO reales de Freddy.
+
+**Evidencias:**
+![Matrices de confusión](../semanas/S1/Pablo/evidencias/s3_matrices-umbral-vs-rf.png)
+![F1 por clase](../semanas/S1/Pablo/evidencias/s3_f1-por-clase.png)

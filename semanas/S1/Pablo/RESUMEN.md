@@ -34,3 +34,20 @@ el pipeline al dataset GeoLife completo.
 - 18 características: velocidad, aceleración, jerk, rumbo, proporciones, rectitud, distancia
 
 ![Características por clase](evidencias/s2_caracteristicas-por-clase.png)
+
+## Sesión 3 · Línea base por umbral y primer Random Forest
+
+Se implementó la línea base por umbral de velocidad y un clasificador Random Forest con
+validación GroupKFold(5) por usuario. El RF alcanzó macro-F1 = 0.9124, superando al
+umbral (0.7170) en un 27%. Se publicó la función `clasificar()` del contrato con caché
+de modelo y fallback a umbral. Se redujo la tasa de falsas liberaciones de 21% a 14%.
+
+**Resultados de la validación cruzada:**
+- RF macro-F1: 0.9124 ± 0.0126
+- Umbral macro-F1: 0.7170 ± 0.0206
+- F1 por clase (RF): a_pie 0.84, quieto 1.00, vehiculo 0.90
+- Tasa falsas liberaciones (veh→apie): RF 14% vs Umbral 21%
+
+![Matrices de confusión](evidencias/s3_matrices-umbral-vs-rf.png)
+
+![F1 por clase](evidencias/s3_f1-por-clase.png)

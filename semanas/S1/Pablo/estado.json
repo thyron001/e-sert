@@ -13,11 +13,7 @@
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
       "criterios": {"cumplidos": 5, "total": 5},
-      "pendientes": [
-        "Derivar la clase 'quieto' a partir de ventanas de baja velocidad (sesión 2)",
-        "Remuestrear a 1 Hz y generar ventanas de 30 s (sesión 2)",
-        "Combinar con trazas SUMO de Freddy cuando estén disponibles"
-      ]
+      "pendientes": []
     },
     "sesion-2": {
       "estado": "hecha",
@@ -29,9 +25,23 @@
       ],
       "explicacion": "explicaciones/s2_explicacion.pdf",
       "criterios": {"cumplidos": 5, "total": 5},
+      "pendientes": []
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Random Forest (macro-F1=0.9124) supera al umbral (0.7170) con GroupKFold por usuario. Función clasificar() del contrato publicada con fallback a umbral. Tasa de falsas liberaciones reducida de 21% a 14%.",
+      "evidencias": [
+        "evidencias/s3_matrices-umbral-vs-rf.png",
+        "evidencias/s3_f1-por-clase.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Pablo.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {"cumplidos": 4, "total": 4},
       "pendientes": [
-        "Entrenar el clasificador Random Forest con GroupKFold (sesión 3)",
-        "Integrar con trazas SUMO reales de Freddy cuando estén disponibles"
+        "Mejorar tasa vehiculo→a_pie (14%) con features de acelerómetro o datos SUMO difíciles en S2",
+        "Integrar con trazas SUMO reales de Freddy"
       ]
     }
   }

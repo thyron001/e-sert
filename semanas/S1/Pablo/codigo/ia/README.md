@@ -27,22 +27,55 @@ ventaneo con la siguiente regla:
 - El desplazamiento de 10 m descarta ventanas donde el dispositivo se movió
   poco pero de forma sostenida.
 
+## Validación: GroupKFold por usuario
+
+La validación cruzada usa `GroupKFold(n_splits=5)` agrupando por `usuario_id`:
+**ningún usuario aparece en entrenamiento y prueba a la vez**.
+
+**Por qué no usar KFold normal:** un KFold aleatorio mezcla ventanas del mismo
+usuario en train y test. Como las ventanas solapan (paso 5 s en 30 s) y cada
+persona tiene patrones propios de movimiento, el modelo aprende a reconocer
+*usuarios*, no *modos*. Esto infla las métricas y el modelo falla con usuarios
+nuevos. GroupKFold evita esta fuga de datos.
+
+## Inferencia (contrato §2)
+
+```python
+from ia.inferencia import clasificar
+
+# ventana: list[PuntoGPS] con t, lat, lon, precision_m
+resultado = clasificar(ventana)
+# {"modo": "vehiculo", "confianza": 0.92, "fuente": "rf"}
+```
+
+Variables de entorno:
+- `ESERT_MODELO`: ruta al .joblib (default: `ia/modelos/rf_v0.joblib`)
+- `ESERT_CLASIFICADOR`: `"rf"` o `"umbral"` (default: intenta RF, fallback a umbral)
+
 ## Estructura
 
 ```
 ia/
 ├── ventanas.py           # remuestrear() y ventanear() — librería genérica
 ├── caracteristicas.py    # extraer(ventana) → dict con ~18 features
+├── umbral.py             # línea base por umbral de velocidad
+├── entrenar.py           # RF + GroupKFold + modelo final
+├── evaluar.py            # métricas, matrices de confusión, evidencias
+├── inferencia.py         # clasificar() del contrato §2
+├── modelos/              # rf_v0.joblib + rf_v0_info.json
+├── resultados/           # s1_metricas.json
 ├── datos/
 │   ├── descargar_geolife.py
 │   ├── ingesta_geolife.py
 │   ├── construir_ventanas.py
 │   ├── evidencias_geolife.py
+│   ├── evidencias_ventanas.py
 │   ├── geolife_info.json
 │   └── procesados/         # parquets (gitignored)
 ├── tests/
 │   ├── test_ingesta.py
-│   └── test_ventanas.py
+│   ├── test_ventanas.py
+│   └── test_inferencia.py
 └── requirements.txt
 ```
 
