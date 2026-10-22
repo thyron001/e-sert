@@ -1,0 +1,22 @@
+{
+  "persona": "Freddy",
+  "semana": "S1",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Contrato v1 completo (CONTRATO.propuesto.md, con cambios respecto a v0) y código compartido: esquemas.py (Pydantic v2), esquemas.ts, tarifa.json/tarifa.py y 29 ejemplos JSON + CSV, cubiertos por 163 tests.",
+      "evidencias": [
+        "evidencias/s1_contrato-diagrama.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 4, "total": 4},
+      "pendientes": [
+        "Compilar esquemas.ts con tsc (no hay Node/npm en la computadora ni en el contenedor)",
+        "Instalar pydantic en el contenedor van3twin antes de que el controlador TraCI importe comun/",
+        "Ajustar tarifa.json cuando Miguel confirme la tarifa SERT vigente"
+      ]
+    }
+  }
+}

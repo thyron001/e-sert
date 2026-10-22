@@ -1,0 +1,8 @@
+{
+  "usuario_id": "sim_veh42",
+  "ts": "2026-10-20T14:03:05Z",
+  "t_sim": 1234.0,
+  "modo": "vehiculo",
+  "confianza": 0.93,
+  "fuente": "rf"
+}

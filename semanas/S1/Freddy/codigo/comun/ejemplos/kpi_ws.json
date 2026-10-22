@@ -1,0 +1,10 @@
+{
+  "tipo": "kpi",
+  "t_sim": 1234.0,
+  "ts": "2026-10-20T14:03:05Z",
+  "valores": {
+    "busqueda_media_s": 210.5,
+    "falsas_liberaciones_100": 1.2,
+    "precision_mapa": 0.91
+  }
+}
