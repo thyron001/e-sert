@@ -51,3 +51,48 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Evidencias:**
 ![Horas por modo](../semanas/S1/Pablo/evidencias/s1_geolife-horas-por-modo.png)
 ![Trayectorias](../semanas/S1/Pablo/evidencias/s1_geolife-trayectorias.png)
+
+---
+
+## S1 · Sesión 2 · 2026-10-22 · Remuestreo, ventanas y características
+**Estado:** hecha
+**Qué hice:**
+- Creé `ia/ventanas.py` con `remuestrear()` (interpolación a 1 Hz, partición en huecos >10 s) y `ventanear()` (ventanas de 30 s, paso 5 s, cobertura y pureza ≥80%).
+- Implementé la derivación de `quieto`: velocidad efectiva (desplazamiento neto / duración) < 0.3 m/s Y desplazamiento < 10 m. Se usa velocidad efectiva porque el ruido GPS genera ~2.6 m/s aparentes incluso estando quieto.
+- Creé `ia/caracteristicas.py` con `extraer()`: 18 features robustas (velocidad, aceleración, jerk, rumbo, proporciones, rectitud, distancia, precisión, paradas-arranques). Velocidades sobre posiciones suavizadas con mediana móvil de 3.
+- Creé `ia/datos/construir_ventanas.py` para aplicar el pipeline completo a GeoLife. Procesamiento secuencial por usuario (joblib con n_jobs=-1 causaba OOM en usuarios grandes de >300k puntos).
+- Escribí 11 tests con trazas sintéticas (línea recta, punto fijo con ruido, hueco, SUMO).
+- Generé boxplots de 6 características × 3 clases como evidencia.
+
+**Archivos creados o modificados:**
+- `semanas/S1/Pablo/codigo/ia/ventanas.py`
+- `semanas/S1/Pablo/codigo/ia/caracteristicas.py`
+- `semanas/S1/Pablo/codigo/ia/datos/construir_ventanas.py`
+- `semanas/S1/Pablo/codigo/ia/datos/evidencias_ventanas.py`
+- `semanas/S1/Pablo/codigo/ia/tests/test_ventanas.py`
+- `semanas/S1/Pablo/codigo/ia/README.md`
+- `semanas/S1/Pablo/codigo/ia/__init__.py`
+- `semanas/S1/Pablo/evidencias/s2_caracteristicas-por-clase.png`
+- `semanas/S1/Pablo/explicaciones/s2_explicacion.md`
+- `semanas/S1/Pablo/explicaciones/s2_explicacion.pdf`
+
+**Decisiones y por qué:**
+- **Velocidad efectiva para quieto:** la mediana de velocidades instantáneas no funciona porque el ruido GPS (σ~5 m) genera velocidades aparentes de ~2.6 m/s incluso tras suavizado. El desplazamiento neto / duración cancela el ruido aleatorio en 30 s.
+- **Procesamiento secuencial:** `joblib.Parallel(n_jobs=-1)` causaba OOM kills (código 137) porque cada worker copiaba el DataFrame del usuario grande. Con n_jobs=1 tarda ~68 min pero completa de forma estable.
+- **Bus como vehiculo (heredado de S1):** el GPS no distingue bus de auto en un entorno urbano.
+
+**Problemas encontrados:**
+- OOM kills repetidos con joblib paralelo. Resuelto cambiando a procesamiento secuencial.
+- `matplotlib.Axes.boxplot()` no acepta `labels=` en la versión instalada. Corregido con `set_xticklabels()`.
+- `fpdf2` no soporta tablas markdown con pipes dentro de `<td>`. Simplificadas las tablas en la explicación.
+
+**Pedidos a otros:** ninguno.
+
+**Bucle y verificación:** 1 vuelta de código (tests pasaron al primer intento), 4 intentos del pipeline por OOM. El verificador independiente reportó 5/5 criterios cumplidos.
+
+**Pendientes para la próxima sesión:**
+- Entrenar clasificador Random Forest con GroupKFold sobre las ventanas generadas.
+- Integrar con trazas SUMO reales de Freddy cuando estén disponibles.
+
+**Evidencias:**
+![Características por clase](../semanas/S1/Pablo/evidencias/s2_caracteristicas-por-clase.png)

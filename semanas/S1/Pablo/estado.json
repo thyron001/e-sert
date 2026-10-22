@@ -18,6 +18,21 @@
         "Remuestrear a 1 Hz y generar ventanas de 30 s (sesión 2)",
         "Combinar con trazas SUMO de Freddy cuando estén disponibles"
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Remuestreo a 1 Hz, ventaneo deslizante (30 s, paso 5 s), derivación de quieto y extracción de 18 características GPS. Pipeline aplicado a GeoLife: 1,389,591 ventanas con 3 clases (vehiculo 811k, a_pie 443k, quieto 135k). Librería genérica lista para SUMO y teléfonos.",
+      "evidencias": [
+        "evidencias/s2_caracteristicas-por-clase.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {"cumplidos": 5, "total": 5},
+      "pendientes": [
+        "Entrenar el clasificador Random Forest con GroupKFold (sesión 3)",
+        "Integrar con trazas SUMO reales de Freddy cuando estén disponibles"
+      ]
     }
   }
 }

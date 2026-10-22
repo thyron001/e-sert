@@ -17,3 +17,20 @@ subway, airplane, etc.). Se escribieron 18 tests unitarios y dos evidencias grá
 ![Horas por modo](evidencias/s1_geolife-horas-por-modo.png)
 
 ![Trayectorias al azar](evidencias/s1_geolife-trayectorias.png)
+
+## Sesión 2 · Remuestreo, ventanas y características
+
+Se construyó la librería genérica de preprocesamiento GPS que convierte trazas crudas en
+ventanas de 30 s con 18 características numéricas. Se implementó remuestreo a 1 Hz con
+interpolación lineal, ventaneo deslizante con paso de 5 s, y la derivación automática de
+la clase `quieto` (velocidad efectiva < 0.3 m/s y desplazamiento neto < 10 m). Se aplicó
+el pipeline al dataset GeoLife completo.
+
+**Resultados:**
+- 1,389,591 ventanas generadas
+- vehiculo: 811,697 (58.4%), a_pie: 443,324 (31.9%), quieto: 134,570 (9.7%)
+- 134,570 ventanas reetiquetadas como quieto
+- 11 tests unitarios (incluye traza sintética tipo SUMO)
+- 18 características: velocidad, aceleración, jerk, rumbo, proporciones, rectitud, distancia
+
+![Características por clase](evidencias/s2_caracteristicas-por-clase.png)
