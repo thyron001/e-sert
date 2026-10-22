@@ -72,3 +72,54 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Pendientes para la próxima sesión:** compilar `esquemas.ts` con `tsc` cuando haya Node 18+; instalar pydantic en el contenedor; ajustar la tarifa cuando Miguel la confirme.
 
 **Evidencias:** ![](../semanas/S1/Freddy/evidencias/s1_contrato-diagrama.png) · [Explicación (PDF)](../semanas/S1/Freddy/explicaciones/s1_explicacion.pdf)
+
+## S1 · Sesión 2 · 2026-10-22 · Núcleo del backend (billetera, tarifa y sesiones)
+**Estado:** hecha
+**Qué hice:**
+- `backend/nucleo/db.py`:
+  - SQLAlchemy 2 + SQLite, con URL configurable (`:memory:` o archivo);
+  - tablas `usuarios`, `movimientos`, `sesiones` y `puestos`, con el dinero en centavos y las horas en UTC;
+  - lector del `puestos.csv` de Tyrone y mock de 20 puestos (`# MOCK`).
+- `backend/nucleo/tarifa.py`: `minutos_cobrables`, `costo`, `costo_tarjeta_sert` (bloques de 30 min) y `retencion`, sobre `comun/tarifa.py`.
+- `backend/nucleo/billetera.py`: `Billetera` con `recargar`, `retener`, `debitar`, `liberar`, `estado` y `movimientos`. El saldo siempre sale del libro y las operaciones son transaccionales.
+- `backend/nucleo/sesiones.py`: `ServicioSesiones` con `iniciar`, `transicion`, `cerrar`, `avisos`, `avisos_usuario`, `recibo` y `obtener`.
+- `backend/nucleo/ocupacion.py`: `MapaOcupacion` con `libres_cerca` y `recomendar` (haversine).
+- `backend/nucleo/errores.py`: `ErrorNucleo` con el código y el HTTP del contrato.
+- 63 tests con 99 % de cobertura del núcleo; gráfica `s2_cobro-sert-vs-real.png`.
+- Instalé sqlalchemy y pydantic en el contenedor `van3twin` y comprobé que el núcleo se importa y cobra bien allí (Python 3.10.12).
+
+**Archivos creados o modificados:**
+- `semanas/S1/Freddy/codigo/backend/`: `__init__.py`, `requirements.txt`, `nucleo/*`, `tests/*` y `graficas/cobro_sert_vs_real.py`.
+- `semanas/S1/Freddy/codigo/comun/`: `tarifa.json` (`tarjeta_bloque_min` 60 → 30), `CONTRATO.propuesto.md` (§5: tarjeta de 30 min y definición de `saldo_bajo` durante una sesión) y `tests/test_esquemas.py`.
+- Cierre: `evidencias/s2_cobro-sert-vs-real.png`, `explicaciones/s2_explicacion.{md,pdf}`, `estado.json` y `RESUMEN.md`.
+
+**Decisiones y por qué:**
+- La tarjeta SERT pasa a bloques de 30 min, como pide el prompt; en S1-1 había supuesto 60.
+- El aviso se llama `tiempo_maximo_cerca` (nombre del contrato) y no `tiempo_maximo_proximo` (nombre del prompt), para no romper la paridad con `esquemas.ts`.
+- El "bloqueado" se deriva de `saldo < 0` y no se guarda, para que nunca se desincronice del libro.
+- El débito se aplica completo aunque el saldo baje de −$0,50 (contrato §5): el auto ya estuvo estacionado. `saldo_negativo_max_usd` solo dispara el aviso `saldo_agotado`. Es mi interpretación del paso 4 ("si queda negativo pero dentro del máximo, bloquea").
+- El lugar en el puesto y la sesión única por usuario se validan en la base, dentro de la transacción, con un índice único parcial, porque el controlador TraCI y FastAPI pueden compartir la base. El mapa en memoria solo se sincroniza.
+- Si la sesión tiene `t_sim` al inicio y al cierre, la duración sale del reloj de SUMO; si falta alguno, de la hora UTC.
+
+**Problemas encontrados:**
+- El test de propiedad tardaba 18 s porque revisaba a todos los usuarios en cada paso. Ahora revisa al usuario afectado en cada paso y a todos al final (11 s).
+- El verificador encontró dos bugs, ya corregidos con tests de regresión:
+  - dos servicios sobre la misma base podían sobrellenar un puesto;
+  - `liberar` aceptaba la sesión de otro usuario.
+
+**Pedidos a otros:**
+- @Tyrone: cuando `puestos.csv` entre en `proyecto/sumo/parqueos/`, el núcleo lo carga solo (`puestos_iniciales()`). Mientras tanto usa el mock de 20 puestos.
+- @Tyrone (KPIs): el sobrecobro medio de la tarjeta SERT es $0,101 por estadía (19,3 %, 1–120 min). Sirve para la exposición.
+- @Miguel: la tarjeta SERT es ahora de bloques de 30 min (`tarjeta_bloque_min: 30`) y `saldo_bajo` se calcula con `saldo − costo en curso`. Confirma si la tarifa SERT real usa tarjetas de 30 min.
+
+**Bucle y verificación:** 3 vueltas.
+1. 54 tests y 99 % de cobertura.
+2. Optimicé el test de propiedad.
+3. El verificador independiente reportó **4/4 criterios cumplidos**, 2 bugs de lógica y 3 desviaciones menores. Corregí los dos bugs, `retener` sin control de dueño ni de disponible, `saldo_bajo` fuera de una sesión y las recargas `nan`/`inf`, y añadí 9 tests de regresión. Resultado final: 63 tests, 99 %.
+
+**Pendientes para la próxima sesión:**
+- Capa FastAPI sobre el núcleo (S2).
+- `recomendar` por tiempo de manejo.
+- Reemplazar el mock de puestos.
+
+**Evidencias:** ![](../semanas/S1/Freddy/evidencias/s2_cobro-sert-vs-real.png) · [Explicación (PDF)](../semanas/S1/Freddy/explicaciones/s2_explicacion.pdf)

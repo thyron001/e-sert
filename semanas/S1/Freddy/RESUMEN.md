@@ -13,3 +13,19 @@ TypeScript), `tarifa.json` + `tarifa.py` y 29 ejemplos JSON más un CSV de traza
 ![Diagrama de componentes del contrato v1](evidencias/s1_contrato-diagrama.png)
 
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)
+
+## Sesión 2 · 2026-10-22 · Núcleo del backend (billetera, tarifa y sesiones)
+
+Núcleo en Python puro, sin HTTP, en `codigo/backend/nucleo/`, con SQLAlchemy 2 + SQLite:
+- billetera como libro de movimientos: el saldo se calcula y nunca se guarda;
+- tarifa sobre `comun/`;
+- `ServicioSesiones`, con las 5 reglas de cobro de `CONTEXTO.md`;
+- `MapaOcupacion`, con recomendación por haversine.
+
+Lo cubren 63 tests con 99 % de cobertura, incluidos un test de propiedad con 200
+operaciones aleatorias y regresiones de los bugs que encontró el verificador. Con la tarjeta
+SERT, el conductor paga en promedio 0,10 USD (19,3 %) más que con el cobro por fracciones.
+
+![Tarjeta SERT frente al cobro real](evidencias/s2_cobro-sert-vs-real.png)
+
+Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)

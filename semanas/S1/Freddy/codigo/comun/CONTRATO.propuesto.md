@@ -231,7 +231,7 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
   "tiempo_maximo_min": 120,
   "aviso_tiempo_min": 10,
   "recarga_minima_usd": 5.00,
-  "tarjeta_bloque_min": 60
+  "tarjeta_bloque_min": 30
 }
 ```
 
@@ -243,15 +243,18 @@ carga y valida el archivo (`cargar_tarifa()`) y ofrece las funciones de cálculo
 - `costo_usd(m) = redondeo_centavo(m · valor_hora_usd / 60)`.
 - **Retención** al crear la sesión: `costo_usd(bloque_minimo_min)` ($0,25).
 - **Débito** al cerrar: `costo_usd(minutos_cobrados)`; se libera toda la retención.
-- **Tarjeta SERT equivalente** (para el recibo): `⌈minutos_reales / tarjeta_bloque_min⌉ ·
-  costo_usd(tarjeta_bloque_min)`, con al menos un bloque. `ahorro_usd = tarjeta − cobrado`.
+- **Tarjeta SERT equivalente** (para el recibo): tarjetas de `tarjeta_bloque_min` (30 min)
+  pagadas por adelantado, `⌈minutos_reales / tarjeta_bloque_min⌉ · costo_usd(tarjeta_bloque_min)`,
+  con al menos un bloque. `ahorro_usd = tarjeta − cobrado`.
 - **Saldo negativo:** el débito se aplica completo aunque deje el saldo negativo (el auto ya
   estuvo estacionado). Mientras `saldo < 0` la billetera queda `bloqueada` y `POST /sesiones`
   responde `403 SESIONES_BLOQUEADAS`. `saldo_negativo_max_usd` es el margen tolerado: cuando
   el costo en curso alcanza `saldo + saldo_negativo_max_usd`, el espejo muestra el aviso
   `saldo_agotado` (el conductor debería salir o recargar).
 - **Avisos** (`Aviso`):
-  - `saldo_bajo`: el `disponible` cubre menos de `aviso_saldo_min` minutos;
+  - `saldo_bajo`: lo que queda (`saldo − costo en curso` durante una sesión, `disponible`
+    fuera de ella) cubre menos de `aviso_saldo_min` minutos, es decir, es menor que
+    `costo_usd(aviso_saldo_min)`;
   - `saldo_agotado`: el costo en curso alcanzó `saldo + saldo_negativo_max_usd`;
   - `tiempo_maximo_cerca`: faltan `aviso_tiempo_min` minutos o menos para `tiempo_maximo_min`;
   - `tiempo_maximo_superado`: la sesión superó `tiempo_maximo_min`;

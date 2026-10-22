@@ -201,8 +201,8 @@ def test_montos(tarifa):
     assert t.monto_debito(47, tarifa) == 0.42  # 50 min → 0.4166… → 0.42
     assert t.costo_usd(12.5, tarifa) == 0.10
     assert t.tarjeta_sert_usd(47, tarifa) == 0.50
-    assert t.tarjeta_sert_usd(61, tarifa) == 1.00
-    assert t.tarjeta_sert_usd(0, tarifa) == 0.50
+    assert t.tarjeta_sert_usd(61, tarifa) == 0.75
+    assert t.tarjeta_sert_usd(0, tarifa) == 0.25
     assert t.a_centavos(0.425) == 43
 
 

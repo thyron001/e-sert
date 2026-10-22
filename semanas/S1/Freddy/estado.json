@@ -11,11 +11,33 @@
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 4, "total": 4},
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
       "pendientes": [
         "Compilar esquemas.ts con tsc (no hay Node/npm en la computadora ni en el contenedor)",
         "Instalar pydantic en el contenedor van3twin antes de que el controlador TraCI importe comun/",
         "Ajustar tarifa.json cuando Miguel confirme la tarifa SERT vigente"
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Núcleo del backend en Python puro (SQLAlchemy 2 + SQLite): billetera como libro de movimientos, tarifa, ciclo de vida de la sesión con las 5 reglas de cobro y mapa de ocupación; 63 tests con 99 % de cobertura.",
+      "evidencias": [
+        "evidencias/s2_cobro-sert-vs-real.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Capa FastAPI sobre el núcleo (S2)",
+        "Reemplazar el mock de 20 puestos por proyecto/sumo/parqueos/puestos.csv cuando se unifique",
+        "recomendar() por tiempo de manejo en lugar de haversine (S2)"
       ]
     }
   }

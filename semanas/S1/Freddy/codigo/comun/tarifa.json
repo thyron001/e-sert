@@ -8,5 +8,5 @@
   "tiempo_maximo_min": 120,
   "aviso_tiempo_min": 10,
   "recarga_minima_usd": 5.00,
-  "tarjeta_bloque_min": 60
+  "tarjeta_bloque_min": 30
 }
