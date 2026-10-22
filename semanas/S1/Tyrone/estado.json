@@ -13,9 +13,29 @@
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 6, "total": 6},
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
       "pendientes": [
         "Islas peatonales menores tras la poda (6 de 60 viajes sorteados sin ruta): revisar si afectan a los puestos SERT en la sesión 2."
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-21",
+      "resumen": "Script determinista que genera 610 parkingArea (6194 puestos en 103 calles) sobre las calles SERT según calles_sert.yaml, con parqueos.add.xml para SUMO y puestos.csv para el contrato; SUMO los carga sin advertencias y 10 autos de prueba estacionan.",
+      "evidencias": [
+        "evidencias/s2_puestos-sert.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Ajustar calles_sert.yaml cuando Miguel verifique la ordenanza SERT (S1-3 de Miguel)."
       ]
     }
   }
