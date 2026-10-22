@@ -37,6 +37,27 @@
       "pendientes": [
         "Ajustar calles_sert.yaml cuando Miguel verifique la ordenanza SERT (S1-3 de Miguel)."
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Demanda de hora pico (12 destinos reales, buscadores con estadía lognormal, 40 % de paso, 80 % de ocupación de fondo) y búsqueda a ciegas con rerouters invisibles a 400 m; calibrado a 1800 veh/h, la ocupación media en la hora pico es 87,0 % y 87,7 % (2 semillas), sin teletransportes, con búsqueda media de 230-246 s.",
+      "evidencias": [
+        "evidencias/s3_escenario-base.png",
+        "evidencias/s3_busqueda-histograma.png",
+        "evidencias/s3_ocupacion-base.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Tyrone.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "KPIs formales en S2 (distancia, CO2, búsquedas censuradas al final de la corrida).",
+        "Opcional: rotación de la ocupación de fondo para tener un estado estacionario."
+      ]
     }
   }
 }

@@ -43,3 +43,32 @@ docker exec -w /home/vanet/results/e-sert/semanas/S1/Tyrone/codigo/sumo/parqueos
 ![Puestos SERT](evidencias/s2_puestos-sert.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · Demanda y búsqueda a ciegas (línea base)
+
+`generar_demanda.py` crea la demanda de hora pico con tres clases de autos:
+
+- **Buscadores:** van a 12 destinos reales de `destinos.csv`, elegidos por peso, con estadía lognormal de 45 min.
+- **Tráfico de paso:** el 40 % de las llegadas, que cruzan sin estacionar.
+- **Autos de fondo:** ocupan el 80 % de los puestos desde el inicio, como larga estadía.
+
+`rerouters.add.xml` modela la búsqueda a ciegas: alternativas a menos de 400 m, invisibles hasta llegar.
+
+- **Calibración:** `--veh-hora` = **1800** da una ocupación media en la hora pico de 87,0 % y 87,7 % (semillas 1 y 2).
+- **Teletransportes:** 0 de unos 7000 vehículos.
+- **Búsqueda:** media de 230 y 246 s; mediana de 188 y 193 s.
+- **`con_app`:** cada vehículo lleva `<param key="con_app" value="0"/>`, que es el interruptor de Freddy en S2.
+
+Comandos:
+
+```bash
+docker exec -w /home/vanet/results/e-sert/semanas/S1/Tyrone/codigo/sumo/demanda van3twin bash -lc "python3 generar_demanda.py --semilla 1 && python3 correr_base.py --semillas 1 2"
+```
+
+![Escenario base en sumo-gui](evidencias/s3_escenario-base.png)
+
+![Tiempo de búsqueda](evidencias/s3_busqueda-histograma.png)
+
+![Ocupación](evidencias/s3_ocupacion-base.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf)
