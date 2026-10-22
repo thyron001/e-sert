@@ -29,3 +29,23 @@ SERT, el conductor paga en promedio 0,10 USD (19,3 %) más que con el cobro por 
 ![Tarjeta SERT frente al cobro real](evidencias/s2_cobro-sert-vs-real.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-10-22 · Controlador TraCI base y emulador de GPS
+
+`Controlador` TraCI con suscripciones, hooks `on_paso` y CLI
+(`python3 -m traci.controlador --cfg … --hasta 300`), que corre en el contenedor `van3twin`
+sobre el escenario de hora pico de Tyrone. El emulador de GPS tiene:
+- ruido AR(1) con ρ = 0,8 y σ = 5 m;
+- 2 % de pérdidas de muestra;
+- precisión reportada y velocidad calculada por diferencias, como en un teléfono.
+
+Hay 3 semillas de trazas de 30 min (413 000 a 448 000 filas) con las tres clases, autos en
+congestión y peatones rápidos, para el clasificador de Pablo. Las cifras del ruido coinciden
+con la teoría: error medio de 6,28 m y lag 1 de 0,791.
+
+![Trazas GPS sobre la red](evidencias/s3_trazas-gps.png)
+
+![Ruido del GPS emulado](evidencias/s3_ruido-gps.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) ·
+PDF semanal: [evidencias/resumen_S1_Freddy.pdf](evidencias/resumen_S1_Freddy.pdf)

@@ -345,14 +345,17 @@ encabezado y **estas 7 columnas primero y en este orden**:
 usuario_id,t,lat,lon,precision_m,velocidad_mps,modo_real
 ```
 
-- `usuario_id`: texto libre sin comas. Convención: `sim_<vehId>` (SUMO), `geolife_<nnn>`
-  (GeoLife, con el número de usuario original) y `casa_<persona>_<n>` (grabaciones caseras).
+- `usuario_id`: texto libre sin comas. Convención: `sim_<vehId>` (vehículo de SUMO),
+  `ped_<personId>` (peatón de SUMO), `geolife_<nnn>` (GeoLife, con el número de usuario
+  original) y `casa_<persona>_<n>` (grabaciones caseras).
 - `t`: segundos (`float`), crecientes dentro de cada `usuario_id`. En SUMO es `t_sim`; en
   GeoLife, segundos Unix UTC.
 - `precision_m`, `velocidad_mps` y `modo_real` pueden quedar vacías (desconocidas).
 - `modo_real` es la etiqueta verdadera (`a_pie`, `quieto` o `vehiculo`).
 - Se permiten columnas extra **después** de las 7 (por ejemplo `segmento_id` de Pablo); quien
-  no las conozca las ignora.
+  no las conozca las ignora. Las trazas de SUMO (`traci/trazas/`) traen
+  `lat_real, lon_real, velocidad_real_mps, caso`, con `caso` ∈ {`normal`, `congestion`
+  (vehículo no estacionado a < 7 km/h), `peaton_rapido`}.
 
 ## Cambios respecto a v0
 

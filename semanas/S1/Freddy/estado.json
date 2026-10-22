@@ -39,6 +39,27 @@
         "Reemplazar el mock de 20 puestos por proyecto/sumo/parqueos/puestos.csv cuando se unifique",
         "recomendar() por tiempo de manejo en lugar de haversine (S2)"
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Controlador TraCI base (suscripciones, hooks on_paso, CLI) y emulador de GPS con ruido AR(1) ρ=0,8; 3 semillas de trazas de 30 min sobre el escenario de Tyrone más 150 peatones, con las 3 clases, congestión y peatones rápidos; 19 tests.",
+      "evidencias": [
+        "evidencias/s3_trazas-gps.png",
+        "evidencias/s3_ruido-gps.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Freddy.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Enchufar máquina de estados, guiado y /sim/paso como hooks (S2)",
+        "Suscribir solo autos con app o usar suscripciones de contexto (~55 ms/paso con 5000 autos)",
+        "Usar proyecto/sumo/ en lugar de la copia del escenario tras la unificación"
+      ]
     }
   }
 }

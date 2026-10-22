@@ -123,3 +123,67 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Reemplazar el mock de puestos.
 
 **Evidencias:** ![](../semanas/S1/Freddy/evidencias/s2_cobro-sert-vs-real.png) · [Explicación (PDF)](../semanas/S1/Freddy/explicaciones/s2_explicacion.pdf)
+
+## S1 · Sesión 3 · 2026-10-22 · Controlador TraCI base y emulador de GPS
+**Estado:** hecha
+**Qué hice:**
+- `traci/sumo.py`: carga la librería TraCI de SUMO como `sumo_traci`, porque nuestro paquete también se llama `traci` y la taparía.
+- `traci/controlador.py`: `Controlador(config)` con `traci.start`, `paso()` y `correr(hasta)`; suscripciones de vehículos (posición, velocidad, STOPSTATE) y de personas; hooks con `agregar_hook`; CLI con `--cfg --gui --hasta --semilla --captura`. Crea solo las carpetas de salida del `.sumocfg`.
+- `traci/gps.py`: `EmuladorGPS(semilla, sigma_m=5, p_perdida=0.02, tasa_hz=1)` con:
+  - ruido AR(1) con ρ = 0,8 por eje;
+  - pérdidas de muestra;
+  - `precision_m = σ·U(0,8; 1,5)`;
+  - velocidad por diferencia de posiciones ruidosas;
+  - etiquetas `modo_real`.
+- `traci/generar_trazas.py`:
+  - corre el escenario de Tyrone con 150 peatones propios (15 % rápidos, a 2,2 m/s): 5 min de calentamiento y 30 min grabados;
+  - sigue al 30 % de los autos y a 25 de los de fondo estacionados;
+  - escribe el CSV del contrato §8 con columnas extra y una muestra de 5000 filas.
+- `traci/obtener_escenario.py`: copia el escenario de la rama de Tyrone a `traci/escenario/`, ignorado por git, sin editar su rama.
+- `traci/graficas_gps.py`: las dos evidencias.
+- 19 tests (17 en la computadora y 2 de integración que solo corren en el contenedor).
+- Contrato §8: convención `ped_<personId>` y columnas extra de las trazas de SUMO.
+
+**Archivos creados o modificados:**
+- `semanas/S1/Freddy/codigo/traci/`: `__init__.py`, `.gitignore`, `requirements.txt`, `sumo.py`, `controlador.py`, `gps.py`, `generar_trazas.py`, `obtener_escenario.py`, `graficas_gps.py`, `tests/*` y `trazas/sumo_semilla1_muestra.csv`.
+- `semanas/S1/Freddy/codigo/comun/CONTRATO.propuesto.md`.
+- Evidencias: `evidencias/s3_trazas-gps.png`, `evidencias/s3_ruido-gps.png` y `evidencias/resumen_S1_Freddy.pdf`.
+- Cierre: `explicaciones/s3_explicacion.{md,pdf}`, `estado.json` y `RESUMEN.md`.
+
+**Decisiones y por qué:**
+- Usé el escenario real de Tyrone y no un mock, porque ya existía en su rama.
+- Añadí peatones propios porque su escenario no tiene; con eso salen las clases `a_pie` y `quieto` de persona.
+- Un auto estacionado cuenta como `quieto` (persona adentro), como pide el prompt: en S1 no hay bajada del conductor.
+- En el generador, lat/lon se calcula con pyproj y la proyección de la red, que da lo mismo que `convertGeo` (diferencia de 1,6·10⁻⁹ m, verificada por un test) sin una llamada TraCI por punto.
+- Las semillas cambian la semilla de SUMO, los peatones y el ruido; la demanda de autos es la de la semilla 1 de Tyrone.
+
+**Problemas encontrados (adaptaciones a SUMO 1.12 y al contenedor):**
+- El nombre `traci` choca con el de la librería de SUMO; lo resolví cargándola con importlib.
+- Faltaba `pyproj` en el contenedor, aunque `CLAUDE.md` dice que viene. Lo instalé con `traci/requirements.txt` (`pip3 install --user`).
+- En SUMO 1.12 la velocidad de un `vType` es `maxSpeed`; `speed` se ignora sin avisar. El verificador detectó que los peatones "rápidos" no lo eran; lo corregí y regeneré las 3 semillas.
+- SUMO no crea las carpetas de salida del `.sumocfg`; el controlador las crea.
+- La computadora tiene su propio SUMO con `SUMO_HOME`; los tests de integración se limitan al contenedor.
+
+**Pedidos a otros:**
+- @Pablo: las trazas de SUMO están en `semanas/S1/Freddy/codigo/traci/trazas/` (tras la unificación, en `proyecto/traci/trazas/`).
+  - Formato: las 7 columnas del contrato §8 (`usuario_id,t,lat,lon,precision_m,velocidad_mps,modo_real`) y, después, `lat_real,lon_real,velocidad_real_mps,caso`, con `caso` ∈ {`normal`, `congestion`, `peaton_rapido`}.
+  - `usuario_id` es `sim_<veh>` o `ped_<persona>`; GPS a 1 Hz con σ = 5 m, AR(1) ρ = 0,8 y 2 % de pérdidas.
+  - Los CSV completos (~40 MB cada uno) no están en git. Se regeneran en el contenedor con `python3 traci/obtener_escenario.py` (en la computadora) y luego `python3 -m traci.generar_trazas --semilla N`; en git va la muestra de 5000 filas.
+  - Ojo: `quieto` es ~40 % de las filas, y la velocidad por diferencias de un agente quieto ronda 4 m/s por el ruido, así que hay que balancear las clases.
+- @Tyrone, qué necesito del escenario:
+  - unificar `centro_base.sumocfg` con su red, demanda y parqueos en `proyecto/sumo/`;
+  - en S2, un atributo o tipo que marque a los autos "con app" en `demanda.rou.xml`, para suscribir solo esos;
+  - si es posible, peatones o bajada del conductor al estacionar en la demanda;
+  - las salidas de su `.sumocfg` apuntan a `salidas/base_1/` fijo; un `--output-prefix` por semilla ayudaría a correr varias en paralelo.
+- @Tyrone [Plan] `CLAUDE.md`: dice que el contenedor trae `pyproj`, pero no lo trae (o se perdió al recrearlo); conviene listarlo entre las dependencias que se instalan.
+
+**Bucle y verificación:** 2 vueltas.
+1. El controlador corrió a la primera. Corregí el test de integración (con una red sin demanda, `correr()` se detiene enseguida, como debe), el estimador de autocorrelación de la gráfica (restar la media de tramos cortos lo sesgaba: 0,762 → 0,786) y los números del eje de la gráfica.
+2. El verificador independiente reportó **4/4 criterios** (el PDF semanal quedaba para el cierre) y un bug importante: los peatones rápidos no eran rápidos (`speed` en lugar de `maxSpeed`). Lo corregí, además de la muestra con pocos agentes (7 → 19), el filtro de autos de fondo y olvidar el estado de los agentes que salen. Regeneré las 3 semillas y añadí un test de velocidad real de los peatones. Resultado final: 19 tests en el contenedor.
+
+**Pendientes para la próxima sesión:**
+- Máquina de estados, guiado y `/sim/paso` como hooks.
+- Suscripciones más baratas (unos 55 ms/paso con unos 5000 autos).
+- Pasar al escenario unificado.
+
+**Evidencias:** ![](../semanas/S1/Freddy/evidencias/s3_trazas-gps.png) ![](../semanas/S1/Freddy/evidencias/s3_ruido-gps.png) · [Explicación (PDF)](../semanas/S1/Freddy/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S1/Freddy/evidencias/resumen_S1_Freddy.pdf)
