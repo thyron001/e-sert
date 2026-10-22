@@ -5,14 +5,18 @@
     "sesion-1": {
       "estado": "hecha",
       "fecha": "2026-10-22",
-      "resumen": "App Expo SDK 58 con expo-router y 5 pestañas, mapa de puestos con react-native-maps y cliente API tipado (cliente.ts y mock.ts con la misma interfaz ApiESert). Probada en Expo Go en Android real y en el simulador de iPhone.",
+      "resumen": "App Expo SDK 58 con expo-router y 5 pestañas, mapa de puestos con react-native-maps y cliente API tipado (cliente.ts y mock.ts con la misma interfaz ApiESert). Probada en Expo Go en Android real (5 pestañas y flujo de retención) y en el simulador de iPhone.",
       "evidencias": [
         "evidencias/s1_app-pantallas.png",
         "evidencias/s1_ios-pestanas.png",
+        "evidencias/s1_android-pestanas.png",
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 4, "total": 4},
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
       "pendientes": [
         "Repetir la prueba en un iPhone físico (iOS se probó en el simulador de Xcode).",
         "Sincronizar src/api/tipos.ts y tarifa.ts cuando Freddy publique comun/esquemas.ts y comun/tarifa.json.",

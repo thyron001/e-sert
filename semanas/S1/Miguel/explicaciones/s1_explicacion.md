@@ -120,6 +120,10 @@ const api = useMemo(
 
 ![](../evidencias/s1_ios-pestanas.png)
 
+En Android se probó además el flujo en el teléfono: Sesión pasa a ESTACIONADO y la Billetera muestra $0,25 retenidos (disponible $4,75) con el movimiento `retencion` en el libro.
+
+![](../evidencias/s1_android-pestanas.png)
+
 ## 8. Limitaciones y decisiones
 
 - **iOS se probó en el simulador**, no en un iPhone físico: Miguel solo tiene un Android por ahora. Queda pendiente repetirlo en un iPhone real.

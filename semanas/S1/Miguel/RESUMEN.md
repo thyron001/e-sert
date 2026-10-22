@@ -14,4 +14,6 @@
 
 ![Las 5 pestañas en iOS (simulador)](evidencias/s1_ios-pestanas.png)
 
+![Las 5 pestañas en Android, probando el flujo: llegada confirmada y $0,25 retenidos](evidencias/s1_android-pestanas.png)
+
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)

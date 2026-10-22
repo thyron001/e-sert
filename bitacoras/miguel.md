@@ -65,7 +65,7 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
   1. `tsc` falló por los íconos y por `Themed`.
   2. Fallo de Expo Go en Android; el `Switch` y el fondo de la fila en iOS.
   3. Todo en verde.
-- El verificador independiente reportó 4/4 criterios cumplidos, con una observación: de Android solo hay capturas de Mapa y Ajustes. La navegación de las 5 pestañas está capturada en iOS.
+- El verificador independiente reportó 4/4 criterios cumplidos. Su única observación (de Android solo había capturas de Mapa y Ajustes) quedó resuelta: Miguel capturó también Sesión, Billetera y Grabador en Android, probando el flujo (confirmar llegada → $0,25 retenidos, disponible $4,75).
 
 **Pendientes para la próxima sesión:**
 - Sesión 2: el grabador de sensores.
@@ -73,4 +73,4 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Sincronizar los tipos y la tarifa con lo que publique Freddy.
 - Verificar la tarifa SERT vigente.
 
-**Evidencias:** ![](../semanas/S1/Miguel/evidencias/s1_app-pantallas.png) ![](../semanas/S1/Miguel/evidencias/s1_ios-pestanas.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s1_explicacion.pdf)
+**Evidencias:** ![](../semanas/S1/Miguel/evidencias/s1_app-pantallas.png) ![](../semanas/S1/Miguel/evidencias/s1_ios-pestanas.png) ![](../semanas/S1/Miguel/evidencias/s1_android-pestanas.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s1_explicacion.pdf)
