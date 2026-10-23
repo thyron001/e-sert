@@ -57,11 +57,20 @@ limpias.
   tests leen ahora `docs/CONTRATO.md`. Sin ese cambio, 2 tests fallaban en `proyecto/` porque
   la propuesta no se copia allí. La copia de Freddy en `semanas/` sigue igual.
 
+## Verificación independiente
+
+Un subagente sin contexto verificó todas las afirmaciones de este archivo. Hubo 2 vueltas.
+En la primera encontró que el bloque de Estado de `docs/CONTRATO.md` había perdido el párrafo
+"Versión del contrato: `1` … manda `esquemas.py`" (ya restaurado) y un comando mal escrito en
+la tabla de tests (ya corregido). Todo lo demás cumple.
+
 ## Tests
+
+Desde `proyecto/`: `PYTHONPATH=. <m>/.venv/bin/python -m pytest -q <m>/tests`.
 
 | Módulo | Comando | Resultado | Duración |
 |---|---|---|---|
-| `comun` | `PYTHONPATH=proyecto comun/.venv/bin/python -m pytest -q comun/tests` | 163 pasados | 0,4 s |
+| `comun` | ídem con `comun/.venv` y `comun/tests` | 163 pasados | 0,4 s |
 | `backend` | ídem con `backend/.venv` y `backend/tests` | 63 pasados | 11,2 s |
 | `traci` | ídem con `traci/.venv` y `traci/tests` | 14 pasados, 3 saltados | 1,7 s |
 | `ia` | ídem con `ia/.venv` y `ia/tests` | 35 pasados (6 avisos) | 2,4 s |

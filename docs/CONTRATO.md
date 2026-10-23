@@ -3,6 +3,12 @@
 > Estado: **v1 congelado** el 2026-10-23 en la unificación de S1 (adelantada a pedido de
 > Tyrone), a partir de la propuesta de Freddy (custodio). Desde ahora, cualquier cambio entra
 > solo como `CONTRATO.propuesto.md` y se aprueba en la unificación siguiente.
+>
+> **Versión del contrato: `1`.** El código compartido que lo implementa vive en
+> `proyecto/comun/`: `esquemas.py` (Pydantic v2), `esquemas.ts` (TypeScript),
+> `tarifa.json` + `tarifa.py` y `ejemplos/` (un JSON válido por mensaje). Si este texto y
+> `esquemas.py` no coinciden, se considera un error del contrato y se corrige en la siguiente
+> unificación; mientras tanto **manda `esquemas.py`**, que está cubierto por tests.
 
 Este documento es lo que permite que las cuatro piezas encajen. Si tu código produce o
 consume algo de aquí, debe respetarlo al pie de la letra.
