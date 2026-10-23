@@ -74,3 +74,69 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Verificar la tarifa SERT vigente.
 
 **Evidencias:** ![](../semanas/S1/Miguel/evidencias/s1_app-pantallas.png) ![](../semanas/S1/Miguel/evidencias/s1_ios-pestanas.png) ![](../semanas/S1/Miguel/evidencias/s1_android-pestanas.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s1_explicacion.pdf)
+
+## S1 · Sesión 2 · 2026-10-22 · Grabador de sensores etiquetado
+**Estado:** parcial
+
+**Qué hice:**
+- `src/sensores/grabador.ts`, la clase `Grabador`:
+  - pide el permiso con `requestForegroundPermissionsAsync`;
+  - lee el GPS con `watchPositionAsync` (BestForNavigation, 1000 ms, 0 m) y descarta las lecturas que llegan a menos de 0,5 s;
+  - escribe el acelerómetro a 10 Hz en un archivo aparte (`_acel.csv`);
+  - mantiene la pantalla encendida con `expo-keep-awake`;
+  - vuelca a disco cada 30 s con `expo-file-system` (`write` en modo `append`);
+  - permite `cambiarEtiqueta()` en caliente y guarda los instantes en `_meta.json`.
+- `src/sensores/formato.ts` y `exportar.ts`:
+  - las 7 columnas del contrato más `escenario,telefono,persona`;
+  - `vehiculo_lento` se exporta como `vehiculo` + `trafico_lento`;
+  - `speed` nulo o −1 deja el campo vacío;
+  - el nombre del archivo es `<fecha>_<persona>_<telefono>.csv` y se comparte con `expo-sharing` (CSV del GPS y del acelerómetro).
+- La pestaña **Grabador**:
+  - selectores de persona, teléfono y etiqueta, con la etiqueta cambiable mientras se graba;
+  - el aviso "graba el acompañante";
+  - botones grandes Iniciar y Detener;
+  - contador de muestras, precisión, velocidad y duración, y la lista de cambios y de grabaciones guardadas.
+- `datos/herramientas/graficar_grabacion.py` valida contra el contrato (sale con 1 si hay errores), grafica la traza y la velocidad con franjas, y resume la duración por etiqueta y la precisión.
+- `datos/herramientas/anonimizar_grabacion.py` traslada la traza al Parque Calderón, con un error de distancia de 0,0000 m.
+- Pruebas:
+  - `npm run prueba:grabador`: 12 comprobaciones;
+  - una grabación sintética para probar el script;
+  - una grabación en el simulador de iOS, manejada por deep links (solo en `__DEV__`) y con ubicación simulada;
+  - la prueba casera en Android real.
+
+**Archivos creados o modificados:**
+- `codigo/app/src/sensores/{grabador,formato,exportar}.ts`, `src/sensores/pruebas/formato.prueba.ts`, `app/(tabs)/grabador.tsx`, `app.json` (plugin `expo-location`), `package.json` y `README.md`;
+- `codigo/datos/herramientas/{graficar_grabacion,anonimizar_grabacion}.py`, `datos/requirements.txt`, `datos/README.md`, `datos/ejemplos/sintetica_muestra.csv` y `datos/grabaciones/*`;
+- `evidencias/s2_*.png`, `evidencias/capturas/s2_*.jpeg`, `explicaciones/s2_explicacion.{md,pdf}`, `estado.json` y `RESUMEN.md`.
+
+**Decisiones y por qué:**
+- **Seguí la propuesta de contrato v1 de Freddy (§8):** `usuario_id = casa_<persona>_<n>`, `t` en segundos Unix y las columnas extra después de las 7.
+- **Separé el formato (`formato.ts`) de lo nativo**, para poder probarlo en la computadora.
+- **La grabación casera se anonimizó antes de subirla**, porque tenía las coordenadas reales del lugar donde Miguel grabó. Miguel lo eligió. El original quedó fuera del repo, en `Proyecto1/CapturasDesarrollo_Miguel/2026-10-22_S1-sesion2/`. El clasificador no pierde nada: distancias, tiempos, velocidades y etiquetas quedan iguales.
+- **Para probar en el simulador añadí deep links** (`?accion=iniciar|etiqueta|detener`), solo en `__DEV__`.
+
+**Problemas encontrados:**
+- `simctl location start` interpretaba la primera coordenada negativa como una opción. Se resolvió pasando los puntos por stdin (`-`).
+- En el simulador, una ubicación fija produce una sola actualización. Para "quieto" se simuló el temblor del GPS con un vaivén de ±2 m. En el teléfono real no pasa: hubo 317 muestras quieto.
+- El simulador no tiene acelerómetro. La app lo detecta y muestra "no disponible".
+- En Android, el GPS tardó 6 s en dar la segunda lectura al arrancar: el único hueco de la grabación.
+- La caminata casera fue lenta (3,1 km/h de media, con tramos casi parados). Es útil como caso difícil, pero no representa una caminata por la calle.
+
+**Pedidos a otros:**
+- @Tyrone @Freddy @Pablo: instalen **Expo Go** (versión del SDK 58) para probar la app y luego el modo espejo. Las grabaciones caseras son **opcionales**; si alguien graba, que la anonimice con `datos/herramientas/anonimizar_grabacion.py` antes de subirla.
+- @Pablo: hay una grabación casera de Android en `semanas/S1/Miguel/codigo/datos/grabaciones/` (5:53 a pie y 5:17 quieto, con el CSV del contrato y el acelerómetro aparte), por si sirve como validación extra. La de iOS es del simulador y no sirve como dato real.
+- Si alguien del equipo tiene un iPhone físico disponible: necesito una grabación corta para cerrar el criterio 1.
+
+**Bucle y verificación:**
+- Hubo 3 vueltas:
+  1. La derivada de la velocidad salía ilegible, así que la suavicé con una mediana de 5 s.
+  2. La ruta del simulador no arrancaba (coordenada negativa) y una ubicación fija daba 1 sola muestra.
+  3. Todo en verde.
+- El verificador independiente reportó **3/4 cumplidos y el criterio 1 parcial**: iOS solo se probó en el simulador, con GPS sintético y sin acelerómetro, y la prueba de iOS duró 3 + 2 min. Además observó que en Android no hay `_meta.json`; el cambio de etiqueta está en el CSV y se confirmó con la captura.
+
+**Pendientes para la próxima sesión:**
+- Sesión 3.
+- Grabación en un iPhone físico.
+- Sincronizar los tipos y la tarifa con `comun/` de Freddy tras la unificación.
+
+**Evidencias:** ![](../semanas/S1/Miguel/evidencias/s2_grabador-pantalla.png) ![](../semanas/S1/Miguel/evidencias/s2_primera-grabacion.png) ![](../semanas/S1/Miguel/evidencias/s2_grabacion-ios-simulador.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s2_explicacion.pdf)

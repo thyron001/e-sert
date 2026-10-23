@@ -62,13 +62,17 @@ app/                      rutas de expo-router (cada archivo es una pantalla)
   (tabs)/index.tsx        Mapa: puestos en verde (con espacio) o rojo (llenos)
   (tabs)/sesion.tsx       sesión activa (confirmar llegada / cerrar a mano)
   (tabs)/billetera.tsx    saldo, retenido, disponible, movimientos y recarga de prueba
-  (tabs)/grabador.tsx     marcador; el grabador llega en S1 · sesión 2
+  (tabs)/grabador.tsx     grabador de sensores etiquetado (GPS 1 Hz + acelerómetro 10 Hz)
   (tabs)/ajustes.tsx      URL del backend, modo mock, usuario_id
 src/api/tipos.ts          tipos del contrato e interfaz ApiESert  (SINCRONIZAR con comun/esquemas.ts)
 src/api/tarifa.ts         tarifa del contrato y cálculo de cobro   (SINCRONIZAR con comun/tarifa.json)
 src/api/cliente.ts        cliente HTTP real (fetch, X-Contrato-Version: 1, errores {error:{codigo,mensaje}})
 src/api/mock.ts           backend falso en memoria con la misma interfaz ApiESert
 src/api/pruebas/          prueba del mock que corre en la computadora
+src/sensores/grabador.ts  clase Grabador: permisos, GPS, acelerómetro, keep-awake, volcado cada 30 s
+src/sensores/formato.ts   columnas y filas del CSV del contrato (sin dependencias nativas)
+src/sensores/exportar.ts  archivos en el teléfono, lista de grabaciones y compartir (expo-sharing)
+src/sensores/pruebas/     prueba del formato y generador de una grabación sintética
 src/ajustes/              contexto de ajustes (expo-secure-store + expo-crypto)
 ```
 
@@ -77,5 +81,23 @@ src/ajustes/              contexto de ajustes (expo-secure-store + expo-crypto)
 ```bash
 npx tsc --noEmit          # tipos: cliente.ts y mock.ts cumplen la interfaz ApiESert
 npm run prueba:mock       # tarifa, billetera y puestos del mock
+npm run prueba:grabador   # formato del CSV de grabaciones
 npx expo-doctor           # dependencias compatibles con el SDK
 ```
+
+## Grabador (pestaña Grabador)
+
+1. Elige quién graba, el teléfono y la etiqueta, y pulsa **Iniciar**. La primera vez acepta el permiso de ubicación.
+2. Durante la grabación la etiqueta se puede cambiar sin detener: por ejemplo, de "Vehículo" a
+   "A pie" al bajarse del auto. Cada cambio queda con su hora.
+3. **Detener** y luego **Compartir** (CSV del GPS) o **Acel.** (CSV del acelerómetro).
+4. Mantén la pantalla abierta: en iPhone, Expo Go no graba en segundo plano.
+5. Las etiquetas de vehículo las graba **el acompañante**, nunca quien maneja.
+
+Formato y herramientas: ver `../datos/README.md`.
+
+**Prueba en el simulador de iOS (solo en desarrollo):** la pantalla acepta deep links para
+manejarla sin tocar la pantalla. Por ejemplo:
+`xcrun simctl openurl booted "exp://<ip>:8081/--/grabador?accion=iniciar&etiqueta=a_pie&n=1"`,
+donde `accion` puede ser `iniciar`, `etiqueta` o `detener`. La ubicación se simula con
+`xcrun simctl location booted start --speed=1.4 -`, pasando los puntos por stdin.

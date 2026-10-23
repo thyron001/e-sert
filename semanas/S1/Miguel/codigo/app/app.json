@@ -34,7 +34,14 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-sharing",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "e-sert usa tu ubicación para grabar trazas etiquetadas (a pie, quieto, vehículo) mientras la pantalla está abierta."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

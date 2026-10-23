@@ -22,6 +22,26 @@
         "Sincronizar src/api/tipos.ts y tarifa.ts cuando Freddy publique comun/esquemas.ts y comun/tarifa.json.",
         "Verificar la tarifa SERT vigente (CONTRATO §5)."
       ]
+    },
+    "sesion-2": {
+      "estado": "parcial",
+      "fecha": "2026-10-22",
+      "resumen": "Pestaña Grabador: GPS 1 Hz y acelerómetro 10 Hz etiquetados, con cambio de etiqueta en caliente, volcado cada 30 s, CSV del contrato y compartir; script que valida y grafica. Probado en Android real (11 min) y en el simulador de iPhone (5 min).",
+      "evidencias": [
+        "evidencias/s2_grabador-pantalla.png",
+        "evidencias/s2_primera-grabacion.png",
+        "evidencias/s2_grabacion-ios-simulador.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 3,
+        "total": 4
+      },
+      "pendientes": [
+        "Grabación en un iPhone físico: en iOS solo se probó en el simulador (GPS simulado y sin acelerómetro), por eso el criterio 1 queda parcial.",
+        "Sincronizar tipos y tarifa con comun/ de Freddy tras la unificación."
+      ]
     }
   }
 }

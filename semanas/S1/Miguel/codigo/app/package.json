@@ -6,10 +6,15 @@
     "expo": "~58.0.17",
     "expo-constants": "~58.0.13",
     "expo-crypto": "~58.0.7",
+    "expo-file-system": "~58.0.10",
     "expo-font": "~58.0.9",
+    "expo-keep-awake": "~58.0.3",
     "expo-linking": "~58.0.14",
+    "expo-location": "~58.0.18",
     "expo-router": "~58.0.25",
     "expo-secure-store": "~58.0.2",
+    "expo-sensors": "~58.0.4",
+    "expo-sharing": "~58.0.20",
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
     "expo-symbols": "~58.0.4",
@@ -35,7 +40,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "prueba:mock": "tsx src/api/pruebas/mock.prueba.ts",
-    "tipos": "tsc --noEmit"
+    "tipos": "tsc --noEmit",
+    "prueba:grabador": "tsx src/sensores/pruebas/formato.prueba.ts"
   },
   "private": true
 }
