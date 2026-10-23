@@ -20,6 +20,10 @@ from comun import tarifa as t
 
 COMUN = Path(__file__).resolve().parents[1]
 EJEMPLOS = COMUN / "ejemplos"
+# En semanas/ se lee la propuesta; en proyecto/ (tras la unificación) el contrato congelado.
+CONTRATO = COMUN / "CONTRATO.propuesto.md"
+if not CONTRATO.exists():
+    CONTRATO = COMUN.parents[1] / "docs" / "CONTRATO.md"
 
 # Archivo de ejemplo → modelo (o tipo) contra el que debe validar.
 MODELO_POR_EJEMPLO = {
@@ -182,7 +186,7 @@ def test_tarifa_carga_y_coincide_con_contrato(tarifa):
     """tarifa.json, el modelo Tarifa y el bloque JSON de CONTRATO.propuesto.md coinciden."""
     datos = json.loads(t.RUTA_TARIFA.read_text(encoding="utf-8"))
     assert set(datos) == set(e.Tarifa.model_fields)
-    texto = (COMUN / "CONTRATO.propuesto.md").read_text(encoding="utf-8")
+    texto = CONTRATO.read_text(encoding="utf-8")
     bloque = re.search(r"## 5\. Tarifa.*?```json\n(.*?)```", texto, re.S).group(1)
     assert json.loads(bloque) == datos
     assert tarifa.valor_hora_usd == 0.50 and tarifa.bloque_minimo_min == 30
@@ -336,7 +340,7 @@ def test_constantes_compartidas():
 
 
 def test_contrato_documenta_todos_los_codigos():
-    texto = (COMUN / "CONTRATO.propuesto.md").read_text(encoding="utf-8")
+    texto = CONTRATO.read_text(encoding="utf-8")
     for codigo in e.CodigoError:
         assert f"`{codigo.value}` | {e.HTTP_POR_CODIGO[codigo]} |" in texto, codigo
     assert "## Cambios respecto a v0" in texto
