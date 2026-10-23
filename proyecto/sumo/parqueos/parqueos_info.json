@@ -1,0 +1,73 @@
+{
+  "red": "../red/centro.net.xml",
+  "config": {
+    "incluir_tipos": [
+      "highway.residential",
+      "highway.tertiary",
+      "highway.secondary",
+      "highway.unclassified"
+    ],
+    "excluir_nombres": [
+      "Avenida Huayna Cápac",
+      "Avenida Gaspar Sangurima"
+    ],
+    "incluir_nombres": [],
+    "excluir_sin_nombre": true,
+    "bbox_s_w_n_e": [
+      -2.905,
+      -79.013,
+      -2.8895,
+      -78.9945
+    ],
+    "lado": "derecho",
+    "largo_puesto_m": 5.5,
+    "margen_esquina_m": 8.0,
+    "largo_minimo_tramo_m": 12.0
+  },
+  "parking_areas": 610,
+  "capacidad_total": 6194,
+  "calles_con_puestos": 103,
+  "capacidad_media_por_parking_area": 10.15,
+  "capacidad_por_calle_top10": [
+    {
+      "calle": "Gran Colombia",
+      "capacidad": 211
+    },
+    {
+      "calle": "Simón Bolívar",
+      "capacidad": 211
+    },
+    {
+      "calle": "Antonio Vega Muñoz",
+      "capacidad": 206
+    },
+    {
+      "calle": "Pío Bravo",
+      "capacidad": 196
+    },
+    {
+      "calle": "Mariscal Lamar",
+      "capacidad": 195
+    },
+    {
+      "calle": "Presidente Córdova",
+      "capacidad": 191
+    },
+    {
+      "calle": "Antonio Vargas Machuca",
+      "capacidad": 188
+    },
+    {
+      "calle": "Mariano Cueva",
+      "capacidad": 180
+    },
+    {
+      "calle": "Mariscal Sucre",
+      "capacidad": 180
+    },
+    {
+      "calle": "Tomás Ordóñez",
+      "capacidad": 178
+    }
+  ]
+}

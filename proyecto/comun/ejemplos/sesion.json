@@ -1,0 +1,15 @@
+{
+  "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+  "usuario_id": "sim_veh42",
+  "placa": "SIM-0042",
+  "puesto_id": "pa_-106945247#0_0",
+  "estado": "CERRADA",
+  "inicio": "2026-10-20T14:03:05Z",
+  "fin": "2026-10-20T14:50:05Z",
+  "t_sim_inicio": 1234.0,
+  "t_sim_fin": 4054.0,
+  "retenido": 0.25,
+  "minutos_reales": 47.0,
+  "minutos_cobrados": 50,
+  "debitado": 0.42
+}

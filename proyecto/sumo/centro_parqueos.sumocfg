@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Red del Centro Histórico + edificios + puestos SERT, sin demanda. -->
+<configuration>
+    <input>
+        <net-file value="red/centro.net.xml"/>
+        <additional-files value="red/centro.poly.xml,parqueos/parqueos.add.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+    </time>
+</configuration>
