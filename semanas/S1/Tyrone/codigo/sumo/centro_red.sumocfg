@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solo la red del Centro Histórico y los edificios, sin demanda. -->
+<configuration>
+    <input>
+        <net-file value="red/centro.net.xml"/>
+        <additional-files value="red/centro.poly.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+    </time>
+</configuration>
