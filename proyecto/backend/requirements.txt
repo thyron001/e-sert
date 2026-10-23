@@ -1,0 +1,5 @@
+sqlalchemy>=2.0,<3
+pydantic>=2.5,<3
+pytest>=7
+pytest-cov>=4
+matplotlib>=3.7

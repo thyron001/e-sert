@@ -1,0 +1,69 @@
+{
+  "persona": "Miguel",
+  "semana": "S1",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "App Expo SDK 58 con expo-router y 5 pestañas, mapa de puestos con react-native-maps y cliente API tipado (cliente.ts y mock.ts con la misma interfaz ApiESert). Probada en Expo Go en Android real (5 pestañas y flujo de retención) y en el simulador de iPhone.",
+      "evidencias": [
+        "evidencias/s1_app-pantallas.png",
+        "evidencias/s1_ios-pestanas.png",
+        "evidencias/s1_android-pestanas.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Repetir la prueba en un iPhone físico (iOS se probó en el simulador de Xcode).",
+        "Sincronizar src/api/tipos.ts y tarifa.ts cuando Freddy publique comun/esquemas.ts y comun/tarifa.json.",
+        "Verificar la tarifa SERT vigente (CONTRATO §5)."
+      ]
+    },
+    "sesion-2": {
+      "estado": "parcial",
+      "fecha": "2026-10-22",
+      "resumen": "Pestaña Grabador: GPS 1 Hz y acelerómetro 10 Hz etiquetados, con cambio de etiqueta en caliente, volcado cada 30 s, CSV del contrato y compartir; script que valida y grafica. Probado en Android real (11 min) y en el simulador de iPhone (5 min).",
+      "evidencias": [
+        "evidencias/s2_grabador-pantalla.png",
+        "evidencias/s2_primera-grabacion.png",
+        "evidencias/s2_grabacion-ios-simulador.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 3,
+        "total": 4
+      },
+      "pendientes": [
+        "Grabación en un iPhone físico: en iOS solo se probó en el simulador (GPS simulado y sin acelerómetro), por eso el criterio 1 queda parcial.",
+        "Sincronizar tipos y tarifa con comun/ de Freddy tras la unificación."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Reglas SERT verificadas con fuentes oficiales (USD 0,25 por media hora, máximo 2 h; tarifa.json no necesita cambios) y prototipo del conductor espejo en Expo Go con un recorrido mock de 60 s que cumple CONTRATO 6b, de BUSCANDO al recibo; protocolo casero con regla de seguridad.",
+      "evidencias": [
+        "evidencias/s3_espejo-prototipo.png",
+        "evidencias/s3_espejo-recibo.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Miguel.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Reemplazar suscribirMock por el cliente WS /ws/espejo cuando Freddy publique el backend (S2-3).",
+        "Acordar con Freddy la regla de saldo_bajo durante la sesión.",
+        "Sincronizar tipos con comun/esquemas.ts tras la unificación.",
+        "Probar en un iPhone físico."
+      ]
+    }
+  }
+}

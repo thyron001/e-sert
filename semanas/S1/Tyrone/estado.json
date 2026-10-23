@@ -1,0 +1,63 @@
+{
+  "persona": "Tyrone",
+  "semana": "S1",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-21",
+      "resumen": "Script reproducible que descarga el OSM del Centro Histórico y genera la red SUMO para autos y peatones (veredas, 775 cruces, 129 semáforos, UTM 17S) con edificios de fondo; la red de autos queda en una sola componente fuertemente conexa y se valida con sumo y 20 peatones sin teletransporte.",
+      "evidencias": [
+        "evidencias/s1_red-centro.png",
+        "evidencias/s1_componentes-podadas.png",
+        "evidencias/s1_red-centro-gui.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Islas peatonales menores tras la poda (6 de 60 viajes sorteados sin ruta): revisar si afectan a los puestos SERT en la sesión 2."
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-21",
+      "resumen": "Script determinista que genera 610 parkingArea (6194 puestos en 103 calles) sobre las calles SERT según calles_sert.yaml, con parqueos.add.xml para SUMO y puestos.csv para el contrato; SUMO los carga sin advertencias y 10 autos de prueba estacionan.",
+      "evidencias": [
+        "evidencias/s2_puestos-sert.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Ajustar calles_sert.yaml cuando Miguel verifique la ordenanza SERT (S1-3 de Miguel)."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Demanda de hora pico (12 destinos reales, buscadores con estadía lognormal, 40 % de paso, 80 % de ocupación de fondo) y búsqueda a ciegas con rerouters invisibles a 400 m; calibrado a 1800 veh/h, la ocupación media en la hora pico es 87,0 % y 87,7 % (2 semillas), sin teletransportes, con búsqueda media de 230-246 s.",
+      "evidencias": [
+        "evidencias/s3_escenario-base.png",
+        "evidencias/s3_busqueda-histograma.png",
+        "evidencias/s3_ocupacion-base.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Tyrone.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "KPIs formales en S2 (distancia, CO2, búsquedas censuradas al final de la corrida).",
+        "Opcional: rotación de la ocupación de fondo para tener un estado estacionario."
+      ]
+    }
+  }
+}

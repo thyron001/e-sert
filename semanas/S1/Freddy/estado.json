@@ -1,0 +1,65 @@
+{
+  "persona": "Freddy",
+  "semana": "S1",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Contrato v1 completo (CONTRATO.propuesto.md, con cambios respecto a v0) y código compartido: esquemas.py (Pydantic v2), esquemas.ts, tarifa.json/tarifa.py y 29 ejemplos JSON + CSV, cubiertos por 163 tests.",
+      "evidencias": [
+        "evidencias/s1_contrato-diagrama.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Compilar esquemas.ts con tsc (no hay Node/npm en la computadora ni en el contenedor)",
+        "Instalar pydantic en el contenedor van3twin antes de que el controlador TraCI importe comun/",
+        "Ajustar tarifa.json cuando Miguel confirme la tarifa SERT vigente"
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Núcleo del backend en Python puro (SQLAlchemy 2 + SQLite): billetera como libro de movimientos, tarifa, ciclo de vida de la sesión con las 5 reglas de cobro y mapa de ocupación; 63 tests con 99 % de cobertura.",
+      "evidencias": [
+        "evidencias/s2_cobro-sert-vs-real.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Capa FastAPI sobre el núcleo (S2)",
+        "Reemplazar el mock de 20 puestos por proyecto/sumo/parqueos/puestos.csv cuando se unifique",
+        "recomendar() por tiempo de manejo en lugar de haversine (S2)"
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Controlador TraCI base (suscripciones, hooks on_paso, CLI) y emulador de GPS con ruido AR(1) ρ=0,8; 3 semillas de trazas de 30 min sobre el escenario de Tyrone más 150 peatones, con las 3 clases, congestión y peatones rápidos; 19 tests.",
+      "evidencias": [
+        "evidencias/s3_trazas-gps.png",
+        "evidencias/s3_ruido-gps.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Freddy.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Enchufar máquina de estados, guiado y /sim/paso como hooks (S2)",
+        "Suscribir solo autos con app o usar suscripciones de contexto (~55 ms/paso con 5000 autos)",
+        "Usar proyecto/sumo/ en lugar de la copia del escenario tras la unificación"
+      ]
+    }
+  }
+}

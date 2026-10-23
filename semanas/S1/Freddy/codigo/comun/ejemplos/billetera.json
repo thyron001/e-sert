@@ -1,0 +1,40 @@
+{
+  "saldo": 4.58,
+  "retenido": 0.0,
+  "disponible": 4.58,
+  "bloqueada": false,
+  "movimientos": [
+    {
+      "movimiento_id": "mov_02cd4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f",
+      "tipo": "recarga",
+      "monto": 5.0,
+      "ts": "2026-10-20T14:00:00Z",
+      "sesion_id": null,
+      "referencia_payphone": null
+    },
+    {
+      "movimiento_id": "mov_13de5f60-7b8c-4d9e-8f10-2b3c4d5e6f70",
+      "tipo": "retencion",
+      "monto": 0.25,
+      "ts": "2026-10-20T14:03:05Z",
+      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+      "referencia_payphone": null
+    },
+    {
+      "movimiento_id": "mov_24ef6071-8c9d-4eaf-9021-3c4d5e6f7081",
+      "tipo": "debito",
+      "monto": 0.42,
+      "ts": "2026-10-20T14:50:05Z",
+      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+      "referencia_payphone": null
+    },
+    {
+      "movimiento_id": "mov_35f07182-9dae-4fb0-8132-4d5e6f708192",
+      "tipo": "liberacion",
+      "monto": 0.25,
+      "ts": "2026-10-20T14:50:05Z",
+      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+      "referencia_payphone": null
+    }
+  ]
+}
