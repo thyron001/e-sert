@@ -187,3 +187,96 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Pasar al escenario unificado.
 
 **Evidencias:** ![](../semanas/S1/Freddy/evidencias/s3_trazas-gps.png) ![](../semanas/S1/Freddy/evidencias/s3_ruido-gps.png) · [Explicación (PDF)](../semanas/S1/Freddy/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S1/Freddy/evidencias/resumen_S1_Freddy.pdf)
+
+## S2 · Sesión 1 · 2026-10-23 · Capa FastAPI sobre el núcleo, WebSocket y Swagger
+**Estado:** parcial. Cumple 5 de 6 criterios; el de Docker queda parcial porque esta máquina no tiene Docker.
+
+**Qué hice:**
+- Copié `proyecto/backend/` (sin `pagos/` ni `asistente/`) y `proyecto/comun/` a `semanas/S2/Freddy/codigo/`.
+- `backend/api/main.py`:
+  - `Config` con pydantic-settings, que lee `ESERT_DB_URL`, `ESERT_TOKEN_SIM`, `ESERT_CORS_ORIGENES`, `ESERT_PUESTOS_CSV` y `ESERT_VISOR_DIR`, con los alias `E_SERT_*` y `SIM_TOKEN`;
+  - `crear_app(config)` con el prefijo `/api/v1`;
+  - un middleware ASGI que pone `X-Contrato-Version: 1` en toda respuesta (también en los 500), da `400 CONTRATO_INCOMPATIBLE` si llega otra versión y devuelve un 500 con el formato del contrato;
+  - CORS, montaje opcional de `backend.pagos.rutas`, `/visor` estático y `/salud` en la raíz.
+- `backend/api/rutas/` (`sistema`, `puestos`, `guia`, `eventos`, `sesiones`, `billetera`, `simulacion`): las 14 rutas de la tabla §4.3 más el alias `/interno/snapshot`, con `response_model` de `comun/esquemas.py`. Las dependencias se inyectan con `Depends` desde `app.state.servicios`.
+- `backend/api/errores.py`: `ErrorNucleo` → `{"error": {codigo, mensaje, detalle}}` con su estado HTTP; la validación da 422 `VALIDACION`, y los 404/405 de rutas inexistentes salen con el mismo formato.
+- `backend/api/ws.py`:
+  - `GestorConexiones` (`conectar`, `desconectar`, `difundir` con `asyncio.gather`, que descarta a los clientes caídos);
+  - una cola `asyncio.Queue` alimentada por `publicar()`, segura entre hilos;
+  - `WS /ws/estado?rol=visor|publico&verdad=0|1`.
+  - Para el controlador en proceso: `app.state.servicios.publicar_snapshot(paso)`.
+- La lógica nueva fue al núcleo:
+  - `nucleo/mundo.py`: último estado de cada usuario, último paso, límite de 1 paso por segundo simulado, `snapshot`/`verdad` y candidatos del espejo;
+  - `MapaOcupacion.guiar()`.
+- Swagger con título "e-sert API", versión "1", descripción en español, 8 tags y ejemplos de `comun/ejemplos/` en cada ruta (cuerpo, respuesta y errores). `python -m backend.api.exportar_openapi` genera `backend/openapi.json`.
+- Tests:
+  - `backend/tests/test_api.py` (29, REST);
+  - `backend/tests/test_api_ws.py` (10, WebSocket), escrito por un subagente en paralelo;
+  - en total 102 tests, con 99 % de cobertura en `api/` + `nucleo/`.
+- Para el VPS: `backend/Dockerfile` en dos etapas (`python:3.11-slim`, `ARG ORIGEN`), `requirements-servidor.txt` y `.env.ejemplo`.
+- Probé a mano con uvicorn y `curl` usando los ejemplos de `comun/ejemplos/`, y saqué las capturas de `/docs` con Playwright.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Freddy/codigo/backend/api/**`
+- `semanas/S2/Freddy/codigo/backend/nucleo/mundo.py` (nuevo) y `nucleo/ocupacion.py` (`guiar`)
+- `semanas/S2/Freddy/codigo/backend/tests/test_api.py` y `test_api_ws.py`
+- `semanas/S2/Freddy/codigo/backend/{Dockerfile,requirements.txt,requirements-servidor.txt,.env.ejemplo,openapi.json}`
+- `semanas/S2/Freddy/codigo/comun/CONTRATO.propuesto.md`
+- `semanas/S2/Freddy/{estado.json,RESUMEN.md}`, `evidencias/s1_swagger*.png` y `explicaciones/s1_explicacion.{md,pdf}`
+
+**Decisiones y por qué:**
+- **El contrato v1 congelado manda sobre el prompt cuando se contradicen.** Las dos variantes funcionan y la diferencia va en `CONTRATO.propuesto.md`:
+  - el visor recibe `verdad` por defecto, y `?verdad=0` la apaga;
+  - se aceptan `X-Sim-Token` y `Authorization: Bearer`;
+  - `/sim/paso` y `/interno/snapshot` son equivalentes.
+- **`/interno/snapshot` recibe un `PasoSimulacion`, no un snapshot ya armado.** Así el backend arma `snapshot.puestos` con su propia estimación, como dice el contrato (§6).
+- **`POST /eventos/*` no cambia el mapa de ocupación**, aunque el prompt lo pedía: el mapa se estima con las sesiones (diseño de S1). Los eventos solo guardan el último estado de cada usuario.
+- **`GET /guia`:** `distancia_m` es la distancia del puesto al destino. El contrato no lo decía; queda como propuesta.
+- **Arranque con uvicorn:** `backend.api.main:app` en lugar de `app:app`, porque el paquete es `backend`. La app se crea al pedirla (`__getattr__` del módulo), así los tests no abren `./e-sert.db`.
+- **El Dockerfile usa `ARG ORIGEN`** (por defecto `proyecto`) para poder construir también la copia semanal.
+- **La etapa 1 del Dockerfile copia `proyecto/`** y elige los archivos que necesita, porque `proyecto/visor/` todavía no existe en git y un `COPY` directo fallaría.
+
+**Problemas encontrados:**
+- Docker no está disponible en WSL (falta la integración con Docker Desktop). Lo que hice en su lugar:
+  - revisé el Dockerfile;
+  - simulé su etapa 1 en el scratchpad;
+  - arranqué uvicorn sobre esa carpeta: `/salud` dio 200 y el snapshot sin token dio 401.
+- `docker build -f semanas/S2/Freddy/codigo/backend/Dockerfile .` sin argumentos todavía no sirve antes de la unificación: hace falta `--build-arg ORIGEN=semanas/S2/Freddy/codigo`.
+- En la computadora solo hay Python 3.10 (no 3.11). El venv `backend/.venv` es 3.10, que es compatible.
+- A Chromium (Playwright) le faltaba `libasound.so.2`. La bajé con `apt-get download` y la usé con `LD_LIBRARY_PATH`, sin sudo.
+- El emoji 🔒 salía como un cuadro en la captura headless; en los resúmenes de Swagger lo cambié por `[sim]`.
+- `/salud` no lleva `version`: `Salud` (`extra="forbid"`) no la admite. Va como propuesta.
+- Posible carrera menor en `GestorConexiones.conectar`, entre `accept` y el registro del cliente. No se reprodujo.
+
+**Pedidos a otros:**
+- @Miguel:
+  - URL base: `http://<host>:8000/api/v1` en local y `https://demo.e-sert.tesisucuenca.com/api/v1` en el VPS. El esquema completo está en `backend/openapi.json`, y Swagger en `/docs`.
+  - Arranque local, desde `semanas/S2/Freddy/codigo/` (tras la unificación, desde `proyecto/`): `python -m venv backend/.venv && backend/.venv/bin/pip install -r backend/requirements.txt`, y luego `backend/.venv/bin/uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000`.
+  - `backend/pagos/`: crea `backend/pagos/rutas.py` con una variable `router = APIRouter(prefix="/pagos", tags=["pagos"])`. Se monta solo bajo `/api/v1` (por ejemplo `/api/v1/pagos/retorno`); si no existe, el backend arranca igual.
+  - Todas las respuestas traen `X-Contrato-Version: 1`.
+- @Tyrone:
+  - Para el visor: `ws://<host>:8000/ws/estado?rol=visor` (`snapshot`, `kpi` y `verdad`). `rol=publico` excluye `verdad`, y `?verdad=0` la apaga en un visor proyectado.
+  - Si `proyecto/visor/` tiene archivos, se sirve en `/visor`.
+  - El controlador publica con `POST /api/v1/interno/snapshot` (o `/sim/paso`), con el cuerpo `PasoSimulacion` y `Authorization: Bearer $ESERT_TOKEN_SIM` (o `X-Sim-Token`).
+- @Tyrone [VPS], después de la unificación de S2, en la app `esert-demo` de Dokploy:
+  - Docker File `proyecto/backend/Dockerfile`, contexto `.`, puerto 8000;
+  - volumen persistente en `/data`;
+  - Environment: `ESERT_DB_URL=sqlite:////data/esert.db`, `ESERT_TOKEN_SIM=<token largo aleatorio>` y `ESERT_CORS_ORIGENES=*` (o los dominios);
+  - healthcheck en `GET /salud`.
+- @Tyrone [Plan]:
+  - `semanas/S2/Freddy/sesion-1.md`:
+    - dice "las 9 rutas del contrato", pero el contrato v1 tiene 14;
+    - su sección "VPS" contradice al contrato v1 (Bearer frente a `X-Sim-Token`, `?verdad=1` frente a `rol=visor`); conviene alinear el prompt con el contrato o aprobar `CONTRATO.propuesto.md`.
+  - `CLAUDE.md`: dice Python ≥ 3.11 en la computadora, pero esta computadora tiene 3.10. El código es compatible; quizá baste con exigir ≥ 3.10.
+
+**Bucle y verificación:** 2 vueltas.
+1. Las rutas y los tests REST pasaron al primer intento, salvo un test que suponía mal el orden de los movimientos (la recarga lleva la hora del servidor). En la captura, `espejo/candidatos` salía duplicado por la suma de tags de router y ruta; lo corregí.
+2. El verificador independiente reportó **5/6 criterios cumplidos**; el sexto (Docker) queda parcial porque no hay Docker. Encontró que los 404/405 de Starlette no tenían el formato `{"error": ...}`: lo corregí con un handler y un test (102 tests, 99 %).
+
+**Pendientes para la próxima sesión:**
+- Un `docker build` real en una máquina con Docker.
+- `WS /ws/espejo/{veh_id}` (contrato §7).
+- El límite de tasa de recargas.
+- Conectar el controlador TraCI con `publicar_snapshot` / `/interno/snapshot` (S2-2 y S2-3).
+
+**Evidencias:** ![](../semanas/S2/Freddy/evidencias/s1_swagger-rutas.png) · [Swagger completo](../semanas/S2/Freddy/evidencias/s1_swagger.png) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s1_explicacion.pdf)

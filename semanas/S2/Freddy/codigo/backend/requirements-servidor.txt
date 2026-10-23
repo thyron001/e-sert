@@ -1,0 +1,6 @@
+# Lo mínimo para servir la API en la imagen Docker (sin tests ni gráficas).
+sqlalchemy>=2.0,<3
+pydantic>=2.5,<3
+fastapi>=0.110,<1
+uvicorn[standard]>=0.29
+pydantic-settings>=2.2,<3

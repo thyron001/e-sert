@@ -1,0 +1,30 @@
+{
+  "tipo": "espejo",
+  "veh_id": "sim_veh42",
+  "t_sim": 4054.0,
+  "ts": "2026-11-05T15:51:05.050Z",
+  "estado": "CERRADA",
+  "lat": -2.8903,
+  "lon": -78.999,
+  "modo": "vehiculo",
+  "destino": {
+    "nombre": "Parque Calderón",
+    "lat": -2.897308,
+    "lon": -79.004488
+  },
+  "puesto": null,
+  "ruta": [],
+  "sesion": null,
+  "billetera": {
+    "saldo": 4.58,
+    "disponible": 4.58
+  },
+  "avisos": [],
+  "recibo": {
+    "minutos_reales": 47.0,
+    "minutos_cobrados": 50,
+    "cobrado_usd": 0.42,
+    "tarjeta_sert_usd": 0.5,
+    "ahorro_usd": 0.08
+  }
+}
