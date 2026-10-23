@@ -71,6 +71,10 @@ def _a_html(md_texto: str, base: Path) -> str:
     html = re.sub(r'<img[^>]*src="([^"]+)"', abs_img, html)
     # write_html de fpdf2 no maneja <code> dentro de <pre> con clases: se simplifica
     html = re.sub(r'<pre><code[^>]*>', '<pre>', html).replace('</code></pre>', '</pre>')
+    # fpdf2 no admite etiquetas anidadas dentro de <td>: ahí el código va como texto plano
+    html = re.sub(r'<td([^>]*)>(.*?)</td>',
+                  lambda m: f"<td{m.group(1)}>" + re.sub(r'</?code>', '', m.group(2)) + "</td>",
+                  html, flags=re.S)
     html = re.sub(r'<code>(.*?)</code>', r'<font face="courier">\1</font>', html, flags=re.S)
     return _latin1(html)
 

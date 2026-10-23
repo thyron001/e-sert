@@ -292,10 +292,10 @@ Lo que trae el contenedor (y obliga a adaptarse):
   `sys.path` de Python: los scripts añaden `os.path.join(os.environ["SUMO_HOME"], "tools")`
   antes de importarlos. Si un prompt pide algo que no existe en 1.12, adáptalo con la
   alternativa equivalente y anótalo en la bitácora.
-- **Python 3.10** con `numpy`, `matplotlib`, `lxml` y `pyproj`. El código que corre en el
+- **Python 3.10** con `numpy`, `matplotlib` y `lxml`. El código que corre en el
   contenedor debe ser compatible con 3.10, también el que el controlador importa
-  directamente (por ejemplo `backend/nucleo/` en los experimentos). Las dependencias que falten (`requests`,
-  `pandas`, `pyyaml`…) se instalan en el contenedor con
+  directamente (por ejemplo `backend/nucleo/` en los experimentos). Las dependencias que falten (`pyproj`,
+  `requests`, `pandas`, `pyyaml`, `pydantic`…) se instalan en el contenedor con
   `docker exec van3twin pip3 install --user -r <ruta-relativa>/requirements.txt`. No hay
   `venv` (falta `ensurepip`). Si el contenedor se recrea, hay que reinstalarlas.
 - **`sumo-gui`** usa la pantalla virtual `:99` del contenedor. El usuario la ve con un
