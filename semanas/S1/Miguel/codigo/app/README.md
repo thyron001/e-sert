@@ -73,6 +73,13 @@ src/sensores/grabador.ts  clase Grabador: permisos, GPS, acelerómetro, keep-awa
 src/sensores/formato.ts   columnas y filas del CSV del contrato (sin dependencias nativas)
 src/sensores/exportar.ts  archivos en el teléfono, lista de grabaciones y compartir (expo-sharing)
 src/sensores/pruebas/     prueba del formato y generador de una grabación sintética
+src/espejo/recorridoMock.ts   MOCK del WS /ws/espejo: recorrido de ~60 s (BUSCANDO → CERRADA con recibo)
+src/espejo/recorrido_mock.json el mismo recorrido en JSON (npm run generar-mock), para el servidor mock de S2-3
+src/espejo/validar.ts     validadores en tiempo de ejecución (esMensajeEspejo, esFinEspejo)
+src/espejo/componentes/   MapaEspejo, LineaTiempo, CostoVivo, BannerAvisos, ReciboEspejo
+app/espejo/index.tsx      selector de conductor simulado
+app/espejo/[vehId].tsx    pantalla del conductor espejo
+docs/sert_reglas.md       reglas SERT verificadas con fuentes y tabla para tarifa.json
 src/ajustes/              contexto de ajustes (expo-secure-store + expo-crypto)
 ```
 
@@ -82,6 +89,8 @@ src/ajustes/              contexto de ajustes (expo-secure-store + expo-crypto)
 npx tsc --noEmit          # tipos: cliente.ts y mock.ts cumplen la interfaz ApiESert
 npm run prueba:mock       # tarifa, billetera y puestos del mock
 npm run prueba:grabador   # formato del CSV de grabaciones
+npx jest src/espejo       # recorrido mock del espejo contra CONTRATO §6b (jest-expo)
+npm run generar-mock      # regenera src/espejo/recorrido_mock.json
 npx expo-doctor           # dependencias compatibles con el SDK
 ```
 
@@ -101,3 +110,16 @@ manejarla sin tocar la pantalla. Por ejemplo:
 `xcrun simctl openurl booted "exp://<ip>:8081/--/grabador?accion=iniciar&etiqueta=a_pie&n=1"`,
 donde `accion` puede ser `iniciar`, `etiqueta` o `detener`. La ubicación se simula con
 `xcrun simctl location booted start --speed=1.4 -`, pasando los puntos por stdin.
+
+## Modo espejo (teléfono = pantalla de un conductor simulado)
+
+En la pestaña **Sesión**, el botón **Modo espejo** abre la lista de conductores simulados. Al
+elegir uno, el teléfono reproduce lo que vería ese conductor:
+- guiado al puesto, con la ruta en el mapa;
+- la sesión, con el costo en vivo y los avisos;
+- la línea de tiempo de los 7 estados;
+- el recibo, con la comparación frente a la tarjeta SERT.
+
+Por ahora los datos salen de un recorrido **mock** de unos 60 s (`src/espejo/recorridoMock.ts`). Cuando
+exista el backend (S2-3), `suscribirMock` se reemplaza por el cliente del WebSocket
+`/ws/espejo/{veh_id}`, que tiene la misma firma.

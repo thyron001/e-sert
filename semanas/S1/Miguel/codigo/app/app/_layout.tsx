@@ -45,7 +45,9 @@ function RootLayoutNav() {
     <AjustesProveedor>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Inicio' }} />
+          <Stack.Screen name="espejo/index" options={{ title: 'Modo espejo' }} />
+          <Stack.Screen name="espejo/[vehId]" options={{ title: 'Espejo' }} />
         </Stack>
       </ThemeProvider>
     </AjustesProveedor>

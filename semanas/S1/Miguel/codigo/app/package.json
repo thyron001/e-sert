@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@types/jest": "30.0.0",
     "expo": "~58.0.17",
     "expo-constants": "~58.0.13",
     "expo-crypto": "~58.0.7",
@@ -19,6 +20,8 @@
     "expo-status-bar": "~58.0.4",
     "expo-symbols": "~58.0.4",
     "expo-web-browser": "~58.0.6",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.12",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.0",
@@ -41,7 +44,12 @@
     "web": "expo start --web",
     "prueba:mock": "tsx src/api/pruebas/mock.prueba.ts",
     "tipos": "tsc --noEmit",
-    "prueba:grabador": "tsx src/sensores/pruebas/formato.prueba.ts"
+    "prueba:grabador": "tsx src/sensores/pruebas/formato.prueba.ts",
+    "generar-mock": "tsx scripts/generar_mock.ts > src/espejo/recorrido_mock.json",
+    "test": "jest"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "jest-expo"
+  }
 }

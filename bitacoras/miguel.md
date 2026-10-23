@@ -140,3 +140,81 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Sincronizar los tipos y la tarifa con `comun/` de Freddy tras la unificación.
 
 **Evidencias:** ![](../semanas/S1/Miguel/evidencias/s2_grabador-pantalla.png) ![](../semanas/S1/Miguel/evidencias/s2_primera-grabacion.png) ![](../semanas/S1/Miguel/evidencias/s2_grabacion-ios-simulador.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S1 · Sesión 3 · 2026-10-22 · Reglas SERT verificadas, prototipo del conductor espejo y protocolo casero
+**Estado:** hecha
+
+**Qué hice:**
+- **`app/docs/sert_reglas.md`:** reglas del SERT con fuentes oficiales, cada una con su URL y la fecha de consulta (2026-10-22). Las fuentes son la ordenanza de 2012 (R.O. 765), la EMOV EP y el GAD Municipal; la prensa queda como respaldo.
+  - Tarifa: USD 0,25 por media hora o fracción (Art. 36).
+  - Tiempo máximo: 2 h.
+  - Tarjeta: 4 casilleros de 30 min.
+  - Tolerancia: 10 min (Art. 10).
+  - AppSERT avisa 5 min antes del final.
+  - Multa: 5 % del SBU.
+  - Marqué como no verificados el horario vigente, el precio de la tarjeta, el inventario de plazas y la recarga mínima.
+  - Termina con la tabla para `tarifa.json`: **no hace falta cambiar ningún valor**. `fraccion_min = 5` y `cobro_minimo_min = 10` son reglas de la app, no del SERT.
+- **Tipos del espejo** en `tipos.ts` (`CandidatoEspejo`, `MensajeEspejo`, `ReciboEspejo`, `FinEspejo` y `ESTADOS_SESION`), copiados de `comun/esquemas.ts` v1 de Freddy y marcados SINCRONIZAR. La tarifa quedó en v1: `aviso_tiempo_min`, `tarjeta_bloque_min`, `tarjetaSertUsd` y el redondeo mitad hacia arriba de su `tarifa.py`.
+- **`src/espejo/recorridoMock.ts`** (`// MOCK`):
+  - 59 mensajes `espejo` y un `espejo_fin`, a 1 por segundo;
+  - 47 min simulados de sesión, con un recibo de 50 min = $0,42, tarjeta $0,50 y ahorro $0,08;
+  - `saldo_bajo` en ESTACIONADO;
+  - puestos reales del `puestos.csv` de Tyrone;
+  - `suscribirMock`, con la firma del WS real.
+- **`recorrido_mock.json`** se genera con `npm run generar-mock`.
+- **`validar.ts`** (`esMensajeEspejo` y `esFinEspejo`) y **el test con jest-expo**: 11/11.
+- **Pantallas:**
+  - `app/espejo/index.tsx`, el selector, con 4 candidatos;
+  - `app/espejo/[vehId].tsx`, con MapaEspejo (auto que rota, destino, puesto, Polyline de 5 px y `animateToRegion`), LineaTiempo, CostoVivo, BannerAvisos y el modal ReciboEspejo;
+  - el botón "Reiniciar recorrido";
+  - la entrada desde la pestaña Sesión.
+- **`datos/PROTOCOLO_CASERO.md`**, con la regla de seguridad.
+
+**Archivos creados o modificados:**
+- `codigo/app/docs/sert_reglas.md`, `src/api/{tipos,tarifa}.ts`, `src/espejo/**`, `app/espejo/{index,[vehId]}.tsx`, `app/_layout.tsx`, `app/(tabs)/sesion.tsx`, `scripts/generar_mock.ts`, `package.json` (jest-expo, `test` y `generar-mock`) y `README.md`;
+- `codigo/datos/PROTOCOLO_CASERO.md`;
+- `evidencias/s3_*.png`, `evidencias/capturas/s3_*.jpeg`, `explicaciones/s3_explicacion.{md,pdf}`, `evidencias/resumen_S1_Miguel.pdf`, `estado.json` y `RESUMEN.md`.
+
+**Decisiones y por qué:**
+- **La investigación del SERT la hizo un agente en paralelo**, con instrucciones de citar todo y no inventar nada.
+- **En los tipos, los campos de §6b son obligatorios y nullables**, porque el JSON los trae siempre. En `esquemas.ts` de Freddy son opcionales, y siguen siendo compatibles.
+- **El tiempo simulado no es uniforme**, para que 60 s reales cubran 47 min de parqueo.
+- **`saldo_bajo` se calcula como "saldo − max(retención, costo en curso)"**, para que el aviso salga en ESTACIONADO. La regla v1 de Freddy (saldo − costo) no lo dispararía ahí.
+- **Las globales de jest se importan de `@jest/globals`**, porque el tsconfig de Expo no carga `@types/jest`.
+
+**Problemas encontrados:**
+- **`tsc` fallaba en las rutas tipadas (`/espejo`)** hasta que Metro regeneró `.expo/types`.
+- **El modal del recibo:**
+  - salía sin fondo (usaba `View` de RN en vez del `View` del tema);
+  - quedaba abierto encima de otras pantallas. Ahora se cierra al perder el foco.
+- **En iOS**, la lista del selector quedaba debajo del encabezado translúcido (se arregló con `contentInsetAdjustmentBehavior`) y el botón de volver decía "(tabs)".
+- **`herramientas/explicacion_pdf.py` falla con `__tests__` dentro de una tabla**, porque Markdown lo vuelve negrita. Lo esquivé escapando los guiones bajos.
+- **El verificador encontró un `sesion_id` que no era uuid4.** Ya está corregido y tiene su test.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Valores reales para `tarifa.json`: **no hay que cambiar ninguno** (tabla en `semanas/S1/Miguel/codigo/app/docs/sert_reglas.md`). Sugiero documentar qué claves son reglas del SERT y cuáles de la app, y añadir `tolerancia_ingreso_min: 10` (Art. 10).
+  - Los tipos del espejo ya están en tu `comun/esquemas.ts` v1: los copié. Cuando se unifique, los importo.
+  - Pregunta: durante la sesión, ¿`saldo_bajo` usa "saldo − costo" o "saldo − max(retención, costo)"? Con la primera, el aviso no aparece mientras la retención cubre el costo.
+  - `recorrido_mock.json` queda listo para tu servidor mock de S2-3.
+  - El `espejo_fin` del mock trae `t_sim`, `ts` y `motivo` (v1).
+- **@Tyrone:** observaciones a `calles_sert.yaml` y `puestos.csv` (rama tyrone/s1):
+  1. **Hay demasiadas plazas:** tu red genera **6.194 plazas en 103 calles**, y las fuentes oficiales dan unas **2.500 en toda la ciudad** (1.424 en el Centro Histórico y 388 en El Ejido en 2020, más 204 en 2022). Conviene usar `incluir_nombres` con las calles tarifadas, o bajar la capacidad, por ejemplo con `lado: derecho` solo en calles con línea azul.
+  2. **Calles que probablemente no son SERT** y salen con muchas plazas: Avenida 12 de Abril (145), Avenida 3 de Noviembre (73), Héroes de Verdeloma (72) y Avenida Loja (28).
+  3. **Zonas oficiales:** Centro Histórico, El Ejido, Feria Libre y el sector del Parque Luis Cordero (Calle Larga – Huayna Cápac – Juan Jaramillo – Vargas Machuca).
+  4. **No se encontró un inventario oficial de calles.** Las plazas se marcan con línea azul y número en el piso, así que la lista exacta queda **no verificada**.
+- **@Pablo:** las grabaciones caseras son **opcionales**. Si se hacen, siguen `datos/PROTOCOLO_CASERO.md` y quedan en `datos/grabaciones/`, anonimizadas.
+
+**Bucle y verificación:**
+- Hubo 3 vueltas:
+  1. Las rutas tipadas y los tipos de jest en tsc.
+  2. El modal sin fondo, el encabezado "(tabs)", el peatón tapado y el inset de la lista en iOS.
+  3. El modal que seguía abierto al navegar, y el `sesion_id` que señaló el verificador.
+- El verificador independiente reportó 5/6 criterios cumplidos. El sexto, el PDF semanal, quedó pendiente hasta este cierre y ya está generado. También señaló el `sesion_id` (corregido) y la cita de la multa por remolque, que ahora figura como "no confirmado".
+
+**Pendientes para la próxima sesión:**
+- Conectar el espejo al WS real cuando Freddy lo publique (S2-3).
+- Sincronizar los tipos tras la unificación.
+- Probar en un iPhone físico.
+
+**Evidencias:** ![](../semanas/S1/Miguel/evidencias/s3_espejo-prototipo.png) ![](../semanas/S1/Miguel/evidencias/s3_espejo-recibo.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s3_explicacion.pdf) · [PDF semanal](../semanas/S1/Miguel/evidencias/resumen_S1_Miguel.pdf)

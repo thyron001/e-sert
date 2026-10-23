@@ -37,3 +37,19 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 ![Grabación de prueba en el simulador de iOS](evidencias/s2_grabacion-ios-simulador.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-10-22 · Reglas SERT verificadas, prototipo del conductor espejo y protocolo casero
+
+**Estado:** hecha (6/6 criterios).
+
+- **Reglas SERT** (`app/docs/sert_reglas.md`): USD 0,25 por media hora (Art. 36 de la ordenanza), máximo 2 h y tarjeta de 4 casilleros de 30 min. **`tarifa.json` no necesita cambios.**
+- **Modo espejo:** un selector de conductores y una pantalla con mapa (ruta, puesto, destino, auto que rota y peatón), línea de tiempo de 7 estados, costo en vivo, avisos y recibo frente a la tarjeta SERT.
+- **Recorrido mock:** 60 mensajes que cumplen el JSON del contrato (§6b). La sesión dura 47 min simulados: 50 cobrados = $0,42, frente a $0,50 con la tarjeta.
+- **Pruebas:** jest pasa 11/11 y tsc no da errores. Probado en Android real y en el simulador de iPhone.
+- **`datos/PROTOCOLO_CASERO.md`:** grabaciones opcionales y la regla de seguridad.
+
+![Prototipo del espejo](evidencias/s3_espejo-prototipo.png)
+
+![Recibo y línea de tiempo completa](evidencias/s3_espejo-recibo.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · PDF semanal: [evidencias/resumen_S1_Miguel.pdf](evidencias/resumen_S1_Miguel.pdf)

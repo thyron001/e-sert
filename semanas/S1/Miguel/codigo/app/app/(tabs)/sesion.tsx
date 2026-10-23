@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 import { Text, View, useThemeColor } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
@@ -62,6 +62,11 @@ export default function SesionScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contenedor}>
+      <Boton
+        texto="🚗  Modo espejo: seguir a un conductor simulado"
+        onPress={() => router.push('/espejo')}
+        style={styles.espejo}
+      />
       <Text style={styles.estado}>{sesion ? sesion.estado : 'Sin sesión'}</Text>
       {sesion && (
         <View style={styles.tarjeta}>
@@ -96,6 +101,7 @@ export default function SesionScreen() {
 
 const styles = StyleSheet.create({
   contenedor: { padding: 16 },
+  espejo: { backgroundColor: '#1565C0', marginTop: 0, marginBottom: 16 },
   estado: { fontSize: 24, fontWeight: '700', color: COLORES.miguel },
   tarjeta: { marginTop: 12, padding: 12, borderRadius: 10, borderWidth: 1, borderColor: COLORES.gris, gap: 4 },
   etiqueta: { fontSize: 15, fontWeight: '600', marginTop: 16 },

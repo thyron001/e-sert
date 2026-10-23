@@ -42,6 +42,28 @@
         "Grabación en un iPhone físico: en iOS solo se probó en el simulador (GPS simulado y sin acelerómetro), por eso el criterio 1 queda parcial.",
         "Sincronizar tipos y tarifa con comun/ de Freddy tras la unificación."
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-22",
+      "resumen": "Reglas SERT verificadas con fuentes oficiales (USD 0,25 por media hora, máximo 2 h; tarifa.json no necesita cambios) y prototipo del conductor espejo en Expo Go con un recorrido mock de 60 s que cumple CONTRATO 6b, de BUSCANDO al recibo; protocolo casero con regla de seguridad.",
+      "evidencias": [
+        "evidencias/s3_espejo-prototipo.png",
+        "evidencias/s3_espejo-recibo.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S1_Miguel.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Reemplazar suscribirMock por el cliente WS /ws/espejo cuando Freddy publique el backend (S2-3).",
+        "Acordar con Freddy la regla de saldo_bajo durante la sesión.",
+        "Sincronizar tipos con comun/esquemas.ts tras la unificación.",
+        "Probar en un iPhone físico."
+      ]
     }
   }
 }
