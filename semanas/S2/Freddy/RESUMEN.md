@@ -14,6 +14,6 @@ Lo cubren 102 tests, con 99 % de cobertura en `api/` + `nucleo/`. La lógica nue
 
 ![Swagger: rutas de la API](evidencias/s1_swagger-rutas.png)
 
-Captura completa con las 16 operaciones desplegadas: [evidencias/s1_swagger.png](evidencias/s1_swagger.png)
+Captura completa con las 16 operaciones desplegadas: [evidencias/s1_swagger.png](evidencias/s1_swagger.png) · paginada en A4: [evidencias/s1_swagger.pdf](evidencias/s1_swagger.pdf)
 
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)

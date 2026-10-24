@@ -280,3 +280,12 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Conectar el controlador TraCI con `publicar_snapshot` / `/interno/snapshot` (S2-2 y S2-3).
 
 **Evidencias:** ![](../semanas/S2/Freddy/evidencias/s1_swagger-rutas.png) · [Swagger completo](../semanas/S2/Freddy/evidencias/s1_swagger.png) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s1_explicacion.pdf)
+
+### Adenda · S2 · Sesión 1 · 2026-10-23 · Capturas de Swagger legibles en PDF
+- `s1_swagger-rutas.png` (1400 × 3939 px) salía cortada en `s1_explicacion.pdf`: `explicacion_pdf.py` la incrusta a 520 pt de ancho (1463 pt de alto, en una página de 842 pt) y no la reparte en páginas. La captura completa (1400 × 24 458 px) no estaba en ningún PDF.
+- Nuevo `semanas/S2/Freddy/codigo/comun/paginar_captura.py`: corta una captura alta por filas en blanco. `--trozos` deja `s1_swagger-rutas_1.png` … `_3.png`, que ahora van uno tras otro en la explicación. `--pdf` deja `evidencias/s1_swagger.pdf` (14 páginas A4).
+- Regeneré `s1_explicacion.pdf` y comprobé en el PDF que las tres partes quedan dentro de la página. Actualicé `estado.json` y `RESUMEN.md`.
+
+**Pedidos a otros:** @Tyrone [Plan] herramientas/explicacion_pdf.py: si una imagen es más alta que el espacio de la página, partirla en varias páginas (o escalarla para que quepa); hoy se corta en silencio y cada persona tendría que trocear sus capturas a mano.
+
+**Evidencias:** [Swagger completo (PDF)](../semanas/S2/Freddy/evidencias/s1_swagger.pdf) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s1_explicacion.pdf)

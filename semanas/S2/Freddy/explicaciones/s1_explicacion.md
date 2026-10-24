@@ -29,6 +29,8 @@
 | `openapi.json` | `backend/.venv/bin/python -m backend.api.exportar_openapi` | app → `backend/openapi.json` |
 | Servidor local | `ESERT_TOKEN_SIM=secreto backend/.venv/bin/uvicorn backend.api.main:app --reload --port 8000` | `puestos.csv` de Tyrone (610 puestos) → API en `:8000` |
 | Captura de Swagger | script de Playwright: abre `/docs`, despliega cada operación y llama a `page.screenshot(full_page=True)` | `/docs` → `evidencias/s1_swagger.png` y `s1_swagger-rutas.png` |
+| Trozos de la captura de rutas | `backend/.venv/bin/python comun/paginar_captura.py ../evidencias/s1_swagger-rutas.png --trozos` | `s1_swagger-rutas.png` → `s1_swagger-rutas_1.png` … `_3.png` (cortados por filas en blanco para que cada uno quepa en una página) |
+| PDF de la captura completa | `backend/.venv/bin/python comun/paginar_captura.py ../evidencias/s1_swagger.png --pdf` | `s1_swagger.png` → `evidencias/s1_swagger.pdf` (A4, un trozo por página) |
 | Imagen Docker | `docker build -f semanas/S2/Freddy/codigo/backend/Dockerfile --build-arg ORIGEN=semanas/S2/Freddy/codigo .` (desde la raíz del repo) | repo → imagen con `/srv/{backend,comun,ia,visor,datos}` |
 
 ## 4. Mapa de archivos
@@ -47,6 +49,7 @@
 | `backend/Dockerfile`, `requirements-servidor.txt`, `.env.ejemplo` | imagen para Dokploy y nombres de las variables | Tyrone (VPS) |
 | `backend/tests/test_api.py`, `test_api_ws.py` | 29 tests REST + 10 de WebSocket | CI / verificador |
 | `comun/CONTRATO.propuesto.md` | 6 cambios aditivos al contrato | unificación del domingo |
+| `comun/paginar_captura.py` | parte capturas muy altas en trozos de una página (PNG o PDF) | evidencias de esta sesión |
 
 ## 5. Recorrido del código
 
@@ -110,9 +113,15 @@ for ws, r in zip(destino, resultados):
 - `grep` en `backend/api/`: no hay cálculos de cobro ni de ocupación (solo aparecen en docstrings).
 - Prueba manual con `curl` usando todos los ejemplos de `comun/ejemplos/`: cada código esperado (200/201/202/400/401/404/409) salió con el formato correcto.
 
-![Swagger con las rutas desplegadas](../evidencias/s1_swagger-rutas.png)
+Swagger con las rutas desplegadas (la captura `s1_swagger-rutas.png`, repartida en tres trozos para que quepa en el PDF):
 
-La captura completa, con cada operación abierta y sus ejemplos, está en `evidencias/s1_swagger.png` (1400 × ~25 000 px).
+![Swagger con las rutas desplegadas, parte 1](../evidencias/s1_swagger-rutas_1.png)
+
+![Swagger con las rutas desplegadas, parte 2](../evidencias/s1_swagger-rutas_2.png)
+
+![Swagger con las rutas desplegadas, parte 3](../evidencias/s1_swagger-rutas_3.png)
+
+La captura completa, con cada operación abierta y sus ejemplos (1400 × 24 458 px), está en `evidencias/s1_swagger.png` y, paginada para leerla cómodamente, en `evidencias/s1_swagger.pdf`.
 
 ## 8. Limitaciones y decisiones
 

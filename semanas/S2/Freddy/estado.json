@@ -6,7 +6,7 @@
       "estado": "parcial",
       "fecha": "2026-10-23",
       "resumen": "Capa FastAPI delgada sobre el núcleo: las 14 rutas del contrato v1 bajo /api/v1, el alias /interno/snapshot con token, WS /ws/estado (cola asyncio, 1 snapshot por segundo simulado, verdad solo para el visor) y Swagger con ejemplos y openapi.json. 102 tests con 99 % de cobertura. Queda parcial solo porque no hubo Docker para construir la imagen.",
-      "evidencias": ["evidencias/s1_swagger.png", "evidencias/s1_swagger-rutas.png", "explicaciones/s1_explicacion.pdf"],
+      "evidencias": ["evidencias/s1_swagger.png", "evidencias/s1_swagger-rutas.png", "evidencias/s1_swagger.pdf", "explicaciones/s1_explicacion.pdf"],
       "explicacion": "explicaciones/s1_explicacion.pdf",
       "criterios": {"cumplidos": 5, "total": 6},
       "pendientes": [
