@@ -1,0 +1,26 @@
+{
+ "warmup_s": 900.0,
+ "fin_s": 4500.0,
+ "capacidad_total": 6194,
+ "radio_busqueda_m": 300.0,
+ "parametros_demanda": {
+  "veh_hora": "1800.0",
+  "porc_paso": "40.0",
+  "duracion_s": "3600",
+  "warmup_s": "900",
+  "ocupacion_fondo": "0.8",
+  "semilla": "1"
+ },
+ "vehiculos_por_clase": {
+  "fondo": 4924,
+  "busca": 1277,
+  "paso": 864
+ },
+ "excluidos_paso": 864,
+ "excluidos_fondo": 4924,
+ "buscadores": 1277,
+ "buscadores_con_kpi": 1075,
+ "buscadores_sin_estacionar": 201,
+ "busqueda_censurada_media_s": 2111.5174129353236,
+ "buscadores_sin_inicio": 0
+}

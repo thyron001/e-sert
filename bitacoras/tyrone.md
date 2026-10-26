@@ -139,3 +139,47 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Opcional: rotación de la ocupación de fondo para tener un estado estacionario.
 
 **Evidencias:** ![](../semanas/S1/Tyrone/evidencias/s3_escenario-base.png) ![](../semanas/S1/Tyrone/evidencias/s3_busqueda-histograma.png) ![](../semanas/S1/Tyrone/evidencias/s3_ocupacion-base.png) · [Explicación (PDF)](../semanas/S1/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S1/Tyrone/evidencias/resumen_S1_Tyrone.pdf)
+
+## S2 · Sesión 1 · 2026-10-26 · KPIs de la línea base (búsqueda, distancia, CO₂ y ocupación)
+**Estado:** hecha
+
+**Qué hice:**
+- Abrí la rama `tyrone/s2` desde `main` y copié `proyecto/sumo/` a `semanas/S2/Tyrone/codigo/sumo/`. `proyecto/kpis/` solo tenía un `.gitkeep`.
+- Añadí `vehroute-output.route-length` a `centro_base.sumocfg` y a la plantilla de `generar_demanda.py`. Después corrí las 2 semillas en segundo plano en el contenedor, con `correr_base.py` (~16 min).
+- Escribí `kpis/lectores.py`: lectores en streaming con `lxml.iterparse` para tripinfo, stops, vehroutes, emisiones, red y demanda.
+- Escribí `kpis/kpis.py` (definiciones en el docstring, CLI y `kpis_<escenario>.json` con todas las semillas) y `kpis/graficas.py` (figura 2×2).
+- Un subagente escribió 13 tests con XML sintéticos a partir de las firmas que fijé antes.
+- Calculé los KPIs de las 2 semillas: búsqueda media de 349 y 362 s, distancia de 1248 y 1310 m, CO₂ de 666 y 693 g, ocupación pico de 87,0 y 87,7 %.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Tyrone/codigo/kpis/`: `lectores.py`, `kpis.py`, `graficas.py`, `requirements.txt`, `tests/` y `salidas/` (JSON y CSV de la base).
+- `semanas/S2/Tyrone/codigo/sumo/`: copia de `proyecto/sumo/`; se modificaron `centro_base.sumocfg` y `demanda/generar_demanda.py`.
+- `semanas/S2/Tyrone/evidencias/s1_kpis-base.png` y `semanas/S2/Tyrone/explicaciones/s1_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **`inicio_busqueda` con un radio de 300 m o el edge objetivo:** con app, el conductor ya no pasa necesariamente por su puesto objetivo, y la definición tiene que servir para todos los escenarios.
+- **Comparación con S1-3:** el tiempo sale 52 % y 47 % mayor que en el cálculo provisional (230 y 246 s). Con `--radio-busqueda-m 0`, `kpis.py` reproduce exactamente 229,9 y 245,6 s, así que la diferencia es solo de definición.
+- **Distancia:** solo cuenta los edges completos (exitTime en (inicio, fin]).
+- **CO₂:** integral del emission-output, muestreado cada 10 s. Lo validé contra el `CO2_abs` exacto de tripinfo en 330 viajes completos: ratio 0,988 y correlación 0,94.
+- **Censurados:** los buscadores que no estacionaron (201 y 248) se excluyen de las estadísticas y se reportan aparte en `conteos`.
+- **Dónde corre:** `kpis/` no importa `sumolib` ni `traci`, así que corre en la computadora con su propio `.venv`.
+- **Nombres de las claves:** en `kpis_base.json`, `valores` usa los nombres reservados del mensaje WS `kpi` (CONTRATO §6).
+
+**Problemas encontrados:**
+- El `PYTHONPATH` de ROS Jazzy de esta computadora rompe pytest al cargar plugins. Se corre con `env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`.
+- El contenedor no trae `pandas`, así que `kpis/` corre en la computadora. Si el controlador lo importa en S3, hay que instalar `kpis/requirements.txt` en el contenedor.
+
+**Pedidos a otros:**
+- @Freddy:
+  - Definición de búsqueda: empieza al entrar al primer edge a ≤ 300 m del destino (o al edge del `pa_objetivo`) y termina con el `started` de la primera parada en un `parkingArea`.
+  - Claves de `kpis/salidas/kpis_base.json` → `valores`: `busqueda_media_s`, `distancia_busqueda_media_m`, `co2_busqueda_g`, `ocupacion_media_pico` y `falsas_liberaciones_100` (`null` hasta S3). Usa las mismas en tu mensaje WS `kpi`.
+
+**Bucle y verificación:**
+- 2 vueltas. Los tests pasaron a la primera. En la segunda vuelta validé el CO₂ contra tripinfo y la diferencia con S1-3 recalculando con radio 0.
+- El verificador independiente reportó 6/6 criterios cumplidos: tests 13/13, 4,4 y 4,8 s por semilla, JSON completo, ocupación 87,0/87,7 %, docstring y evidencia.
+
+**Pendientes para la próxima sesión:**
+- Aplicar `kpis.kpis` a los escenarios con app (S2-3).
+- Opcional: sumar el tramo parcial del edge de parqueo a la distancia.
+
+**Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s1_kpis-base.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s1_explicacion.pdf)

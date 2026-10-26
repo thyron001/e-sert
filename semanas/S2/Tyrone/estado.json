@@ -1,0 +1,24 @@
+{
+  "persona": "Tyrone",
+  "semana": "S2",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-26",
+      "resumen": "Módulo kpis/ con lectores XML en streaming y definiciones fijas de tiempo, distancia y CO2 de búsqueda y ocupación; en la línea base (2 semillas) la búsqueda media es 356 s, 1280 m y 680 g de CO2, con ocupación pico de 87,0-87,7 %; 13 tests y 5-8 s por semilla.",
+      "evidencias": [
+        "evidencias/s1_kpis-base.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Aplicar kpis.kpis a los escenarios con app (S2-3).",
+        "Opcional: añadir el tramo parcial del edge de parqueo a la distancia."
+      ]
+    }
+  }
+}
