@@ -1,4 +1,5 @@
 {
+ "demanda": "/home/thyron001/v2x/van3twin-docker/results/e-sert/semanas/S2/Tyrone/codigo/sumo/escenarios/base_s2.rou.xml",
  "warmup_s": 900.0,
  "fin_s": 4500.0,
  "capacidad_total": 6194,
@@ -9,7 +10,8 @@
   "duracion_s": "3600",
   "warmup_s": "900",
   "ocupacion_fondo": "0.8",
-  "semilla": "2"
+  "semilla": "2",
+  "porc_app": "0.0"
  },
  "vehiculos_por_clase": {
   "fondo": 4959,
@@ -20,7 +22,7 @@
  "excluidos_fondo": 4959,
  "buscadores": 1369,
  "buscadores_con_kpi": 1121,
- "buscadores_sin_estacionar": 248,
- "busqueda_censurada_media_s": 1866.8306451612902,
+ "buscadores_sin_estacionar": 159,
+ "busqueda_censurada_media_s": 392.35849056603774,
  "buscadores_sin_inicio": 0
 }

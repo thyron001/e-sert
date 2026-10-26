@@ -103,7 +103,9 @@ filas.append({
 | Distancia de búsqueda media | 1248 m | 1310 m | 1280 m (1245–1315) |
 | CO2 de búsqueda medio | 666 g | 693 g | 680 g (661–698) |
 | Ocupación media hora pico | 87,0 % | 87,7 % | 87,3 % |
-| Sin estacionar al final (censurados) | 201 | 248 | |
+| Sin estacionar al final (censurados)* | 114 | 159 | |
+
+\* Corregido en S2-3: la primera versión contaba 201 y 248 porque tomaba como hora válida el exitTime = -1 que SUMO escribe en los edges que un vehículo sin terminar aún no recorrió. Las medias de los 4 KPIs no cambian.
 
 Comparación con el cálculo provisional de S1-3 (230 y 246 s): el tiempo nuevo es 52 % y 47 % mayor. La diferencia viene solo de la definición del inicio: con radio 0 (solo el edge objetivo), `kpis.py` reproduce exactamente 229,9 y 245,6 s.
 
@@ -114,7 +116,7 @@ Comparación con el cálculo provisional de S1-3 (230 y 246 s): el tiempo nuevo 
 - **Radio de 300 m.** Incluye los últimos metros de aproximación al destino, así que ninguna búsqueda dura 0 s (el mínimo ronda 30 s). Se aplica igual en todos los escenarios, así que la comparación es justa.
 - **Distancia.** Solo cuenta los edges completos. El tramo del edge donde estaciona se omite, y la distancia se subestima unas decenas de metros por vehículo.
 - **CO2 muestreado cada 10 s.** Es exacto en promedio (98,8 % del total de SUMO), pero ruidoso por vehículo. Los ~400 g/km son propios del tráfico con arranques y paradas del modelo HBEFA3.
-- **Censurados.** Los 201 y 248 buscadores sin estacionar se excluyen, lo que subestima la media de la línea base. Es una subestimación conservadora: favorece a la búsqueda a ciegas, no a la app.
+- **Censurados.** Los 114 y 159 buscadores sin estacionar (media de 288 y 392 s buscando al final) se excluyen, lo que subestima la media de la línea base. Es una subestimación conservadora: favorece a la búsqueda a ciegas, no a la app.
 - **IC de la ocupación.** Usa las muestras por minuto, que están correlacionadas en el tiempo, así que su IC es optimista.
 
 ## 9. Preguntas que podría hacer el profesor

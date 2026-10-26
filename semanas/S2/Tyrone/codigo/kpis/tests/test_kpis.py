@@ -191,3 +191,15 @@ def test_resumen_estadistico_vacio():
     for clave in ("media", "mediana", "p90", "ic95"):
         assert r[clave] is None
     assert r["n"] in (0, None)
+
+
+def test_exit_times_negativos_son_no_recorridos(tmp_path):
+    """SUMO escribe -1 en los edges que un vehículo sin terminar aún no ha dejado."""
+    ruta = tmp_path / "vehroutes.xml"
+    ruta.write_text('<routes><vehicle id="v9" depart="100.00">'
+                    '<route edges="a b c" exitTimes="110.00 -1 -1"/></vehicle></routes>',
+                    encoding="utf-8")
+    rutas = lectores.leer_vehroutes(ruta)
+    assert rutas["salida"].isna().tolist() == [False, True, True]
+    # El edge objetivo "c" nunca se alcanzó: no hay inicio de búsqueda (antes daba -1)
+    assert kpis.inicio_busqueda(rutas, {"c"}) is None

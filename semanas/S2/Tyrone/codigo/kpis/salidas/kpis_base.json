@@ -100,9 +100,9 @@
    "conteos": {
     "buscadores": 1277,
     "buscadores_con_kpi": 1075,
-    "buscadores_sin_estacionar": 201,
+    "buscadores_sin_estacionar": 114,
     "buscadores_sin_inicio": 0,
-    "busqueda_censurada_media_s": 2111.5174129353236,
+    "busqueda_censurada_media_s": 287.96491228070175,
     "excluidos_paso": 864,
     "excluidos_fondo": 4924
    }
@@ -151,9 +151,9 @@
    "conteos": {
     "buscadores": 1369,
     "buscadores_con_kpi": 1121,
-    "buscadores_sin_estacionar": 248,
+    "buscadores_sin_estacionar": 159,
     "buscadores_sin_inicio": 0,
-    "busqueda_censurada_media_s": 1866.8306451612902,
+    "busqueda_censurada_media_s": 392.35849056603774,
     "excluidos_paso": 922,
     "excluidos_fondo": 4959
    }

@@ -3,9 +3,9 @@
 Uso (dentro del contenedor van3twin, desde esta carpeta):
     python3 generar_demanda.py [--veh-hora 1800] [--porc-paso 40] [--duracion-s 3600]
                                [--warmup-s 900] [--ocupacion-fondo 0.80] [--semilla 1]
-                               [--salida demanda.rou.xml]
+                               [--porc-app 0] [--salida demanda.rou.xml]
 
-Tres clases de vehículos, todos con <param key="con_app" value="0"/>:
+Tres clases de vehículos, con <param key="con_app" value="0|1"/>:
     busca  llega por un edge de borde, va al parkingArea más cercano a su destino
            (destinos.csv, elegido por peso), estaciona una estadía lognormal (media 45 min,
            recortada a 10-120 min) y sale por otro edge de borde.
@@ -13,6 +13,12 @@ Tres clases de vehículos, todos con <param key="con_app" value="0"/>:
     fondo  ya está estacionado al empezar (larga estadía: trabajadores y residentes) y no
            se mueve en toda la corrida; ocupa --ocupacion-fondo de cada parkingArea.
 Las llegadas de busca y paso son Poisson con tasa --veh-hora durante warm-up + duración.
+
+--porc-app (S2-3): cada vehículo que busca sortea u_i ~ U(0,1) con un generador separado
+(numpy.random.default_rng([semilla, 7])) y lleva con_app=1 si u_i < porc_app/100. El sorteo no
+toca el generador de la demanda, así que la demanda es idéntica entre escenarios de una misma
+semilla, y los usuarios con app están anidados (app20 ⊂ app50 ⊂ app80). Paso y fondo siempre
+llevan con_app=0. Cada buscador lleva además param destino ("lat,lon") y destino_nombre.
 
 También escribe rerouters.add.xml: para cada parkingArea, un <rerouter> en su edge con
 <parkingAreaReroute visible="false"> hacia los parkingArea a menos de 400 m (el conductor
@@ -29,6 +35,7 @@ from pathlib import Path
 if "SUMO_HOME" not in os.environ:
     sys.exit("Falta SUMO_HOME: ejecuta este script dentro del contenedor van3twin.")
 sys.path.append(os.path.join(os.environ["SUMO_HOME"], "tools"))
+import numpy as np  # noqa: E402
 import sumolib  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
@@ -149,6 +156,8 @@ def estadia_s(rng):
 
 def generar(net, args):
     rng = random.Random(args.semilla)
+    rng_app = np.random.default_rng([args.semilla, 7])  # solo para con_app (escenarios anidados)
+    porc_app = getattr(args, "porc_app", 0.0)
     puestos = leer_puestos()
     destinos = leer_destinos(net)
     entradas, salidas = edges_borde(net)
@@ -179,7 +188,7 @@ def generar(net, args):
                 f'    </vehicle>')))
             n_fondo += 1
     # --- llegadas Poisson: busca y paso
-    t, n_busca, n_paso = 0.0, 0, 0
+    t, n_busca, n_paso, n_app = 0.0, 0, 0, 0
     tasa = args.veh_hora / 3600.0
     while True:
         t += rng.expovariate(tasa)
@@ -201,14 +210,17 @@ def generar(net, args):
             pa = d["pa"]
             vid = f"busca_{n_busca}"
             n_busca += 1
+            con_app = int(rng_app.random() < porc_app / 100.0)
+            n_app += con_app
             vehiculos.append((t, (
                 f'    <trip id="{vid}" type="auto" depart="{t:.2f}" from="{xml_attr(origen)}" '
                 f'to="{xml_attr(destino_salida)}" departLane="best" departSpeed="max">\n'
                 f'        <stop parkingArea="{xml_attr(pa["puesto_id"])}" '
                 f'duration="{estadia_s(rng)}"/>\n'
-                f'        <param key="con_app" value="0"/>\n'
+                f'        <param key="con_app" value="{con_app}"/>\n'
                 f'        <param key="clase" value="busca"/>\n'
-                f'        <param key="destino" value="{xml_attr(d["nombre"])}"/>\n'
+                f'        <param key="destino" value="{float(d["lat"]):.6f},{float(d["lon"]):.6f}"/>\n'
+                f'        <param key="destino_nombre" value="{xml_attr(d["nombre"])}"/>\n'
                 f'        <param key="pa_objetivo" value="{xml_attr(pa["puesto_id"])}"/>\n'
                 f'    </trip>')))
     vehiculos.sort(key=lambda v: v[0])  # SUMO exige orden por depart (sort estable)
@@ -222,14 +234,15 @@ def generar(net, args):
         # (en un comentario XML no se permite "--")
         f.write(f"<!-- generar_demanda.py: veh_hora={args.veh_hora} porc_paso={args.porc_paso}"
                 f" duracion_s={args.duracion_s} warmup_s={args.warmup_s}"
-                f" ocupacion_fondo={args.ocupacion_fondo} semilla={args.semilla} -->\n")
+                f" ocupacion_fondo={args.ocupacion_fondo} semilla={args.semilla}"
+                f" porc_app={porc_app} -->\n")
         f.write("<routes>\n")
         f.write('    <vType id="auto" vClass="passenger" '
                 f'emissionClass="{CLASE_EMISION}">\n' + params + "    </vType>\n")
         for _, xml in vehiculos:
             f.write(xml + "\n")
         f.write("</routes>\n")
-    return {"fondo": n_fondo, "busca": n_busca, "paso": n_paso,
+    return {"fondo": n_fondo, "busca": n_busca, "paso": n_paso, "con_app": n_app,
             "entradas": len(entradas), "salidas": len(salidas),
             "capacidad_total": sum(p["capacidad"] for p in puestos),
             "destinos": {d["nombre"]: d["pa"]["puesto_id"] for d in destinos}}
@@ -291,6 +304,8 @@ def main():
     ap.add_argument("--ocupacion-fondo", type=float, default=0.80,
                     help="fracción de puestos ocupados por larga estadía desde el inicio")
     ap.add_argument("--semilla", type=int, default=1)
+    ap.add_argument("--porc-app", type=float, default=0.0,
+                    help="porcentaje de buscadores con la app (0, 20, 50, 80)")
     ap.add_argument("--salida", default=str(DIR / "demanda.rou.xml"))
     args = ap.parse_args()
 
@@ -299,7 +314,8 @@ def main():
     alt = escribir_rerouters(leer_puestos())
     escribir_sumocfg(args.warmup_s + args.duracion_s)
     (SALIDAS / f"base_{args.semilla}").mkdir(parents=True, exist_ok=True)
-    print(f"vehículos: {info['fondo']} de fondo, {info['busca']} buscan, {info['paso']} de paso")
+    print(f"vehículos: {info['fondo']} de fondo, {info['busca']} buscan ({info['con_app']} con app), "
+          f"{info['paso']} de paso")
     print(f"edges de borde: {info['entradas']} entradas, {info['salidas']} salidas")
     print(f"rerouters: {len(leer_puestos())} (media de {alt:.1f} alternativas a "
           f"<= {RADIO_ALTERNATIVAS_M:.0f} m)")

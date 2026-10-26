@@ -17,7 +17,8 @@
       },
       "pendientes": [
         "Aplicar kpis.kpis a los escenarios con app (S2-3).",
-        "Opcional: añadir el tramo parcial del edge de parqueo a la distancia."
+        "Opcional: añadir el tramo parcial del edge de parqueo a la distancia.",
+        "Corregido en S2-3: los censurados de la base son 114 y 159 (no 201 y 248); las medias no cambian."
       ]
     },
     "sesion-2": {
@@ -36,6 +37,26 @@
       "pendientes": [
         "Reemplazar el estado y el espejo MOCK por los del controlador de Freddy.",
         "Ver peatones cuando el backend los envíe (el escenario base no tiene)."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-10-26",
+      "resumen": "8 escenarios comparables (base, app20, app50, app80 x 2 semillas) con demanda idéntica y usuarios con app anidados, registrador TraCI de la ocupación real que coincide exactamente con el stop-output, y guiado provisional (oráculo MOCK): la búsqueda media baja de ~355 s a ~152 s con 80 % de app, sin teletransportes.",
+      "evidencias": [
+        "evidencias/s3_penetracion-escenarios.png",
+        "evidencias/s3_ocupacion-real.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S2_Tyrone.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Reemplazar guiado_oraculo.py por traci/guiado.py de Freddy y repetir las 8 corridas (S3-1).",
+        "Ejecutor completo de escenarios con KPIs y precisión del mapa (S3-1)."
       ]
     }
   }

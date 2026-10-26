@@ -44,3 +44,34 @@ python -m visor.servidor_prueba --puerto 8001 --velocidad 5   # http://localhost
 ```
 
 ![Visor Leaflet](evidencias/s2_visor-leaflet.png)
+
+## Sesión 3 · Escenarios con penetración de app y registro de la ocupación real
+
+`generar_escenarios.py` produce `{base,app20,app50,app80}_s{1,2}`, con dos garantías:
+- dentro de cada semilla, la demanda es idéntica (mismos vehículos y horas de salida; solo
+  cambia `con_app`);
+- los usuarios con app están anidados (253 ⊂ 624 ⊂ 1018).
+
+`kpis/registrar_ocupacion.py`, un hook del Controlador de Freddy, guarda la ocupación real de
+los 610 puestos cada 60 s. Coincide exactamente con el stop-output en las 8 corridas.
+
+Con el guiado provisional (oráculo MOCK, optimista), la búsqueda media baja así:
+
+| % app | Búsqueda media s1 / s2 | Distancia | CO₂ por búsqueda |
+|---|---|---|---|
+| 0 | 349 / 362 s | 1248 / 1310 m | 666 / 693 g |
+| 20 | 306 / 320 s | 1092 / 1163 m | 586 / 624 g |
+| 50 | 229 / 225 s | 811 / 804 m | 438 / 424 g |
+| 80 | 154 / 150 s | 531 / 525 m | 294 / 289 g |
+
+Las 8 corridas terminan sin teletransportes. En S3-1 se repiten con el guiado de Freddy.
+
+```bash
+docker exec -w /home/vanet/results/e-sert/semanas/S2/Tyrone/codigo/sumo/escenarios van3twin \
+    bash -lc "python3 generar_escenarios.py && python3 correr_escenarios.py"
+cd semanas/S2/Tyrone/codigo && python -m kpis.resumen_escenarios --calcular --guiado-provisional
+```
+
+![Penetración de la app](evidencias/s3_penetracion-escenarios.png)
+
+![Ocupación real app50_s1](evidencias/s3_ocupacion-real.png)

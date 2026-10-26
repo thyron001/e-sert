@@ -46,7 +46,9 @@ def leer_vehroutes(ruta):
             continue
         final = rutas[-1]
         edges = final.get("edges", "").split()
-        salidas = [float(x) for x in final.get("exitTimes", "").split()]
+        # SUMO escribe -1 en los edges que un vehículo sin terminar todavía no ha dejado
+        salidas = [float(x) if float(x) >= 0 else float("nan")
+                   for x in final.get("exitTimes", "").split()]
         depart = _f(el.get("depart"))
         vid = el.get("id")
         for i, edge in enumerate(edges):
@@ -89,8 +91,8 @@ def leer_proyeccion(ruta_net):
 
 
 def leer_demanda(ruta_rou):
-    """Parámetros de cada trip/vehicle de la demanda (clase, con_app, destino, pa_objetivo)."""
-    claves = ["clase", "con_app", "destino", "pa_objetivo"]
+    """Parámetros de cada trip/vehicle de la demanda (clase, con_app, destino, pa_objetivo...)."""
+    claves = ["clase", "con_app", "destino", "pa_objetivo", "destino_nombre"]
     filas = []
     for _, el in etree.iterparse(str(Path(ruta_rou)), events=("end",), tag=("trip", "vehicle")):
         params = {p.get("key"): p.get("value") for p in el.iterfind("param")}

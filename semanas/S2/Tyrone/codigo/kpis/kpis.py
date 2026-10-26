@@ -20,6 +20,10 @@ Definiciones (fijas; las mismas alimentan el informe y el visor):
 - ocupacion(t): plazas ocupadas / capacidad total, cada 60 s, con los intervalos
   [started, ended) de TODAS las paradas en parkingArea (una parada sin terminar dura hasta el
   fin). El KPI es su promedio en la hora pico: excluye el warm-up (15 min).
+- Si un vehículo estaciona sin haber entrado a la zona del destino (p. ej. guiado por la app a
+  un puesto a más de 300 m), su búsqueda es 0 s y 0 m (inicio = fin); se cuentan en
+  `buscadores_sin_inicio`. En vehroute-output, un exitTime de -1 (edge aún no recorrido por un
+  vehículo sin terminar) se trata como "no recorrido".
 - Buscadores sin estacionar al final: no entran en las estadísticas (tiempo censurado); se
   reportan aparte con su tiempo hasta el fin de la simulación.
 - Estadísticas de cada KPI: n, media, mediana, p90 e IC 95 % de la media (bootstrap, 1000
@@ -137,11 +141,16 @@ def _destinos_xy(ruta_destinos, ruta_net):
     return destinos
 
 
-def calcular(salidas, dir_sumo=DIR_SUMO, radio_busqueda_m=300.0, periodo_emision_s=10.0):
-    """KPIs de una corrida. Devuelve (vehiculos, serie_ocupacion, info)."""
+def calcular(salidas, dir_sumo=DIR_SUMO, radio_busqueda_m=300.0, periodo_emision_s=10.0,
+             ruta_demanda=None):
+    """KPIs de una corrida. Devuelve (vehiculos, serie_ocupacion, info).
+
+    La demanda es `ruta_demanda` si se da; si no, salidas/demanda.rou.xml (correr_base.py) o,
+    en último caso, sumo/demanda/demanda.rou.xml (semilla 1).
+    """
     salidas, dir_sumo = Path(salidas), Path(dir_sumo)
     ruta_net = dir_sumo / "red" / "centro.net.xml"
-    ruta_dem = salidas / "demanda.rou.xml"
+    ruta_dem = Path(ruta_demanda) if ruta_demanda else salidas / "demanda.rou.xml"
     if not ruta_dem.exists():
         ruta_dem = dir_sumo / "demanda" / "demanda.rou.xml"
     cab = _cabecera_demanda(ruta_dem)
@@ -174,7 +183,8 @@ def calcular(salidas, dir_sumo=DIR_SUMO, radio_busqueda_m=300.0, periodo_emision
         ruta = por_veh.get(b.id)
         if ruta is None:
             continue  # no llegó a insertarse
-        objetivo = set(cerca.get(b.destino, set()))
+        nombre = b.destino_nombre or b.destino  # S1: `destino` era el nombre; S2-3: "lat,lon"
+        objetivo = set(cerca.get(nombre, set()))
         if b.pa_objetivo in edge_de_pa:
             objetivo.add(edge_de_pa[b.pa_objetivo])
         ini = inicio_busqueda(ruta, objetivo)
@@ -184,10 +194,10 @@ def calcular(salidas, dir_sumo=DIR_SUMO, radio_busqueda_m=300.0, periodo_emision
             continue
         fin = float(primera.loc[b.id, "started"])
         if ini is None or ini > fin:
-            sin_inicio += 1  # estacionó sin entrar a la zona del destino
-            continue
+            sin_inicio += 1  # estacionó sin entrar a la zona del destino: no hubo búsqueda
+            ini = fin
         filas.append({
-            "id": b.id, "con_app": b.con_app, "destino": b.destino, "pa_objetivo": b.pa_objetivo,
+            "id": b.id, "con_app": b.con_app, "destino": nombre, "pa_objetivo": b.pa_objetivo,
             "pa_final": primera.loc[b.id, "parkingArea"], "inicio_s": ini, "fin_s": fin,
             "tiempo_busqueda_s": fin - ini,
             "distancia_busqueda_m": distancia_busqueda_m(ruta, ini, fin, longitudes),
@@ -196,7 +206,7 @@ def calcular(salidas, dir_sumo=DIR_SUMO, radio_busqueda_m=300.0, periodo_emision
     vehiculos = pd.DataFrame(filas)
     serie = serie_ocupacion(stops, capacidad, fin_sim)
     info = {
-        "warmup_s": warmup, "fin_s": fin_sim, "capacidad_total": capacidad,
+        "demanda": str(ruta_dem), "warmup_s": warmup, "fin_s": fin_sim, "capacidad_total": capacidad,
         "radio_busqueda_m": radio_busqueda_m, "parametros_demanda": cab,
         "vehiculos_por_clase": demanda["clase"].value_counts().to_dict(),
         "excluidos_paso": int((demanda["clase"] == "paso").sum()),
@@ -259,10 +269,12 @@ def main():
     ap.add_argument("--semilla", default="1")
     ap.add_argument("--radio-busqueda-m", type=float, default=300.0)
     ap.add_argument("--dir-sumo", default=str(DIR_SUMO))
+    ap.add_argument("--demanda", default=None, help=".rou.xml de la corrida (escenarios de S2-3)")
     ap.add_argument("--destino", default=str(SALIDAS), help="carpeta de salida de los KPIs")
     args = ap.parse_args()
     t0 = time.time()
-    vehiculos, serie, info = calcular(args.salidas, args.dir_sumo, args.radio_busqueda_m)
+    vehiculos, serie, info = calcular(args.salidas, args.dir_sumo, args.radio_busqueda_m,
+                                      ruta_demanda=args.demanda)
     destino = Path(args.destino)
     destino.mkdir(parents=True, exist_ok=True)
     base = f"{args.escenario}_{args.semilla}"
