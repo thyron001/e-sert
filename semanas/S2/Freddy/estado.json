@@ -6,14 +6,43 @@
       "estado": "parcial",
       "fecha": "2026-10-23",
       "resumen": "Capa FastAPI delgada sobre el núcleo: las 14 rutas del contrato v1 bajo /api/v1, el alias /interno/snapshot con token, WS /ws/estado (cola asyncio, 1 snapshot por segundo simulado, verdad solo para el visor) y Swagger con ejemplos y openapi.json. 102 tests con 99 % de cobertura. Queda parcial solo porque no hubo Docker para construir la imagen.",
-      "evidencias": ["evidencias/s1_swagger.png", "evidencias/s1_swagger-rutas.png", "evidencias/s1_swagger.pdf", "explicaciones/s1_explicacion.pdf"],
+      "evidencias": [
+        "evidencias/s1_swagger.png",
+        "evidencias/s1_swagger-rutas.png",
+        "evidencias/s1_swagger.pdf",
+        "explicaciones/s1_explicacion.pdf"
+      ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 5, "total": 6},
+      "criterios": {
+        "cumplidos": 5,
+        "total": 6
+      },
       "pendientes": [
         "docker build real del Dockerfile (en WSL no hay integración con Docker Desktop)",
         "WS /ws/espejo/{veh_id} (contrato §7)",
         "límite de tasa de recargas (DESPLIEGUE.md), que necesita un código de error en el contrato",
         "la aprobación de CONTRATO.propuesto.md en la unificación"
+      ]
+    },
+    "sesion-2": {
+      "estado": "parcial",
+      "fecha": "2026-10-26",
+      "resumen": "Peatones de diligencia (343 llegadas de búsqueda en 30 min) y máquina de estados por usuario con GPS emulado y clasificación cada 5 s. Las pruebas pasan (25 puras + 3 con SUMO), pero solo 4 de 343 peatones volvieron al auto en 30 min (criterio: >95 %) y hubo 214 falsas liberaciones (62,4 por cada 100 sesiones) con el clasificador de umbral.",
+      "evidencias": [
+        "evidencias/s2_linea-tiempo-sesion.png",
+        "evidencias/s2_peaton-diligencia.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 5
+      },
+      "pendientes": [
+        "Más del 95 % de los peatones vuelve en 30 min: los caminos a pie son de más de 1 km; hace falta una corrida más larga o destinos más cercanos (decisión de Tyrone/Freddy, ver bitácora)",
+        "Falsas liberaciones: el clasificador de umbral (RF no está en el repo) confunde el ruido del GPS con movimiento",
+        "El controlador no publica aún los eventos al backend (POST /sim/paso, POST /sesiones/{id}/cerrar)",
+        "Medir la latencia de clasificar (pedido a Pablo) y el verificador independiente"
       ]
     }
   }

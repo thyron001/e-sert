@@ -289,3 +289,48 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Pedidos a otros:** @Tyrone [Plan] herramientas/explicacion_pdf.py: si una imagen es más alta que el espacio de la página, partirla en varias páginas (o escalarla para que quepa); hoy se corta en silencio y cada persona tendría que trocear sus capturas a mano.
 
 **Evidencias:** [Swagger completo (PDF)](../semanas/S2/Freddy/evidencias/s1_swagger.pdf) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s1_explicacion.pdf)
+
+## S2 · Sesión 2 · 2026-10-26 · Máquina de estados y peatones que hacen diligencias
+**Estado:** parcial
+**Qué hice:**
+- `traci/peatones.py`: `GestorPeatones` crea un peatón por cada auto de búsqueda que estaciona, con ida, espera de diligencia y vuelta; extiende la parada a 86400 s y reanuda el auto cuando el peatón regresa. Casos difíciles: regreso corto (15 %) y espera en el auto (10 %).
+- `traci/estados.py`: `MaquinaSesion` (pura, reglas y umbrales del contrato §3) y `ControlSesiones` (hook de TraCI: teléfono `sim_<veh>` con `EmuladorGPS`, CSV de transiciones, ventanas y falsas liberaciones).
+- `traci/clasificacion.py`: buffer de 30 s por usuario y `clasificar` cada 5 s.
+- `traci/correr_sesiones.py` (CLI), `traci/graficas_sesion.py` (evidencias), `traci/tests/` (9 pruebas puras, 3 con SUMO).
+- Corrida de 30 min del escenario base en segundo plano (`traci/salidas/`, ignorado por git).
+
+**Archivos creados o modificados:** `semanas/S2/Freddy/codigo/traci/` (todo el módulo, copia de `proyecto/traci/` más lo nuevo), `semanas/S2/Freddy/codigo/traci/escenario/tyrone/sumo/` (copia de `proyecto/sumo/`, ignorada), `semanas/S2/Freddy/evidencias/s2_linea-tiempo-sesion.png`, `semanas/S2/Freddy/evidencias/s2_peaton-diligencia.png`, `semanas/S2/Freddy/explicaciones/s2_explicacion.{md,pdf}`, `semanas/S2/Freddy/estado.json`, `semanas/S2/Freddy/RESUMEN.md`.
+
+**Decisiones y por qué:**
+- `getParkingStartingVehicleIDList` del prompt no existe en SUMO 1.12; se usa `getParkingStartingVehiclesIDList`.
+- El peatón nace y vuelve a la acera más cercana al auto, no al carril del parkingArea: caminar hasta el carril hizo caer a SUMO al volver.
+- Las aristas internas de cruce (`:...`) no admiten fin de caminata en SUMO 1.12; los destinos sin acera o sin camino se sustituyen por otro (contado en `sin_destino`). Museo Pumapungo queda en el borde del mapa y no tiene acera cercana.
+- La distancia al puesto se mide al punto donde se estacionó el auto. Un parkingArea mide ~100 m y su centro quedaría a más de 30 m del auto: el regreso (< 30 m) no se cumpliría nunca.
+- Solo generan peatón los autos de clase `busca`; los `fondo` ya están estacionados desde el inicio.
+- Clasificador: `ia.inferencia` se importa desde `proyecto/ia/` (no se edita). Como `rf_v0.joblib` no está en el repo, todas las ventanas usan la regla de umbral (`fuente = umbral`).
+- Se añadió `pydantic` al contenedor (faltaba para las pruebas existentes de S1).
+
+**Problemas encontrados:**
+- SUMO 1.12 se caía sin mensaje al volver caminando al carril del parkingArea y al terminar caminatas en aristas internas. Se aisló con bisección (sin hooks, solo peatones, sin caminar, sin ida, sin vuelta) y se corrigió en el código.
+- Peatones de destinos lejanos: la ida tarda 15–20 min (1–1,5 km). Con el horizonte de 30 min, la mayoría sigue caminando al final. Las pruebas con SUMO necesitaron 16000 s de horizonte.
+- Clasificador de umbral: el ruido AR(1) de 5 m hace que un teléfono quieto aparente moverse a ~4 m/s (por encima de 2,2 m/s). Resultado: 214 falsas liberaciones.
+
+**Resultados de la corrida de 30 min (`centro_base`, semilla 1):**
+- Llegadas con peatón: 343. Volvieron al auto: **4 (1,2 %)**; pendientes: 339.
+- Sesiones: 343; cerradas 215; abiertas al final 128.
+- Falsas liberaciones: **214 = 62,4 por cada 100 sesiones**, con clasificador `umbral` (17 250 ventanas).
+- Criterio ">95 % de peatones vuelve en 30 min": **no cumplido**. Criterio "ningún auto parado para siempre": **no cumplido** al corte (128 sesiones abiertas, 339 peatones aún fuera).
+
+**Bucle y verificación:** varias vueltas de depuración (SUMO, pruebas con SUMO 3 de 3 al final). No se lanzó un subagente verificador independiente, porque no se pidió; la verificación fue ejecutar las pruebas y la corrida completa. Pruebas: `-m "not sumo"` 25 pasan; `-m sumo` 3 pasan. Criterios de "hecho": 4 de 5 cumplidos (pruebas, transiciones según contrato, falsas por 100 reportadas, dos PNG); el de 95 % no.
+
+**Pedidos a otros:**
+- @Pablo: el modelo `rf_v0.joblib` no está en `proyecto/ia/modelos/`; sin él, `clasificar` usa el umbral, y con ruido de 5 m confunde autos y peatones quietos con movimiento. Pido features robustas al ruido (p. ej. `desplazamiento_neto` sobre la ventana, o velocidad suavizada) o el RF. Además, medir y compartir la latencia de `clasificar` por ventana (no la medí en esta sesión).
+- @Tyrone [Plan] `semanas/S2/Freddy/sesion-2.md`: (a) el criterio ">95 % de peatones vuelve en 30 min" no es alcanzable con destinos a 1–1,5 km; propongo un horizonte de 60 min o destinos más cercanos al puesto. (b) El prompt usa `getParkingStartingVehicleIDList`, que no existe en SUMO 1.12 (ya adaptado en el código). (c) La distancia al puesto del contrato §3 necesita aclararse: un parkingArea de ~100 m no sirve como punto de referencia de 30 m. No edité `sesion-2.md`.
+- @Tyrone: en `proyecto/sumo/demanda/destinos.csv`, "Museo Pumapungo" (2479.6, 93.6 en SUMO) no tiene acera cercana; conviene moverlo o quitarlo. Y los peatones `ped_*` aún no salen en el snapshot (el controlador no publica todavía a `POST /sim/paso`).
+
+**Pendientes para la próxima sesión:**
+- Publicar los eventos al backend (`POST /sim/paso`, `POST /sesiones/{id}/cerrar`), con token.
+- Resolver el criterio de 95 % (horizonte o destinos) y volver a medir las falsas liberaciones con el clasificador de Pablo.
+- Verificador independiente y latencia de `clasificar`.
+
+**Evidencias:** ![](../semanas/S2/Freddy/evidencias/s2_linea-tiempo-sesion.png) ![](../semanas/S2/Freddy/evidencias/s2_peaton-diligencia.png) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s2_explicacion.pdf)

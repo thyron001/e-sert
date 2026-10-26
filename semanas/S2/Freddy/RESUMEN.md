@@ -17,3 +17,15 @@ Lo cubren 102 tests, con 99 % de cobertura en `api/` + `nucleo/`. La lógica nue
 Captura completa con las 16 operaciones desplegadas: [evidencias/s1_swagger.png](evidencias/s1_swagger.png) · paginada en A4: [evidencias/s1_swagger.pdf](evidencias/s1_swagger.pdf)
 
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)
+
+## Sesión 2 · 2026-10-26 · Máquina de estados y peatones que hacen diligencias
+
+Cada auto de búsqueda que estaciona genera un peatón que camina al destino, espera la diligencia y vuelve; el auto se libera cuando el peatón regresa. Una máquina de estados por usuario sigue la sesión con el GPS emulado y el clasificador cada 5 s.
+
+Pruebas: 25 puras y 3 con SUMO, todas pasan. Corrida de 30 min del escenario base: 343 sesiones, 4 peatones volvieron al auto (1,2 %) y **214 falsas liberaciones (62,4 por cada 100 sesiones)** con el clasificador de umbral. El criterio de 95 % no se cumple; ver la bitácora.
+
+![Línea de tiempo de una sesión](evidencias/s2_linea-tiempo-sesion.png)
+
+![Trayectoria de una diligencia](evidencias/s2_peaton-diligencia.png)
+
+Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
