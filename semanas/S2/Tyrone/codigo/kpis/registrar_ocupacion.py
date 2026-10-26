@@ -37,7 +37,7 @@ class RegistradorOcupacion:
         self.ruta = Path(destino) / f"ocupacion_real_{escenario}.csv"
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
         self._archivo = open(self.ruta, "w", newline="", encoding="utf-8")
-        self._csv = csv.writer(self._archivo)
+        self._csv = csv.writer(self._archivo, lineterminator="\n")
         self._csv.writerow(COLUMNAS)
         self._puestos = None
         self._capacidad = {}
