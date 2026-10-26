@@ -19,6 +19,24 @@
         "Aplicar kpis.kpis a los escenarios con app (S2-3).",
         "Opcional: añadir el tramo parcial del edge de parqueo a la distancia."
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-26",
+      "resumen": "Visor web estático con Leaflet 1.9 en canvas que muestra autos por estado, puestos verde/rojo y el vehículo espejo desde /ws/estado, con reconexión exponencial; servidor de prueba FastAPI que reproduce 900 snapshots de hora pico grabados con TraCI; probado contra el backend real de Freddy en /visor/ (54 FPS, 9 tests).",
+      "evidencias": [
+        "evidencias/s2_visor-leaflet.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Reemplazar el estado y el espejo MOCK por los del controlador de Freddy.",
+        "Ver peatones cuando el backend los envíe (el escenario base no tiene)."
+      ]
     }
   }
 }

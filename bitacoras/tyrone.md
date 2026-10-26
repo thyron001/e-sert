@@ -183,3 +183,56 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Opcional: sumar el tramo parcial del edge de parqueo a la distancia.
 
 **Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s1_kpis-base.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s1_explicacion.pdf)
+
+## S2 · Sesión 2 · 2026-10-26 · Visor web Leaflet y servidor WS de prueba
+**Estado:** hecha
+
+**Qué hice:**
+- `visor/grabar_snapshots.py` (en el contenedor): simula el escenario base y graba 900 snapshots del contrato (t = 1801–2700 s, hora pico) en `visor/datos/snapshots.jsonl`. Tardó ~8 min en segundo plano.
+- `visor/servidor_prueba.py` (FastAPI): `GET /api/v1/puestos`, `WS /ws/estado` (repetición en bucle, `--velocidad 1|5|10`, un `kpi` cada 30 snapshots con los valores de `kpis_base.json`) y estáticos en `/visor/` y `/`.
+- `visor/index.html`, `visor.js` y `estilos.css`, con Leaflet 1.9.4 desde unpkg (con SRI):
+  - canvas y marcadores actualizados por id;
+  - puestos verde/rojo con popup `calle · ocupados/capacidad`;
+  - autos por estado y borde grueso con app; halo en los `espejos`;
+  - panel con conteos, KPIs, conexión y FPS;
+  - `?ws=` configurable, reconexión 1→30 s y capa `?verdad=1`.
+- `visor/captura.py` (Playwright): captura a 1600×1000, medición de FPS y prueba de reconexión.
+- Un subagente escribió 9 tests (`visor/tests/`): contrato de los 900 snapshots, WS, puestos y rutas relativas.
+- Probé el visor contra el backend real de Freddy (`origin/freddy/s2`, extraído con `git archive` a una carpeta temporal, sin editarlo), servido en su `/visor/` con `ESERT_VISOR_DIR`: le envié 40 pasos `POST /api/v1/sim/paso` hechos con mis snapshots.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Tyrone/codigo/visor/`: `index.html`, `visor.js`, `estilos.css`, `grabar_snapshots.py`, `servidor_prueba.py`, `captura.py`, `requirements.txt`, `.gitignore`, `tests/` y `datos/snapshots_muestra.jsonl`.
+- `semanas/S2/Tyrone/evidencias/s2_visor-leaflet.png` y `semanas/S2/Tyrone/explicaciones/s2_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **Estado del vehículo (MOCK):** `ESTACIONADO` si `stopState` tiene el bit de parking, `BUSCANDO` si busca y aún no estaciona, `null` para paso y fondo (contrato). El espejo (MOCK) es un buscador al azar con `con_app = true`.
+- **Autos de fondo estacionados:** no se envían (~4900 marcadores quietos); ya se ven en el color de los puestos. Así los snapshots bajan a ~100 KB y el visor dibuja ~600 autos más 610 puestos.
+- **lat/lon con pyproj y netOffset** en lugar de `convertGeo` por vehículo. Es la misma conversión, comprobada con 20 vehículos al iniciar (< 1e-6°), y evita ~600 llamadas TraCI por segundo.
+- **`snapshots.jsonl` (91 MB) se ignora** con un `.gitignore` propio de `visor/`, sin tocar el de la raíz. En git va la muestra de 60 (5,5 MB).
+- **URL por defecto:** el WS del mismo origen, y la API REST se deduce de la URL del WS. Así funciona igual detrás del backend en `/visor/`, con el servidor de prueba o con `?ws=`.
+
+**Problemas encontrados:**
+- **Backend de Freddy:** con él no hubo diferencias de formato (40 `snapshot` + 40 `verdad`, sin errores). Su mapa sale todo verde porque `snapshot.puestos` es la ocupación estimada por sesiones, y en la prueba no había ninguna. Es lo que dice el contrato; la ocupación real se ve con `?verdad=1`.
+- **El escenario base no tiene peatones:** la capa de peatones queda vacía hasta que el backend los envíe.
+- **FPS:** se midieron con `requestAnimationFrame` en Chromium headless (Playwright), no en DevTools: 54 de media y 49 de mínimo a velocidad 1.
+- **`pkill -f` se mataba a sí mismo:** el patrón aparecía en su propia línea de comandos. Los servidores se paran por PID.
+
+**Pedidos a otros:**
+- @Freddy: el visor espera `espejos` y `con_app` en cada snapshot, y usa `estado` para colorear (BUSCANDO, GUIADO, ESTACIONADO, A_PIE, REGRESANDO, SALIENDO; `null` sin búsqueda). También lee `GET /api/v1/puestos` del mismo origen para la posición y la calle de cada puesto.
+- @Miguel: para ver resaltado el auto que sigue tu modo espejo, abre `http://<backend>:8000/visor/`, o en la demo `https://demo.e-sert.tesisucuenca.com/visor/`. Con el servidor de prueba: `python -m visor.servidor_prueba --puerto 8001` y `http://localhost:8001/visor/`. El halo amarillo es el vehículo de `espejos`.
+
+**Bucle y verificación:**
+- 2 vueltas. En la primera, la muestra provisional de 5 snapshots; en la segunda, la muestra real de 60, el `.gitignore` del archivo grande y la prueba contra el backend de Freddy.
+- El verificador independiente reportó 6/6 criterios cumplidos:
+  - detrás de `http.server` carga en /visor/ e intenta `ws://<mismo host>/ws/estado`;
+  - autos y puestos cambian;
+  - 58,6 FPS;
+  - 9 tests, y 900 + 60 snapshots válidos;
+  - la reconexión funciona sin recarga, comprobado con una marca en `window`;
+  - existe la evidencia.
+
+**Pendientes para la próxima sesión:**
+- Reemplazar el estado y el espejo MOCK por los del controlador de Freddy.
+- Ver los peatones cuando el backend los publique.
+
+**Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s2_visor-leaflet.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s2_explicacion.pdf)
