@@ -29,3 +29,18 @@ Pruebas: 25 puras y 3 con SUMO, todas pasan. Corrida de 30 min del escenario bas
 ![Trayectoria de una diligencia](evidencias/s2_peaton-diligencia.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-10-26 · Guiado, sesiones y cobro en la simulación
+
+Los autos con app se guían al puesto libre más cercano a su destino (`rerouteParkingArea`), abren sesión en el núcleo del backend al estacionar y cobran al salir. Corrida de 75 min simulados con 50 % de autos con app.
+
+- Con la ocupación del sistema (solo sesiones de la app): la búsqueda con app es **más larga** que sin app (11,3 frente a 10,8 min).
+- Con la ocupación real de SUMO (oráculo): la búsqueda con app es **más corta** (10,0 frente a 10,7 min).
+- El libro cuadra para los 638 usuarios. La retención final (33 USD) corresponde a 132 sesiones aún abiertas al cierre.
+- Pruebas: 37 pasan, 1 omitida (de S1).
+
+![Búsqueda con y sin app](evidencias/s3_guiado-vs-ciegas.png)
+
+![Cobros simulados por sesión](evidencias/s3_cobros-simulados.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · PDF semanal: [evidencias/resumen_S2_Freddy.pdf](evidencias/resumen_S2_Freddy.pdf)

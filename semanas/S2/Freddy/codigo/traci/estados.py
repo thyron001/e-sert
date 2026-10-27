@@ -11,9 +11,12 @@
 from __future__ import annotations
 
 import csv
+import math
 from collections import Counter, namedtuple
 from pathlib import Path
 from typing import Dict, List, Optional
+
+from comun.esquemas import MotivoCierre
 
 from .clasificacion import ClasificadorUsuario, haversine_m
 from .gps import EmuladorGPS, modo_real_persona, modo_real_vehiculo
@@ -74,13 +77,22 @@ class MaquinaSesion:
         return None
 
 
+def _finitas(*valores: float) -> bool:
+    return all(math.isfinite(v) for v in valores)
+
+
 class ControlSesiones:
     """Hook `on_paso` de `Controlador`: sesiones de parqueo con GPS emulado y clasificación."""
 
     def __init__(self, gps: EmuladorGPS, salidas: Path, escenario: str,
-                 clasificador: Optional[ClasificadorUsuario] = None):
+                 clasificador: Optional[ClasificadorUsuario] = None, puente=None,
+                 solo_con_app: bool = False):
         self.gps = gps
         self.clasificador = clasificador or ClasificadorUsuario()
+        # Con `puente` (S2-3), cada sesión se abre y se cierra en el núcleo del backend.
+        self.puente = puente
+        self.solo_con_app = solo_con_app
+        self.sesion_de: Dict[str, str] = {}
         self.maquinas: Dict[str, MaquinaSesion] = {}
         # Puesto = punto donde el auto se estacionó (lat, lon); un parkingArea mide ~100 m y su
         # centro quedaría a más de 30 m de cualquier auto.
@@ -88,6 +100,7 @@ class ControlSesiones:
         self.puesto_de: Dict[str, str] = {}
         self._ultima_fila: Dict[str, dict] = {}
         self.llegadas = 0
+        self.coords_invalidas = 0  # muestras o puestos con coordenadas no finitas (descartados)
         self.cerradas = 0
         self.falsas_liberaciones = 0
         self.fuentes: Counter = Counter()
@@ -115,16 +128,30 @@ class ControlSesiones:
         """Llamado tras cada paso del `Controlador`."""
         tr = ctrl.traci
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
-            if tr.vehicle.getParameter(veh, "clase") == "busca" and veh not in self.maquinas:
-                self.maquinas[veh] = MaquinaSesion(f"sim_{veh}")
-                self.puesto_de[veh] = tr.vehicle.getStops(veh)[0].stoppingPlaceID
-                x, y = tr.vehicle.getPosition(veh)
-                self.puesto_ll[veh] = ctrl.a_geo(x, y)
-                self.llegadas += 1
+            if tr.vehicle.getParameter(veh, "clase") != "busca" or veh in self.maquinas:
+                continue
+            if self.solo_con_app and tr.vehicle.getParameter(veh, "con_app") != "1":
+                continue
+            self.maquinas[veh] = MaquinaSesion(f"sim_{veh}")
+            self.puesto_de[veh] = tr.vehicle.getStops(veh)[0].stoppingPlaceID
+            x, y = tr.vehicle.getPosition(veh)
+            lat, lon = ctrl.a_geo(x, y)
+            if not _finitas(lat, lon) and self.puente is not None:
+                # SUMO a veces da una posición no válida con el auto recién parado: se usa el puesto
+                lat, lon = self.puente.mapa.puestos[self.puesto_de[veh]].lat, self.puente.mapa.puestos[self.puesto_de[veh]].lon
+                self.coords_invalidas += 1
+            self.puesto_ll[veh] = (lat, lon)
+            self.llegadas += 1
+            if self.puente is not None:
+                sesion_id = self.puente.iniciar(f"sim_{veh}", self.puesto_de[veh], t)
+                if sesion_id is not None:
+                    self.sesion_de[veh] = sesion_id
 
         for veh in list(self.maquinas):
             usuario = f"sim_{veh}"
-            if veh not in ctrl.vehiculos:
+            if veh not in ctrl.vehiculos:  # el auto salió de la red sin detección: se cierra a mano
+                if self.puente is not None and veh in self.sesion_de:
+                    self.puente.cerrar(self.sesion_de.pop(veh), t, motivo=MotivoCierre.manual)
                 del self.maquinas[veh]
                 del self.puesto_ll[veh]
                 continue
@@ -149,6 +176,9 @@ class ControlSesiones:
             x, y = datos[tc.VAR_POSITION]
             modo = modo_real_vehiculo(ctrl.estacionado(datos))
         fila = self.gps.observar(usuario, t, x, y, modo, ctrl.a_geo)
+        if fila is not None and not _finitas(fila["lat"], fila["lon"]):
+            self.coords_invalidas += 1
+            return
         if fila is not None:
             self._ultima_fila[usuario] = fila
             self.clasificador.observar(usuario, fila)
@@ -168,6 +198,8 @@ class ControlSesiones:
             self._escritores["transiciones"].writerow(list(trans))
             if trans.hacia == "CERRADA":
                 self._cerrar(ctrl, veh, trans, distancia)
+            elif self.puente is not None and veh in self.sesion_de:
+                self.puente.transicion(self.sesion_de[veh], trans.hacia, trans.t_sim)
         if maquina.estado == "CERRADA":
             del self.maquinas[veh]
             del self.puesto_ll[veh]
@@ -179,6 +211,8 @@ class ControlSesiones:
             self.falsas_liberaciones += 1
             self._escritores["falsas"].writerow([trans.t_sim, trans.usuario_id, self.puesto_de[veh],
                                                  round(distancia, 1)])
+        if self.puente is not None and veh in self.sesion_de:
+            self.puente.cerrar(self.sesion_de.pop(veh), trans.t_sim)
 
     # ------------------------------------------------------------------ cierre y resumen
 
@@ -192,6 +226,7 @@ class ControlSesiones:
         """Cifras de la corrida: sesiones, falsas liberaciones y el clasificador usado."""
         por_100 = round(100 * self.falsas_liberaciones / self.llegadas, 2) if self.llegadas else None
         return {
+            "coords_invalidas": self.coords_invalidas,
             "sesiones": self.llegadas,
             "cerradas": self.cerradas,
             "abiertas_al_final": len(self.maquinas),

@@ -66,6 +66,8 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dp = p2 - p1
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    # el redondeo flotante puede dar a = 1 + ε (puntos casi antípodas): se acota a [0, 1]
+    a = min(1.0, max(0.0, a))
     return 2 * r * math.asin(math.sqrt(a))
 
 

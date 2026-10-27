@@ -44,6 +44,30 @@
         "El controlador no publica aún los eventos al backend (POST /sim/paso, POST /sesiones/{id}/cerrar)",
         "Medir la latencia de clasificar (pedido a Pablo) y el verificador independiente"
       ]
+    },
+    "sesion-3": {
+      "estado": "parcial",
+      "fecha": "2026-10-26",
+      "resumen": "Guiado con rerouteParkingArea, sesiones y cobro contra el núcleo del backend en 75 min simulados (50 % de autos con app). Con la ocupación que conoce el sistema, la búsqueda con app es más larga que sin app (11,3 frente a 10,8 min). Con la ocupación real de SUMO (oráculo), es más corta (10,0 frente a 10,7 min). El libro cuadra para los 638 usuarios; la retención final de 33 USD corresponde a 132 sesiones abiertas al cierre. Pruebas: 37 pasan, 1 omitida de S1.",
+      "evidencias": [
+        "evidencias/s3_guiado-vs-ciegas.png",
+        "evidencias/s3_cobros-simulados.png",
+        "evidencias/resumen_S2_Freddy.pdf",
+        "explicaciones/s3_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 7
+      },
+      "pendientes": [
+        "La búsqueda con app no es menor que sin app con la ocupación del sistema: el mapa no ve autos sin app ni reservas de autos guiados",
+        "Publicar a una URL caída baja la velocidad de la simulación un 3 % (medido, no es cero)",
+        "Retención final 0: 132 sesiones siguen abiertas al cierre (explicado; el libro cuadra)",
+        "Falsas liberaciones del 65 % con el clasificador de umbral (falta rf_v0.joblib): sesiones de ~35 s que pagan el mínimo de 10 min",
+        "Medir de nuevo los peatones de S2-2 con la codificación de destinos corregida",
+        "Entrega de origin/tyrone/s2 (--porc-app): hoy se usa un mock al 50 %"
+      ]
     }
   }
 }

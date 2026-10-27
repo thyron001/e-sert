@@ -334,3 +334,60 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Verificador independiente y latencia de `clasificar`.
 
 **Evidencias:** ![](../semanas/S2/Freddy/evidencias/s2_linea-tiempo-sesion.png) ![](../semanas/S2/Freddy/evidencias/s2_peaton-diligencia.png) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s2_explicacion.pdf)
+
+## S2 · Sesión 3 · 2026-10-26 · Guiado, sesiones y cobro en la simulación
+**Estado:** parcial
+**Qué hice:**
+- `traci/puente_nucleo.py`: billetera, sesiones y mapa de `backend/nucleo` en memoria, recarga inicial U(5, 20) por usuario, `transicion` / `cerrar` / `iniciar`, libro en centavos. Publicador opcional con cola de tamaño 1 y reintentos con backoff.
+- `traci/guiado.py`: `Guia` (asignación con `rerouteParkingArea`, revisión cada 10 s, máximo 3 reasignaciones, fuentes `mapa` y `verdad`) y `RegistroBusqueda` (tiempo de búsqueda de todos los autos de búsqueda).
+- `traci/estados.py`: la máquina de estados abre y cierra sesiones en el núcleo; si el auto sale de la red sin detección, la sesión se cierra como manual.
+- `traci/escenario_app.py` (MOCK de `--porc-app`), `traci/correr_guiado.py`, `traci/auditar_cobro.py`, `traci/graficas_s3.py`, `traci/tests/test_guiado.py`.
+- Corridas de 75 min: `app50_s1` (fuente mapa), `app50_s1_verdad` (oráculo) y `base_s1`.
+
+**Archivos creados o modificados:** `semanas/S2/Freddy/codigo/traci/` (módulos y pruebas), `semanas/S2/Freddy/codigo/backend/` sin cambios, `semanas/S2/Freddy/evidencias/s3_*.png`, `semanas/S2/Freddy/evidencias/resumen_S2_Freddy.pdf`, `semanas/S2/Freddy/explicaciones/s3_explicacion.{md,pdf}`, `semanas/S2/Freddy/estado.json`, `semanas/S2/Freddy/RESUMEN.md`. Las salidas de SUMO y los escenarios copiados quedan en carpetas ignoradas por git.
+
+**Decisiones y por qué:**
+- Escenario al 50 % con `con_app=1` como MOCK, porque `origin/tyrone/s2` no existe todavía. La línea base sale de la misma demanda; solo cambia `con_app`.
+- Sesiones solo para autos con app (`solo_con_app`); los peatones de diligencia siguen para todos los autos de búsqueda.
+- El guiado comprueba alcanzabilidad (`findRoute`) antes de `rerouteParkingArea`: sin esa comprobación SUMO aborta con una aserción de ruta.
+- Coordenadas no finitas (83 en la corrida final): se usa la coordenada de `puestos.csv` como puesto y se descartan las muestras.
+- Cada corrida escribe sus salidas de SUMO en su propia carpeta: dos corridas en la misma carpeta se sobrescriben (ocurrió).
+- La distancia de `haversine_m` se acota a [0, 1] por redondeo flotante.
+- Las placas son `SIM-0001…`: el formato exige 3–4 dígitos.
+- Codificación: TraCI devuelve el texto de los parámetros como latin-1; se convierte al leerlo (`texto_traci`). Afecta también a S2-2.
+
+**Problemas encontrados:**
+- Corrida `app50_s1` caída por `math domain error` (coordenada no finita). Corregido con la guarda descrita.
+- Corrida `verdad` caída por aserción de SUMO al reencaminar a un puesto sin ruta. Corregido con la comprobación de alcanzabilidad.
+- Corrida `verdad` terminó con `malloc_consolidate(): unaligned fastbin chunk detected`, al relanzarla en paralelo con `mapa`. Causa: ambas escribían `stops.xml` en la misma carpeta. Corregido separando carpetas. Con el código final las dos terminaron sin errores.
+- Sesiones abiertas de más en el núcleo (20): autos que salían de la red sin detección dejaban la sesión abierta. Corregido cerrándolas como `manual`.
+
+**Resultados (corridas finales, 75 min simulados):**
+
+| Medida | mapa (sistema) | verdad (oráculo) |
+|---|---|---|
+| Tiempo medio de búsqueda con app / sin app | 11,3 / 10,8 min | 10,0 / 10,7 min |
+| Mediana con app / sin app | 10,5 / 9,9 min | 9,3 / 9,9 min |
+| Sesiones cerradas / abiertas al final (núcleo) | 380 / 132 | 403 / 138 |
+| Falsas liberaciones | 335 (65,4 / 100) | 358 (66,2 / 100) |
+| Reasignaciones | 0 | 1257 (209 a ciegas) |
+| Auditoría: fallos de débito / libro | 0 / cuadra en 638 usuarios | 0 / cuadra en 638 usuarios |
+| Error de facturación medio / máximo | −0,063 / 0,46 USD | −0,072 / 0,50 USD |
+
+El criterio «búsqueda con app menor que sin app» **no se cumple con la fuente del sistema** y sí con la ocupación real. La retención final (33,00 USD) es exactamente 132 sesiones abiertas × 0,25 USD: el libro cuadra, pero la retención no es 0 al cierre.
+
+**Velocidad con `--publicar` a URL caída:** 16,2 frente a 16,7 seg/seg (dos repeticiones, código final). Hay un 3 % de pérdida: no es igual, aunque la simulación nunca espera a la red.
+
+**Bucle y verificación:** varias vueltas de depuración (tres corridas de 75 min con error, dos de ellas corregidas en código). Pruebas finales: `pytest traci/tests` → 37 pasan y 1 omitida (`test_trazas_csv.py` de S1, con parámetros vacíos: no es de esta sesión). No se lanzó un subagente verificador independiente, porque no se pidió.
+
+**Pedidos a otros:**
+- @Tyrone: `traci/guiado.py` reemplaza el oráculo de S3-1. Cada vehículo ya trae `param destino` en la demanda; no hace falta añadirlo. Hace falta entregar `origin/tyrone/s2` con `--porc-app`, porque ahora se usa un MOCK al 50 %. Y en `destinos.csv`, "Museo Pumapungo" no tiene acera cercana (ya lo pedí en S2-2).
+- @Pablo: cuántas falsas liberaciones produjo `rf_v1` en `app50_s1`: no lo sé, porque el modelo no está en el repo y la corrida usó el umbral de respaldo (65 % de falsas liberaciones). Pido el modelo `rf_v1` (o features robustas al ruido) y la latencia de `clasificar`.
+- @Freddy (contrato, propuesta para la unificación): el mapa de ocupación debería contar las reservas de los autos en GUIADO, o el guiado no puede ser mejor que a ciegas con la fuente del sistema (lo mide esta corrida).
+
+**Pendientes para la próxima sesión:**
+- Decidir cómo contar reservas en el mapa y volver a correr `app50_s1` con la fuente `mapa`.
+- Volver a medir los peatones de S2-2 con la codificación de destinos corregida.
+- Publicar al VPS solo con Tyrone (token y despliegue); la prueba local ya está hecha.
+
+**Evidencias:** ![](../semanas/S2/Freddy/evidencias/s3_guiado-vs-ciegas.png) ![](../semanas/S2/Freddy/evidencias/s3_cobros-simulados.png) · [Resumen semanal (PDF)](../semanas/S2/Freddy/evidencias/resumen_S2_Freddy.pdf) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s3_explicacion.pdf)

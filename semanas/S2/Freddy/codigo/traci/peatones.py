@@ -37,6 +37,14 @@ INTERVALO_TRAYECTORIA_S = 10
 Destino = Tuple[float, float, float]  # (lat, lon, peso)
 
 
+def texto_traci(valor: str) -> str:
+    """Texto de TraCI a Unicode: el cliente de Python decodifica como latin-1 y `ó` llega como `Ã³`."""
+    try:
+        return valor.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return valor
+
+
 def _camino(tr, desde: str, hasta: str) -> Optional[Tuple[List[str], float]]:
     """(aristas, tiempo en s) a pie entre dos aristas, o None si no hay camino peatonal.
 
@@ -174,7 +182,7 @@ class GestorPeatones:
 
         Devuelve ((edge, pos), ida, t_ida, vuelta), o None si ningún destino tiene camino.
         """
-        nombre = tr.vehicle.getParameter(veh, "destino")
+        nombre = texto_traci(tr.vehicle.getParameter(veh, "destino"))
         arista = self._arista_destino(tr, nombre)
         if arista is not None:
             ida = _camino(tr, edge_auto, arista[0])
