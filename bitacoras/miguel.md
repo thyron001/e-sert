@@ -296,3 +296,83 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 - Probar contra el backend del VPS cuando esté publicado.
 
 **Evidencias:** ![](../semanas/S2/Miguel/evidencias/s1_flujo-sesion.png) ![](../semanas/S2/Miguel/evidencias/s1_flujo-sesion-ios.png) ![](../semanas/S2/Miguel/evidencias/s1_recarga-recuperar-cerrar.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s1_explicacion.pdf)
+
+## S2 · Sesión 2 · 2026-10-27 · Billetera y recarga con Payphone en modo de pruebas
+**Estado:** parcial
+
+**Qué hice:**
+- `backend/pagos/payphone.py`:
+  - `ConfigPagos` lee el entorno o `backend/pagos/.env`; la `responseUrl` se arma desde `ESERT_URL_PUBLICA`.
+  - `AdaptadorPayphone(config, cliente_http)` implementa *Prepare* (`POST /api/button/Prepare`, montos en centavos, `amount = amountWithoutTax`) y *Confirm* (`POST /api/button/V2/Confirm` con `{id, clientTxId}`; aprobado solo si `statusCode == 3` y `"Approved"`), según https://docs.payphone.app/boton-de-pago consultada el 2026-10-27. Usa `httpx` con 10 s de *timeout* y el token nunca aparece en logs ni en `repr`.
+  - `AdaptadorMock` con la misma interfaz y una página local con "Aprobar" y "Rechazar".
+- `backend/pagos/intenciones.py`: tabla propia `intenciones_pago` (sin tocar los modelos de Freddy) y `procesar_retorno`, que acredita **una sola vez**: `UPDATE … WHERE estado='pendiente'` en la misma transacción que `Billetera.recargar(…, referencia_payphone=id, s=s)`.
+- `backend/pagos/rutas.py`: `POST /pagos/preparar` (`RECARGA_MINIMA` si es menos de $5), `GET /pagos/ir/{id}` (página puente porque Payphone exige Referer del dominio registrado), `GET /pagos/retorno`, `GET /pagos/{id}` y las rutas del mock. Además `.env.ejemplo`, `requirements.txt` (`httpx`) y `README.md`.
+- 30 tests con pytest y `httpx.MockTransport`: monto menor a 5, retorno repetido 3 veces, rechazo, cancelación, error de red, monto distinto, token fuera de los logs y saldo de Freddy.
+- App:
+  - `app/(tabs)/billetera.tsx`: saldo, retenido y disponible, movimientos con fecha local y signo, *pull to refresh*.
+  - `app/recarga.tsx`: $5, $10, $20 o monto libre ≥ $5; abre el pago con `WebBrowser.openAuthSessionAsync(pay_url, Linking.createURL('pagos/retorno'))` y consulta `GET /pagos/{id}` hasta 10 veces cada 2 s.
+  - `src/api/pagos.ts`, `app/pagos/retorno.tsx`, y `__tests__/pagos.test.ts` (8 tests).
+  - Se quitó la recarga de prueba sin pago. Buscar sigue llevando a Recarga si el saldo no alcanza.
+- Prueba de punta a punta en Android con Expo Go **por Tailscale** (Mac `100.85.244.14`): $4.92 → aprobar $10 → $14.92; rechazar no acredita; una segunda recarga de $5 también se confirmó.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Miguel/codigo/backend/pagos/` (`__init__.py`, `payphone.py`, `intenciones.py`, `rutas.py`, `.env.ejemplo`, `requirements.txt`, `README.md`, `tests/`)
+- `semanas/S2/Miguel/codigo/app/app/recarga.tsx`, `app/(tabs)/billetera.tsx`, `app/pagos/retorno.tsx`, `src/api/pagos.ts`, `src/ui/comunes.tsx`, `__tests__/pagos.test.ts`
+- `semanas/S2/Miguel/evidencias/s2_billetera-recarga.png`, `s2_recarga-rechazada.png`, `evidencias/capturas/s2_android_*.jpeg`
+- `semanas/S2/Miguel/explicaciones/s2_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **Todo en `amountWithoutTax`:** una recarga de billetera no es una venta con IVA, y Payphone exige que la suma cuadre con `amount`.
+- **`pay_url` apunta a `/pagos/ir/{id}`** en nuestro dominio, no directamente a Payphone: su formulario rechaza visitas sin Referer del dominio registrado, y la app no puede enviarlo.
+- **La intención es la verdad:** la app no acredita nada, solo consulta. Así funciona aunque el navegador no vuelva a la app.
+- **Rechazo sin `id`:** la `cancellationUrl` es la misma `responseUrl` sin `id`; se marca rechazado. Si Confirm falla por red, queda pendiente.
+- **`url_app` en `preparar`:** el retorno vuelve al deep link que manda la app (`exp://…` en Expo Go, `esert://…` en una app propia). Solo se aceptan esos esquemas, para que no sirva como redirección abierta.
+- **Retorno en Android:** el enlace se convierte en `intent://…#Intent;scheme=exp;end` según el *User-Agent*, porque Chrome y Brave no abren esquemas propios desde un enlace.
+- **`.env.ejemplo` en vez de `.env.example`:** el `.gitignore` de la raíz ignora `.env.*` salvo `!.env.ejemplo`, igual que Freddy. Con el nombre del prompt la plantilla no se habría subido.
+- **Rutas HTML fuera de OpenAPI y ejemplos en las JSON**, para que pase `test_openapi_tiene_todas_las_rutas_con_ejemplos` de Freddy con pagos montado.
+
+**Problemas encontrados:**
+- **Volver a la app en Android:** con Expo Go, la página de retorno no vuelve sola a la app, ni con el botón "Volver a e-sert", ni siquiera con el enlace `intent://`. Al cerrar la pestaña, la app confirma igual. En Android, `dismissBrowser` no existe, así que no se puede cerrar la pestaña desde la app. Se espera que funcione con una APK propia (esquema `esert://` registrado); queda pendiente.
+- **Modo `pruebas` sin credenciales:** `preparar` responde `ERROR_INTERNO` (500) con `detalle.faltan` (solo nombres de variables). No hay un código de error propio de configuración en el contrato.
+- **`git fetch` con `Permission denied (publickey)`** otra vez: la llave SSH no estaba cargada. Se trabajó con las referencias ya descargadas de `origin/freddy/s2`.
+- **Enlace simbólico ajeno sin seguimiento** `semanas/S2/semanas`, que apunta a una ruta de Linux que no existe en la Mac. No es de esta sesión: no se borró y no se incluyó en el commit.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Añadir al contrato propuesto (`CONTRATO.propuesto.md`) las rutas `POST /pagos/preparar {usuario_id, monto, url_app?} → 201 {client_transaction_id, payment_id, pay_url, modo}`, `GET /pagos/{client_transaction_id} → {client_transaction_id, usuario_id, monto, estado, referencia_payphone, creada, actualizada}` y `GET /pagos/retorno?id=&clientTransactionId=` (HTML), además del uso de `RECARGA_MINIMA` (422) en `preparar`.
+  - Confirmar que `Billetera.recargar` acepta `referencia_payphone`: lo uso así con `s=` (tu sesión SQLAlchemy) y funciona.
+  - Agregar `httpx` a `requirements-servidor.txt`. Sin él, `import backend.pagos.rutas` falla y tu `except ImportError` deja pagos sin montar sin avisar. Sugiero registrar en el log por qué no se montó.
+- **@Tyrone [Payphone]** (actualizado el 2026-10-28): la aplicación de pruebas en Payphone Developer ya está configurada como tipo **WEB**, con Dominio Web `https://demo.e-sert.tesisucuenca.com` y Url de respuesta `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno`. Te pido hacer la prueba del modo `pruebas` en el VPS:
+  1. Desplegar `backend/pagos` (llega con la unificación) con `httpx` instalado; ver el pedido a Freddy sobre `requirements-servidor.txt`. Comprobar en el log de arranque que dice `pagos sí`.
+  2. Cargar en Dokploy: `PAYPHONE_MODO=pruebas`, `PAYPHONE_TOKEN` y `PAYPHONE_STORE_ID` (de esa aplicación), `ESERT_URL_PUBLICA=https://demo.e-sert.tesisucuenca.com` y `PAYPHONE_RESPONSE_URL=https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno`. Los valores de `PAYPHONE_URL_BASE` quedan vacíos (por defecto `https://pay.payphonetodoesposible.com`).
+  3. Probar contra la API real de Payphone:
+     - `POST https://demo.e-sert.tesisucuenca.com/api/v1/pagos/preparar` con `{"usuario_id": "app_<uuid4>", "monto": 5}`;
+     - abrir `pay_url` en el navegador y pagar (en pruebas, Payphone aprueba todo);
+     - comprobar que el retorno muestra "Pago confirmado";
+     - comprobar que `GET /api/v1/pagos/{client_transaction_id}` da `aprobado` y que `GET /api/v1/billetera/{usuario_id}` suma $5 con `referencia_payphone`.
+  4. Avisarme el resultado. Si Payphone responde error, el `errorCode` queda en el log del backend (`esert.pagos`); el token nunca se registra.
+  - Las credenciales nunca van en el repo ni en el chat.
+- **@Tyrone [Plan]** `semanas/S2/Miguel/sesion-2.md`: el entregable `backend/pagos/.env.example` debería llamarse `.env.ejemplo`, porque el `.gitignore` de la raíz ignora `.env.*` salvo `!.env.ejemplo`.
+
+**Bucle y verificación:**
+- Hubo 4 vueltas:
+  1. Prueba rápida del flujo mock con TestClient, más los tests del subagente: tres retornos acreditan una sola vez. Se ajustó el `clientTransactionId` exacto en Confirm y se dejó de enviar a la app el motivo de Payphone.
+  2. El LAN se cambió por Tailscale.
+  3. Volver a la app en Android: enlace `intent://` y su test. En Expo Go sigue sin volver.
+  4. Correcciones del verificador.
+- El verificador independiente reportó **4 cumple y 2 parcial**:
+  - el criterio del modo `pruebas` es parcial por falta de credenciales;
+  - el de las credenciales cumple, con un aviso;
+  - encontró que pagos rompía el test de OpenAPI de Freddy y que `.env.example` no se habría subido. Ambos están corregidos.
+- Resultado final:
+  - **pytest:** 132/132 (102 de Freddy y 30 de pagos);
+  - **app:** Jest 99/99 y `tsc` sin errores;
+  - **credenciales:** `git grep -i token` no encuentra nada sensible.
+
+**Pendientes para la próxima sesión:**
+- Probar el modo `pruebas` de Payphone con las credenciales de Tyrone y la URL pública del VPS.
+- Volver a probar el regreso a la app con una APK propia (Chrome y Brave), añadiendo `package=` al `intent://`.
+- Probar en un iPhone físico.
+- S2-3: conectar el espejo al WebSocket real.
+
+**Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_billetera-recarga.png) ![](../semanas/S2/Miguel/evidencias/s2_recarga-rechazada.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)

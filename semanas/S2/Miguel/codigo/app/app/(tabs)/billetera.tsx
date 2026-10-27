@@ -1,27 +1,37 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
-import { TARIFA } from '@/src/api/tarifa';
-import type { Billetera } from '@/src/api/tipos';
+import { getBilletera, mensajeUsuario } from '@/src/api/cliente';
+import type { Billetera, Movimiento, TipoMovimiento } from '@/src/api/tipos';
 import { COLORES } from '@/src/ui/colores';
-import { Boton, usd } from '@/src/ui/comunes';
+import { Boton, fechaLocal, usd } from '@/src/ui/comunes';
+
+const NOMBRES: Record<TipoMovimiento, string> = {
+  recarga: 'Recarga',
+  retencion: 'Retención',
+  debito: 'Cobro de sesión',
+  liberacion: 'Retención liberada',
+};
+
+// Signo con el que cada movimiento afecta al disponible (CONTRATO §5: libro de movimientos).
+const SIGNO: Record<TipoMovimiento, 1 | -1> = { recarga: 1, retencion: -1, debito: -1, liberacion: 1 };
 
 export default function BilleteraScreen() {
   const { api, usuarioId, cargado } = useAjustes();
   const [billetera, setBilletera] = useState<Billetera | null>(null);
-  const [ocupado, setOcupado] = useState(false);
+  const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     if (!cargado) return;
     setError(null);
     try {
-      setBilletera(await api.obtenerBilletera(usuarioId));
+      setBilletera(await getBilletera(usuarioId, api));
     } catch (e) {
-      setError((e as Error).message);
+      setError(mensajeUsuario(e));
     }
   }, [api, usuarioId, cargado]);
 
@@ -31,62 +41,81 @@ export default function BilleteraScreen() {
     }, [cargar]),
   );
 
-  // Recarga de prueba directa al libro. Payphone (modo de pruebas) llega en una sesión posterior.
-  async function recargar() {
-    setOcupado(true);
-    setError(null);
-    try {
-      await api.recargar(usuarioId, { monto: TARIFA.recarga_minima_usd });
-      await cargar();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setOcupado(false);
-    }
+  async function refrescar() {
+    setRefrescando(true);
+    await cargar();
+    setRefrescando(false);
   }
 
+  const movimientos = [...(billetera?.movimientos ?? [])].sort((a, b) => b.ts.localeCompare(a.ts));
+
   return (
-    <View style={styles.contenedor}>
-      <View style={styles.tarjeta}>
-        <Text style={styles.etiqueta}>Disponible</Text>
-        <Text style={styles.grande}>{billetera ? usd(billetera.disponible) : '…'}</Text>
-        <Text style={styles.detalle}>
-          Saldo {billetera ? usd(billetera.saldo) : '…'} · Retenido {billetera ? usd(billetera.retenido) : '…'}
+    <FlatList
+      style={styles.lista}
+      contentContainerStyle={styles.contenedor}
+      data={movimientos}
+      keyExtractor={(m) => m.movimiento_id}
+      refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={COLORES.miguel} />}
+      ListHeaderComponent={
+        <View>
+          <View style={styles.tarjeta}>
+            <Text style={styles.etiqueta}>Disponible</Text>
+            <Text style={styles.grande}>{billetera ? usd(billetera.disponible) : '…'}</Text>
+            <Text style={styles.detalle}>
+              Saldo {billetera ? usd(billetera.saldo) : '…'} · Retenido {billetera ? usd(billetera.retenido) : '…'}
+            </Text>
+            {billetera?.bloqueada && (
+              <Text style={styles.error}>Saldo negativo: recarga para volver a parquear.</Text>
+            )}
+          </View>
+          <Boton texto="Recargar con Payphone" onPress={() => router.push('/recarga')} />
+          {error && <Text style={styles.error}>{error}</Text>}
+          <Text style={styles.subtitulo}>Movimientos</Text>
+        </View>
+      }
+      renderItem={({ item }) => <FilaMovimiento m={item} />}
+      ListEmptyComponent={<Text style={styles.detalle}>Sin movimientos. Desliza hacia abajo para actualizar.</Text>}
+    />
+  );
+}
+
+function FilaMovimiento({ m }: { m: Movimiento }) {
+  const signo = SIGNO[m.tipo];
+  return (
+    <View style={styles.mov}>
+      <View style={styles.movTexto}>
+        <Text style={styles.tipo}>{NOMBRES[m.tipo]}</Text>
+        <Text style={styles.ts}>
+          {fechaLocal(m.ts)}
+          {m.referencia_payphone ? ` · Payphone ${m.referencia_payphone}` : ''}
         </Text>
       </View>
-      <Boton
-        texto={`Recargar ${usd(TARIFA.recarga_minima_usd)} (prueba)`}
-        onPress={recargar}
-        ocupado={ocupado}
-      />
-      {error && <Text style={styles.error}>{error}</Text>}
-      <Text style={styles.subtitulo}>Movimientos</Text>
-      <FlatList
-        data={[...(billetera?.movimientos ?? [])].reverse()}
-        keyExtractor={(m) => m.movimiento_id}
-        renderItem={({ item }) => (
-          <View style={styles.mov}>
-            <Text style={styles.tipo}>{item.tipo}</Text>
-            <Text style={styles.ts}>{new Date(item.ts).toLocaleTimeString()}</Text>
-            <Text style={styles.monto}>{usd(item.monto)}</Text>
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.detalle}>Sin movimientos.</Text>}
-      />
+      <Text style={[styles.monto, { color: signo > 0 ? COLORES.libre : COLORES.lleno }]}>
+        {signo > 0 ? '+' : '−'}
+        {usd(m.monto)}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, padding: 16 },
+  lista: { flex: 1 },
+  contenedor: { padding: 16 },
   tarjeta: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: COLORES.miguel },
   etiqueta: { fontSize: 13, color: COLORES.gris },
   grande: { fontSize: 36, fontWeight: '700' },
   detalle: { color: COLORES.gris, marginTop: 4 },
   subtitulo: { fontSize: 16, fontWeight: '600', marginTop: 20, marginBottom: 6 },
   error: { color: COLORES.lleno, marginTop: 6 },
-  mov: { flexDirection: 'row', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: COLORES.gris },
-  tipo: { flex: 1, fontWeight: '500' },
-  ts: { color: COLORES.gris, marginRight: 12 },
-  monto: { width: 70, textAlign: 'right' },
+  mov: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORES.gris,
+  },
+  movTexto: { flex: 1, backgroundColor: 'transparent' },
+  tipo: { fontWeight: '600' },
+  ts: { color: COLORES.gris, fontSize: 12, marginTop: 2 },
+  monto: { width: 90, textAlign: 'right', fontWeight: '700', fontVariant: ['tabular-nums'] },
 });
