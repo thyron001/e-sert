@@ -218,3 +218,81 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Probar en un iPhone físico.
 
 **Evidencias:** ![](../semanas/S1/Miguel/evidencias/s3_espejo-prototipo.png) ![](../semanas/S1/Miguel/evidencias/s3_espejo-recibo.png) · [Explicación (PDF)](../semanas/S1/Miguel/explicaciones/s3_explicacion.pdf) · [PDF semanal](../semanas/S1/Miguel/evidencias/resumen_S1_Miguel.pdf)
+
+## S2 · Sesión 1 · 2026-10-27 · Flujo de sesión de parqueo en la app (buscar → guiar → confirmar → activa)
+**Estado:** parcial (4/5). Lo único pendiente: iOS se probó en el simulador de iPhone, no en un iPhone físico.
+
+**Qué hice:**
+- Copié `proyecto/app` a `semanas/S2/Miguel/codigo/app`.
+- **Contrato en la app:** `src/contrato/esquemas.ts` (con la cabecera "Copia de comun/, no editar a mano") y `tarifa.json` se copiaron de `proyecto/comun/`. `npm run verificar-contrato` compara el SHA-256 con el original y falla si difieren. `tipos.ts` ahora reexporta el contrato (atiende el pedido de Freddy de S1) y `TARIFA` sale de `tarifa.json`.
+- **Cliente API** (`src/api/cliente.ts`):
+  - `getGuia`, `crearSesion`, `getSesion`, `cerrarSesion` y `getBilletera`, con *timeout* de 8 s (`AbortController`).
+  - Configuración con `EXPO_PUBLIC_API_URL` y `EXPO_PUBLIC_USE_MOCK=1`.
+  - `mensajeUsuario` traduce los 15 códigos del contrato y los 2 del cliente (por ejemplo, `SALDO_INSUFICIENTE` → "Recarga al menos $5 para buscar puesto").
+- El **mock** quedó alineado con la v1:
+  - `SESIONES_BLOQUEADAS` 403, `SESION_ACTIVA`, `SESION_YA_CERRADA`;
+  - débito completo aunque el saldo quede negativo;
+  - `bloqueada`, `minutos_reales` y `saldo`.
+- **Estado** `src/estado/sesion.ts`: `useReducer` + Context con los estados del contrato. Se persiste en AsyncStorage y `RecuperarFlujo` vuelve al guiado o a la sesión activa al reabrir la app.
+- **Pantallas:**
+  - `buscar.tsx`: partida en Gran Colombia y Benigno Malo (o donde se toque), destinos de `destinos.csv` o pulsación larga, y billetera antes de `/guia`.
+  - `recarga.tsx`: "Próximamente" más una recarga de prueba.
+  - `sesion/guiar.tsx`: 8 m/s a 1 Hz, `Polyline`, distancia haversine, "Llegar ya" y el intervalo se limpia al salir.
+  - `sesion/confirmar.tsx`: placa con `^[A-Z]{3}-?\d{3,4}$` en mayúsculas.
+  - `sesion/activa.tsx`: cronómetro, costo en vivo, avisos de tope y saldo, y "Terminar" manual.
+- **Pruebas:**
+  - Tests en `__tests__/` (delegados en un subagente): placa, tarifa igual a `tarifa.py` en 16 casos, los 15 códigos de error del cliente y el mock. Yo escribí los de estado y persistencia, y los de costo.
+  - `scripts/probar_backend.ts`: el flujo completo contra el backend real.
+  - `scripts/montaje.py`: la tira de capturas que se reutiliza en S2-2.
+- **Backend real:** corrí el de `freddy/s2` en la computadora (extraído al scratchpad, sin tocar su carpeta), con `--host 0.0.0.0`, y probé el flujo con él en el Android de Miguel y en el simulador de iPhone.
+
+**Archivos creados o modificados:** `semanas/S2/Miguel/codigo/app/`:
+- `app/buscar.tsx`, `app/recarga.tsx`, `app/sesion/{guiar,confirmar,activa}.tsx`, `app/_layout.tsx`, `app/(tabs)/sesion.tsx`
+- `src/contrato/`, `src/api/{cliente,tipos,tarifa,mock}.ts`, `src/estado/sesion.ts`, `src/sesion/{placa,geo,cobro}.ts`, `src/datos/destinos.ts`, `src/ajustes/AjustesContexto.tsx`
+- `scripts/{verificar_contrato.mjs,destinos.py,probar_backend.ts,montaje.py}`, `__tests__/*.test.ts`
+- `.env.example`, `.gitignore` (excepción `!.env.example`, porque la raíz ignora `.env.*`), `package.json` (AsyncStorage 2.2.0), `README.md`
+
+Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_explicacion.*,evidencias/*}`.
+
+**Decisiones y por qué:**
+- **`tarifa.json` sin cabecera:** JSON no admite comentarios. Se verifica byte a byte y `esquemas.ts` se verifica sin su primera línea.
+- **Tipos del espejo:** `CandidatoEspejo` y `MensajeEspejo` se quedan como versiones más estrictas (campos obligatorios y nullables) que valida `validar.ts`. El resto viene del contrato.
+- **`pedirGuia`** ya no devuelve `null` ante un 404: lanza `ErrorApi` `SIN_PUESTOS_LIBRES`, como el backend.
+- **Recarga de prueba:** el backend real arranca toda billetera en $0, así que la pantalla Recarga tiene un botón de prueba (`POST /billetera/{id}/recarga`, sin Payphone) para poder probar. Se reemplaza en S2-2.
+- **Hora de inicio:** se envía el `ts` del teléfono en `POST /sesiones`, para que el cronómetro y el cobro partan del mismo instante.
+- **Mock por defecto:** solo con `EXPO_PUBLIC_USE_MOCK=1`; sin la variable se usa el backend real. Lo guardado en Ajustes manda sobre `.env`.
+- **Enlaces de desarrollo** `buscar?destino=0&auto=1` y `sesion/confirmar?placa=...&auto=1` (solo `__DEV__`): `simctl` no puede tocar la pantalla del simulador.
+- **Placa:** se mantiene la regla del contrato `^[A-Z]{3}-?\d{3,4}$`.
+
+**Problemas encontrados:**
+- `git fetch` falla con `Permission denied (publickey)`: la llave de GitHub no está cargada en el agente SSH. Se trabajó sobre el `origin/main` local (26-oct).
+- Expo arrancado con `CI=1` desactiva la recarga y el simulador se quedó con el bundle viejo. Hubo que reiniciarlo sin `CI`.
+- En iOS, el contenido de confirmar quedaba debajo del encabezado transparente. Se arregló con `contentInsetAdjustmentBehavior="automatic"` en confirmar, activa y recarga.
+- `explicacion_pdf.py` no acepta `__tests__` sin escapar en una celda de tabla (se interpreta como negrita).
+
+**Pedidos a otros:**
+- **@Freddy:** diferencias entre tu API S2 y `docs/CONTRATO.md` §3–§5 que vi al conectar la app. Ninguna bloquea:
+  1. En `GET /guia`, `distancia_m` es la distancia del puesto al destino. El contrato no lo dice; la app lo muestra así ("a 46 m de Parque Calderón").
+  2. Una ruta inexistente responde 404 o 405 con `codigo: "VALIDACION"`, y un `sesion_id` mal formado da 422 en vez de 404. El contrato solo define `VALIDACION` como 422.
+  3. El token de simulación se llama `ESERT_TOKEN_SIM` (y acepta `Authorization: Bearer`), mientras el contrato dice `SIM_TOKEN` y `X-Sim-Token`. La app no lo usa.
+  4. Todo lo demás coincide: rutas, cuerpos, códigos HTTP, `bloqueada`, `minutos_reales` y `saldo` en el cierre, y `X-Contrato-Version: 1`. `npm run probar-backend` pasa 10/10 contra tu rama.
+- **@Tyrone:**
+  - `destinos.csv` **sirve tal cual** como lista de destinos de la app. Se copia a `src/datos/destinos.ts` con `scripts/destinos.py`, y los 12 nombres se ven bien en los botones.
+  - Los puestos que asigna `/guia` son los de tu `puestos.csv`.
+  - Para el teléfono, cuando el backend esté en el VPS, solo hace falta la URL `https://demo.e-sert.tesisucuenca.com/api/v1` con CORS abierto. No pido nada más del VPS por ahora.
+
+**Bucle y verificación:**
+- Hubo 4 vueltas:
+  1. Errores de tsc al reexportar el contrato (mock sin `bloqueada`, `SesionCerrada` incompleta).
+  2. Metro en modo CI sin recarga y los enlaces de desarrollo para el simulador.
+  3. El contenido tapado por el encabezado en iOS.
+  4. Las correcciones del verificador.
+- El verificador independiente reportó **4/5 criterios cumplidos**. El 1 es parcial porque el iPhone solo se probó en el simulador. Sugirió además que el mock no fuera el valor por defecto sin variable y llevar a Recarga cuando `POST /sesiones` responde `SALDO_INSUFICIENTE`; ambas cosas están aplicadas.
+- Resultado final: `npm test` 91/91, `tsc` sin errores, `verificar-contrato` OK y `probar-backend` 10/10.
+
+**Pendientes para la próxima sesión:**
+- Pagos con Payphone en la pantalla Recarga (S2-2), reutilizando `montaje.py` para la evidencia.
+- Probar en un iPhone físico.
+- Probar contra el backend del VPS cuando esté publicado.
+
+**Evidencias:** ![](../semanas/S2/Miguel/evidencias/s1_flujo-sesion.png) ![](../semanas/S2/Miguel/evidencias/s1_flujo-sesion-ios.png) ![](../semanas/S2/Miguel/evidencias/s1_recarga-recuperar-cerrar.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s1_explicacion.pdf)

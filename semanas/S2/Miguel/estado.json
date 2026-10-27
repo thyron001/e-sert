@@ -1,0 +1,24 @@
+{
+  "persona": "Miguel",
+  "semana": "S2",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "parcial",
+      "fecha": "2026-10-27",
+      "resumen": "Flujo buscar → guiar → confirmar → activa en Expo Go contra el backend real de Freddy, con el contrato copiado y verificado por hash, estado persistido en AsyncStorage (se recupera al reabrir) y 91 tests. Parcial solo porque iOS se probó en el simulador, no en un iPhone físico.",
+      "evidencias": [
+        "evidencias/s1_flujo-sesion.png",
+        "evidencias/s1_flujo-sesion-ios.png",
+        "evidencias/s1_recarga-recuperar-cerrar.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 4, "total": 5},
+      "pendientes": [
+        "Probar el flujo en un iPhone físico (solo simulador).",
+        "Conectar Payphone en la pantalla Recarga (S2-2) y quitar la recarga de prueba.",
+        "Probar contra el backend del VPS cuando Tyrone lo publique."
+      ]
+    }
+  }
+}
