@@ -38,6 +38,9 @@ prueba incluido). Escribe todo en español.
    (`git log --format="%h %cI %s" --since=2026-10-31T23:59:59-05:00 origin/<nombre>/s2`).
    Compara con `datetime.fromisoformat`. Último commit posterior al plazo: **tardía**, pero
    **se incluye**.
+4. Ejecuta `python herramientas/publicar_resultados.py --push` y luego `git fetch`. Así
+   main tiene ya los resultados de cada rama (los publica la Action del roadmap) y las
+   fusiones coinciden en esas rutas.
 
 ## Paso 2 · Auditoría en paralelo (subagentes)
 Lanza **cuatro subagentes en paralelo, uno por persona**, de solo lectura, con este encargo:
@@ -57,7 +60,12 @@ mensajes que **no estén en `docs/CONTRATO.md` v1**." Usa sus reportes.
 3. Conflictos **triviales** (`.gitignore`, `.gitattributes`): unión de líneas sin
    duplicados. **No triviales**: `git merge --abort`, anota los archivos y trae solo la
    carpeta de la persona con
-   `git checkout origin/<nombre>/s2 -- semanas/S2/<Nombre>/ bitacoras/<nombre>.md`.
+   `git checkout origin/<nombre>/s2 -- semanas/S2/<Nombre>/`.
+   Conflictos en las rutas de resultados (`semanas/S2/<Nombre>/estado.json`, `RESUMEN.md`,
+   `evidencias/` y `explicaciones/`): versión de la rama (`git checkout --theirs`). En
+   `bitacoras/<nombre>.md`: versión de main (`git checkout --ours`), que ya trae las
+   entradas de la rama; por eso el `checkout` de la carpeta de la persona no incluye la
+   bitácora.
 4. Archivos que un auditor reportó fuera de la carpeta de la persona (salvo `.gitignore`):
    devuélvelos a `origin/main` y repórtalos.
 

@@ -57,7 +57,8 @@ semanas/SN/    trabajo de cada semana
   unificacion.md
 bitacoras/     una bitácora por persona, más la de las unificaciones
 docs/          CONTEXTO, PLAN, EQUIPO y CONTRATO
-herramientas/  generadores de PDF (semanal y explicativo por sesión)
+herramientas/  generadores de PDF y publicador de resultados en el roadmap
+.github/       Action que publica los resultados de cada rama en main
 roadmap/       sitio Flask del roadmap (Dockerfile en la raíz, para Dokploy)
 ```
 

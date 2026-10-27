@@ -1,0 +1,36 @@
+# Publica en main los resultados de las ramas <nombre>/sN (estado.json, RESUMEN.md, evidencias,
+# explicaciones y entradas de bitácora) para que el roadmap los muestre sin esperar a la
+# unificación. No copia código. Ver herramientas/publicar_resultados.py.
+#
+# - push: corre al subir a una rama de persona que ya tenga este archivo.
+# - schedule: cada hora, para las ramas creadas antes de que existiera (p. ej. freddy/s2).
+# - workflow_dispatch: a mano desde la pestaña Actions.
+name: Publicar resultados en el roadmap
+
+on:
+  push:
+    branches: ["tyrone/s*", "freddy/s*", "pablo/s*", "miguel/s*"]
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar-resultados
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Copiar resultados a main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 herramientas/publicar_resultados.py --push

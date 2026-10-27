@@ -228,6 +228,13 @@ No des una sesión por terminada sin hacer estos pasos, en este orden:
 9. **Responde al usuario** con un resumen corto: qué quedó, qué falta y la ruta del PNG
    principal.
 
+**Publicación en el roadmap (automática).** Tras el push, la GitHub Action
+`publicar-resultados` copia a `main` los resultados de la rama (`estado.json`, `RESUMEN.md`,
+`evidencias/`, `explicaciones/` y las entradas de la semana en la bitácora), sin código, y
+el roadmap se actualiza sin esperar a la unificación. Las ramas creadas antes de que
+existiera se publican en la pasada horaria. No hace falta hacer nada en la sesión; para
+forzarla: `python herramientas/publicar_resultados.py --push`.
+
 Recordatorio: el **plazo de commits es el sábado a las 23:59**. El domingo a las 09:00 se
 ejecuta la unificación automática con lo que esté en las ramas `*/sN`.
 
