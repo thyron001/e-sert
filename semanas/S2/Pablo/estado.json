@@ -16,6 +16,22 @@
         "Reemplazar trazas MOCK de SUMO cuando Freddy entregue trazas reales",
         "Reentrenar modelo v1 con ventanas_v2.parquet en S2-2"
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-10-27",
+      "resumen": "RF v1 entrenado con RandomizedSearchCV (macro-F1=0.9259±0.0219 vs umbral 0.7265±0.0746), importancia por permutación (top: desplazamiento_neto), suavizado temporal histéresis k=1 (reduce 61.9% cambios espurios), inferencia actualizada con ClasificadorConEstado.",
+      "evidencias": [
+        "evidencias/s2_matriz-confusion.png",
+        "evidencias/s2_importancia.png",
+        "evidencias/s2_suavizado.png"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {"cumplidos": 4, "total": 5},
+      "pendientes": [
+        "Latencia mediana 12.57ms (>5ms objetivo) por modelo más grande; aceptable para ventana de 5s",
+        "Evaluar en S2-3 con usuarios de prueba y semillas SUMO reservadas"
+      ]
     }
   }
 }
