@@ -1,0 +1,21 @@
+{
+  "persona": "Pablo",
+  "semana": "S2",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-10-25",
+      "resumen": "Partición fija de usuarios (20% prueba, semillas SUMO 101-105 reservadas), ruido GPS AR(1) calibrado con literatura (σ 3-15 m, ρ 0.8), ventanas SUMO mock, análisis de sensibilidad σ×σ y mezcla ventanas_v2.parquet (1.65M ventanas GeoLife+SUMO sin fuga).",
+      "evidencias": [
+        "evidencias/s1_distribuciones-features.png",
+        "evidencias/s1_sensibilidad-sigma.png"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Reemplazar trazas MOCK de SUMO cuando Freddy entregue trazas reales",
+        "Reentrenar modelo v1 con ventanas_v2.parquet en S2-2"
+      ]
+    }
+  }
+}

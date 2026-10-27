@@ -139,3 +139,161 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Opcional: rotación de la ocupación de fondo para tener un estado estacionario.
 
 **Evidencias:** ![](../semanas/S1/Tyrone/evidencias/s3_escenario-base.png) ![](../semanas/S1/Tyrone/evidencias/s3_busqueda-histograma.png) ![](../semanas/S1/Tyrone/evidencias/s3_ocupacion-base.png) · [Explicación (PDF)](../semanas/S1/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S1/Tyrone/evidencias/resumen_S1_Tyrone.pdf)
+
+## S2 · Sesión 1 · 2026-10-26 · KPIs de la línea base (búsqueda, distancia, CO₂ y ocupación)
+**Estado:** hecha
+
+**Qué hice:**
+- Abrí la rama `tyrone/s2` desde `main` y copié `proyecto/sumo/` a `semanas/S2/Tyrone/codigo/sumo/`. `proyecto/kpis/` solo tenía un `.gitkeep`.
+- Añadí `vehroute-output.route-length` a `centro_base.sumocfg` y a la plantilla de `generar_demanda.py`. Después corrí las 2 semillas en segundo plano en el contenedor, con `correr_base.py` (~16 min).
+- Escribí `kpis/lectores.py`: lectores en streaming con `lxml.iterparse` para tripinfo, stops, vehroutes, emisiones, red y demanda.
+- Escribí `kpis/kpis.py` (definiciones en el docstring, CLI y `kpis_<escenario>.json` con todas las semillas) y `kpis/graficas.py` (figura 2×2).
+- Un subagente escribió 13 tests con XML sintéticos a partir de las firmas que fijé antes.
+- Calculé los KPIs de las 2 semillas: búsqueda media de 349 y 362 s, distancia de 1248 y 1310 m, CO₂ de 666 y 693 g, ocupación pico de 87,0 y 87,7 %.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Tyrone/codigo/kpis/`: `lectores.py`, `kpis.py`, `graficas.py`, `requirements.txt`, `tests/` y `salidas/` (JSON y CSV de la base).
+- `semanas/S2/Tyrone/codigo/sumo/`: copia de `proyecto/sumo/`; se modificaron `centro_base.sumocfg` y `demanda/generar_demanda.py`.
+- `semanas/S2/Tyrone/evidencias/s1_kpis-base.png` y `semanas/S2/Tyrone/explicaciones/s1_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **`inicio_busqueda` con un radio de 300 m o el edge objetivo:** con app, el conductor ya no pasa necesariamente por su puesto objetivo, y la definición tiene que servir para todos los escenarios.
+- **Comparación con S1-3:** el tiempo sale 52 % y 47 % mayor que en el cálculo provisional (230 y 246 s). Con `--radio-busqueda-m 0`, `kpis.py` reproduce exactamente 229,9 y 245,6 s, así que la diferencia es solo de definición.
+- **Distancia:** solo cuenta los edges completos (exitTime en (inicio, fin]).
+- **CO₂:** integral del emission-output, muestreado cada 10 s. Lo validé contra el `CO2_abs` exacto de tripinfo en 330 viajes completos: ratio 0,988 y correlación 0,94.
+- **Censurados:** los buscadores que no estacionaron (201 y 248) se excluyen de las estadísticas y se reportan aparte en `conteos`.
+- **Dónde corre:** `kpis/` no importa `sumolib` ni `traci`, así que corre en la computadora con su propio `.venv`.
+- **Nombres de las claves:** en `kpis_base.json`, `valores` usa los nombres reservados del mensaje WS `kpi` (CONTRATO §6).
+
+**Problemas encontrados:**
+- El `PYTHONPATH` de ROS Jazzy de esta computadora rompe pytest al cargar plugins. Se corre con `env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`.
+- El contenedor no trae `pandas`, así que `kpis/` corre en la computadora. Si el controlador lo importa en S3, hay que instalar `kpis/requirements.txt` en el contenedor.
+
+**Pedidos a otros:**
+- @Freddy:
+  - Definición de búsqueda: empieza al entrar al primer edge a ≤ 300 m del destino (o al edge del `pa_objetivo`) y termina con el `started` de la primera parada en un `parkingArea`.
+  - Claves de `kpis/salidas/kpis_base.json` → `valores`: `busqueda_media_s`, `distancia_busqueda_media_m`, `co2_busqueda_g`, `ocupacion_media_pico` y `falsas_liberaciones_100` (`null` hasta S3). Usa las mismas en tu mensaje WS `kpi`.
+
+**Bucle y verificación:**
+- 2 vueltas. Los tests pasaron a la primera. En la segunda vuelta validé el CO₂ contra tripinfo y la diferencia con S1-3 recalculando con radio 0.
+- El verificador independiente reportó 6/6 criterios cumplidos: tests 13/13, 4,4 y 4,8 s por semilla, JSON completo, ocupación 87,0/87,7 %, docstring y evidencia.
+
+**Pendientes para la próxima sesión:**
+- Aplicar `kpis.kpis` a los escenarios con app (S2-3).
+- Opcional: sumar el tramo parcial del edge de parqueo a la distancia.
+
+**Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s1_kpis-base.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s1_explicacion.pdf)
+
+## S2 · Sesión 2 · 2026-10-26 · Visor web Leaflet y servidor WS de prueba
+**Estado:** hecha
+
+**Qué hice:**
+- `visor/grabar_snapshots.py` (en el contenedor): simula el escenario base y graba 900 snapshots del contrato (t = 1801–2700 s, hora pico) en `visor/datos/snapshots.jsonl`. Tardó ~8 min en segundo plano.
+- `visor/servidor_prueba.py` (FastAPI): `GET /api/v1/puestos`, `WS /ws/estado` (repetición en bucle, `--velocidad 1|5|10`, un `kpi` cada 30 snapshots con los valores de `kpis_base.json`) y estáticos en `/visor/` y `/`.
+- `visor/index.html`, `visor.js` y `estilos.css`, con Leaflet 1.9.4 desde unpkg (con SRI):
+  - canvas y marcadores actualizados por id;
+  - puestos verde/rojo con popup `calle · ocupados/capacidad`;
+  - autos por estado y borde grueso con app; halo en los `espejos`;
+  - panel con conteos, KPIs, conexión y FPS;
+  - `?ws=` configurable, reconexión 1→30 s y capa `?verdad=1`.
+- `visor/captura.py` (Playwright): captura a 1600×1000, medición de FPS y prueba de reconexión.
+- Un subagente escribió 9 tests (`visor/tests/`): contrato de los 900 snapshots, WS, puestos y rutas relativas.
+- Probé el visor contra el backend real de Freddy (`origin/freddy/s2`, extraído con `git archive` a una carpeta temporal, sin editarlo), servido en su `/visor/` con `ESERT_VISOR_DIR`: le envié 40 pasos `POST /api/v1/sim/paso` hechos con mis snapshots.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Tyrone/codigo/visor/`: `index.html`, `visor.js`, `estilos.css`, `grabar_snapshots.py`, `servidor_prueba.py`, `captura.py`, `requirements.txt`, `.gitignore`, `tests/` y `datos/snapshots_muestra.jsonl`.
+- `semanas/S2/Tyrone/evidencias/s2_visor-leaflet.png` y `semanas/S2/Tyrone/explicaciones/s2_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **Estado del vehículo (MOCK):** `ESTACIONADO` si `stopState` tiene el bit de parking, `BUSCANDO` si busca y aún no estaciona, `null` para paso y fondo (contrato). El espejo (MOCK) es un buscador al azar con `con_app = true`.
+- **Autos de fondo estacionados:** no se envían (~4900 marcadores quietos); ya se ven en el color de los puestos. Así los snapshots bajan a ~100 KB y el visor dibuja ~600 autos más 610 puestos.
+- **lat/lon con pyproj y netOffset** en lugar de `convertGeo` por vehículo. Es la misma conversión, comprobada con 20 vehículos al iniciar (< 1e-6°), y evita ~600 llamadas TraCI por segundo.
+- **`snapshots.jsonl` (91 MB) se ignora** con un `.gitignore` propio de `visor/`, sin tocar el de la raíz. En git va la muestra de 60 (5,5 MB).
+- **URL por defecto:** el WS del mismo origen, y la API REST se deduce de la URL del WS. Así funciona igual detrás del backend en `/visor/`, con el servidor de prueba o con `?ws=`.
+
+**Problemas encontrados:**
+- **Backend de Freddy:** con él no hubo diferencias de formato (40 `snapshot` + 40 `verdad`, sin errores). Su mapa sale todo verde porque `snapshot.puestos` es la ocupación estimada por sesiones, y en la prueba no había ninguna. Es lo que dice el contrato; la ocupación real se ve con `?verdad=1`.
+- **El escenario base no tiene peatones:** la capa de peatones queda vacía hasta que el backend los envíe.
+- **FPS:** se midieron con `requestAnimationFrame` en Chromium headless (Playwright), no en DevTools: 54 de media y 49 de mínimo a velocidad 1.
+- **`pkill -f` se mataba a sí mismo:** el patrón aparecía en su propia línea de comandos. Los servidores se paran por PID.
+
+**Pedidos a otros:**
+- @Freddy: el visor espera `espejos` y `con_app` en cada snapshot, y usa `estado` para colorear (BUSCANDO, GUIADO, ESTACIONADO, A_PIE, REGRESANDO, SALIENDO; `null` sin búsqueda). También lee `GET /api/v1/puestos` del mismo origen para la posición y la calle de cada puesto.
+- @Miguel: para ver resaltado el auto que sigue tu modo espejo, abre `http://<backend>:8000/visor/`, o en la demo `https://demo.e-sert.tesisucuenca.com/visor/`. Con el servidor de prueba: `python -m visor.servidor_prueba --puerto 8001` y `http://localhost:8001/visor/`. El halo amarillo es el vehículo de `espejos`.
+
+**Bucle y verificación:**
+- 2 vueltas. En la primera, la muestra provisional de 5 snapshots; en la segunda, la muestra real de 60, el `.gitignore` del archivo grande y la prueba contra el backend de Freddy.
+- El verificador independiente reportó 6/6 criterios cumplidos:
+  - detrás de `http.server` carga en /visor/ e intenta `ws://<mismo host>/ws/estado`;
+  - autos y puestos cambian;
+  - 58,6 FPS;
+  - 9 tests, y 900 + 60 snapshots válidos;
+  - la reconexión funciona sin recarga, comprobado con una marca en `window`;
+  - existe la evidencia.
+
+**Pendientes para la próxima sesión:**
+- Reemplazar el estado y el espejo MOCK por los del controlador de Freddy.
+- Ver los peatones cuando el backend los publique.
+
+**Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s2_visor-leaflet.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s2_explicacion.pdf)
+
+## S2 · Sesión 3 · 2026-10-26 · Escenarios con penetración de app y registro de la ocupación real
+**Estado:** hecha
+
+**Qué hice:**
+- `generar_demanda.py`:
+  - `--porc-app` con un generador separado (`numpy.random.default_rng([semilla, 7])`) que sortea `u_i` solo para los buscadores;
+  - los buscadores llevan además `param destino` ("lat,lon") y `destino_nombre`;
+  - paso y fondo siempre llevan `con_app = 0`.
+- `sumo/escenarios/generar_escenarios.py`:
+  - genera los 8 `.rou.xml` y `.sumocfg`, y `escenarios.json` con semilla, %, conteos y SHA-256;
+  - comprueba que la demanda es idéntica por semilla (7065 y 7250 vehículos) y el anidamiento (253 ⊂ 624 ⊂ 1018; 251 ⊂ 673 ⊂ 1083).
+- `kpis/registrar_ocupacion.py`: hook `hook(controlador, t)` del `Controlador` de Freddy (`proyecto/traci/controlador.py`) que escribe `ocupacion_real_<escenario>_s<N>.csv` cada 60 s. Incluye la comprobación contra el stop-output.
+- `sumo/escenarios/guiado_oraculo.py` (`# MOCK`): el guiado de Freddy no está en `proyecto/traci/` ni en `origin/freddy/s2`, así que lo reemplaza un oráculo que elige el puesto libre más cercano al destino con `rerouteParkingArea`.
+- `sumo/escenarios/correr_escenarios.py`: corre las 8 con `subprocess.Popen`, máximo 3 a la vez.
+- `kpis/resumen_escenarios.py`: KPIs de las 8 corridas, `resumen_escenarios.csv` y las 2 figuras.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Tyrone/codigo/sumo/demanda/generar_demanda.py`.
+- `semanas/S2/Tyrone/codigo/sumo/escenarios/`: scripts, 8 `.sumocfg`, `escenarios.json` y `.gitignore` (los `.rou.xml` se regeneran).
+- `semanas/S2/Tyrone/codigo/kpis/`: `registrar_ocupacion.py`, `resumen_escenarios.py`, `.gitignore`, `kpis.py`, `lectores.py`, un test nuevo y `salidas/` (KPIs de los 4 escenarios, `resumen_escenarios.csv`, `ocupacion_real_app50_s1.csv` y `comprobacion_ocupacion_real.json`).
+- `semanas/S2/Tyrone/evidencias/s3_penetracion-escenarios.png`, `s3_ocupacion-real.png` y `resumen_S2_Tyrone.pdf`.
+- `semanas/S2/Tyrone/explicaciones/s3_explicacion.{md,pdf}`, y `s1_explicacion.{md,pdf}` corregida (censurados).
+
+**Decisiones y por qué:**
+- **Convención (started, ended] para comprobar la ocupación:** el hook lee al final del paso t. Con ella la diferencia es 0 en los 75 instantes de las 8 corridas. Con [started, ended) aparecían ±1–2, y 37 en el warm-up, cuando cientos de autos de fondo estacionan en el mismo segundo.
+- **Estacionar fuera de la zona:** un auto guiado que estaciona sin entrar a los 300 m del destino cuenta como búsqueda 0 s / 0 m, en lugar de excluirse. Excluirlo sesgaba contra la app.
+- **`kpis.kpis --demanda`:** las corridas de escenarios no dejan `demanda.rou.xml` en su carpeta. Sin la opción, las de la semilla 2 se calculaban con la demanda de la semilla 1.
+- **Porcentaje de teletransportes:** se divide entre los vehículos insertados, porque con guiado `loaded` suma una carga por cada `rerouteParkingArea`.
+- **Versionado:** no se versionan las demandas de los escenarios (18 MB, deterministas, con SHA-256) ni 7 de los 8 CSV de ocupación; va el de `app50_s1`.
+
+**Problemas encontrados:**
+- El SUMO 1.12 del contenedor aborta con asserts (`MSVehicle::enterLaneAtMove` y `MSBaseVehicle::replaceRoute`) cuando `rerouteParkingArea` reasigna:
+  - en un cruce;
+  - hacia un puesto del edge actual (puede quedar detrás del vehículo);
+  - sin ruta al nuevo puesto.
+
+  Fallaron 3 corridas. Las diagnostiqué con un log opcional del oráculo (`ESERT_LOG_ORACULO`) y añadí las tres protecciones. Las 6 corridas con app se repitieron con la versión final, así que las 8 son comparables.
+- **Error en `kpis` (venía de S2-1):** SUMO escribe `exitTime = -1` en los edges que un vehículo sin terminar aún no recorrió, y el lector lo tomaba como hora válida. Con guiado inflaba la media (474 s en lugar de 121 s para los usuarios con app en app80_s2). En la base no cambian las medias, pero los censurados correctos son 114 y 159, no 201 y 248. Corregí `lectores.py`, añadí un test y anoté la corrección en la explicación de S2-1.
+- En la semilla 1 se insertan 7064 de 7065 vehículos: el último sale en t = 4499,08, al límite del fin. Es inocuo.
+
+**Pedidos a otros:**
+- @Freddy:
+  - la ocupación real está en `semanas/S2/Tyrone/codigo/kpis/salidas/ocupacion_real_<escenario>_s<N>.csv` (desde el domingo, en `proyecto/kpis/salidas/`), con columnas `t_sim,puesto_id,ocupados,capacidad`, cada 60 s desde t = 60 hasta 4500. Para generarla en tu ejecutor: `ctrl.agregar_hook(RegistradorOcupacion("<escenario>_s<N>"))` y `reg.cerrar()` al final. Es la verdad para tu KPI de precisión del mapa;
+  - `traci/guiado.py` debe reemplazar a `sumo/escenarios/guiado_oraculo.py` en S3-1;
+  - si usas `rerouteParkingArea` en SUMO 1.12, evita reasignar en cruces, hacia puestos del edge actual o sin ruta: el SUMO del contenedor aborta;
+  - los buscadores traen `param destino` ("lat,lon") y `destino_nombre` para la lista de candidatos del espejo.
+
+**Bucle y verificación:**
+- 4 vueltas:
+  1. el oráculo abortó SUMO en 3 corridas;
+  2. la convención de la comprobación de ocupación;
+  3. el `exitTime = -1` y la demanda de la semilla 2;
+  4. el puesto en el edge actual. Con eso se repitieron las 6 corridas con app.
+- El verificador independiente reportó los 5 criterios cumplidos en lo técnico (escenarios idénticos y anidados, ocupación ±0, 8 corridas sin errores ni teletransportes, figuras). Faltaba solo el PDF semanal, que se generó en el cierre. Su observación sobre `loaded` se corrigió (ahora se usan los insertados).
+
+**Pendientes para la próxima sesión (S3):**
+- Repetir las 8 corridas con el guiado real de Freddy.
+- Ejecutor completo con KPIs y precisión del mapa.
+
+**Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s3_penetracion-escenarios.png) ![](../semanas/S2/Tyrone/evidencias/s3_ocupacion-real.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S2/Tyrone/evidencias/resumen_S2_Tyrone.pdf)
