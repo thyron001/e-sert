@@ -49,3 +49,35 @@ los cambios espurios sin pérdida significativa de F1.
 ![Importancia de features](evidencias/s2_importancia.png)
 
 ![Suavizado temporal](evidencias/s2_suavizado.png)
+
+## Sesión 3 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
+
+Se evaluó el clasificador RF v1 sobre 294,579 ventanas de 10 usuarios de GeoLife nunca vistos
+en entrenamiento, midiendo macro-F1 con intervalos de confianza al 95% por bootstrap agrupado
+(1,000 remuestreos por usuario). El RF obtiene macro-F1 = 0.8743 [0.821, 0.947], superando
+significativamente al umbral (0.6983, Δ = +0.185, IC [+0.158, +0.226]).
+
+La brecha de generalización es de 5.2 puntos respecto a la validación cruzada de S2-2
+(0.9259 -> 0.8743), esperable con usuarios nuevos. La tasa vehiculo->a_pie (falsas
+liberaciones) es del 24.3% para el RF, concentrada en vehículos que circulan a menos de
+8 km/h por congestión.
+
+Los escenarios difíciles de SUMO (tráfico lento, peatón rápido, barrido de σ GPS) no se
+generaron porque el contenedor van3twin no estaba corriendo. El script está listo para
+ejecutarse. La sesión queda **parcial** (4/7 criterios cumplidos).
+
+**Métricas principales (GeoLife prueba):**
+
+| Sistema | macro-F1 | IC 95% | Tasa veh->a_pie |
+|---------|----------|--------|-----------------|
+| RF v1 | 0.8743 | [0.821, 0.947] | 24.3% |
+| RF+suav | 0.8724 | [0.819, 0.944] | 24.1% |
+| Umbral | 0.6983 | [0.619, 0.756] | 27.2% |
+
+**Tests:** 11/11 pasan.
+
+![Umbral vs RF por fuente](evidencias/s3_umbral-vs-rf-por-fuente.png)
+
+![Curvas sigma](evidencias/s3_curvas-sigma.png)
+
+![Tráfico lento](evidencias/s3_trafico-lento.png)
