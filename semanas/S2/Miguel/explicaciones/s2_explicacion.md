@@ -6,7 +6,7 @@
 2. El backend prepara el pago, Payphone (o el mock) cobra, vuelve a nuestra `responseUrl`, el servidor **confirma** y acredita la billetera de Freddy **una sola vez**.
 3. En la app, la pantalla **Recarga** ofrece $5, $10, $20 o un monto libre ≥ $5, abre el pago en el navegador del sistema y luego consulta el estado hasta 10 veces.
 4. La pantalla **Billetera** muestra saldo, retenido, disponible y los movimientos con fecha local, y se actualiza deslizando hacia abajo.
-5. Se probó de punta a punta en Android con Expo Go por Tailscale: $4.92 → aprobar $10 → $14.92, y un pago rechazado no acredita nada.
+5. Se probó de punta a punta en Android con Expo Go por Tailscale ($4.92 → aprobar $10 → $14.92; un rechazo no acredita) y, el 28-oct, con **Payphone real en modo de pruebas** en la demo del VPS: pago de $5 aprobado, confirmado y acreditado una sola vez.
 
 ## 2. Conceptos clave
 
@@ -85,7 +85,7 @@ const intencion = await esperarConfirmacion(() => consultarPago(urlApi, pago.cli
 
 - **Freddy (billetera y API):** se usa solo `Billetera.recargar(usuario, monto, referencia_payphone=id, s=sesión)`, `dep.servicios` y `dep.billetera`, y los errores `ErrorNucleo` con `RECARGA_MINIMA`, `VALIDACION` y `ERROR_INTERNO`. Su `crear_app` monta `backend.pagos.rutas` en `/api/v1` sin cambios.
 - **Contrato:** las rutas `/pagos/*` no están en el contrato v1. Se piden a Freddy para `CONTRATO.propuesto.md`. La app sigue usando `GET /billetera/{id}` del contrato.
-- **Tyrone (VPS y Payphone):** tiene las credenciales de prueba y el dominio. Debe registrar la `responseUrl` `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno` y cargar `PAYPHONE_*` en Dokploy.
+- **Tyrone (VPS y Payphone):** tiene las credenciales de prueba y el dominio. Registró la `responseUrl` `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno`, creó la app `esert-demo` en Dokploy con `PAYPHONE_*` y `ESERT_URL_PUBLICA`, e hizo la prueba real el 28-oct.
 - **Entrega:** el saldo recargado es el que usa la búsqueda de puesto de S2-1 (si no alcanza, lleva a Recarga).
 
 ## 7. Resultados y evidencias
@@ -98,9 +98,13 @@ const intencion = await esperarConfirmacion(() => consultarPago(urlApi, pago.cli
 
 ![Pago rechazado y segunda recarga](../evidencias/s2_recarga-rechazada.png)
 
+- **Payphone real, modo de pruebas (28-oct, `https://demo.e-sert.tesisucuenca.com`):** `POST /pagos/preparar` por $5 → 201 con `modo = pruebas`; pago con tarjeta en el formulario de Payphone; el retorno confirmó con *V2/Confirm* (`statusCode` 3) y mostró "Pago confirmado"; la intención quedó `aprobado` con `referencia_payphone` 92952895 y la billetera nueva subió de $0 a **$5.00** con un solo movimiento. Repetir la URL de retorno no volvió a acreditar.
+
+![Payphone en modo de pruebas en el VPS](../evidencias/s2_payphone-pruebas.png)
+
 ## 8. Limitaciones y decisiones
 
-- **Modo `pruebas` sin probar:** las credenciales de prueba solo las tiene Tyrone y Payphone exige una `responseUrl` pública HTTPS en el dominio registrado. El código está listo; en `pruebas` sin credenciales, `preparar` responde `ERROR_INTERNO` con la lista de variables que faltan.
+- **Modo `pruebas` probado en el VPS (28-oct):** funcionó sin cambios de código. Los primeros intentos de `preparar` dieron `ERROR_INTERNO` hasta que se corrigieron el Token y el StoreId cargados en Dokploy (Payphone responde 401 si el token está mal copiado). Un primer pago (`rec_72a744f8…`) quedó `pendiente`: no llegó a confirmarse y, según Payphone, se reversa solo a los 5 minutos. El motivo del error de Payphone solo se ve en el log del backend (a la app va un mensaje genérico).
 - **Volver a la app en Android con Expo Go:** la página de retorno no logra abrir Expo Go desde la pestaña del navegador (Brave), ni sola ni con el botón. Se cierra la pestaña y la app confirma igual consultando el estado. Con una APK propia (esquema `esert://` registrado) se espera que funcione; queda para probar.
 - **Unicidad de `referencia_payphone`:** se usa el `id` de Payphone como `referencia_payphone`. No se tocó la billetera para hacerla única; la unicidad la garantiza la intención.
 - **Retorno con Confirm fallido:** si Payphone no responde, la intención queda pendiente sin límite de tiempo; Payphone reversa el pago a los 5 minutos si nadie confirma.

@@ -376,3 +376,22 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 - S2-3: conectar el espejo al WebSocket real.
 
 **Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_billetera-recarga.png) ![](../semanas/S2/Miguel/evidencias/s2_recarga-rechazada.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S2 · Sesión 2 (cierre) · 2026-10-28 · Prueba del modo `pruebas` de Payphone en el VPS
+**Estado:** hecha (antes parcial, 5/6)
+**Qué hice:** cierre hecho por Tyrone en su sesión, a pedido de Miguel (pedido `@Tyrone [Payphone]`):
+- `proyecto/backend/` se adelantó en main (`b93a111`) con el backend de Freddy y `backend/pagos` de esta sesión, más `httpx` en `requirements-servidor.txt`.
+- Se creó la app `esert-demo` en Dokploy (`proyecto/backend/Dockerfile`, dominio `demo.e-sert.tesisucuenca.com`, volumen `/data`) con `PAYPHONE_MODO=pruebas`, `PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`, `ESERT_URL_PUBLICA` y `PAYPHONE_RESPONSE_URL`.
+- Prueba real: `POST /api/v1/pagos/preparar` por $5 → 201 `modo=pruebas`; pago con tarjeta en el formulario de Payphone; el retorno confirmó (*V2/Confirm*, `statusCode` 3) y mostró "Pago confirmado"; `GET /pagos/rec_64e89b5e-…` → `aprobado`, `referencia_payphone` 92952895; la billetera nueva pasó de $0 a $5.00 con un solo movimiento. Repetir el retorno no volvió a acreditar.
+**Archivos creados o modificados:** `semanas/S2/Miguel/evidencias/s2_payphone-pruebas.png`, `semanas/S2/Miguel/estado.json`, `semanas/S2/Miguel/RESUMEN.md`, `semanas/S2/Miguel/explicaciones/s2_explicacion.{md,pdf}`.
+**Decisiones y por qué:** no se cambió código de pagos: funcionó tal como lo dejó Miguel. El adelanto en main se hizo para no esperar a la unificación; el domingo se sobrescribe con la copia desde las ramas.
+**Problemas encontrados:**
+- Los primeros `preparar` dieron `ERROR_INTERNO` (500) hasta corregir el Token y el StoreId en Dokploy. Payphone responde 401 ("Su aplicación no esta autorizada…") si el token está mal copiado; el detalle solo se ve en el log del backend.
+- El StoreId es el de la pestaña **Credenciales** de Payphone Developer (no el "Identificador" de Detalles). Id Cliente, Clave secreta y Contraseña de codificación no se usan en el Botón de pagos.
+- Un primer pago (`rec_72a744f8-…`) quedó `pendiente` sin confirmarse; Payphone lo reversa a los 5 minutos. No se determinó la causa (probablemente no se completó el pago); el segundo intento funcionó.
+- Después de cambiar variables en Dokploy hay que redesplegar: la config de pagos se lee una vez por proceso.
+**Pedidos a otros:** ninguno nuevo. Siguen abiertos los pedidos a Freddy (rutas `/pagos/*` en `CONTRATO.propuesto.md` y `httpx` en su `requirements-servidor.txt`).
+**Bucle y verificación:** 1 vuelta en el VPS (4 intentos de `preparar`: 3 con credenciales mal cargadas, 1 correcto; 2 pagos: 1 pendiente, 1 aprobado). Se verificaron por API la intención, la billetera y la idempotencia del retorno. Los otros 5 criterios ya los había dado por cumplidos el verificador de la sesión; antes del adelanto en main se volvió a correr pytest (132/132).
+**Pendientes para la próxima sesión:** volver a la app en Android con una APK propia (`esert://`); probar en un iPhone físico; probar la recarga desde la app contra el backend del VPS (`EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`).
+**Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_payphone-pruebas.png)
+[Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)

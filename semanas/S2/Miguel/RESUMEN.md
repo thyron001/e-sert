@@ -24,7 +24,7 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 
 ## Sesión 2 · 2026-10-27 · Billetera y recarga con Payphone en modo de pruebas
 
-**Estado:** parcial (5/6 criterios). Falta probar el modo `pruebas` de Payphone: las credenciales y la `responseUrl` pública del VPS las tiene Tyrone.
+**Estado:** hecha (6/6 criterios). El modo `pruebas` de Payphone se probó el 28-oct en la demo del VPS con las credenciales de Tyrone.
 
 - `backend/pagos/` (router `/api/v1/pagos/*` que el backend de Freddy monta solo):
   - `AdaptadorPayphone` (*Prepare* y *V2/Confirm* según la documentación de Payphone del 27-oct, montos en centavos) y `AdaptadorMock` con página "Aprobar/Rechazar";
@@ -33,9 +33,12 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 - App: Billetera (saldo, retenido, disponible y movimientos con fecha local, *pull to refresh*) y Recarga ($5, $10, $20 o monto libre ≥ $5, navegador del sistema y consulta del estado hasta 10 veces).
 - Prueba en Android con Expo Go por Tailscale: $4.92 → aprobar $10 → **$14.92**, un solo movimiento "Payphone 21081677"; un pago rechazado no acredita.
 - pytest 30/30 (más los 102 de Freddy con pagos montado), Jest 99/99, `tsc` sin errores.
+- **Payphone real (modo de pruebas) en `https://demo.e-sert.tesisucuenca.com`:** $5 aprobados → "Pago confirmado" → intención `aprobado` (ref. 92952895) → billetera $0 → **$5.00**, un solo movimiento aunque se repita el retorno.
 
 ![Recarga aprobada de punta a punta](evidencias/s2_billetera-recarga.png)
 
 ![Pago rechazado y segunda recarga](evidencias/s2_recarga-rechazada.png)
+
+![Payphone en modo de pruebas en el VPS](evidencias/s2_payphone-pruebas.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
