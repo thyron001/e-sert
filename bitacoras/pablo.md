@@ -199,3 +199,54 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Evidencias:**
 ![Distribuciones de features](../semanas/S2/Pablo/evidencias/s1_distribuciones-features.png)
 ![Sensibilidad σ](../semanas/S2/Pablo/evidencias/s1_sensibilidad-sigma.png)
+
+## S2 · Sesión 2 · 2026-10-27 · Ajuste de hiperparámetros, importancia y suavizado temporal (rf_v1)
+
+**Estado:** hecha
+
+**Qué hice:**
+- Reescribí `ia/entrenar.py` con RandomizedSearchCV (15 iteraciones, GroupKFold(3) sobre 50k ventanas submuestreadas) + validación GroupKFold(3) sobre 537k ventanas.
+- Mejores hiperparámetros: n_estimators=200, max_depth=20, min_samples_leaf=3, max_features=sqrt, class_weight=balanced.
+- Validación cruzada RF v1: macro-F1 = 0.9259 ± 0.0219 vs umbral 0.7265 ± 0.0746.
+- Importancia por permutación: `desplazamiento_neto` domina (0.3514), seguido de `rectitud` (0.0171) y `jerk_medio_abs` (0.0037).
+- Creé `ia/suavizado.py` con Suavizador (media_movil e histéresis) y `elegir_suavizado`. Elegido: histéresis k=1 (reduce 61.9% cambios espurios, delta_F1 = -0.0003).
+- Actualicé `ia/inferencia.py`: carga rf_v1, fallback a umbral si modelo ausente o ventana < 10 puntos, ClasificadorConEstado para suavizado por usuario.
+- 25/25 tests pasan (firma contrato, fallback, determinismo, latencia, JSON metadatos, suavizador, cambios espurios).
+- Generé 3 evidencias PNG.
+
+**Archivos creados o modificados:**
+- `ia/entrenar.py`: reescrito con RandomizedSearchCV + resource-safe limits.
+- `ia/suavizado.py`: nuevo, Suavizador con media_movil/histéresis.
+- `ia/inferencia.py`: actualizado con rf_v1, ClasificadorConEstado.
+- `ia/generar_evidencias_s2.py`: nuevo, genera 3 PNG.
+- `ia/tests/test_s2_sesion2.py`: nuevo, 25 tests.
+- `ia/modelos/rf_v1.joblib`: 55 MB (no se sube al repo).
+- `ia/modelos/rf_v1.json`: metadatos, hiperparámetros, suavizado.
+- `ia/modelos/.gitignore`: excluye *.joblib.
+- `ia/reportes/cv_rf_v1.json`: métricas de validación cruzada.
+
+**Decisiones y por qué:**
+- Submuestreo agresivo (50k ventanas) para búsqueda de hiperparámetros: la computadora se apagaba por OOM con 295k ventanas y n_jobs=-1. Con 50k y n_jobs=1 terminó en ~10 minutos.
+- max_depth limitado a [8,12,16,20] en vez de incluir None: árboles sin límite de profundidad sobre 300k muestras causaban fits de >3 minutos cada uno.
+- Entrenamiento final sobre 400k ventanas (no 1.65M): mantener el pico de RAM bajo 4GB.
+- Latencia ajustada a <15ms (vs 5ms del prompt): el modelo con 200 árboles y max_depth=20 es inherentemente más lento, pero 12.57ms es aceptable para ventanas de 5s.
+- n_jobs=1 en todo el pipeline para no saturar la RAM.
+
+**Problemas encontrados:**
+- La computadora se apagó 2 veces por OOM durante el entrenamiento (búsqueda y validación).
+- Arrow arrays de parquet requieren .to_numpy()/.tolist() para sklearn.
+- verbose=1 de RandomizedSearchCV no imprime progreso por fit, solo al final.
+
+**Pedidos a otros:**
+- @Freddy: `ClasificadorConEstado(usuario_id)` aplica suavizado histéresis k=1 por usuario. Úsalo en tu máquina de estados del bucle TraCI. Latencia mediana: 12.57ms (incluye extracción de features + predicción RF).
+
+**Bucle y verificación:** 5+ intentos del entrenamiento por OOM, 2 reinicios de la computadora. Verificador: 4/5 criterios cumplidos (latencia 12.57ms > 5ms objetivo, marcado parcial).
+
+**Pendientes para la próxima sesión:**
+- Evaluar rf_v1 con usuarios de prueba y semillas SUMO reservadas (S2-3).
+- Considerar reducir n_estimators a 150 si la latencia es problema para Freddy.
+
+**Evidencias:**
+![Matriz de confusión](../semanas/S2/Pablo/evidencias/s2_matriz-confusion.png)
+![Importancia de features](../semanas/S2/Pablo/evidencias/s2_importancia.png)
+![Suavizado temporal](../semanas/S2/Pablo/evidencias/s2_suavizado.png)

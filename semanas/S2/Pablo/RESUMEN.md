@@ -24,3 +24,28 @@ con augmentation del 50% y prueba aparte sin aumentar (294,579 ventanas).
 ![Distribuciones de features](evidencias/s1_distribuciones-features.png)
 
 ![Sensibilidad σ](evidencias/s1_sensibilidad-sigma.png)
+
+## Sesión 2 · Ajuste de hiperparámetros, importancia y suavizado temporal (rf_v1)
+
+Se entrenó el modelo Random Forest v1 con RandomizedSearchCV (15 iteraciones sobre 50k
+ventanas submuestreadas) y validación GroupKFold(3) sobre 537k ventanas. Los mejores
+hiperparámetros: n_estimators=200, max_depth=20, min_samples_leaf=3, max_features=sqrt,
+class_weight=balanced.
+
+Se analizó la importancia por permutación: `desplazamiento_neto` domina (0.3514), seguido
+de `rectitud` (0.0171). Se implementó suavizado temporal con histéresis k=1 que reduce 61.9%
+los cambios espurios sin pérdida significativa de F1.
+
+**Métricas de validación cruzada (macro-F1):**
+- RF v1: 0.9259 ± 0.0219
+- Umbral: 0.7265 ± 0.0746
+
+**Suavizado elegido:** histéresis k=1 (reducción 61.9%, delta_F1 = -0.0003)
+
+**Tests:** 25/25 pasan.
+
+![Matriz de confusión](evidencias/s2_matriz-confusion.png)
+
+![Importancia de features](evidencias/s2_importancia.png)
+
+![Suavizado temporal](evidencias/s2_suavizado.png)
