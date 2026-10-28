@@ -107,3 +107,55 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 ![Matriz de confusión](../semanas/S2/Pablo/evidencias/s2_matriz-confusion.png)
 ![Importancia de features](../semanas/S2/Pablo/evidencias/s2_importancia.png)
 ![Suavizado temporal](../semanas/S2/Pablo/evidencias/s2_suavizado.png)
+
+## S2 · Sesión 3 · 2026-10-28 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
+**Estado:** parcial
+**Qué hice:**
+- Implementé `ia/evaluar_generalizacion.py` con evaluación completa de GeoLife prueba (294,579 ventanas, 10 usuarios no vistos) para los 3 sistemas (umbral, RF v1, RF v1 + suavizado).
+- Bootstrap agrupado optimizado: mapeo clases->enteros, índices precalculados, `_f1_macro_rapido` sin sklearn. Pasó de >10 min a ~30 s.
+- Bootstrap pareado RF vs umbral: Δ=+0.185 [+0.158, +0.226], significativo.
+- Escribí `ia/escenarios_dificiles.py` con generación de escenarios SUMO (trafico_lento, peaton_rapido, normal) y barrido de σ. No se ejecutó: contenedor van3twin apagado.
+- 11 tests en `ia/tests/test_evaluacion.py`: partición, hash, semillas reservadas, bootstrap determinista, formato métricas.
+- 3 PNGs de evidencia (2 son placeholders sin SUMO).
+- Reporte `evaluacion_generalizacion.md` redactado para el informe.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Pablo/codigo/ia/evaluar_generalizacion.py`
+- `semanas/S2/Pablo/codigo/ia/escenarios_dificiles.py`
+- `semanas/S2/Pablo/codigo/ia/generar_evidencias_s3.py`
+- `semanas/S2/Pablo/codigo/ia/tests/test_evaluacion.py`
+- `semanas/S2/Pablo/codigo/ia/reportes/metricas_generalizacion.json`
+- `semanas/S2/Pablo/codigo/ia/reportes/evaluacion_generalizacion.md`
+- `semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png`
+- `semanas/S2/Pablo/evidencias/s3_curvas-sigma.png` (placeholder)
+- `semanas/S2/Pablo/evidencias/s3_trafico-lento.png` (placeholder)
+- `semanas/S2/Pablo/explicaciones/s3_explicacion.md`
+- `semanas/S2/Pablo/explicaciones/s3_explicacion.pdf`
+
+**Decisiones y por qué:**
+- **Bootstrap agrupado por usuario**: las ventanas de un mismo usuario están correlacionadas; remuestrear por ventana subestimaría la varianza. Con 10 grupos el IC es amplio [0.821, 0.947] pero honesto.
+- **Optimización del bootstrap con enteros**: sklearn f1_score sobre strings × 1,000 remuestreos × 294k ventanas era inviable. El cálculo directo con arrays int dio ~100x speedup.
+- **Sesión parcial por falta de SUMO**: el prompt dice "si no hay SUMO, la sesión queda parcial; no sustituyas SUMO por datos inventados". Los placeholders son transparentes.
+- **NaN en precision_media**: sklearn RF 1.9.1 maneja NaN nativamente. Eliminar el filtro de NaN fue crítico (filtraba las 294k ventanas).
+
+**Problemas encontrados:**
+- Contenedor van3twin apagado: no se generaron escenarios SUMO.
+- Bootstrap naive tardaba >10 min por timeout de 600s. Resuelto con optimización (enteros + índices precalculados).
+- Filtro de NaN eliminaba todas las ventanas porque precision_media es NaN en todo GeoLife.
+
+**Pedidos a otros:**
+- @Freddy: el RF v1 (macro-F1=0.87 en usuarios no vistos) es el sistema recomendado para el controlador. La tasa vehiculo->a_pie es 24.3% (vehículos lentos confundidos con peatones); el suavizado no mejora significativamente en esta evaluación offline. Sin datos de SUMO no hay curva de σ todavía, pero σ>10m probablemente degrade mucho.
+- @Miguel: si grabas algo casero, lo más útil serían trayectorias de vehículo en congestión (circulando a <8 km/h) y peatones caminando rápido, que son los casos donde el modelo falla más.
+- @Tyrone [VPS]: ninguno.
+
+**Bucle y verificación:** 3 vueltas del bucle (1 por NaN filter, 1 por timeout bootstrap, 1 exitosa). Verificador independiente: 2/7 cumplidos, 3/7 parciales, 2/7 no cumplidos. Los 5 no completos dependen de SUMO (contenedor van3twin apagado): escenarios no generados, curvas_sigma.csv inexistente, tráfico lento sin datos.
+
+**Pendientes para la próxima sesión:**
+- Ejecutar `ia/escenarios_dificiles.py` con van3twin activo para completar la evaluación.
+- Regenerar evidencias PNG con datos SUMO reales.
+- Completar curvas_sigma.csv y análisis de tráfico lento.
+
+**Evidencias:**
+![Umbral vs RF por fuente](../semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png)
+![Curvas sigma](../semanas/S2/Pablo/evidencias/s3_curvas-sigma.png)
+![Tráfico lento](../semanas/S2/Pablo/evidencias/s3_trafico-lento.png)

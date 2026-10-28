@@ -32,6 +32,24 @@
         "Latencia mediana 12.57ms (>5ms objetivo) por modelo más grande; aceptable para ventana de 5s",
         "Evaluar en S2-3 con usuarios de prueba y semillas SUMO reservadas"
       ]
+    },
+    "sesion-3": {
+      "estado": "parcial",
+      "fecha": "2026-10-28",
+      "resumen": "Evaluación de generalización RF v1 sobre 294,579 ventanas de 10 usuarios GeoLife no vistos: macro-F1=0.8743 [0.821, 0.947] vs umbral 0.6983 [0.619, 0.756], brecha de generalización 5.2pp. Escenarios SUMO (tráfico lento, peatón rápido, barrido σ) pendientes: contenedor van3twin apagado.",
+      "evidencias": [
+        "evidencias/s3_umbral-vs-rf-por-fuente.png",
+        "evidencias/s3_curvas-sigma.png",
+        "evidencias/s3_trafico-lento.png",
+        "explicaciones/s3_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {"cumplidos": 2, "parciales": 3, "no_cumplidos": 2, "total": 7},
+      "pendientes": [
+        "Generar escenarios SUMO con semillas 101-105 (requiere contenedor van3twin)",
+        "Completar curvas_sigma.csv con datos de SUMO",
+        "Completar análisis de tráfico lento con datos controlados"
+      ]
     }
   }
 }
