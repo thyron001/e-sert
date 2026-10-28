@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 from comun import esquemas as e
 
 from .db import BaseDatos, PuestoTabla, SesionParqueo, distancia_m
+from .errores import ErrorNucleo
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,17 @@ class MapaOcupacion:
             if mejor is None or (d, p.puesto_id) < (mejor.distancia_m, mejor.puesto_id):
                 mejor = PuestoCercano(p.puesto_id, p.lat, p.lon, libres, d)
         return mejor
+
+    def guiar(self, consulta: e.ConsultaGuia) -> e.Guia:
+        """`GET /guia`: el puesto libre más cercano al destino. `distancia_m` es hasta el destino.
+
+        Nunca devuelve un puesto lleno; si no queda ninguno libre, `SIN_PUESTOS_LIBRES`.
+        """
+        mejor = self.recomendar(consulta.destino_lat, consulta.destino_lon)
+        if mejor is None:
+            raise ErrorNucleo(e.CodigoError.SIN_PUESTOS_LIBRES, "No hay puestos con plazas libres.")
+        return e.Guia(puesto_id=mejor.puesto_id, lat=mejor.lat, lon=mejor.lon,
+                      distancia_m=round(mejor.distancia_m, 1))
 
     def como_contrato(self) -> List[e.Puesto]:
         """Respuesta de `GET /puestos`."""
