@@ -13,11 +13,34 @@
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 4, "total": 5},
+      "criterios": {
+        "cumplidos": 4,
+        "total": 5
+      },
       "pendientes": [
         "Probar el flujo en un iPhone físico (solo simulador).",
         "Conectar Payphone en la pantalla Recarga (S2-2) y quitar la recarga de prueba.",
         "Probar contra el backend del VPS cuando Tyrone lo publique."
+      ]
+    },
+    "sesion-2": {
+      "estado": "parcial",
+      "fecha": "2026-10-27",
+      "resumen": "Recarga de la billetera con el Botón de Pagos de Payphone (Prepare/Confirm) desde backend/pagos, con retorno idempotente y modo mock; en la app, Billetera con pull to refresh y Recarga con $5/$10/$20 o monto libre. Funciona de punta a punta en modo mock en Android por Tailscale ($4.92 → $14.92). Parcial porque el modo pruebas de Payphone no se pudo probar sin las credenciales de Tyrone.",
+      "evidencias": [
+        "evidencias/s2_billetera-recarga.png",
+        "evidencias/s2_recarga-rechazada.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 6
+      },
+      "pendientes": [
+        "Prueba del modo pruebas de Payphone en el VPS a cargo de Tyrone: desplegar backend/pagos y cargar PAYPHONE_* y ESERT_URL_PUBLICA en Dokploy (la aplicación de Payphone ya tiene el dominio de la demo y la responseUrl).",
+        "En Android con Expo Go, la página de retorno no vuelve sola a la app (ni con el botón): probar con una APK propia (esquema esert://).",
+        "Probar en un iPhone físico."
       ]
     }
   }
