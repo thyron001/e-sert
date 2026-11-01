@@ -4,3 +4,5 @@ pydantic>=2.5,<3
 fastapi>=0.110,<1
 uvicorn[standard]>=0.29
 pydantic-settings>=2.2,<3
+# Pagos (backend/pagos, Miguel): cliente HTTP de Payphone.
+httpx>=0.27,<1
