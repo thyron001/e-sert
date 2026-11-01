@@ -27,6 +27,13 @@ export function Boton({
   );
 }
 
+/** Fecha y hora locales del teléfono, p. ej. "27/10 10:42". */
+export function fechaLocal(iso: string): string {
+  const d = new Date(iso);
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return `${dos(d.getDate())}/${dos(d.getMonth() + 1)} ${dos(d.getHours())}:${dos(d.getMinutes())}`;
+}
+
 export const usd = (v: number) => `${v < 0 ? '−' : ''}$${Math.abs(v).toFixed(2)}`;
 
 const estilos = StyleSheet.create({

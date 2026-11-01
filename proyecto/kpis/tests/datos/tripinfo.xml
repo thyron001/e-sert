@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sintético con formato de la opción tripinfo-output de SUMO. -->
+<tripinfos>
+    <tripinfo id="v1" depart="0.00" departLane="e0_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="60.00" arrivalLane="eObj_0" arrivalPos="100.00" arrivalSpeed="5.00" duration="60.00" routeLength="195.00" waitingTime="0.00" waitingCount="0" stopTime="40.00" timeLoss="3.00" rerouteNo="0" devices="tripinfo_v1" vType="DEFAULT_VEHTYPE" speedFactor="1.00" vaporized=""/>
+</tripinfos>

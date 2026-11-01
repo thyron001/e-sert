@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@types/jest": "30.0.0",
     "expo": "~58.0.17",
     "expo-constants": "~58.0.13",
@@ -46,7 +47,9 @@
     "tipos": "tsc --noEmit",
     "prueba:grabador": "tsx src/sensores/pruebas/formato.prueba.ts",
     "generar-mock": "tsx scripts/generar_mock.ts > src/espejo/recorrido_mock.json",
-    "test": "jest"
+    "test": "jest",
+    "verificar-contrato": "node scripts/verificar_contrato.mjs",
+    "probar-backend": "tsx scripts/probar_backend.ts"
   },
   "private": true,
   "jest": {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Red sintética mínima con formato .net.xml de SUMO. -->
+<net version="1.9" junctionCornerDetail="5" limitTurnSpeed="5.50">
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,200.00,550.00" origBoundary="0.00,0.00,200.00,550.00" projParameter="!"/>
+    <edge id=":j1_0" function="internal">
+        <lane id=":j1_0_0" index="0" speed="13.89" length="5.00" shape="100.00,0.00 105.00,0.00"/>
+    </edge>
+    <edge id="e_cerca" from="j0" to="j1" priority="-1">
+        <lane id="e_cerca_0" index="0" speed="13.89" length="100.00" shape="0.00,0.00 100.00,0.00"/>
+        <lane id="e_cerca_1" index="1" speed="13.89" length="999.00" shape="0.00,3.20 100.00,3.20"/>
+    </edge>
+    <edge id="e_lejos" from="j2" to="j3" priority="-1">
+        <lane id="e_lejos_0" index="0" speed="13.89" length="200.00" shape="0.00,550.00 100.00,550.00 200.00,550.00"/>
+    </edge>
+    <junction id="j0" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00"/>
+</net>

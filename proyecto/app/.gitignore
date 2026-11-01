@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# .env con la URL local no se sube; la plantilla sí (la raíz ignora .env.*)
+.env
+!.env.example
