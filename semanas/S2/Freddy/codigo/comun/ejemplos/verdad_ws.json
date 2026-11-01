@@ -1,0 +1,23 @@
+{
+  "tipo": "verdad",
+  "t_sim": 1234.0,
+  "ts": "2026-10-20T14:03:05Z",
+  "puestos": [
+    {
+      "puesto_id": "pa_-106945247#0_0",
+      "ocupados": 9,
+      "capacidad": 17
+    },
+    {
+      "puesto_id": "pa_-118367899_0",
+      "ocupados": 7,
+      "capacidad": 7
+    }
+  ],
+  "estacionados": [
+    "sim_veh7"
+  ],
+  "falsas_liberaciones": [
+    "ses_0b1c2d3e-4f50-4a61-9b72-8c93a4b5c6d7"
+  ]
+}
