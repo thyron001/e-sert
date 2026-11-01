@@ -123,7 +123,13 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
     const suma = (t: TipoMovimiento) => movs.filter((m) => m.tipo === t).reduce((s, m) => s + m.monto, 0);
     const saldo = redondearCentavos(suma('recarga') - suma('debito'));
     const retenido = redondearCentavos(suma('retencion') - suma('liberacion'));
-    return { saldo, retenido, disponible: redondearCentavos(saldo - retenido), movimientos: [...movs] };
+    return {
+      saldo,
+      retenido,
+      disponible: redondearCentavos(saldo - retenido),
+      bloqueada: saldo < 0,
+      movimientos: [...movs],
+    };
   }
 
   function buscarPuesto(puestoId: string): Puesto {
@@ -151,7 +157,9 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
     pedirGuia: (c) =>
       responder(() => {
         const libres = puestos.filter((p) => p.ocupados < p.capacidad);
-        if (libres.length === 0) return null;
+        if (libres.length === 0) {
+          throw new ErrorApi(404, 'SIN_PUESTOS_LIBRES', 'No hay puestos libres cerca del destino');
+        }
         const conDistancia = libres.map((p) => ({
           p,
           d: distanciaM(c.destino_lat, c.destino_lon, p.lat, p.lon),
@@ -162,7 +170,8 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
           puesto_id: p.puesto_id,
           lat: p.lat,
           lon: p.lon,
-          distancia_m: Math.round(distanciaM(c.lat, c.lon, p.lat, p.lon)),
+          // Como el backend v1: distancia del puesto al destino, no desde el auto.
+          distancia_m: Math.round(conDistancia[0].d),
         };
       }),
 
@@ -171,14 +180,18 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
 
     crearSesion: (datos) =>
       responder(() => {
+        // Mismo orden de comprobaciones que el backend v1 de Freddy.
         const puesto = buscarPuesto(datos.puesto_id);
-        if (puesto.ocupados >= puesto.capacidad) {
-          throw new ErrorApi(409, 'PUESTO_LLENO', `El puesto ${puesto.puesto_id} está lleno`);
+        const abierta = [...sesiones.values()].find(
+          (x) => x.usuario_id === datos.usuario_id && x.estado !== 'CERRADA',
+        );
+        if (abierta) {
+          throw new ErrorApi(409, 'SESION_ACTIVA', `Ya tienes una sesión abierta (${abierta.sesion_id})`);
         }
         const retener = montoRetencion();
         const billetera = estadoBilletera(datos.usuario_id);
         if (billetera.saldo < 0) {
-          throw new ErrorApi(402, 'SALDO_NEGATIVO', 'Hay saldo negativo: recarga antes de una nueva sesión');
+          throw new ErrorApi(403, 'SESIONES_BLOQUEADAS', 'Hay saldo negativo: recarga antes de una nueva sesión');
         }
         if (billetera.disponible < retener) {
           throw new ErrorApi(
@@ -187,15 +200,19 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
             `Necesitas $${retener.toFixed(2)} disponibles; recarga $${TARIFA.recarga_minima_usd.toFixed(2)} o más`,
           );
         }
+        if (puesto.ocupados >= puesto.capacidad) {
+          throw new ErrorApi(409, 'PUESTO_LLENO', `El puesto ${puesto.puesto_id} está lleno`);
+        }
         const sesion: Sesion = {
           sesion_id: `ses_${uuid4()}`,
           usuario_id: datos.usuario_id,
           placa: datos.placa.toUpperCase(),
           puesto_id: puesto.puesto_id,
           estado: 'ESTACIONADO',
-          inicio: ahora().toISOString(),
+          inicio: datos.ts ?? ahora().toISOString(),
           fin: null,
           retenido: retener,
+          minutos_reales: null,
           minutos_cobrados: null,
           debitado: null,
         };
@@ -209,24 +226,30 @@ export function crearClienteMock(opciones: { latenciaMs?: number; ahora?: () => 
       responder(() => {
         const s = buscarSesion(sesionId);
         if (s.estado === 'CERRADA') {
-          throw new ErrorApi(409, 'SESION_CERRADA', `La sesión ${sesionId} ya está cerrada`);
+          throw new ErrorApi(409, 'SESION_YA_CERRADA', `La sesión ${sesionId} ya está cerrada`);
         }
         const fin = new Date(datos.ts);
         const minutosReales = (fin.getTime() - new Date(s.inicio).getTime()) / 60000;
+        if (minutosReales < 0) throw new ErrorApi(422, 'VALIDACION', 'El cierre es anterior al inicio');
         const cobrados = minutosCobrados(minutosReales);
-        // Si el saldo no alcanza, se permite un negativo de hasta saldo_negativo_max_usd.
-        const saldo = estadoBilletera(s.usuario_id).saldo;
-        const tope = Math.max(0, redondearCentavos(saldo + TARIFA.saldo_negativo_max_usd));
-        const debitado = Math.min(costoMinutos(cobrados), tope);
+        // CONTRATO §5 v1: el débito se aplica completo aunque el saldo quede negativo.
+        const debitado = costoMinutos(cobrados);
         anotar(s.usuario_id, 'debito', debitado, { sesion_id: s.sesion_id });
         anotar(s.usuario_id, 'liberacion', s.retenido, { sesion_id: s.sesion_id });
         s.estado = 'CERRADA';
         s.fin = fin.toISOString();
+        s.minutos_reales = redondearCentavos(minutosReales);
         s.minutos_cobrados = cobrados;
         s.debitado = debitado;
         const puesto = buscarPuesto(s.puesto_id);
         puesto.ocupados = Math.max(0, puesto.ocupados - 1);
-        return { sesion_id: s.sesion_id, minutos_cobrados: cobrados, debitado };
+        return {
+          sesion_id: s.sesion_id,
+          minutos_reales: redondearCentavos(minutosReales),
+          minutos_cobrados: cobrados,
+          debitado,
+          saldo: estadoBilletera(s.usuario_id).saldo,
+        };
       }),
 
     obtenerSesion: (sesionId) => responder(() => buscarSesion(sesionId)),

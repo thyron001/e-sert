@@ -1,19 +1,9 @@
+import tarifaContrato from '@/src/contrato/tarifa.json';
 import type { Tarifa } from './tipos';
 
-// SINCRONIZAR con comun/tarifa.json y comun/tarifa.py (rama freddy/s1, contrato v1 §5).
-// Valores provisionales: ver docs/sert_reglas.md para los valores reales del SERT.
-export const TARIFA: Tarifa = {
-  valor_hora_usd: 0.5,
-  bloque_minimo_min: 30,
-  fraccion_min: 5,
-  cobro_minimo_min: 10,
-  saldo_negativo_max_usd: 0.5,
-  aviso_saldo_min: 10,
-  tiempo_maximo_min: 120,
-  aviso_tiempo_min: 10,
-  recarga_minima_usd: 5.0,
-  tarjeta_bloque_min: 30,
-};
+// Valores de comun/tarifa.json (copia en src/contrato/, verificada con npm run verificar-contrato).
+// docs/sert_reglas.md confirma que coinciden con la tarifa real del SERT.
+export const TARIFA: Tarifa = tarifaContrato;
 
 export function redondearCentavos(valor: number): number {
   return Math.round(valor * 100) / 100;

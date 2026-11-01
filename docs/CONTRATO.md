@@ -1,6 +1,10 @@
-# Contrato de interfaces (v1, congelado el 2026-10-23 en la unificación de S1)
+# Contrato de interfaces (v1.1, 2026-11-01, unificación de S2)
 
-> Estado: **v1 congelado** el 2026-10-23 en la unificación de S1 (adelantada a pedido de
+> **v1.1 (2026-11-01):** aplica la propuesta aditiva de Freddy de S2 (ver "Cambios en v1.1" al
+> final). Ningún cambio rompe a los clientes de v1, por eso el header `X-Contrato-Version` y el
+> campo `Salud.contrato` siguen valiendo `1`.
+
+> Historia: **v1 congelado** el 2026-10-23 en la unificación de S1 (adelantada a pedido de
 > Tyrone), a partir de la propuesta de Freddy (custodio). Desde ahora, cualquier cambio entra
 > solo como `CONTRATO.propuesto.md` y se aprueba en la unificación siguiente.
 >
@@ -122,8 +126,10 @@ BUSCANDO → GUIADO → ESTACIONADO → A_PIE → REGRESANDO → SALIENDO → CE
   se acepta (para poder probar con `curl`), pero los clientes del proyecto siempre lo envían.
 - `Content-Type: application/json` en cuerpos y respuestas.
 - **Token de simulación:** las rutas marcadas con 🔒 son solo del controlador TraCI. Si el
-  backend define la variable `SIM_TOKEN` (en `.env`, obligatorio en el VPS), exigen el header
-  `X-Sim-Token: <SIM_TOKEN>`; si falta o no coincide, `401 TOKEN_SIM_INVALIDO`.
+  backend define la variable `ESERT_TOKEN_SIM` (alias aceptado: `SIM_TOKEN`; en `.env`,
+  obligatoria en el VPS), exigen el header `X-Sim-Token: <token>` **o**
+  `Authorization: Bearer <token>`; si falta o no coincide, `401 TOKEN_SIM_INVALIDO`. Sin token
+  configurado, las rutas 🔒 quedan abiertas (uso local).
 - Las respuestas `202` devuelven `{"aceptado": true}`.
 
 ### 4.2 Errores
@@ -161,11 +167,12 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 
 | Método y ruta | Cuerpo / parámetros | Respuesta | Modelo (`esquemas.py`) |
 |---|---|---|---|
-| `GET /salud` | — | `{ok, contrato: 1, t_sim}` | `Salud` |
+| `GET /salud` | — (responde también en la raíz, `/salud`, para el healthcheck de Dokploy) | `{ok, contrato: 1, t_sim}` | `Salud` |
 | `GET /tarifa` | — | El contenido de `tarifa.json` | `Tarifa` |
 | `GET /puestos` | — | `[{puesto_id, lat, lon, calle, capacidad, ocupados}]` | `Puesto` |
-| `GET /guia` | `?lat=&lon=&destino_lat=&destino_lon=` | `{puesto_id, lat, lon, distancia_m}` o `404 SIN_PUESTOS_LIBRES` | `ConsultaGuia` → `Guia` |
+| `GET /guia` | `?lat=&lon=&destino_lat=&destino_lon=` | `{puesto_id, lat, lon, distancia_m}` o `404 SIN_PUESTOS_LIBRES`. Se elige el puesto con plazas libres más cercano al **destino**; `distancia_m` es la distancia haversine del puesto al destino. | `ConsultaGuia` → `Guia` |
 | 🔒 `POST /sim/paso` | Paso de simulación (§4.4) | `202` | `PasoSimulacion` |
+| 🔒 `POST /interno/snapshot` | Alias de `POST /sim/paso` (mismo cuerpo, respuesta y límite) | `202` | `PasoSimulacion` |
 | `POST /eventos/ubicacion` | `{usuario_id, origen, ts, t_sim?, lat, lon, velocidad_mps?, precision_m?}` | `202` | `EventoUbicacion` |
 | `POST /eventos/modo` | `{usuario_id, ts, t_sim?, modo, confianza, fuente}` | `202` | `EventoModo` |
 | `POST /sesiones` | `{usuario_id, placa, puesto_id, ts?, t_sim?}` | `201 {sesion_id, estado: "ESTACIONADO", retenido}` | `NuevaSesion` → `SesionCreada` |
@@ -274,6 +281,8 @@ Tipos: `recarga`, `retencion`, `debito`, `liberacion`.
 Cada mensaje es JSON con un campo `tipo` (unión discriminada `MensajeWS` en `esquemas.py`).
 
 - `?rol=visor` (por defecto) recibe `snapshot`, `kpi` y `verdad`.
+- `?verdad=0|1` (opcional, solo con `rol=visor`): `verdad=0` quita el mensaje `verdad` para un
+  visor proyectado en público. Por defecto el visor la recibe.
 - `?rol=publico` recibe solo `snapshot` y `kpi`. **`verdad` nunca se envía a la app**, que
   además usa `/ws/espejo` y no este canal.
 
@@ -392,3 +401,21 @@ usuario_id,t,lat,lon,precision_m,velocidad_mps,modo_real
 12. **Código compartido:** `comun/esquemas.py`, `comun/esquemas.ts`, `comun/tarifa.json`,
     `comun/tarifa.py` y `comun/ejemplos/`, con tests que verifican que los ejemplos validan y
     que el `.ts` tiene los mismos campos que el `.py`.
+
+## Cambios en v1.1 (unificación de S2, 2026-11-01)
+
+Propuesta de Freddy (`semanas/S2/Freddy/codigo/comun/CONTRATO.propuesto.md`), aplicada porque
+es aditiva y ya está implementada en `proyecto/backend/`:
+
+1. **§4.3:** `POST /interno/snapshot` como alias 🔒 de `POST /sim/paso`.
+2. **§4.1:** el token de simulación se lee de `ESERT_TOKEN_SIM` (alias `SIM_TOKEN`) y se acepta
+   en `X-Sim-Token` o en `Authorization: Bearer`.
+3. **§4.3:** `GET /salud` responde también en la raíz.
+4. **§6:** parámetro opcional `?verdad=0|1` en `/ws/estado` con `rol=visor`.
+5. **§4.3:** semántica de `GET /guia` (puesto libre más cercano al destino; `distancia_m` del
+   puesto al destino).
+
+**No aplicado (queda como propuesta):** el campo opcional `Salud.version` y el código de error
+`RUTA_NO_EXISTE` (404), porque `comun/esquemas.py` todavía no los incluye y el contrato no
+puede adelantarse al código que lo implementa. Mientras tanto, rutas inexistentes responden
+`VALIDACION` con `detalle.http`.

@@ -80,7 +80,7 @@ async function main() {
   comprobar(rec.saldo === 9.58 && rec.movimiento_id.startsWith('mov_'), 'recarga de $5 → saldo 9.58');
 
   const guia = await api.pedirGuia({ lat: -2.9, lon: -79.0, destino_lat: -2.8975, destino_lon: -79.0045 });
-  comprobar(guia !== null && puestos.some((p) => p.puesto_id === guia.puesto_id), `guía devuelve un puesto libre (${guia?.puesto_id}, ${guia?.distancia_m} m)`);
+  comprobar(puestos.some((p) => p.puesto_id === guia.puesto_id), `guía devuelve un puesto libre (${guia?.puesto_id}, ${guia?.distancia_m} m)`);
 
   console.log(fallos === 0 ? '\nTodo OK' : `\n${fallos} comprobaciones fallaron`);
   if (fallos > 0) throw new Error('prueba del mock fallida');

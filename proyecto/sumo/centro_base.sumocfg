@@ -16,6 +16,7 @@
         <stop-output.write-unfinished value="true"/>
         <vehroute-output value="salidas/base_1/vehroutes.xml"/>
         <vehroute-output.exit-times value="true"/>
+        <vehroute-output.route-length value="true"/>
         <vehroute-output.write-unfinished value="true"/>
         <emission-output value="salidas/base_1/emisiones.xml"/>
         <statistic-output value="salidas/base_1/estadisticas.xml"/>

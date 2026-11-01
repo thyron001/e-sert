@@ -1,0 +1,43 @@
+{
+  "tipo": "snapshot",
+  "t_sim": 1234.0,
+  "ts": "2026-10-20T14:03:05Z",
+  "vehiculos": [
+    {
+      "id": "sim_veh42",
+      "lat": -2.897,
+      "lon": -79.004,
+      "estado": "BUSCANDO",
+      "con_app": true
+    },
+    {
+      "id": "sim_veh7",
+      "lat": -2.8899,
+      "lon": -78.9957,
+      "estado": null,
+      "con_app": false
+    }
+  ],
+  "peatones": [
+    {
+      "id": "ped_veh7",
+      "lat": -2.8968,
+      "lon": -79.0039
+    }
+  ],
+  "puestos": [
+    {
+      "puesto_id": "pa_-106945247#0_0",
+      "ocupados": 3,
+      "capacidad": 17
+    },
+    {
+      "puesto_id": "pa_-118367899_0",
+      "ocupados": 7,
+      "capacidad": 7
+    }
+  ],
+  "espejos": [
+    "sim_veh42"
+  ]
+}

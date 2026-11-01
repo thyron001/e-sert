@@ -2,7 +2,7 @@ import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { URL_POR_DEFECTO, crearClienteHttp } from '@/src/api/cliente';
+import { MOCK_POR_DEFECTO, URL_POR_DEFECTO, crearClienteHttp } from '@/src/api/cliente';
 import { crearClienteMock } from '@/src/api/mock';
 import type { ApiESert, UsuarioId } from '@/src/api/tipos';
 
@@ -46,8 +46,8 @@ const mockCompartido = crearClienteMock();
 export function AjustesProveedor({ children }: { children: ReactNode }) {
   const [cargado, setCargado] = useState(false);
   const [urlApi, setUrlApi] = useState(URL_POR_DEFECTO);
-  // El backend de Freddy aún no existe: por defecto se arranca en modo mock.
-  const [modoMock, setModoMock] = useState(true);
+  // EXPO_PUBLIC_USE_MOCK decide el valor inicial; luego manda lo guardado en Ajustes.
+  const [modoMock, setModoMock] = useState(MOCK_POR_DEFECTO);
   const [usuarioId, setUsuarioId] = useState<UsuarioId>('');
 
   useEffect(() => {

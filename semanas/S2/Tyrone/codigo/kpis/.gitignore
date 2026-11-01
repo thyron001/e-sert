@@ -1,0 +1,3 @@
+# Ocupación real por corrida (~1,5 MB cada una): se regenera con correr_escenarios.py; en git va la de app50_s1
+salidas/ocupacion_real_*.csv
+!salidas/ocupacion_real_app50_s1.csv

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>e-sert · Visor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="./estilos.css">
+</head>
+<body>
+  <div id="mapa"></div>
+  <aside id="panel">
+    <h1>e-sert · visor</h1>
+    <div id="conexion" class="estado desconectado">desconectado</div>
+    <dl>
+      <dt>t_sim</dt><dd id="t-sim">—</dd>
+      <dt>Vehículos</dt><dd id="n-vehiculos">0</dd>
+      <dt>Buscando</dt><dd id="n-buscando">0</dd>
+      <dt>Estacionados</dt><dd id="n-estacionados">0</dd>
+      <dt>Con app</dt><dd id="n-app">0</dd>
+      <dt>Peatones</dt><dd id="n-peatones">0</dd>
+      <dt>Puestos llenos</dt><dd id="n-llenos">0</dd>
+      <dt>Ocupación</dt><dd id="ocupacion">—</dd>
+      <dt>FPS</dt><dd id="fps">—</dd>
+    </dl>
+    <h2>KPIs</h2>
+    <dl id="kpis"><dt>—</dt><dd></dd></dl>
+    <div id="verdad" hidden>
+      <h2>Verdad (depuración)</h2>
+      <p id="verdad-texto">—</p>
+    </div>
+    <h2>Leyenda</h2>
+    <ul id="leyenda"></ul>
+    <p class="nota" id="ws-url"></p>
+  </aside>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./visor.js"></script>
+</body>
+</html>

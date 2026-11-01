@@ -24,8 +24,9 @@ la versión cuadre con el SDK.
 ## Cómo correrla
 
 ```bash
-cd semanas/S1/Miguel/codigo/app   # en proyecto/app/ después de la unificación
+cd semanas/S2/Miguel/codigo/app   # en proyecto/app/ después de la unificación
 npm install
+cp .env.example .env              # y pon la IP de la computadora con el backend
 npx expo start
 ```
 
@@ -42,31 +43,65 @@ npx expo start
 
 ## Backend: mock o API real
 
-- **Modo mock** (por defecto mientras no exista el backend de Freddy): un backend falso en
-  memoria (`src/api/mock.ts`) con 20 puestos alrededor del Parque Calderón, una billetera
-  con $5 iniciales y la tarifa del contrato, y 300 ms de latencia simulada.
-- **API real:** en la pestaña **Ajustes**, apaga "Modo mock". La URL base sale de
-  `EXPO_PUBLIC_API_URL` y se puede cambiar en Ajustes. El cliente le añade `/api/v1`.
+Las variables van en `.env` (no se sube; la plantilla es `.env.example`):
 
-  ```bash
-  EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com npx expo start
-  # o un backend local: EXPO_PUBLIC_API_URL=http://<ip-de-la-laptop>:8000
-  ```
+```bash
+EXPO_PUBLIC_API_URL=http://<ip-de-la-computadora>:8000/api/v1   # nunca localhost en el teléfono
+EXPO_PUBLIC_USE_MOCK=0                                          # 1 = mock en memoria
+```
+
+- **Modo mock:** backend falso en memoria (`src/api/mock.ts`, marcado `// MOCK`) con 20
+  puestos alrededor del Parque Calderón, una billetera con $5 iniciales y la tarifa del
+  contrato, y 300 ms de latencia simulada.
+- **API real:** el backend de Freddy (`uvicorn backend.api.main:app --host 0.0.0.0 --port 8000`).
+  Toda billetera nueva empieza en $0: la app lleva a **Recarga**, que por ahora tiene una
+  "recarga de prueba" sin pago (Payphone llega en S2-2).
+- Ajustes guarda la URL y el modo mock en el teléfono: lo guardado manda sobre `.env`.
+- `npm run probar-backend -- http://<ip>:8000/api/v1` recorre el flujo completo con el cliente
+  HTTP real desde la computadora (sale con código 1 si algo no cumple el contrato).
+
+## Flujo de sesión (S2-1): buscar → guiar → confirmar → activa
+
+Todo es simulado: el teléfono no se mueve ni usa el GPS.
+
+1. **Sesión → Buscar puesto** (`app/buscar.tsx`): partida por defecto en la esquina de la Gran
+   Colombia y Benigno Malo (tocar el mapa la mueve), destino de `destinos.csv` de Tyrone o
+   pulsación larga en el mapa. Consulta la billetera y, si `disponible` < retención, va a Recarga;
+   si no, `GET /guia`.
+2. **Guiado** (`app/sesion/guiar.tsx`): la posición avanza sola a 8 m/s en línea recta hacia el
+   puesto (1 Hz); "Llegar ya" salta al puesto. A menos de 25 m pasa a confirmar.
+3. **Confirmar** (`app/sesion/confirmar.tsx`): placa con la regla del contrato
+   `^[A-Z]{3}-?\d{3,4}$` y puesto editable; `POST /sesiones` retiene $0.25.
+4. **Activa** (`app/sesion/activa.tsx`): cronómetro, minutos cobrables, costo con `tarifa.json`,
+   avisos de tope y saldo, y "Terminar" (`POST /sesiones/{id}/cerrar`, `motivo: "manual"`).
+
+El estado (`src/estado/sesion.ts`, `useReducer` + Context) se guarda en AsyncStorage: al
+reabrir la app vuelve al guiado o a la sesión activa.
+
+En desarrollo, las pantallas se pueden manejar desde la terminal (simulador de iPhone):
+`xcrun simctl openurl booted "exp://<ip>:8081/--/buscar?destino=0&auto=1"` y
+`.../sesion/confirmar?placa=ABC-1234&auto=1`.
 
 ## Estructura
 
 ```
 app/                      rutas de expo-router (cada archivo es una pantalla)
-  _layout.tsx             raíz: AjustesProveedor + tema
+  _layout.tsx             raíz: AjustesProveedor + SesionProveedor + tema; recupera el flujo al abrir
+  buscar.tsx              partida simulada, destino y GET /guia
+  recarga.tsx             "Próximamente" + recarga de prueba (Payphone en S2-2)
+  sesion/guiar.tsx        guiado simulado a 8 m/s con Polyline y distancia haversine
+  sesion/confirmar.tsx    placa + puesto → POST /sesiones
+  sesion/activa.tsx       cronómetro, costo en vivo, Terminar
   (tabs)/_layout.tsx      las 5 pestañas
   (tabs)/index.tsx        Mapa: puestos en verde (con espacio) o rojo (llenos)
-  (tabs)/sesion.tsx       sesión activa (confirmar llegada / cerrar a mano)
+  (tabs)/sesion.tsx       entrada al flujo de parqueo (o continuar el que esté en curso) y modo espejo
   (tabs)/billetera.tsx    saldo, retenido, disponible, movimientos y recarga de prueba
   (tabs)/grabador.tsx     grabador de sensores etiquetado (GPS 1 Hz + acelerómetro 10 Hz)
   (tabs)/ajustes.tsx      URL del backend, modo mock, usuario_id
-src/api/tipos.ts          tipos del contrato e interfaz ApiESert  (SINCRONIZAR con comun/esquemas.ts)
-src/api/tarifa.ts         tarifa del contrato y cálculo de cobro   (SINCRONIZAR con comun/tarifa.json)
-src/api/cliente.ts        cliente HTTP real (fetch, X-Contrato-Version: 1, errores {error:{codigo,mensaje}})
+src/contrato/             copia de comun/esquemas.ts y comun/tarifa.json (npm run verificar-contrato)
+src/api/tipos.ts          reexporta el contrato + ErrorApi, ApiESert y tipos estrictos del espejo
+src/api/tarifa.ts         TARIFA = src/contrato/tarifa.json y fórmulas de cobro
+src/api/cliente.ts        cliente HTTP (8 s, X-Contrato-Version: 1), getGuia/crearSesion/getSesion/cerrarSesion/getBilletera, mensajes en español
 src/api/mock.ts           backend falso en memoria con la misma interfaz ApiESert
 src/api/pruebas/          prueba del mock que corre en la computadora
 src/sensores/grabador.ts  clase Grabador: permisos, GPS, acelerómetro, keep-awake, volcado cada 30 s
@@ -81,11 +116,19 @@ app/espejo/index.tsx      selector de conductor simulado
 app/espejo/[vehId].tsx    pantalla del conductor espejo
 docs/sert_reglas.md       reglas SERT verificadas con fuentes y tabla para tarifa.json
 src/ajustes/              contexto de ajustes (expo-secure-store + expo-crypto)
+src/estado/sesion.ts      estado del flujo (useReducer + Context) persistido en AsyncStorage
+src/sesion/               placa.ts, geo.ts (haversine, simularAvance), cobro.ts (costo en vivo y avisos)
+src/datos/destinos.ts     copia de proyecto/sumo/demanda/destinos.csv (python3 scripts/destinos.py)
+scripts/montaje.py        une capturas en una tira horizontal (evidencias)
+__tests__/                placa, tarifa (igual a tarifa.py), cliente (15 códigos), mock, estado, cobro
 ```
 
 ## Comprobaciones
 
 ```bash
+npm test                  # jest: todos los tests (__tests__/ y src/espejo)
+npm run verificar-contrato # hash de src/contrato/ = proyecto/comun/
+npm run probar-backend -- http://<ip>:8000/api/v1  # flujo contra el backend real
 npx tsc --noEmit          # tipos: cliente.ts y mock.ts cumplen la interfaz ApiESert
 npm run prueba:mock       # tarifa, billetera y puestos del mock
 npm run prueba:grabador   # formato del CSV de grabaciones
