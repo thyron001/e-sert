@@ -1,0 +1,105 @@
+{
+ "escenarios": [
+  {
+   "escenario": "base_s1",
+   "semilla": 1,
+   "porc_app": 0,
+   "rou": "base_s1.rou.xml",
+   "sumocfg": "base_s1.sumocfg",
+   "salidas": "../salidas/base_s1",
+   "vehiculos": 7065,
+   "buscadores": 1277,
+   "con_app": 0,
+   "sha256_demanda": "b6e3333760d2183873cdbc8308730cef2d4a4dc879eee7fc980ef8fb57837c23"
+  },
+  {
+   "escenario": "app20_s1",
+   "semilla": 1,
+   "porc_app": 20,
+   "rou": "app20_s1.rou.xml",
+   "sumocfg": "app20_s1.sumocfg",
+   "salidas": "../salidas/app20_s1",
+   "vehiculos": 7065,
+   "buscadores": 1277,
+   "con_app": 253,
+   "sha256_demanda": "753a78edfeda56aeacd3df6e412491d2b60c1316fb71689a2842ed745c06ca20"
+  },
+  {
+   "escenario": "app50_s1",
+   "semilla": 1,
+   "porc_app": 50,
+   "rou": "app50_s1.rou.xml",
+   "sumocfg": "app50_s1.sumocfg",
+   "salidas": "../salidas/app50_s1",
+   "vehiculos": 7065,
+   "buscadores": 1277,
+   "con_app": 624,
+   "sha256_demanda": "01bb7e367050ee4e2d141768c8bd7eefa417aca546e67fec3fa3d51071b880f1"
+  },
+  {
+   "escenario": "app80_s1",
+   "semilla": 1,
+   "porc_app": 80,
+   "rou": "app80_s1.rou.xml",
+   "sumocfg": "app80_s1.sumocfg",
+   "salidas": "../salidas/app80_s1",
+   "vehiculos": 7065,
+   "buscadores": 1277,
+   "con_app": 1018,
+   "sha256_demanda": "d82eeaf91dc732508dd558d19e6a8ff6e0c139c5b4ff79ca1fb6fd62d5a44d56"
+  },
+  {
+   "escenario": "base_s2",
+   "semilla": 2,
+   "porc_app": 0,
+   "rou": "base_s2.rou.xml",
+   "sumocfg": "base_s2.sumocfg",
+   "salidas": "../salidas/base_s2",
+   "vehiculos": 7250,
+   "buscadores": 1369,
+   "con_app": 0,
+   "sha256_demanda": "0f8d242832527b01ead6088ed8516b7ae7f76eb36ba05a13312b8e71bbfc3667"
+  },
+  {
+   "escenario": "app20_s2",
+   "semilla": 2,
+   "porc_app": 20,
+   "rou": "app20_s2.rou.xml",
+   "sumocfg": "app20_s2.sumocfg",
+   "salidas": "../salidas/app20_s2",
+   "vehiculos": 7250,
+   "buscadores": 1369,
+   "con_app": 251,
+   "sha256_demanda": "f3c0a807ade98208a0e0b883b466e9a5b2f39aafa91bd6d4d4d81bb54047e7ab"
+  },
+  {
+   "escenario": "app50_s2",
+   "semilla": 2,
+   "porc_app": 50,
+   "rou": "app50_s2.rou.xml",
+   "sumocfg": "app50_s2.sumocfg",
+   "salidas": "../salidas/app50_s2",
+   "vehiculos": 7250,
+   "buscadores": 1369,
+   "con_app": 673,
+   "sha256_demanda": "af7f487ae151e7acb1fa102e94e6c5ed4176db10e4573ec0632742794dca1cd1"
+  },
+  {
+   "escenario": "app80_s2",
+   "semilla": 2,
+   "porc_app": 80,
+   "rou": "app80_s2.rou.xml",
+   "sumocfg": "app80_s2.sumocfg",
+   "salidas": "../salidas/app80_s2",
+   "vehiculos": 7250,
+   "buscadores": 1369,
+   "con_app": 1083,
+   "sha256_demanda": "e25cb82cef2840d1434700a0342f69709dce5b98bdc2845502b769e3ba6954e0"
+  }
+ ],
+ "comprobaciones": {
+  "demanda_identica_por_semilla": true,
+  "usuarios_app_anidados": true,
+  "errores": []
+ }
+}
