@@ -33,7 +33,7 @@ Plazo: `2026-10-31T23:59:59-05:00`.
   - S2-1 es `parcial`: iOS solo se probó en el simulador.
   - La sesión 3 (modo espejo) no se hizo. Faltan sus 8 entregas y `resumen_S2_Miguel.pdf`.
   - En S2-2, `.env.example` se entregó como `.env.ejemplo`, por la regla del `.gitignore` raíz.
-- No hay archivos de más de 50 MB ni secretos en ninguna rama. Las plantillas `.env.ejemplo` y `.env.example` tienen los valores vacíos.
+- No hay archivos de más de 50 MB ni secretos en ninguna rama. Las plantillas `.env.ejemplo` y `.env.example` no traen secretos: los tokens están vacíos y solo hay valores por defecto (`PAYPHONE_MODO=mock`, una IP de LAN y `EXPO_PUBLIC_USE_MOCK=1`).
 
 ## Conflictos
 
@@ -84,7 +84,7 @@ en `1`.
 1. `POST /interno/snapshot` como alias 🔒 de `/sim/paso`. El controlador de Freddy solo usa este alias.
 2. El token se lee de `ESERT_TOKEN_SIM` (alias `SIM_TOKEN`) y se acepta en `X-Sim-Token` o en `Authorization: Bearer`.
 3. `GET /salud` responde también en la raíz.
-4. `?verdad=0|1` en `/ws/estado`. El visor de Tyrone ya usa `?verdad=1` en su página.
+4. `?verdad=0|1` en `/ws/estado`. Es independiente del parámetro de página `?verdad=1` del visor de Tyrone, que solo decide si se muestra la verdad.
 5. Semántica de `GET /guia`: puesto libre más cercano al destino; `distancia_m` va del puesto al destino. Coincide con lo que pidió Miguel.
 
 **No aplicado:** `Salud.version` y el código `RUTA_NO_EXISTE`. `comun/esquemas.py` todavía no
@@ -202,7 +202,7 @@ libre, con una SQLite temporal y sin token, y usa los ejemplos de `comun/ejemplo
 | Freddy | Tyrone | "Museo Pumapungo" sin acera cercana en `destinos.csv`; peatones `ped_*` aún fuera del snapshot | S2-2, S2-3 |
 | Freddy | Freddy (contrato) | Contar las reservas GUIADO en el mapa de ocupación (no está en la propuesta) | S2-3 |
 | Pablo | Freddy | Ruido `ruido_literatura.json` (σ 3–15 m, ρ 0,8) para `EmuladorGPS`; no usar semillas 101–105 para entrenar | S2-1 |
-| Pablo | Freddy | Usar `ClasificadorConEstado(usuario_id)` (histéresis k=1); `rf_v1` recomendado (macro-F1 0,87) | S2-2, S2-3 |
+| Pablo | Freddy | Usar `ClasificadorConEstado(usuario_id)` (histéresis k=1); `rf_v1` recomendado (macro-F1 0,87 en usuarios no vistos; 0,93 en validación cruzada) | S2-2, S2-3 |
 | Pablo | Miguel | Partición en `ia/particion_usuarios.json`; grabaciones caseras de congestión o peatones rápidos | S2-1, S2-3 |
 | Miguel | Freddy | Añadir `/pagos/*` y `RECARGA_MINIMA` al contrato; `Billetera.recargar` con `referencia_payphone` (**abierto**) | S2-2 |
 | Miguel | Freddy | `httpx` en `requirements-servidor.txt` (resuelto en el adelanto y mantenido aquí) | S2-2 |

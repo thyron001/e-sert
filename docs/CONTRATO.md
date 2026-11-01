@@ -4,7 +4,7 @@
 > final). Ningún cambio rompe a los clientes de v1, por eso el header `X-Contrato-Version` y el
 > campo `Salud.contrato` siguen valiendo `1`.
 
-> Estado: **v1 congelado** el 2026-10-23 en la unificación de S1 (adelantada a pedido de
+> Historia: **v1 congelado** el 2026-10-23 en la unificación de S1 (adelantada a pedido de
 > Tyrone), a partir de la propuesta de Freddy (custodio). Desde ahora, cualquier cambio entra
 > solo como `CONTRATO.propuesto.md` y se aprueba en la unificación siguiente.
 >
