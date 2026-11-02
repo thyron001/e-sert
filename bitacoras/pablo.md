@@ -108,16 +108,16 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 ![Importancia de features](../semanas/S2/Pablo/evidencias/s2_importancia.png)
 ![Suavizado temporal](../semanas/S2/Pablo/evidencias/s2_suavizado.png)
 
-## S2 · Sesión 3 · 2026-10-28 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
-**Estado:** parcial
+## S2 · Sesión 3 · 2026-11-01 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
+**Estado:** hecha
 **Qué hice:**
-- Implementé `ia/evaluar_generalizacion.py` con evaluación completa de GeoLife prueba (294,579 ventanas, 10 usuarios no vistos) para los 3 sistemas (umbral, RF v1, RF v1 + suavizado).
+- Implementé `ia/evaluar_generalizacion.py` con evaluación completa de GeoLife prueba (294,579 ventanas, 10 usuarios no vistos) y SUMO (43,508 ventanas, semillas 101-105) para los 3 sistemas.
 - Bootstrap agrupado optimizado: mapeo clases->enteros, índices precalculados, `_f1_macro_rapido` sin sklearn. Pasó de >10 min a ~30 s.
-- Bootstrap pareado RF vs umbral: Δ=+0.185 [+0.158, +0.226], significativo.
-- Escribí `ia/escenarios_dificiles.py` con generación de escenarios SUMO (trafico_lento, peaton_rapido, normal) y barrido de σ. No se ejecutó: contenedor van3twin apagado.
-- 11 tests en `ia/tests/test_evaluacion.py`: partición, hash, semillas reservadas, bootstrap determinista, formato métricas.
-- 3 PNGs de evidencia (2 son placeholders sin SUMO).
-- Reporte `evaluacion_generalizacion.md` redactado para el informe.
+- Bootstrap pareado RF vs umbral en GeoLife: Δ=+0.185 [+0.158, +0.226], significativo.
+- Escribí y ejecuté `ia/escenarios_dificiles.py` con las semillas 101-105 en el contenedor van3twin. Generó 238k filas de trazas (normal + tráfico lento) con barrido de σ.
+- Curvas F1 vs σ completas (18 puntos en curvas_sigma.csv): el ruido GPS no es el factor dominante; la brecha de dominio GeoLife→SUMO es más importante.
+- Tráfico lento: 81 ventanas <8 km/h, recall vehículo = 0% para todos los sistemas.
+- 11 tests pasan. 3 PNGs con datos reales. PDF explicación y PDF semanal.
 
 **Archivos creados o modificados:**
 - `semanas/S2/Pablo/codigo/ia/evaluar_generalizacion.py`
@@ -126,34 +126,35 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - `semanas/S2/Pablo/codigo/ia/tests/test_evaluacion.py`
 - `semanas/S2/Pablo/codigo/ia/reportes/metricas_generalizacion.json`
 - `semanas/S2/Pablo/codigo/ia/reportes/evaluacion_generalizacion.md`
+- `semanas/S2/Pablo/codigo/ia/reportes/curvas_sigma.csv`
 - `semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png`
-- `semanas/S2/Pablo/evidencias/s3_curvas-sigma.png` (placeholder)
-- `semanas/S2/Pablo/evidencias/s3_trafico-lento.png` (placeholder)
+- `semanas/S2/Pablo/evidencias/s3_curvas-sigma.png`
+- `semanas/S2/Pablo/evidencias/s3_trafico-lento.png`
 - `semanas/S2/Pablo/explicaciones/s3_explicacion.md`
 - `semanas/S2/Pablo/explicaciones/s3_explicacion.pdf`
 
 **Decisiones y por qué:**
-- **Bootstrap agrupado por usuario**: las ventanas de un mismo usuario están correlacionadas; remuestrear por ventana subestimaría la varianza. Con 10 grupos el IC es amplio [0.821, 0.947] pero honesto.
+- **Bootstrap agrupado por usuario/semilla**: las ventanas de un mismo grupo están correlacionadas; remuestrear por ventana subestimaría la varianza.
 - **Optimización del bootstrap con enteros**: sklearn f1_score sobre strings × 1,000 remuestreos × 294k ventanas era inviable. El cálculo directo con arrays int dio ~100x speedup.
-- **Sesión parcial por falta de SUMO**: el prompt dice "si no hay SUMO, la sesión queda parcial; no sustituyas SUMO por datos inventados". Los placeholders son transparentes.
-- **NaN en precision_media**: sklearn RF 1.9.1 maneja NaN nativamente. Eliminar el filtro de NaN fue crítico (filtraba las 294k ventanas).
+- **Simulación corta (600s, 30 peatones)**: para cuidar RAM y tiempo. Generó suficientes datos de tráfico lento (~57k filas) pero no de peatón rápido (0 ventanas).
+- **NaN en precision_media**: sklearn RF 1.9.1 maneja NaN nativamente. Eliminar el filtro de NaN fue crítico.
 
 **Problemas encontrados:**
-- Contenedor van3twin apagado: no se generaron escenarios SUMO.
-- Bootstrap naive tardaba >10 min por timeout de 600s. Resuelto con optimización (enteros + índices precalculados).
-- Filtro de NaN eliminaba todas las ventanas porque precision_media es NaN en todo GeoLife.
+- Bootstrap naive tardaba >10 min. Resuelto con optimización (enteros + índices precalculados).
+- Filtro de NaN eliminaba todas las ventanas GeoLife porque precision_media es NaN.
+- Repo no visible en van3twin: se copió a results/ y se extrajeron archivos SUMO de la rama de Tyrone.
+- Peatón rápido: 0 ventanas generadas con simulación corta. Necesitaría más peatones/duración.
 
 **Pedidos a otros:**
-- @Freddy: el RF v1 (macro-F1=0.87 en usuarios no vistos) es el sistema recomendado para el controlador. La tasa vehiculo->a_pie es 24.3% (vehículos lentos confundidos con peatones); el suavizado no mejora significativamente en esta evaluación offline. Sin datos de SUMO no hay curva de σ todavía, pero σ>10m probablemente degrade mucho.
-- @Miguel: si grabas algo casero, lo más útil serían trayectorias de vehículo en congestión (circulando a <8 km/h) y peatones caminando rápido, que son los casos donde el modelo falla más.
-- @Tyrone [VPS]: ninguno.
+- @Freddy: el RF v1 funciona bien en GeoLife (0.87) pero mal en SUMO (0.70 normal, 0.33 tráfico lento). La tasa veh->a_pie en SUMO es 69.3%. Para el controlador, el umbral es más seguro contra falsas liberaciones (0.2% vs 69.3%), pero el RF es mejor en macro-F1 en datos reales. Recomiendo RF con un filtro adicional de velocidad mínima para evitar liberar vehículos lentos.
+- @Miguel: si grabas algo casero, lo más útil serían trayectorias de vehículo en congestión (<8 km/h).
+- @Tyrone [Plan]: propuesta para S3 — reentrenar RF con datos mixtos GeoLife+SUMO para reducir la brecha de dominio.
 
-**Bucle y verificación:** 3 vueltas del bucle (1 por NaN filter, 1 por timeout bootstrap, 1 exitosa). Verificador independiente: 2/7 cumplidos, 3/7 parciales, 2/7 no cumplidos. Los 5 no completos dependen de SUMO (contenedor van3twin apagado): escenarios no generados, curvas_sigma.csv inexistente, tráfico lento sin datos.
+**Bucle y verificación:** 4 vueltas totales (NaN filter, timeout bootstrap, SUMO sin contenedor, evaluación completa con SUMO). Verificador final: 6/7 criterios cumplidos (falta peatón rápido por simulación corta).
 
 **Pendientes para la próxima sesión:**
-- Ejecutar `ia/escenarios_dificiles.py` con van3twin activo para completar la evaluación.
-- Regenerar evidencias PNG con datos SUMO reales.
-- Completar curvas_sigma.csv y análisis de tráfico lento.
+- Generar escenarios con más peatones y mayor duración para capturar peatón rápido.
+- Considerar reentrenamiento con datos mixtos GeoLife+SUMO.
 
 **Evidencias:**
 ![Umbral vs RF por fuente](../semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png)

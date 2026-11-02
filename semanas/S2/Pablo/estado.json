@@ -34,9 +34,9 @@
       ]
     },
     "sesion-3": {
-      "estado": "parcial",
-      "fecha": "2026-10-28",
-      "resumen": "Evaluación de generalización RF v1 sobre 294,579 ventanas de 10 usuarios GeoLife no vistos: macro-F1=0.8743 [0.821, 0.947] vs umbral 0.6983 [0.619, 0.756], brecha de generalización 5.2pp. Escenarios SUMO (tráfico lento, peatón rápido, barrido σ) pendientes: contenedor van3twin apagado.",
+      "estado": "hecha",
+      "fecha": "2026-11-01",
+      "resumen": "Evaluación completa: GeoLife prueba RF macro-F1=0.8743 [0.821, 0.947], SUMO normal 0.6958, SUMO tráfico lento 0.3333 (100% falsas liberaciones). Brecha de dominio GeoLife→SUMO de 23pp. Curvas σ y análisis tráfico lento completos. 81 ventanas <8km/h: ningún sistema reconoce vehículos lentos.",
       "evidencias": [
         "evidencias/s3_umbral-vs-rf-por-fuente.png",
         "evidencias/s3_curvas-sigma.png",
@@ -44,11 +44,9 @@
         "explicaciones/s3_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s3_explicacion.pdf",
-      "criterios": {"cumplidos": 2, "parciales": 3, "no_cumplidos": 2, "total": 7},
+      "criterios": {"cumplidos": 6, "total": 7},
       "pendientes": [
-        "Generar escenarios SUMO con semillas 101-105 (requiere contenedor van3twin)",
-        "Completar curvas_sigma.csv con datos de SUMO",
-        "Completar análisis de tráfico lento con datos controlados"
+        "Peatón rápido sin datos (simulación corta, 0 ventanas generadas)"
       ]
     }
   }

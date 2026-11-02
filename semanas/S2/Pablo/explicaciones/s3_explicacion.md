@@ -3,12 +3,11 @@
 ## 1. Resumen en 5 líneas
 
 Se evaluó el clasificador RF v1 (entrenado en S2-2) sobre 294,579 ventanas de 10 usuarios de
-GeoLife que nunca participaron en el entrenamiento, midiendo macro-F1 con intervalos de
-confianza al 95% por bootstrap agrupado. El RF obtiene 0.8743 [0.821, 0.947] frente a 0.6983
-del umbral, con una brecha de generalización de 5.2 puntos respecto a la validación cruzada.
-Se preparó el script de escenarios difíciles de SUMO (tráfico lento, peatón rápido, barrido
-de σ) pero no se ejecutó porque el contenedor van3twin no estaba activo. La sesión queda
-parcial: la evaluación GeoLife está completa, la de SUMO queda pendiente.
+GeoLife no vistos y 43,508 ventanas de escenarios SUMO (semillas 101-105). El RF obtiene
+macro-F1 = 0.87 en GeoLife pero cae a 0.70 en SUMO normal y a 0.33 en tráfico lento,
+revelando una brecha de dominio de 23 puntos. En tráfico lento, el RF clasifica el 100% de
+los vehículos como peatones. Las curvas F1 vs σ confirman que el ruido GPS no es el factor
+dominante. El hallazgo principal: el modelo necesita datos del dominio Cuenca para producción.
 
 ## 2. Conceptos clave
 
@@ -146,21 +145,27 @@ Tres funciones, una por PNG: `generar_umbral_vs_rf_por_fuente()` (barras con IC)
 
 ## 7. Resultados y evidencias
 
-### Métricas principales (GeoLife prueba)
+### Métricas principales por fuente
 
-| Sistema | macro-F1 | IC 95% | Tasa veh->a_pie |
-|---------|----------|--------|-----------------|
-| RF v1 | 0.8743 | [0.821, 0.947] | 24.3% |
-| RF+suavizado | 0.8724 | [0.819, 0.944] | 24.1% |
-| Umbral | 0.6983 | [0.619, 0.756] | 27.2% |
+| Fuente | RF macro-F1 | IC 95% | RF tasa veh->a_pie |
+|--------|-------------|--------|-------------------|
+| GeoLife prueba | 0.8743 | [0.821, 0.947] | 24.3% |
+| SUMO normal | 0.6958 | [0.677, 0.714] | 69.3% |
+| SUMO tráfico lento | 0.3333 | [0.333, 0.333] | 100.0% |
 
 ### Brecha de generalización
 
-| Métrica | CV (S2-2) | Prueba (S2-3) | Brecha |
-|---------|-----------|---------------|--------|
-| RF macro-F1 | 0.9259 | 0.8743 | -0.052 |
+| Fuente | CV (S2-2) | Prueba (S2-3) | Brecha |
+|--------|-----------|---------------|--------|
+| GeoLife | 0.9259 | 0.8743 | -0.052 |
+| SUMO normal | 0.9259 | 0.6958 | -0.230 |
+| SUMO tráfico lento | 0.9259 | 0.3333 | -0.593 |
 
-### Comparación estadística
+### Tráfico lento (<8 km/h)
+
+81 ventanas, 6.8 min, vel media 7.47 km/h. Recall vehiculo = 0% para todos los sistemas.
+
+### Comparación estadística (GeoLife)
 
 RF vs umbral: Δ = +0.185 [+0.158, +0.226], significativo.
 
@@ -172,18 +177,15 @@ RF vs umbral: Δ = +0.185 [+0.158, +0.226], significativo.
 
 ## 8. Limitaciones y decisiones
 
-1. **SUMO no disponible**: el contenedor van3twin no estaba corriendo. Los escenarios difíciles
-   (tráfico lento, peatón rápido, barrido σ) quedan pendientes. El script está listo.
-2. **GeoLife es Beijing**: los patrones de movilidad, la geometría urbana y el tipo de congestión
-   difieren de Cuenca. Las features son genéricas (desplazamiento, rectitud, jerk) pero el
-   modelo podría comportarse diferente en el Centro Histórico real.
-3. **IC amplio**: con solo 10 usuarios de prueba, el bootstrap agrupado da un IC de 12.6 puntos
-   [0.821, 0.947]. Más usuarios estrecharían el intervalo.
-4. **Grabaciones caseras**: Miguel no ha subido grabaciones a `proyecto/datos/`. Serían la
-   validación más relevante (datos reales de Cuenca).
-5. **Suavizado marginal**: RF+suavizado (0.8724) es ligeramente peor que RF solo (0.8743). La
-   histéresis k=1 no aporta en GeoLife porque las transiciones son menos frecuentes que en
-   tiempo real.
+1. **Brecha de dominio GeoLife->SUMO**: el hallazgo principal. El RF funciona bien en datos
+   reales (0.87) pero mal en simulados (0.70 normal, 0.33 tráfico lento). Las features
+   aprendidas de GeoLife (Beijing) no transfieren a SUMO (Cuenca simulado).
+2. **Tráfico lento irrecuperable**: a velocidad de peatón (<8 km/h), ningún sistema distingue
+   vehículos de peatones solo con GPS. Se necesitaría acelerómetro o contexto de calle.
+3. **Peatón rápido sin datos**: la simulación corta (600s, 30 peatones) no generó ventanas
+   de peatón rápido. Necesitaría mayor duración o más peatones.
+4. **IC amplio en GeoLife**: con solo 10 usuarios, el IC es de 12.6 puntos [0.821, 0.947].
+5. **Grabaciones caseras**: Miguel no ha subido grabaciones. Serían la validación más relevante.
 
 ## 9. Preguntas que podría hacer el profesor
 
@@ -192,10 +194,11 @@ Las ventanas de un mismo usuario están correlacionadas (movimiento continuo). U
 ventana subestimaría la varianza real. Al remuestrear por usuario, cada muestra tiene la
 variabilidad real entre personas.
 
-**P2: ¿La brecha de 5.2 puntos indica sobreajuste?**
-No necesariamente. Es esperable porque los usuarios de prueba tienen patrones diferentes
-(rutas, velocidades habituales). El umbral tiene una brecha de solo 2.8 puntos porque no
-aprende patrones. Una brecha <10% se considera aceptable en la literatura.
+**P2: ¿Por qué el RF funciona bien en GeoLife pero mal en SUMO?**
+Brecha de dominio: GeoLife tiene datos reales de Beijing con patrones de velocidad, congestión
+y geometría urbana reales. SUMO genera movimiento sintético con dinámicas vehiculares
+diferentes. El RF aprendió features (desplazamiento_neto, rectitud) calibradas para GeoLife
+que no transfieren. La brecha de 23pp confirma la necesidad de reentrenar con datos de Cuenca.
 
 **P3: ¿Por qué la tasa vehiculo->a_pie es 24%?**
 Beijing tiene congestión urbana severa. Cuando un vehículo circula a <8 km/h, sus features de
@@ -208,7 +211,7 @@ ventanas independientes sin continuidad temporal real (ventanas de 30s con paso 
 de trayectorias distintas). En tiempo real con el controlador TraCI, el suavizado sí debería
 ayudar.
 
-**P5: ¿Qué falta para completar la evaluación?**
-Los escenarios SUMO con las semillas 101-105: tráfico lento (vehículos a velocidad de peatón),
-peatón rápido y el barrido de σ (degradación con ruido GPS). El script está escrito y probado,
-solo necesita el contenedor van3twin activo.
+**P5: ¿Qué se haría para mejorar el modelo en producción?**
+Reentrenar con datos mixtos GeoLife+SUMO para reducir la brecha de dominio. Añadir un filtro
+de velocidad mínima post-clasificación para evitar liberar vehículos lentos. Y si hay
+acelerómetro disponible, incorporar sus features para distinguir vehículo lento de peatón.

@@ -193,7 +193,641 @@
           "significativo": true
         }
       }
+    },
+    "sumo_normal": {
+      "fuente": "sumo_normal",
+      "n_ventanas": 33051,
+      "n_grupos": 541,
+      "umbral": {
+        "fuente": "sumo_normal",
+        "n_ventanas": 33051,
+        "macro_f1": 0.25115674938997773,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.3645833333333333,
+            "recall": 0.00315798971397636,
+            "f1": 0.006261740763932373,
+            "support": 11083
+          },
+          "quieto": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2263
+          },
+          "vehiculo": {
+            "precision": 0.5969959035047793,
+            "recall": 0.9984267952296372,
+            "f1": 0.7472085074060008,
+            "support": 19705
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.00315798971397636,
+            0.0,
+            0.9968420102860236
+          ],
+          [
+            0.013256738842244807,
+            0.0,
+            0.9867432611577552
+          ],
+          [
+            0.001573204770362852,
+            0.0,
+            0.9984267952296372
+          ]
+        ],
+        "tasa_veh_como_apie": 0.001573204770362852,
+        "bootstrap": {
+          "macro_f1_media": 0.25126913132295575,
+          "macro_f1_ic95": [
+            0.23899846529681099,
+            0.2622547961680922
+          ],
+          "tasa_veh_apie_media": 0.0015740231106103986,
+          "tasa_veh_apie_ic95": [
+            0.0009054510858373743,
+            0.002286456753975968
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 541
+        }
+      },
+      "rf": {
+        "fuente": "sumo_normal",
+        "n_ventanas": 33051,
+        "macro_f1": 0.6958443835229966,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.4478842500909348,
+            "recall": 0.9999097717224578,
+            "f1": 0.6186568414001005,
+            "support": 11083
+          },
+          "quieto": {
+            "precision": 0.9991169977924945,
+            "recall": 1.0,
+            "f1": 0.9995583038869258,
+            "support": 2263
+          },
+          "vehiculo": {
+            "precision": 0.9998345192785041,
+            "recall": 0.30662268459781783,
+            "f1": 0.46931800528196366,
+            "support": 19705
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.9999097717224578,
+            0.0,
+            9.022827754218172e-05
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.6932758183202233,
+            0.00010149708195889369,
+            0.30662268459781783
+          ]
+        ],
+        "tasa_veh_como_apie": 0.6932758183202233,
+        "bootstrap": {
+          "macro_f1_media": 0.6953912291625206,
+          "macro_f1_ic95": [
+            0.676655073981529,
+            0.7139221278646697
+          ],
+          "tasa_veh_apie_media": 0.6932513830466313,
+          "tasa_veh_apie_ic95": [
+            0.6772050210431702,
+            0.7103676332900448
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 541
+        }
+      },
+      "rf_suavizado": {
+        "fuente": "sumo_normal",
+        "n_ventanas": 33051,
+        "macro_f1": 0.5502055624807088,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.4392617156819967,
+            "recall": 0.9083280700171433,
+            "f1": 0.5921590541454663,
+            "support": 11083
+          },
+          "quieto": {
+            "precision": 0.4562717304092003,
+            "recall": 0.7538665488289881,
+            "f1": 0.5684771742752416,
+            "support": 2263
+          },
+          "vehiculo": {
+            "precision": 1.0,
+            "recall": 0.3244861710225831,
+            "f1": 0.48998045902141846,
+            "support": 19705
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.9083280700171433,
+            0.09167192998285663,
+            0.0
+          ],
+          [
+            0.24613345117101193,
+            0.7538665488289881,
+            0.0
+          ],
+          [
+            0.6239025628013195,
+            0.05161126617609744,
+            0.3244861710225831
+          ]
+        ],
+        "tasa_veh_como_apie": 0.6239025628013195,
+        "bootstrap": {
+          "macro_f1_media": 0.5496597156106887,
+          "macro_f1_ic95": [
+            0.530168457394306,
+            0.5686259177713138
+          ],
+          "tasa_veh_apie_media": 0.6237994502041742,
+          "tasa_veh_apie_ic95": [
+            0.6008357467348384,
+            0.6469614217817777
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 541
+        }
+      },
+      "comparacion": {
+        "rf_vs_umbral": {
+          "delta_media": 0.4441220978395648,
+          "delta_ic95": [
+            0.4155350976218235,
+            0.47287628946473154
+          ],
+          "significativo": true
+        },
+        "rf_suav_vs_umbral": {
+          "delta_media": 0.29839058428773296,
+          "delta_ic95": [
+            0.2718207496100166,
+            0.3227685554644497
+          ],
+          "significativo": true
+        }
+      }
+    },
+    "sumo_trafico_lento": {
+      "fuente": "sumo_trafico_lento",
+      "n_ventanas": 10457,
+      "n_grupos": 171,
+      "umbral": {
+        "fuente": "sumo_trafico_lento",
+        "n_ventanas": 10457,
+        "macro_f1": 0.32918502735944993,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "quieto": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 210
+          },
+          "vehiculo": {
+            "precision": 0.9801038062283737,
+            "recall": 0.9951205230799258,
+            "f1": 0.9875550820783497,
+            "support": 10247
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.014285714285714285,
+            0.0,
+            0.9857142857142858
+          ],
+          [
+            0.004879476920074168,
+            0.0,
+            0.9951205230799258
+          ]
+        ],
+        "tasa_veh_como_apie": 0.004879476920074168,
+        "bootstrap": {
+          "macro_f1_media": 0.3291855569370214,
+          "macro_f1_ic95": [
+            0.3282803191747001,
+            0.33002252458159903
+          ],
+          "tasa_veh_apie_media": 0.004932494466250295,
+          "tasa_veh_apie_ic95": [
+            0.003134428400778223,
+            0.006950667638120881
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 171
+        }
+      },
+      "rf": {
+        "fuente": "sumo_trafico_lento",
+        "n_ventanas": 10457,
+        "macro_f1": 0.3333333333333333,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "quieto": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 210
+          },
+          "vehiculo": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 10247
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "tasa_veh_como_apie": 1.0,
+        "bootstrap": {
+          "macro_f1_media": 0.33333333333333326,
+          "macro_f1_ic95": [
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          "tasa_veh_apie_media": 1.0,
+          "tasa_veh_apie_ic95": [
+            1.0,
+            1.0
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 171
+        }
+      },
+      "rf_suavizado": {
+        "fuente": "sumo_trafico_lento",
+        "n_ventanas": 10457,
+        "macro_f1": 0.23450586264656617,
+        "por_clase": {
+          "a_pie": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "quieto": {
+            "precision": 0.5426356589147286,
+            "recall": 1.0,
+            "f1": 0.7035175879396985,
+            "support": 210
+          },
+          "vehiculo": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 10247
+          }
+        },
+        "confusion_matrix": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.9827266517029375,
+            0.017273348297062556,
+            0.0
+          ]
+        ],
+        "tasa_veh_como_apie": 0.9827266517029375,
+        "bootstrap": {
+          "macro_f1_media": 0.23510413472095967,
+          "macro_f1_ic95": [
+            0.21922330641543292,
+            0.25230204969616193
+          ],
+          "tasa_veh_apie_media": 0.982868939496126,
+          "tasa_veh_apie_ic95": [
+            0.9769583553569839,
+            0.9878774232931853
+          ],
+          "n_bootstrap": 1000,
+          "n_grupos": 171
+        }
+      },
+      "comparacion": {
+        "rf_vs_umbral": {
+          "delta_media": 0.00414777639631198,
+          "delta_ic95": [
+            0.003310808751734273,
+            0.005053014158633266
+          ],
+          "significativo": true
+        },
+        "rf_suav_vs_umbral": {
+          "delta_media": -0.09408142221606167,
+          "delta_ic95": [
+            -0.11022326200697019,
+            -0.07702759523478035
+          ],
+          "significativo": true
+        }
+      }
+    },
+    "caseras": "no disponibles"
+  },
+  "curvas_sigma": [
+    {
+      "sigma": 0,
+      "sistema": "umbral",
+      "macro_f1": 0.721838818375739,
+      "macro_f1_ic_lo": 0.6967872100352198,
+      "macro_f1_ic_hi": 0.7456246353628372,
+      "tasa_veh_apie": 0.5141519250780437,
+      "tasa_veh_apie_ic_lo": 0.47696554913443795,
+      "tasa_veh_apie_ic_hi": 0.5512096693135693,
+      "n_ventanas": 43513
+    },
+    {
+      "sigma": 0,
+      "sistema": "rf",
+      "macro_f1": 0.8959001978845867,
+      "macro_f1_ic_lo": 0.8826286911832986,
+      "macro_f1_ic_hi": 0.907595966174254,
+      "tasa_veh_apie": 0.12362122788761706,
+      "tasa_veh_apie_ic_lo": 0.1097351469159476,
+      "tasa_veh_apie_ic_hi": 0.14004762911249508,
+      "n_ventanas": 43513
+    },
+    {
+      "sigma": 0,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.5238051773405795,
+      "macro_f1_ic_lo": 0.500811393200306,
+      "macro_f1_ic_hi": 0.5480252550475553,
+      "tasa_veh_apie": 0.15660770031217483,
+      "tasa_veh_apie_ic_lo": 0.13474297737492316,
+      "tasa_veh_apie_ic_hi": 0.18144667758977023,
+      "n_ventanas": 43513
+    },
+    {
+      "sigma": 3,
+      "sistema": "umbral",
+      "macro_f1": 0.35405404912775457,
+      "macro_f1_ic_lo": 0.3424088833206139,
+      "macro_f1_ic_hi": 0.36607180528598654,
+      "tasa_veh_apie": 0.2306347083633371,
+      "tasa_veh_apie_ic_lo": 0.209877374654948,
+      "tasa_veh_apie_ic_hi": 0.2541585137701859,
+      "n_ventanas": 43506
+    },
+    {
+      "sigma": 3,
+      "sistema": "rf",
+      "macro_f1": 0.6251866646618508,
+      "macro_f1_ic_lo": 0.6017506117530619,
+      "macro_f1_ic_hi": 0.6461798282180071,
+      "tasa_veh_apie": 0.7017796522991462,
+      "tasa_veh_apie_ic_lo": 0.6782267659649335,
+      "tasa_veh_apie_ic_hi": 0.7274326894657452,
+      "n_ventanas": 43506
+    },
+    {
+      "sigma": 3,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.3263553858069604,
+      "macro_f1_ic_lo": 0.30671611404705007,
+      "macro_f1_ic_hi": 0.35005744788360366,
+      "tasa_veh_apie": 0.6426979391694956,
+      "tasa_veh_apie_ic_lo": 0.6188010520683271,
+      "tasa_veh_apie_ic_hi": 0.6654451879406236,
+      "n_ventanas": 43506
+    },
+    {
+      "sigma": 5,
+      "sistema": "umbral",
+      "macro_f1": 0.2737146692615517,
+      "macro_f1_ic_lo": 0.2647916497988687,
+      "macro_f1_ic_hi": 0.2822797938565443,
+      "tasa_veh_apie": 0.002704326923076923,
+      "tasa_veh_apie_ic_lo": 0.0018698196178032352,
+      "tasa_veh_apie_ic_hi": 0.003581782222937216,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 5,
+      "sistema": "rf",
+      "macro_f1": 0.6054572504076386,
+      "macro_f1_ic_lo": 0.5858137807237218,
+      "macro_f1_ic_hi": 0.6254443155678872,
+      "tasa_veh_apie": 0.7982104700854701,
+      "tasa_veh_apie_ic_lo": 0.7812989287049886,
+      "tasa_veh_apie_ic_hi": 0.8149457965274876,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 5,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.29124030318973587,
+      "macro_f1_ic_lo": 0.2710040179961186,
+      "macro_f1_ic_hi": 0.3142356941557871,
+      "tasa_veh_apie": 0.7213875534188035,
+      "tasa_veh_apie_ic_lo": 0.7031977402392358,
+      "tasa_veh_apie_ic_hi": 0.7399632879464461,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 8,
+      "sistema": "umbral",
+      "macro_f1": 0.274734480988028,
+      "macro_f1_ic_lo": 0.26604798542123514,
+      "macro_f1_ic_hi": 0.2828981275596153,
+      "tasa_veh_apie": 0.0,
+      "tasa_veh_apie_ic_lo": 0.0,
+      "tasa_veh_apie_ic_hi": 0.0,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 8,
+      "sistema": "rf",
+      "macro_f1": 0.566189042009875,
+      "macro_f1_ic_lo": 0.547569681475354,
+      "macro_f1_ic_hi": 0.5841861280012773,
+      "tasa_veh_apie": 0.8666797822808053,
+      "tasa_veh_apie_ic_lo": 0.8547347151247618,
+      "tasa_veh_apie_ic_hi": 0.8782332858244809,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 8,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.24850278672211093,
+      "macro_f1_ic_lo": 0.22844993116238968,
+      "macro_f1_ic_hi": 0.2727999598751751,
+      "tasa_veh_apie": 0.8387763132008657,
+      "tasa_veh_apie_ic_lo": 0.8257210256688295,
+      "tasa_veh_apie_ic_hi": 0.851644042812073,
+      "n_ventanas": 43508
+    },
+    {
+      "sigma": 10,
+      "sistema": "umbral",
+      "macro_f1": 0.275491901660126,
+      "macro_f1_ic_lo": 0.2669119902801749,
+      "macro_f1_ic_hi": 0.28381742798096776,
+      "tasa_veh_apie": 0.0,
+      "tasa_veh_apie_ic_lo": 0.0,
+      "tasa_veh_apie_ic_hi": 0.0,
+      "n_ventanas": 43509
+    },
+    {
+      "sigma": 10,
+      "sistema": "rf",
+      "macro_f1": 0.5514734928420412,
+      "macro_f1_ic_lo": 0.5334822156894642,
+      "macro_f1_ic_hi": 0.569054581579622,
+      "tasa_veh_apie": 0.8902813132302069,
+      "tasa_veh_apie_ic_lo": 0.880251239051238,
+      "tasa_veh_apie_ic_hi": 0.9000282168733684,
+      "n_ventanas": 43509
+    },
+    {
+      "sigma": 10,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.23129070241396077,
+      "macro_f1_ic_lo": 0.2102385410507432,
+      "macro_f1_ic_hi": 0.2528195137424841,
+      "tasa_veh_apie": 0.8766725409568566,
+      "tasa_veh_apie_ic_lo": 0.8660977447949653,
+      "tasa_veh_apie_ic_hi": 0.8868814260997305,
+      "n_ventanas": 43509
+    },
+    {
+      "sigma": 15,
+      "sistema": "umbral",
+      "macro_f1": 0.2770284793121977,
+      "macro_f1_ic_lo": 0.2683577019214215,
+      "macro_f1_ic_hi": 0.28533945350872963,
+      "tasa_veh_apie": 0.0,
+      "tasa_veh_apie_ic_lo": 0.0,
+      "tasa_veh_apie_ic_hi": 0.0,
+      "n_ventanas": 43507
+    },
+    {
+      "sigma": 15,
+      "sistema": "rf",
+      "macro_f1": 0.5662771395492057,
+      "macro_f1_ic_lo": 0.5490236162073734,
+      "macro_f1_ic_hi": 0.5828843361197282,
+      "tasa_veh_apie": 0.8577894158342223,
+      "tasa_veh_apie_ic_lo": 0.8476538103174438,
+      "tasa_veh_apie_ic_hi": 0.8676884029215514,
+      "n_ventanas": 43507
+    },
+    {
+      "sigma": 15,
+      "sistema": "rf_suavizado",
+      "macro_f1": 0.22292053634877237,
+      "macro_f1_ic_lo": 0.2023357905114784,
+      "macro_f1_ic_hi": 0.2443959391542251,
+      "tasa_veh_apie": 0.8857530792357676,
+      "tasa_veh_apie_ic_lo": 0.8744883971839152,
+      "tasa_veh_apie_ic_hi": 0.8971136638471136,
+      "n_ventanas": 43507
+    }
+  ],
+  "trafico_lento": {
+    "n_ventanas": 81,
+    "minutos": 6.8,
+    "vel_media_kmh": 7.47,
+    "umbral": {
+      "recall_vehiculo": 0.0,
+      "confusion": {
+        "predicho_a_pie": 1.0,
+        "predicho_quieto": 0.0,
+        "predicho_vehiculo": 0.0
+      }
+    },
+    "rf": {
+      "recall_vehiculo": 0.0,
+      "confusion": {
+        "predicho_a_pie": 0.9753086419753086,
+        "predicho_quieto": 0.024691358024691357,
+        "predicho_vehiculo": 0.0
+      }
+    },
+    "rf_suavizado": {
+      "recall_vehiculo": 0.0,
+      "confusion": {
+        "predicho_a_pie": 1.0,
+        "predicho_quieto": 0.0,
+        "predicho_vehiculo": 0.0
+      }
     }
   },
-  "caseras": "no disponibles"
+  "brecha_generalizacion": {
+    "geolife_prueba": {
+      "cv_macro_f1": 0.9259292740469424,
+      "test_macro_f1": 0.8743397815794722,
+      "brecha": 0.0516
+    },
+    "sumo_normal": {
+      "cv_macro_f1": 0.9259292740469424,
+      "test_macro_f1": 0.6958443835229966,
+      "brecha": 0.2301
+    },
+    "sumo_trafico_lento": {
+      "cv_macro_f1": 0.9259292740469424,
+      "test_macro_f1": 0.3333333333333333,
+      "brecha": 0.5926
+    }
+  }
 }
