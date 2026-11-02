@@ -42,6 +42,28 @@
         "En Android con Expo Go, la página de retorno no vuelve sola a la app (ni con el botón): probar con una APK propia (esquema esert://).",
         "Probar en un iPhone físico."
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-01",
+      "resumen": "Modo espejo por red: candidatos por REST y seguimiento por WebSocket con reconexión exponencial, vigilancia de silencio y AppState, notificaciones locales una vez por transición y latencia evento → pantalla (Cristian). Probado en Android por Tailscale contra un servidor mock local (el WS del espejo de Freddy aún no existe): p50 174 ms y p95 412 ms en 253 mensajes.",
+      "evidencias": [
+        "evidencias/s3_espejo-en-vivo.png",
+        "evidencias/s3_latencia-espejo.png",
+        "evidencias/s3_latencias-espejo.csv",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S2_Miguel.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Cambiar el mock por WS /ws/espejo/{veh_id} de Freddy cuando lo publique (S3-3): basta quitar EXPO_PUBLIC_ESPEJO_URL.",
+        "Medir la latencia en modo VPS y compararla con la local.",
+        "Canal de notificaciones de alta importancia y regreso de Payphone con una APK propia (Expo Go rechaza el canal)."
+      ]
     }
   }
 }

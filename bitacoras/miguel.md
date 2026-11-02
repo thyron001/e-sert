@@ -395,3 +395,98 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 **Pendientes para la próxima sesión:** volver a la app en Android con una APK propia (`esert://`); probar en un iPhone físico; probar la recarga desde la app contra el backend del VPS (`EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`).
 **Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_payphone-pruebas.png)
 [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S2 · Sesión 3 · 2026-11-01 · Modo espejo conectado a la simulación
+**Estado:** hecha
+
+**Qué hice:**
+- `src/api/espejo.ts`: `getCandidatos()` con *timeout* de 8 s y `ErrorApi`; `urlWsEspejo` (https → wss, http → ws, sin `/api/v1`); `EXPO_PUBLIC_ESPEJO_URL` para apuntar solo el espejo a otro servidor.
+- `src/espejo/socketEspejo.ts`, clase `SocketEspejo`:
+  - reconexión 1, 2, 4, 8, 16, 30 s con *jitter* ±20 %, reiniciada con el primer mensaje;
+  - vigilancia de 5 s de silencio;
+  - con AppState, cierra en segundo plano y reconecta enseguida al volver;
+  - no reconecta tras `espejo_fin` ni `cerrar()`; descarta mensajes inválidos con `console.warn`.
+- `src/espejo/usarEspejo.ts` reemplaza a `suscribirMock` en la pantalla. El modo mock de la app (`EXPO_PUBLIC_USE_MOCK=1` o Ajustes) conserva el recorrido interno de S1-3.
+- La cabecera tiene un indicador de conexión (`IndicadorConexion`). El selector (`app/espejo/index.tsx`) muestra los candidatos reales con *pull to refresh*.
+- `src/espejo/notificaciones.ts` con `expo-notifications`: permisos, canal Android "espejo" y `setNotificationHandler`. Notifica una vez por (veh_id, estado) en GUIADO, ESTACIONADO, SALIENDO y CERRADA, y una vez por saldo bajo.
+- `src/espejo/latencia.ts`:
+  - desfase con el método de Cristian, sobre 5 peticiones a `/salud`, con el `ts` del cuerpo o el header `Date`;
+  - registra `lat_total` y `lat_cliente`;
+  - exporta el CSV con `expo-sharing`.
+- `mock_espejo/` (`# MOCK`): FastAPI que reproduce `recorrido_mock.json` a 1 Hz como simulación en vivo, con `ts` en ms. Tiene `--bucle`, `--cortar-en N`, `/salud` con `ts`, `/espejo/reiniciar` y `POST /espejo/latencias`, por donde el teléfono envía su CSV. Tiene 12 tests.
+- 41 tests nuevos de Jest con socket falso y temporizadores falsos:
+  - la secuencia 1, 2, 4, 8, 16, 30, 30 s;
+  - el silencio de 5 s;
+  - que `espejo_fin` no reconecta;
+  - una sola notificación por transición;
+  - la latencia y las URL.
+- `scripts/latencia_espejo.py` (histograma) y `scripts/mapa_espejo.py` (mapa del recorrido para la evidencia).
+- Pruebas en Android con Expo Go por Tailscale: 3 recorridos completos, corte cada 20 s, segundo plano de 11 s y 39 s, y la exportación de latencias.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Miguel/codigo/app/`:
+  - `src/api/espejo.ts`
+  - `src/espejo/{socketEspejo,usarEspejo,notificaciones,latencia}.ts`
+  - `src/espejo/componentes/IndicadorConexion.tsx`
+  - `src/espejo/__tests__/{socketEspejo,notificaciones,latencia,espejoApi}.test.ts`
+  - `app/espejo/index.tsx`, `app/espejo/[vehId].tsx`
+  - `mock_espejo/`
+  - `scripts/latencia_espejo.py`, `scripts/mapa_espejo.py`
+  - `.env.example`, `package.json` (`expo-notifications`)
+- `semanas/S2/Miguel/evidencias/`:
+  - `s3_espejo-en-vivo.png`, `s3_latencia-espejo.png`, `s3_latencias-espejo.csv`
+  - `capturas/s3_*.jpeg`
+  - `resumen_S2_Miguel.pdf`
+- `semanas/S2/Miguel/explicaciones/s3_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **Mock local en vez del backend:** el VPS responde `[]` en `/espejo/candidatos` y 404 en `/ws/espejo/...`, y `proyecto/backend/api/ws.py` solo tiene `/ws/estado`. El mock respeta el formato del contrato §7: cuando Freddy publique el WS, basta quitar `EXPO_PUBLIC_ESPEJO_URL`.
+- **El mock simula en vivo:** cada auto tiene su propio reloj; al reconectar se sigue donde va, no desde el principio. Así la prueba de reconexión es realista.
+- **Dependencias inyectables en `SocketEspejo`:** socket, AppState, azar y reloj se inyectan para probar la secuencia exacta con temporizadores falsos.
+- **Se espera al desfase antes de abrir el socket,** para que ninguna muestra use desfase 0. Se corrigió después de las pruebas; ver "Problemas".
+- **Sin sumo-gui:** Docker no estaba corriendo y el auto del mock no existe en SUMO. La evidencia une el teléfono con un mapa del recorrido dibujado con los mismos mensajes (`mapa_espejo.py`).
+- **Indicador "Finalizado":** al llegar `espejo_fin` el indicador ya no queda en "Sin conexión".
+
+**Problemas encontrados:**
+- **Canal de notificaciones en Expo Go (SDK 58, Android):** `setNotificationChannelAsync` falla con `NullPointerException`. Como el permiso se pedía después, al principio no llegaba ninguna notificación. Ahora el fallo del canal no impide pedir permiso y se usa el canal por defecto: permiso `granted`, 5 notificaciones por auto.
+- **Segundo plano largo:** al volver de 28 s en segundo plano el auto del mock ya había terminado. La app recibió `espejo_fin` bien, pero el indicador seguía en "Sin conexión" (corregido con "Finalizado"). La prueba de segundo plano se repitió con `--bucle`.
+- **El teléfono dejó de recibir los cambios de Metro** a mitad de las pruebas. Hubo que cerrar y abrir Expo Go.
+- **La copia del backend de Freddy en el scratchpad se borró** entre sesiones. Esta sesión no la necesitó.
+- **Las primeras muestras de cada recorrido usaron desfase 0,** porque el desfase se estimaba en paralelo. Puede inflar algo el p95 total; ya está corregido en el código.
+
+**Latencia evento → pantalla (modo local, mock por Tailscale, Android, 253 mensajes de 3 recorridos completos y 3 parciales):**
+- total (ts del servidor → pintado): **p50 174 ms, p95 412 ms**;
+- solo el teléfono (recepción → pintado): **p50 109 ms, p95 174 ms**.
+
+No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Publicar `WS /ws/espejo/{veh_id}` según el contrato §7 (S3-3): mensajes `espejo` a 1 Hz con `ts` en ms, y `espejo_fin` con `motivo` antes de cerrar.
+  - Añadir el `veh_id` a `mundo.espejos` mientras haya un WS abierto: hoy nada lo llena y el snapshot siempre manda `espejos: []`.
+  - Añadir `ts` (hora UTC con ms) a `GET /salud`. Sin él, la app estima el desfase con el header `Date`, que solo tiene resolución de 1 s.
+  - Diferencias con §7 que vi: el contrato no define códigos de cierre del WS. Propongo 1000 tras `espejo_fin` y 1011 por error.
+- **@Tyrone:** el visor ya resalta los ids de `espejos`, pero no se verá nada hasta que el backend llene el conjunto (pedido a Freddy).
+- **@Tyrone [Plan]:** esta sesión es S2-3, hecha el domingo 1-nov después de la unificación de S2. Pido incluir `miguel/s2` (commit de esta sesión) en la unificación de S3, o fusionarlo antes, para que el espejo por red llegue a `proyecto/app/`.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código, tests y servidor mock.
+  2. Notificaciones que no llegaban (canal rechazado por Expo Go).
+  3. El indicador tras `espejo_fin` y la prueba de segundo plano con `--bucle`.
+  4. El histograma y el mapa (etiquetas superpuestas y leyenda sobre el puesto).
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/6 criterios cumplidos**; faltaba el PDF semanal, que se generó en el cierre. Además encontró defectos que ya están corregidos:
+  - el motivo de corte mal registrado en el log del mock;
+  - las primeras muestras con desfase 0;
+  - que un `/salud` fallido anulaba toda la estimación;
+  - que exportar el CSV no manejaba errores.
+- Deja anotado que las notificaciones se repiten si se sale y se vuelve a entrar al mismo auto.
+- Resultado final: Jest 140/140, `tsc` sin errores, tests del mock 12/12.
+
+**Pendientes para la próxima sesión:**
+- Usar el WS real de Freddy cuando lo publique, y medir la latencia en modo VPS.
+- Probar el canal de notificaciones de alta importancia y el regreso de Payphone con una APK propia.
+- S3-1: cierre automático en la app y recibo comparado con la tarjeta SERT.
+
+**Evidencias:** ![](../semanas/S2/Miguel/evidencias/s3_espejo-en-vivo.png) ![](../semanas/S2/Miguel/evidencias/s3_latencia-espejo.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S2 (PDF)](../semanas/S2/Miguel/evidencias/resumen_S2_Miguel.pdf)
