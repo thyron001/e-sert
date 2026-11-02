@@ -150,10 +150,13 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - @Miguel: si grabas algo casero, lo más útil serían trayectorias de vehículo en congestión (<8 km/h).
 - @Tyrone [Plan]: propuesta para S3 — reentrenar RF con datos mixtos GeoLife+SUMO para reducir la brecha de dominio.
 
-**Bucle y verificación:** 4 vueltas totales (NaN filter, timeout bootstrap, SUMO sin contenedor, evaluación completa con SUMO). Verificador final: 6/7 criterios cumplidos (falta peatón rápido por simulación corta).
+**Bucle y verificación:** 6 vueltas totales (NaN filter, timeout bootstrap, SUMO sin contenedor, evaluación completa con SUMO, bug fix typeID setSpeed, re-evaluación optimizada). Verificador final: 7/7 criterios cumplidos.
+
+**Bug fix importante:** `traci.person.setSpeed()` en SUMO 1.12 muta el typeID de `"peaton_rapido"` a `"peaton_rapido@pN"`. La comparación exacta `==` fallaba siempre. Corregido con `startswith("peaton_rapido")`. Tras el fix: 49,139 filas de peatón rápido en las 5 semillas (S101:5260, S102:9751, S103:11544, S104:14914, S105:7670). Evaluación: 8,082 ventanas, RF macro-F1 = 0.6665.
+
+**Optimización de evaluación:** `preparar_sumo_escenarios` se llamaba 9 veces (3 escenarios + 6 sigmas). Se redujo a: 1 carga para escenarios, 2 semillas para curvas σ, 2 semillas para tráfico lento. Tiempo de ~2h+ reducido a ~15 min.
 
 **Pendientes para la próxima sesión:**
-- Generar escenarios con más peatones y mayor duración para capturar peatón rápido.
 - Considerar reentrenamiento con datos mixtos GeoLife+SUMO.
 
 **Evidencias:**

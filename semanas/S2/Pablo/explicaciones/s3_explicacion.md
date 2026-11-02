@@ -3,11 +3,12 @@
 ## 1. Resumen en 5 líneas
 
 Se evaluó el clasificador RF v1 (entrenado en S2-2) sobre 294,579 ventanas de 10 usuarios de
-GeoLife no vistos y 43,508 ventanas de escenarios SUMO (semillas 101-105). El RF obtiene
-macro-F1 = 0.87 en GeoLife pero cae a 0.70 en SUMO normal y a 0.33 en tráfico lento,
-revelando una brecha de dominio de 23 puntos. En tráfico lento, el RF clasifica el 100% de
-los vehículos como peatones. Las curvas F1 vs σ confirman que el ruido GPS no es el factor
-dominante. El hallazgo principal: el modelo necesita datos del dominio Cuenca para producción.
+GeoLife no vistos y 353,868 ventanas de escenarios SUMO (semillas 101-105, normal + tráfico
+lento + peatón rápido). El RF obtiene macro-F1 = 0.87 en GeoLife pero cae a 0.64 en SUMO
+normal, 0.67 en peatón rápido y 0.33 en tráfico lento, revelando una brecha de dominio de
+29 puntos. Se corrigió un bug donde `traci.person.setSpeed()` mutaba el typeID, impidiendo
+capturar las 8,082 ventanas de peatón rápido. Las curvas F1 vs σ confirman que el ruido GPS
+no es el factor dominante. El hallazgo principal: el modelo necesita datos del dominio Cuenca.
 
 ## 2. Conceptos clave
 
@@ -147,23 +148,25 @@ Tres funciones, una por PNG: `generar_umbral_vs_rf_por_fuente()` (barras con IC)
 
 ### Métricas principales por fuente
 
-| Fuente | RF macro-F1 | IC 95% | RF tasa veh->a_pie |
-|--------|-------------|--------|-------------------|
-| GeoLife prueba | 0.8743 | [0.821, 0.947] | 24.3% |
-| SUMO normal | 0.6958 | [0.677, 0.714] | 69.3% |
-| SUMO tráfico lento | 0.3333 | [0.333, 0.333] | 100.0% |
+| Fuente | RF macro-F1 | IC 95% |
+|--------|-------------|--------|
+| GeoLife prueba | 0.8743 | [0.821, 0.947] |
+| SUMO normal | 0.6395 | [0.629, 0.650] |
+| SUMO peatón rápido | 0.6665 | [0.666, 0.667] |
+| SUMO tráfico lento | 0.3327 | [0.332, 0.333] |
 
 ### Brecha de generalización
 
 | Fuente | CV (S2-2) | Prueba (S2-3) | Brecha |
 |--------|-----------|---------------|--------|
 | GeoLife | 0.9259 | 0.8743 | -0.052 |
-| SUMO normal | 0.9259 | 0.6958 | -0.230 |
-| SUMO tráfico lento | 0.9259 | 0.3333 | -0.593 |
+| SUMO normal | 0.9259 | 0.6395 | -0.286 |
+| SUMO peatón rápido | 0.9259 | 0.6665 | -0.260 |
+| SUMO tráfico lento | 0.9259 | 0.3327 | -0.593 |
 
 ### Tráfico lento (<8 km/h)
 
-81 ventanas, 6.8 min, vel media 7.47 km/h. Recall vehiculo = 0% para todos los sistemas.
+399 ventanas, 33.2 min. Recall vehiculo = 0% para todos los sistemas.
 
 ### Comparación estadística (GeoLife)
 
@@ -182,8 +185,8 @@ RF vs umbral: Δ = +0.185 [+0.158, +0.226], significativo.
    aprendidas de GeoLife (Beijing) no transfieren a SUMO (Cuenca simulado).
 2. **Tráfico lento irrecuperable**: a velocidad de peatón (<8 km/h), ningún sistema distingue
    vehículos de peatones solo con GPS. Se necesitaría acelerómetro o contexto de calle.
-3. **Peatón rápido sin datos**: la simulación corta (600s, 30 peatones) no generó ventanas
-   de peatón rápido. Necesitaría mayor duración o más peatones.
+3. **Bug typeID peatón rápido corregido**: `traci.person.setSpeed()` en SUMO 1.12 muta el
+   typeID a `"peaton_rapido@pN"`. Corregido con `startswith()` → 8,082 ventanas generadas.
 4. **IC amplio en GeoLife**: con solo 10 usuarios, el IC es de 12.6 puntos [0.821, 0.947].
 5. **Grabaciones caseras**: Miguel no ha subido grabaciones. Serían la validación más relevante.
 

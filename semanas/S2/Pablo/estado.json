@@ -36,7 +36,7 @@
     "sesion-3": {
       "estado": "hecha",
       "fecha": "2026-11-01",
-      "resumen": "Evaluación completa: GeoLife prueba RF macro-F1=0.8743 [0.821, 0.947], SUMO normal 0.6958, SUMO tráfico lento 0.3333 (100% falsas liberaciones). Brecha de dominio GeoLife→SUMO de 23pp. Curvas σ y análisis tráfico lento completos. 81 ventanas <8km/h: ningún sistema reconoce vehículos lentos.",
+      "resumen": "Evaluación completa: GeoLife prueba RF macro-F1=0.8743, SUMO normal 0.6395, SUMO peatón rápido 0.6665, SUMO tráfico lento 0.3327. Brecha de dominio GeoLife→SUMO de 29pp. Bug fix: traci.person.setSpeed() mutaba typeID, corregido con startswith(). 8,082 ventanas de peatón rápido, 399 ventanas tráfico lento <8km/h.",
       "evidencias": [
         "evidencias/s3_umbral-vs-rf-por-fuente.png",
         "evidencias/s3_curvas-sigma.png",
@@ -44,10 +44,8 @@
         "explicaciones/s3_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s3_explicacion.pdf",
-      "criterios": {"cumplidos": 6, "total": 7},
-      "pendientes": [
-        "Peatón rápido sin datos (simulación corta, 0 ventanas generadas)"
-      ]
+      "criterios": {"cumplidos": 7, "total": 7},
+      "pendientes": []
     }
   }
 }
