@@ -1,0 +1,18 @@
+{
+  "persona": "Pablo",
+  "semana": "S3",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-03",
+      "resumen": "Servicio de inferencia robusto: limpieza de huecos/duplicados/ruido, fallback escalonado a umbral, RF compilado a numpy (p95 individual 1.56 ms, lote 0.33 ms/ventana) sin perder precision, meta.json con SHA-256 y 49 tests con hypothesis.",
+      "evidencias": [
+        "evidencias/s1_latencia-inferencia.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 5, "total": 5},
+      "pendientes": []
+    }
+  }
+}
