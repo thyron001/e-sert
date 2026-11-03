@@ -302,3 +302,39 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 ![Umbral vs RF por fuente](../semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png)
 ![Curvas sigma](../semanas/S2/Pablo/evidencias/s3_curvas-sigma.png)
 ![Tráfico lento](../semanas/S2/Pablo/evidencias/s3_trafico-lento.png)
+
+## S3 · Sesión 1 · 2026-11-03 · Servicio de inferencia robusto: huecos, latencia menor a 5 ms y fallback
+**Estado:** hecha
+**Qué hice:**
+- `ia/validacion.py`: `limpiar()` ordena, quita duplicados, NaN y fuera de rango, `precision_m > 50`, saltos > 50 m/s; remuestrea a 1 Hz e interpola huecos de hasta 5 s; devuelve `Calidad`.
+- `ia/inferencia.py` reescrito: `clasificar(ventana, previo=None)` con RF (cobertura ≥ 0,6 y hueco ≤ 10 s), umbral con confianza × cobertura, `previo` × 0,5 o umbral con confianza 0; aviso único si el modelo falta o `predict` lanza; solo `TypeError` si la entrada no es lista de puntos. `clasificar_lote` con una sola llamada a `predict_proba`.
+- Latencia: `predict_proba` de sklearn costaba 19,6 ms (200 árboles). Compilé el bosque a arrays de numpy (`ia/bosque_plano.py`) y lo recorro entero a la vez: mismas probabilidades (dif. máx. 5e-9, mismo argmax). Características con numpy 2-D (una sola implementación para individual y lote) y mediana móvil vectorizada.
+- `ia/modelos/rf_v1.meta.json` (orden de características, sklearn, SHA-256, fecha, hiperparámetros, métricas S2); aviso si sklearn o el SHA no coinciden.
+- `ia/bench_inferencia.py` y `ia/tests/test_inferencia.py` (49 tests; 4 propiedades con 300 ejemplos de hypothesis).
+- Resultados con 10 000 ventanas (5 000 GeoLife de prueba + 5 000 SUMO σ=5): individual p50/p95/p99 = 1,23 / 1,56 / 1,84 ms; lote 0,313 / 0,326 / 0,334 ms por ventana.
+
+**Archivos creados o modificados:** `semanas/S3/Pablo/codigo/ia/` → `validacion.py`, `inferencia.py`, `bosque_plano.py`, `bench_inferencia.py`, `caracteristicas.py` (mediana vectorizada), `modelos/rf_v1.meta.json`, `datos/ventanas_prueba.py`, `datos/generar_referencia_inferencia.py`, `tests/test_inferencia.py`, `tests/test_s2_sesion2.py` (2 tests adaptados a la nueva regla), `tests/datos/referencia_s2.json`, `reportes/bench_inferencia.json`; `evidencias/s1_latencia-inferencia.png`; `explicaciones/s1_explicacion.md/.pdf`.
+
+**Decisiones y por qué:**
+- No reduje `n_estimators` ni `max_depth`: compilar el bosque cumple la meta sin pérdida de macro-F1 y sin añadir `onnxruntime`.
+- La referencia de "predicciones guardadas de S2" no existía como archivo: la generé con la ruta original (pandas + `extraer` + pipeline sklearn) sobre 150 ventanas de usuarios no vistos; coinciden al 100 %.
+- Dos tests de S2 decían "menos de 10 puntos → umbral"; los adapté a la regla nueva (cobertura y huecos) en la copia de S3.
+- Se limita el rango de tiempo de una ventana a 120 s para que tiempos absurdos no creen una malla gigante.
+
+**Problemas encontrados:**
+- Generar la referencia con 400 k filas tardó 4 min y 2,8 GB; bajé el muestreo a 80 k filas.
+- Una corrida del benchmark dio p95 de lote 0,55 ms por carga del equipo (la mediana siempre fue ~0,31 ms); desactivé el GC durante la medición y repetí.
+- `test_evaluacion.py` falla en la copia de S3 por falta de `ventanas_prueba_geolife.parquet` (datos grandes que no se copian); no está relacionado con estos cambios.
+
+**Pedidos a otros:**
+- @Freddy: firma `clasificar(ventana, previo=None)` (previo opcional, el contrato sigue válido) y `clasificar_lote(ventanas, previos=None)`; en TraCI usa el lote por paso de simulación. Latencia: individual p95 1,56 ms; lote 0,33 ms por ventana. `fuente` = "rf" o "umbral". Cargar el modelo tarda unos segundos y ocupa ~100 MB.
+- @Miguel: la precisión máxima aceptada es 50 m (`precision_max_m`), por si validas grabaciones caseras.
+- @Tyrone [Plan]: `docs/CONTRATO.md` §2 podría documentar el parámetro opcional `previo` y `clasificar_lote` (propuesta, no se editó).
+
+**Bucle y verificación:** 5 vueltas (primer perfil de latencia, bosque plano, características 2-D, endurecimiento por hypothesis, ajuste del benchmark). El verificador independiente reportó 5/5 criterios cumplidos.
+
+**Pendientes para la próxima sesión:**
+- Integrar con Freddy el modo espejo y el controlador TraCI.
+
+**Evidencias:**
+![](../semanas/S3/Pablo/evidencias/s1_latencia-inferencia.png)

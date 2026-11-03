@@ -1,0 +1,32 @@
+{
+  "n_ventanas": 4000,
+  "n_geolife": 2000,
+  "n_sumo": 2000,
+  "calentamiento_descartado": 100,
+  "bloque_lote": 500,
+  "individual_ms": {
+    "p50": 1.2028835,
+    "p95": 1.7027308999999993,
+    "p99": 1.8255633299999983,
+    "media": 1.2712219905128204,
+    "n": 3900
+  },
+  "lote_ms_por_ventana": {
+    "p50": 0.305958078,
+    "p95": 0.32230579800000003,
+    "p99": 0.32982279595999997,
+    "media": 0.30639875748571427,
+    "n": 35
+  },
+  "fraccion_rf_en_muestra": 1.0,
+  "cumple": {
+    "individual_p95_lt_5ms": true,
+    "lote_lt_0_5ms": true
+  },
+  "entorno": {
+    "python": "3.12.3",
+    "numpy": "2.5.4",
+    "sklearn": "1.9.1",
+    "cpu": "x86_64"
+  }
+}
