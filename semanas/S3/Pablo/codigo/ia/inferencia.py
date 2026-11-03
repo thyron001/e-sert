@@ -323,9 +323,13 @@ def clasificar(
 def clasificar_lote(
     ventanas: list[list[PuntoGPS]],
     previos: list[ResultadoModo | None] | None = None,
-) -> list[ResultadoModo]:
+    con_probas: bool = False,
+):
     """
     Clasifica un lote de ventanas con una sola llamada a predict_proba.
+
+    Con `con_probas=True` devuelve `(resultados, probas)`, donde `probas[i]` es el vector de
+    probabilidades en el orden a_pie, quieto, vehiculo (None si esa ventana uso el umbral).
     """
     if previos is None:
         previos = [None] * len(ventanas)
@@ -341,6 +345,7 @@ def clasificar_lote(
     rf_indices = []
     rf_features = []
     resultados: list[ResultadoModo | None] = [None] * len(ventanas)
+    probas_out: list[np.ndarray | None] = [None] * len(ventanas)
 
     modelo = _intentar_modelo()
 
@@ -378,6 +383,7 @@ def clasificar_lote(
             clases = modelo.classes_
             for j, idx_orig in enumerate(rf_indices):
                 idx_max = int(np.argmax(probas_all[j]))
+                probas_out[idx_orig] = probas_all[j]
                 resultados[idx_orig] = ResultadoModo(
                     modo=str(clases[idx_max]),
                     confianza=float(probas_all[j][idx_max]),
@@ -393,6 +399,8 @@ def clasificar_lote(
                     fuente="umbral",
                 )
 
+    if con_probas:
+        return resultados, probas_out
     return resultados  # type: ignore[return-value]
 
 

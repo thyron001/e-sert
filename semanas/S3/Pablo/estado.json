@@ -11,8 +11,30 @@
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 5, "total": 5},
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
       "pendientes": []
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-03",
+      "resumen": "Analisis de errores por contexto y simulacion de 300 sesiones SUMO (5 semillas, sigma 5/10/15) para 12 combinaciones de suavizado. Umbral: 88 falsas/100; RF: ~0. k recomendado = 1 (suavizar solo suma retardo). Hallazgo: REGRESANDO->A_PIE de la maquina de Freddy (no esta en el contrato) deja sin cerrar ~97 % de las sesiones.",
+      "evidencias": [
+        "evidencias/s2_errores-contexto.png",
+        "evidencias/s2_suavizado-falsas-liberaciones.png",
+        "evidencias/s2_peores-errores.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Validar k con la corrida p50_rf_s1 de 1800 s: el controlador no tiene parametro de suavizado (pedido a Freddy)"
+      ]
     }
   }
 }

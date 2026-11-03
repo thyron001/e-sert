@@ -338,3 +338,41 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 
 **Evidencias:**
 ![](../semanas/S3/Pablo/evidencias/s1_latencia-inferencia.png)
+
+## S3 · Sesión 2 · 2026-11-03 · Análisis de errores y efecto del suavizado en las falsas liberaciones
+**Estado:** hecha
+**Qué hice:**
+- `ia/analisis_errores.py` (delegado a un subagente y revisado por mí): recall por velocidad, precisión, transición, σ y escenario para umbral y RF; 20 peores errores con su traza (5 de etiqueta, 15 del modelo).
+- `ia/suavizado.py`: `Suavizador(k, metodo="mayoria"|"prob_media")` con estado por instancia y `actualizar()` que respeta `ResultadoModo`; se conservan los métodos antiguos. `clasificar_lote(..., con_probas=True)`.
+- `ia/grabar_episodios.py`: hook sobre el controlador de Freddy que graba, en el contenedor, la traza limpia de cada sesión (estacionar → caminar → volver → manejar). 5 semillas (101–105) a 4 800 s: 1 784 sesiones completas.
+- `ia/simular_falsas.py`: ruido AR(1) σ = 5, 10, 15 → ventanas de 30 s/5 s → clasificador → suavizador → `MaquinaSesion` de Freddy; 12 combinaciones con IC 95 % (bootstrap 2 000) sobre 300 sesiones, en procesos (fork). Variante con la tabla literal del contrato §3.
+- Resultados: umbral 88,2 falsas/100 [86,4; 90,1]; RF 0,00–0,33; con la máquina del contrato el RF cierra bien el 96,2 % con retardo 52/56/69 s para k = 1/3/5. **k recomendado = 1.**
+- 36 tests nuevos de esta sesión pasan (109 en el conjunto relevante).
+
+**Archivos creados o modificados:** `semanas/S3/Pablo/codigo/ia/` → `analisis_errores.py`, `grabar_episodios.py`, `simular_falsas.py`, `graficar_suavizado.py`, `suavizado.py`, `inferencia.py`, `reportes/{errores_contexto,errores_confusion,peores_errores,suavizado_k,suavizado_k_contrato}.csv`, `reportes/conclusiones_s3.md`, `tests/test_suavizado_falsas.py`, `tests/test_analisis_errores.py`; `evidencias/s2_*.png`; `explicaciones/s2_explicacion.md/.pdf`.
+
+**Decisiones y por qué:**
+- Se usó la máquina de Freddy importada de `proyecto/traci/estados.py` (no una réplica) y, además, la del contrato, porque la de Freddy tiene `REGRESANDO → A_PIE`, que no está en el contrato §3 y que casi impide cerrar sesiones.
+- El umbral usa la velocidad suavizada (mediana de 3) igual que en S2; con el recorrido crudo habría salido aún peor.
+- Muestra de 300 de 1 784 sesiones por tiempo: cada ventana cuesta ~0,5 ms y hay ~100 por sesión y σ.
+- Retardo y falsas en paneles separados (no un segundo eje) para no mezclar escalas.
+- Dos semillas de SUMO se grabaron en paralelo para ahorrar ~50 min.
+
+**Problemas encontrados:**
+- El contenedor `van3twin` había desaparecido; lo recreé con `docker compose up -d van3twin` y reinstalé numpy, pydantic y pyproj con `pip --user`.
+- SUMO entrega posiciones `inf` a veces; se filtran.
+- Las etiquetas de SUMO de S2-3 estaban sesgadas (`remuestrear` etiqueta el segmento con el modo de su primera fila); el análisis de errores segmenta por tramos de modo constante.
+- No se validó k con la corrida de 1 800 s: el controlador no tiene parámetro de suavizado y las estadías duran mediana 43 min.
+
+**Pedidos a otros:**
+- @Freddy: usar k = 1 con RF (método indiferente). Revisar `REGRESANDO → A_PIE` en `proyecto/traci/estados.py`: no está en el contrato y con ella cierran bien solo 1,4–3,7 % de las sesiones. Añadir un parámetro de suavizado al controlador para validar k.
+- @Tyrone: usar k = 1 en la corrida final de S4. [Plan] `docs/CONTRATO.md` §3: aclarar si `REGRESANDO → A_PIE` existe.
+
+**Bucle y verificación:** 6 vueltas (tubería, NaN/inf, umbral suavizado, máquina del contrato, tests, gráfica). El verificador reportó 6/6 criterios cumplidos y 14 cifras contrastadas con los CSV; se corrigió el dato de "60 sesiones" (no estaba en los CSV) y la figura.
+
+**Pendientes para la próxima sesión:** redactar la sección de IA del informe (S3-3).
+
+**Evidencias:**
+![](../semanas/S3/Pablo/evidencias/s2_suavizado-falsas-liberaciones.png)
+![](../semanas/S3/Pablo/evidencias/s2_errores-contexto.png)
+![](../semanas/S3/Pablo/evidencias/s2_peores-errores.png)
