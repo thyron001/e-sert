@@ -16,6 +16,10 @@ Lo cubren 102 tests, con 99 % de cobertura en `api/` + `nucleo/`. La lógica nue
 
 Captura completa con las 16 operaciones desplegadas: [evidencias/s1_swagger.png](evidencias/s1_swagger.png) · paginada en A4: [evidencias/s1_swagger.pdf](evidencias/s1_swagger.pdf)
 
+**Cierre del 2026-11-05:** se construyó la imagen Docker de verdad (281 MB, `healthy`). `/salud` responde 200 y el snapshot sin token da 401, así que la sesión pasa a **hecha** (6/6).
+
+![Backend en Docker](evidencias/s1_docker-backend.png)
+
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)
 
 ## Sesión 2 · 2026-10-26 · Máquina de estados y peatones que hacen diligencias
