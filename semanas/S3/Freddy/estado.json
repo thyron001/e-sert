@@ -1,0 +1,25 @@
+{
+  "persona": "Freddy",
+  "semana": "S3",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-05",
+      "resumen": "KPIs de sistema dentro de la simulación (falsas liberaciones, retardo de cierre, error de facturación y precisión del mapa) con VerdadSUMO y KPIsSistema, la interfaz para Tyrone. Con 50 % de autos con app: precisión del mapa solo app 1,00 (total 0,82), 91–100 falsas liberaciones por 100 sesiones con el umbral y sobrecosto de 1,7–3,6 % por paso.",
+      "evidencias": [
+        "evidencias/s1_kpis-sistema.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Repetir p50_rf_s1 cuando Pablo publique rf_v1.joblib (hoy rf cae al umbral)",
+        "precision_mapa_app casi siempre da 1,0 por definición (libre = ocupados < capacidad total); usar también mae_mapa_app",
+        "Aprobar POST /api/v1/sim/kpi (CONTRATO.propuesto.md) en la unificación"
+      ]
+    }
+  }
+}

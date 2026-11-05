@@ -391,3 +391,48 @@ El criterio «búsqueda con app menor que sin app» **no se cumple con la fuente
 - Publicar al VPS solo con Tyrone (token y despliegue); la prueba local ya está hecha.
 
 **Evidencias:** ![](../semanas/S2/Freddy/evidencias/s3_guiado-vs-ciegas.png) ![](../semanas/S2/Freddy/evidencias/s3_cobros-simulados.png) · [Resumen semanal (PDF)](../semanas/S2/Freddy/evidencias/resumen_S2_Freddy.pdf) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s3_explicacion.pdf)
+
+## S3 · Sesión 1 · 2026-11-05 · KPIs de sistema: falsas liberaciones, retardo de cierre, facturación y mapa
+**Estado:** hecha
+**Qué hice:**
+- Copié `proyecto/traci`, `proyecto/backend` (sin `pagos/` ni `asistente/`) y `proyecto/comun` a `semanas/S3/Freddy/codigo/`.
+- Creé `traci/verdad.py` (`VerdadSUMO`): obtiene el estado físico de los autos con app a partir del bit de parking de `VAR_STOPSTATE` en la suscripción del controlador, sus tiempos reales de llegada y salida, y la ocupación por puesto (total y solo con app).
+- Creé `traci/kpis_sistema.py` (`KPIsSistema`): falsas liberaciones, retardo de cierre, error de facturación, ahorro frente a la tarjeta SERT y precisión del mapa (total y solo app), con `resumen()`, `detalle_sesiones()` y `serie_mapa()`.
+- Creé `traci/correr_kpis.py`: corridas `p{pen}_{clf}_s{sem}` sobre los escenarios unificados de Tyrone (`--porc-app`), lo que reemplaza el mock de `escenario_app.py`. El sobrecosto se mide cronometrando los hooks dentro de la misma corrida.
+- Publicación en vivo: añadí la ruta `POST /api/v1/sim/kpi` (🔒), que difunde `kpi` cada 10 s simulados, y `PublicadorSnapshots` ahora llena `verdad` con datos reales. Regeneré `openapi.json`.
+- Añadí un gancho `al_cerrar` a `PuenteNucleo` y una ruta configurable al `Publicador`.
+- Tests: 8 unitarios con un `traci` falso, más 2 con SUMO (la equivalencia con `isStoppedParking` y la integración `p50_rf_s1`), y un test de `/sim/kpi` en el backend.
+- Corrí `p50_umbral_s1` y `p50_rf_s1` (900 s) y `p50_rf_s1` (3600 s), e hice la figura 2×2.
+
+**Archivos creados o modificados:** `semanas/S3/Freddy/codigo/traci/{verdad,kpis_sistema,correr_kpis,graficas_kpis}.py`, `traci/tests/test_kpis_sistema.py`, `traci/{puente_nucleo,correr_guiado}.py`, `traci/requirements.txt` (pandas), `traci/salidas_kpi/ejemplo_*.json`, `backend/api/rutas/simulacion.py`, `backend/tests/test_api_ws.py`, `backend/openapi.json`, `comun/CONTRATO.propuesto.md`, `semanas/S3/Freddy/{estado.json,RESUMEN.md}`, `explicaciones/s1_explicacion.{md,pdf}`, `evidencias/s1_kpis-sistema.png`.
+
+**Decisiones y por qué:**
+- La verdad sale de la suscripción `VAR_STOPSTATE` que el `Controlador` ya hace para todos los vehículos, en lugar de una suscripción nueva o de llamar a `isStoppedParking` en cada paso. Así cuesta menos y el test demuestra que da lo mismo.
+- `n_sesiones` cuenta las sesiones cerradas, que son el denominador de `falsas_lib_100`; las abiertas van en `sin_cierre`. Ojo: `sesiones_maquina.falsas_por_100_sesiones` (S2) divide entre las llegadas, que es otra cifra.
+- Los valores que todavía no tienen datos se escriben como `null` en el JSON y se omiten en el mensaje `kpi`, porque `NaN` no es JSON válido.
+- El sobrecosto se mide dentro de la corrida (tiempo en los hooks frente al resto) para no depender del ruido entre corridas. `--medir-costo` también existe, pero no se usó.
+- Hice una corrida de 3600 s solo para la figura: en 900 s ningún auto con app sale de verdad, así que el retardo y la facturación quedan vacíos.
+
+**Problemas encontrados:**
+- No existe `rf_v1.joblib` en el repo ni en la máquina; solo está `rf_v1.json`. `p50_rf_s1` usó el umbral (`clasificador_usado: "umbral"`), así que el panel (a) compara dos corridas que en realidad son iguales.
+- Con el umbral, el 100 % (900 s) y el 91 % (3600 s) de los cierres son falsas liberaciones. Pagan el mínimo de 10 min, y por eso el error de facturación medio es −0,12 USD.
+- El JSON de ejemplo de 900 s tiene 5 de las 12 claves en `null` (retardo y facturación), porque no hubo ninguna salida real en ese tiempo. Es esperado. Para cifras completas está `ejemplo_p50_rf_s1_3600.json`.
+- `precision_mapa_app` sale ≈ 1,0 casi por construcción: los autos con app rara vez llenan un puesto, así que libre/lleno coincide aunque el mapa no vea algunos autos. Lo señaló el verificador. Cumple el criterio tal como está escrito, pero `mae_mapa_app` (0,06 a los 900 s y 0,16 de media en 3600 s) describe mejor el error.
+- Al arrancar, el contenedor no tenía pandas, httpx, pydantic, sqlalchemy ni scikit-learn; los instalé con `pip3 install --user`.
+
+**Pedidos a otros:**
+- @Tyrone: `from traci.kpis_sistema import KPIsSistema, CLAVES_RESUMEN`, ruta `origin/freddy/s3:semanas/S3/Freddy/codigo/traci/kpis_sistema.py`. Firma: `KPIsSistema(controlador, nucleo, intervalo_mapa_s=60)`, donde `nucleo` es un `PuenteNucleo`; se registra solo como hook y como oyente de `al_cerrar`. Al final llamas a `resumen()`, `detalle_sesiones()` y `serie_mapa()`. Claves de `resumen()`: `falsas_lib_100, n_sesiones, n_falsas, sin_cierre, retardo_cierre_mediana_s, retardo_cierre_p90_s, error_fact_medio_usd, error_fact_abs_max_usd, ahorro_vs_tarjeta_medio_usd, precision_mapa, precision_mapa_app, libres_fantasma_medio`, más otras de apoyo. Ejemplo completo en `traci/correr_kpis.py:correr`. Ten en cuenta que con `duracion_s` corta el retardo y la facturación salen NaN.
+- @Pablo: falsas liberaciones por 100 sesiones cerradas, con 50 % de app y semilla 1: **umbral 100,0 (39/39) en 900 s y 91,1 (246/270) en 3600 s**. Con rf no hay cifra, porque `rf_v1.joblib` no está en el repo y `inferencia.py` cae al umbral. Necesito que publiques el modelo (o cómo regenerarlo) para repetir `p50_rf_s1`.
+- @Tyrone [Plan] `docs/CONTRATO.md`: aprobar en la unificación la ruta `POST /api/v1/sim/kpi` (ver `semanas/S3/Freddy/codigo/comun/CONTRATO.propuesto.md`).
+
+**Bucle y verificación:** 2 vueltas.
+- Vuelta 1: la corrida `p50_umbral_s1` mostró que el retardo y la facturación quedan vacíos en 900 s y que hacía falta una medición del sobrecosto que no dependiera del ruido.
+- Vuelta 2: sobrecosto medido dentro de la corrida, corrida de 3600 s y figura.
+- El verificador independiente reportó **5/5 criterios cumplidos**: `pytest traci/tests/test_kpis_sistema.py` en el contenedor dio 10 passed y 0 skipped; en la computadora, `backend/tests` + `traci/tests` dieron 142 passed y 9 skipped. Sus observaciones sobre `precision_mapa_app`, el rf ausente y los `null` de 900 s quedan en "Problemas encontrados".
+
+**Pendientes para la próxima sesión:**
+- Repetir `p50_rf_s1` cuando exista `rf_v1.joblib`.
+- Evaluar si `precision_mapa_app` debe compararse contra la capacidad disponible para la app; es un cambio de criterio y le toca a Tyrone.
+- S3-2: rendimiento con 80 % de app y robustez.
+
+**Evidencias:** ![](../semanas/S3/Freddy/evidencias/s1_kpis-sistema.png) · [Explicación (PDF)](../semanas/S3/Freddy/explicaciones/s1_explicacion.pdf)

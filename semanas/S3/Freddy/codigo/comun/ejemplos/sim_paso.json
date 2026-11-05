@@ -1,0 +1,62 @@
+{
+  "t_sim": 1234.0,
+  "ts": "2026-10-20T14:03:05Z",
+  "vehiculos": [
+    {
+      "id": "sim_veh42",
+      "lat": -2.8973,
+      "lon": -79.0045,
+      "estado": "GUIADO",
+      "con_app": true,
+      "modo": "vehiculo",
+      "destino": {
+        "nombre": "Parque Calderón",
+        "lat": -2.897308,
+        "lon": -79.004488
+      },
+      "puesto_id": "pa_-106945247#0_0",
+      "ruta": [
+        [
+          -2.8973,
+          -79.0045
+        ],
+        [
+          -2.8975,
+          -79.005
+        ]
+      ]
+    },
+    {
+      "id": "sim_veh7",
+      "lat": -2.8899,
+      "lon": -78.9957,
+      "estado": null,
+      "con_app": false
+    }
+  ],
+  "peatones": [
+    {
+      "id": "ped_veh7",
+      "lat": -2.8968,
+      "lon": -79.0039
+    }
+  ],
+  "verdad": {
+    "puestos": [
+      {
+        "puesto_id": "pa_-106945247#0_0",
+        "ocupados": 9,
+        "capacidad": 17
+      },
+      {
+        "puesto_id": "pa_-118367899_0",
+        "ocupados": 7,
+        "capacidad": 7
+      }
+    ],
+    "estacionados": [
+      "sim_veh7"
+    ],
+    "falsas_liberaciones": []
+  }
+}

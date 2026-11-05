@@ -1,0 +1,3018 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "e-sert API",
+    "description": "\nAPI del backend de **e-sert**, la app de parqueo para la zona SERT del Centro Histórico de\nCuenca. Implementa el **contrato v1** (`docs/CONTRATO.md`).\n\n- Todas las rutas van bajo `/api/v1` y toda respuesta trae `X-Contrato-Version: 1`.\n- Si la petición manda otro `X-Contrato-Version`, responde `400 CONTRATO_INCOMPATIBLE`.\n- Los errores siguen el formato `{\"error\": {\"codigo\", \"mensaje\", \"detalle\"}}`.\n- Las rutas 🔒 son del controlador TraCI: si el backend tiene `ESERT_TOKEN_SIM`, exigen\n  `X-Sim-Token: <token>` o `Authorization: Bearer <token>`.\n- WebSocket `ws://<host>/ws/estado?rol=visor|publico`: mensajes `snapshot`, `kpi` y `verdad`\n  (este último solo para `rol=visor`).\n",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/salud": {
+      "get": {
+        "tags": [
+          "sistema"
+        ],
+        "summary": "Estado del backend",
+        "description": "`ok`, versión del contrato y `t_sim` del último paso recibido (null sin simulación).",
+        "operationId": "salud_api_v1_salud_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                },
+                "example": {
+                  "ok": true,
+                  "contrato": 1,
+                  "t_sim": 1234.0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tarifa": {
+      "get": {
+        "tags": [
+          "sistema"
+        ],
+        "summary": "Tarifa vigente (tarifa.json)",
+        "description": "Parámetros de cobro de `comun/tarifa.json` (contrato §5).",
+        "operationId": "tarifa_api_v1_tarifa_get",
+        "responses": {
+          "200": {
+            "description": "Contenido de `comun/tarifa.json`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tarifa"
+                },
+                "example": {
+                  "valor_hora_usd": 0.5,
+                  "bloque_minimo_min": 30,
+                  "fraccion_min": 5,
+                  "cobro_minimo_min": 10,
+                  "saldo_negativo_max_usd": 0.5,
+                  "aviso_saldo_min": 10,
+                  "tiempo_maximo_min": 120,
+                  "aviso_tiempo_min": 10,
+                  "recarga_minima_usd": 5.0,
+                  "tarjeta_bloque_min": 30
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/puestos": {
+      "get": {
+        "tags": [
+          "puestos"
+        ],
+        "summary": "Puestos y ocupación estimada",
+        "description": "Cada `parkingArea` con su capacidad y las plazas ocupadas según las sesiones abiertas.",
+        "operationId": "listar_api_v1_puestos_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Puesto"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Api V1 Puestos Get"
+                },
+                "example": [
+                  {
+                    "puesto_id": "pa_-106945247#0_0",
+                    "lat": -2.8898155,
+                    "lon": -78.9956309,
+                    "calle": "Del Chorro",
+                    "capacidad": 17,
+                    "ocupados": 3
+                  },
+                  {
+                    "puesto_id": "pa_-118367899_0",
+                    "lat": -2.8900644,
+                    "lon": -78.9980747,
+                    "calle": "Del Chorro",
+                    "capacidad": 7,
+                    "ocupados": 7
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guia": {
+      "get": {
+        "tags": [
+          "guia"
+        ],
+        "summary": "Asignar un puesto libre",
+        "description": "Nunca devuelve un puesto lleno. `distancia_m` es la distancia del puesto al destino.",
+        "operationId": "guiar_api_v1_guia_get",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Latitud del auto",
+              "examples": [
+                -2.8973
+              ],
+              "title": "Lat"
+            },
+            "description": "Latitud del auto"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Longitud del auto",
+              "examples": [
+                -79.0045
+              ],
+              "title": "Lon"
+            },
+            "description": "Longitud del auto"
+          },
+          {
+            "name": "destino_lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "examples": [
+                -2.897308
+              ],
+              "title": "Destino Lat"
+            }
+          },
+          {
+            "name": "destino_lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "examples": [
+                -79.004488
+              ],
+              "title": "Destino Lon"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Guia"
+                },
+                "example": {
+                  "puesto_id": "pa_-106945247#0_0",
+                  "lat": -2.8898155,
+                  "lon": -78.9956309,
+                  "distancia_m": 180.0
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SIN_PUESTOS_LIBRES": {
+                    "value": {
+                      "error": {
+                        "codigo": "SIN_PUESTOS_LIBRES",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/ubicacion": {
+      "post": {
+        "tags": [
+          "eventos"
+        ],
+        "summary": "Registrar una posición GPS",
+        "description": "Guarda la última ubicación del usuario. La ocupación del mapa la deciden las sesiones.",
+        "operationId": "ubicacion_api_v1_eventos_ubicacion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventoUbicacion"
+              },
+              "examples": {
+                "ubicacion": {
+                  "summary": "GPS con ruido de un auto con app",
+                  "value": {
+                    "usuario_id": "sim_veh42",
+                    "origen": "sumo",
+                    "ts": "2026-10-20T14:03:05Z",
+                    "t_sim": 1234.0,
+                    "lat": -2.89731,
+                    "lon": -79.00452,
+                    "velocidad_mps": 6.2,
+                    "precision_m": 8.0
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Evento registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aceptado"
+                },
+                "example": {
+                  "aceptado": true
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/eventos/modo": {
+      "post": {
+        "tags": [
+          "eventos"
+        ],
+        "summary": "Registrar el modo que clasificó la IA",
+        "description": "Guarda el último modo (`a_pie`, `quieto`, `vehiculo`) del usuario.",
+        "operationId": "modo_api_v1_eventos_modo_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventoModo"
+              },
+              "examples": {
+                "modo": {
+                  "summary": "Resultado del clasificador",
+                  "value": {
+                    "usuario_id": "sim_veh42",
+                    "ts": "2026-10-20T14:03:05Z",
+                    "t_sim": 1234.0,
+                    "modo": "vehiculo",
+                    "confianza": 0.93,
+                    "fuente": "rf"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Evento registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aceptado"
+                },
+                "example": {
+                  "aceptado": true
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sesiones": {
+      "post": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "Iniciar sesión (llegada confirmada)",
+        "description": "Crea la sesión en `ESTACIONADO` y retiene el bloque mínimo.",
+        "operationId": "crear_api_v1_sesiones_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaSesion"
+              },
+              "examples": {
+                "sesion_crear": {
+                  "summary": "Auto simulado que estaciona",
+                  "value": {
+                    "usuario_id": "sim_veh42",
+                    "placa": "SIM-0042",
+                    "puesto_id": "pa_-106945247#0_0",
+                    "ts": "2026-10-20T14:03:05Z",
+                    "t_sim": 1234.0
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Sesión creada en ESTACIONADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesionCreada"
+                },
+                "example": {
+                  "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+                  "estado": "ESTACIONADO",
+                  "retenido": 0.25
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "SALDO_INSUFICIENTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SALDO_INSUFICIENTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "SESIONES_BLOQUEADAS": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESIONES_BLOQUEADAS",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "PUESTO_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "PUESTO_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "PUESTO_LLENO": {
+                    "value": {
+                      "error": {
+                        "codigo": "PUESTO_LLENO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  },
+                  "SESION_ACTIVA": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_ACTIVA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sesiones/{sesion_id}": {
+      "get": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "Consultar una sesión",
+        "description": "Sesión completa; los campos de cierre son null hasta cerrarla.",
+        "operationId": "obtener_api_v1_sesiones__sesion_id__get",
+        "parameters": [
+          {
+            "name": "sesion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "description": "ses_<uuid4>",
+              "examples": [
+                "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+              ],
+              "title": "Sesion Id"
+            },
+            "description": "ses_<uuid4>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sesion"
+                },
+                "example": {
+                  "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+                  "usuario_id": "sim_veh42",
+                  "placa": "SIM-0042",
+                  "puesto_id": "pa_-106945247#0_0",
+                  "estado": "CERRADA",
+                  "inicio": "2026-10-20T14:03:05Z",
+                  "fin": "2026-10-20T14:50:05Z",
+                  "t_sim_inicio": 1234.0,
+                  "t_sim_fin": 4054.0,
+                  "retenido": 0.25,
+                  "minutos_reales": 47.0,
+                  "minutos_cobrados": 50,
+                  "debitado": 0.42
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sesiones/{sesion_id}/transicion": {
+      "post": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "[sim] Cambiar de estado (controlador TraCI)",
+        "description": "Solo transiciones legales (§3); `CERRADA` va por `/cerrar`.",
+        "operationId": "transicion_api_v1_sesiones__sesion_id__transicion_post",
+        "parameters": [
+          {
+            "name": "sesion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "description": "ses_<uuid4>",
+              "examples": [
+                "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+              ],
+              "title": "Sesion Id"
+            },
+            "description": "ses_<uuid4>"
+          },
+          {
+            "name": "x-sim-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Token del controlador (contrato §4.1)",
+              "title": "X-Sim-Token"
+            },
+            "description": "Token del controlador (contrato §4.1)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)",
+              "title": "Authorization"
+            },
+            "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransicionSesion"
+              },
+              "examples": {
+                "sesion_transicion": {
+                  "summary": "El conductor se bajó",
+                  "value": {
+                    "estado": "A_PIE",
+                    "ts": "2026-10-20T14:04:10Z",
+                    "t_sim": 1299.0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoActualSesion"
+                },
+                "example": {
+                  "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+                  "estado": "A_PIE"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TOKEN_SIM_INVALIDO": {
+                    "value": {
+                      "error": {
+                        "codigo": "TOKEN_SIM_INVALIDO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_YA_CERRADA": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_YA_CERRADA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  },
+                  "TRANSICION_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "TRANSICION_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sesiones/{sesion_id}/cerrar": {
+      "post": {
+        "tags": [
+          "sesiones"
+        ],
+        "summary": "Cerrar y cobrar",
+        "description": "Debita el tiempo real (fracciones y mínimo), libera la retención y el puesto.",
+        "operationId": "cerrar_api_v1_sesiones__sesion_id__cerrar_post",
+        "parameters": [
+          {
+            "name": "sesion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "description": "ses_<uuid4>",
+              "examples": [
+                "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+              ],
+              "title": "Sesion Id"
+            },
+            "description": "ses_<uuid4>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CierreSesion"
+              },
+              "examples": {
+                "sesion_cerrar": {
+                  "summary": "Salida detectada",
+                  "value": {
+                    "ts": "2026-10-20T14:50:05Z",
+                    "t_sim": 4054.0,
+                    "motivo": "deteccion"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesionCerrada"
+                },
+                "example": {
+                  "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+                  "minutos_reales": 47.0,
+                  "minutos_cobrados": 50,
+                  "debitado": 0.42,
+                  "saldo": 4.58
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_YA_CERRADA": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_YA_CERRADA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  },
+                  "TRANSICION_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "TRANSICION_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billetera/{usuario_id}": {
+      "get": {
+        "tags": [
+          "billetera"
+        ],
+        "summary": "Saldo y movimientos",
+        "description": "Un usuario sin movimientos tiene saldo 0 (billetera implícita, sin 404).",
+        "operationId": "consultar_api_v1_billetera__usuario_id__get",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+              "description": "sim_<vehId> o app_<uuid4>",
+              "examples": [
+                "sim_veh42"
+              ],
+              "title": "Usuario Id"
+            },
+            "description": "sim_<vehId> o app_<uuid4>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Billetera"
+                },
+                "example": {
+                  "saldo": 4.58,
+                  "retenido": 0.0,
+                  "disponible": 4.58,
+                  "bloqueada": false,
+                  "movimientos": [
+                    {
+                      "movimiento_id": "mov_02cd4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f",
+                      "tipo": "recarga",
+                      "monto": 5.0,
+                      "ts": "2026-10-20T14:00:00Z"
+                    },
+                    {
+                      "movimiento_id": "mov_13de5f60-7b8c-4d9e-8f10-2b3c4d5e6f70",
+                      "tipo": "retencion",
+                      "monto": 0.25,
+                      "ts": "2026-10-20T14:03:05Z",
+                      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+                    },
+                    {
+                      "movimiento_id": "mov_24ef6071-8c9d-4eaf-9021-3c4d5e6f7081",
+                      "tipo": "debito",
+                      "monto": 0.42,
+                      "ts": "2026-10-20T14:50:05Z",
+                      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+                    },
+                    {
+                      "movimiento_id": "mov_35f07182-9dae-4fb0-8132-4d5e6f708192",
+                      "tipo": "liberacion",
+                      "monto": 0.25,
+                      "ts": "2026-10-20T14:50:05Z",
+                      "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billetera/{usuario_id}/recarga": {
+      "post": {
+        "tags": [
+          "billetera"
+        ],
+        "summary": "Recargar saldo",
+        "description": "Asienta una recarga (los autos simulados no envían `referencia_payphone`).",
+        "operationId": "recargar_api_v1_billetera__usuario_id__recarga_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+              "description": "sim_<vehId> o app_<uuid4>",
+              "examples": [
+                "sim_veh42"
+              ],
+              "title": "Usuario Id"
+            },
+            "description": "sim_<vehId> o app_<uuid4>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Recarga"
+              },
+              "examples": {
+                "recarga": {
+                  "summary": "Recarga de $5",
+                  "value": {
+                    "monto": 5.0,
+                    "referencia_payphone": "PP-TEST-000123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recarga asentada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecargaHecha"
+                },
+                "example": {
+                  "movimiento_id": "mov_02cd4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f",
+                  "saldo": 5.0
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "RECARGA_MINIMA": {
+                    "value": {
+                      "error": {
+                        "codigo": "RECARGA_MINIMA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  },
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sim/paso": {
+      "post": {
+        "tags": [
+          "simulacion"
+        ],
+        "summary": "[sim] Paso de simulación",
+        "description": "Actualiza el mundo y difunde `snapshot` y `verdad` por `/ws/estado`.",
+        "operationId": "sim_paso_api_v1_sim_paso_post",
+        "parameters": [
+          {
+            "name": "x-sim-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Token del controlador (contrato §4.1)",
+              "title": "X-Sim-Token"
+            },
+            "description": "Token del controlador (contrato §4.1)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)",
+              "title": "Authorization"
+            },
+            "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasoSimulacion"
+              },
+              "examples": {
+                "sim_paso": {
+                  "summary": "Un paso con un auto guiado y un peatón",
+                  "value": {
+                    "t_sim": 1234.0,
+                    "ts": "2026-10-20T14:03:05Z",
+                    "vehiculos": [
+                      {
+                        "id": "sim_veh42",
+                        "lat": -2.8973,
+                        "lon": -79.0045,
+                        "estado": "GUIADO",
+                        "con_app": true,
+                        "modo": "vehiculo",
+                        "destino": {
+                          "nombre": "Parque Calderón",
+                          "lat": -2.897308,
+                          "lon": -79.004488
+                        },
+                        "puesto_id": "pa_-106945247#0_0",
+                        "ruta": [
+                          [
+                            -2.8973,
+                            -79.0045
+                          ],
+                          [
+                            -2.8975,
+                            -79.005
+                          ]
+                        ]
+                      },
+                      {
+                        "id": "sim_veh7",
+                        "lat": -2.8899,
+                        "lon": -78.9957,
+                        "con_app": false
+                      }
+                    ],
+                    "peatones": [
+                      {
+                        "id": "ped_veh7",
+                        "lat": -2.8968,
+                        "lon": -79.0039
+                      }
+                    ],
+                    "verdad": {
+                      "puestos": [
+                        {
+                          "puesto_id": "pa_-106945247#0_0",
+                          "ocupados": 9,
+                          "capacidad": 17
+                        },
+                        {
+                          "puesto_id": "pa_-118367899_0",
+                          "ocupados": 7,
+                          "capacidad": 7
+                        }
+                      ],
+                      "estacionados": [
+                        "sim_veh7"
+                      ],
+                      "falsas_liberaciones": []
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Paso recibido (se difunde como mucho 1 por s simulado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aceptado"
+                },
+                "example": {
+                  "aceptado": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TOKEN_SIM_INVALIDO": {
+                    "value": {
+                      "error": {
+                        "codigo": "TOKEN_SIM_INVALIDO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interno/snapshot": {
+      "post": {
+        "tags": [
+          "simulacion"
+        ],
+        "summary": "[sim] Paso de simulación (alias para el VPS)",
+        "description": "Igual que `/sim/paso` (ver `comun/CONTRATO.propuesto.md`). Acepta `Authorization: Bearer`.",
+        "operationId": "interno_snapshot_api_v1_interno_snapshot_post",
+        "parameters": [
+          {
+            "name": "x-sim-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Token del controlador (contrato §4.1)",
+              "title": "X-Sim-Token"
+            },
+            "description": "Token del controlador (contrato §4.1)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)",
+              "title": "Authorization"
+            },
+            "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasoSimulacion"
+              },
+              "examples": {
+                "sim_paso": {
+                  "summary": "Un paso con un auto guiado y un peatón",
+                  "value": {
+                    "t_sim": 1234.0,
+                    "ts": "2026-10-20T14:03:05Z",
+                    "vehiculos": [
+                      {
+                        "id": "sim_veh42",
+                        "lat": -2.8973,
+                        "lon": -79.0045,
+                        "estado": "GUIADO",
+                        "con_app": true,
+                        "modo": "vehiculo",
+                        "destino": {
+                          "nombre": "Parque Calderón",
+                          "lat": -2.897308,
+                          "lon": -79.004488
+                        },
+                        "puesto_id": "pa_-106945247#0_0",
+                        "ruta": [
+                          [
+                            -2.8973,
+                            -79.0045
+                          ],
+                          [
+                            -2.8975,
+                            -79.005
+                          ]
+                        ]
+                      },
+                      {
+                        "id": "sim_veh7",
+                        "lat": -2.8899,
+                        "lon": -78.9957,
+                        "con_app": false
+                      }
+                    ],
+                    "peatones": [
+                      {
+                        "id": "ped_veh7",
+                        "lat": -2.8968,
+                        "lon": -79.0039
+                      }
+                    ],
+                    "verdad": {
+                      "puestos": [
+                        {
+                          "puesto_id": "pa_-106945247#0_0",
+                          "ocupados": 9,
+                          "capacidad": 17
+                        },
+                        {
+                          "puesto_id": "pa_-118367899_0",
+                          "ocupados": 7,
+                          "capacidad": 7
+                        }
+                      ],
+                      "estacionados": [
+                        "sim_veh7"
+                      ],
+                      "falsas_liberaciones": []
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Paso recibido (se difunde como mucho 1 por s simulado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aceptado"
+                },
+                "example": {
+                  "aceptado": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TOKEN_SIM_INVALIDO": {
+                    "value": {
+                      "error": {
+                        "codigo": "TOKEN_SIM_INVALIDO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sim/kpi": {
+      "post": {
+        "tags": [
+          "simulacion"
+        ],
+        "summary": "[sim] KPIs en vivo",
+        "description": "Difunde `{\"tipo\": \"kpi\"}` por `/ws/estado` (S3-1: `KPIsSistema`, cada 10 s simulados).",
+        "operationId": "sim_kpi_api_v1_sim_kpi_post",
+        "parameters": [
+          {
+            "name": "x-sim-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Token del controlador (contrato §4.1)",
+              "title": "X-Sim-Token"
+            },
+            "description": "Token del controlador (contrato §4.1)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)",
+              "title": "Authorization"
+            },
+            "description": "Alternativa: `Bearer <token>` (DESPLIEGUE.md)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MensajeKpi"
+              },
+              "examples": {
+                "kpi_ws": {
+                  "summary": "KPIs de sistema de la corrida",
+                  "value": {
+                    "tipo": "kpi",
+                    "t_sim": 1234.0,
+                    "ts": "2026-10-20T14:03:05Z",
+                    "valores": {
+                      "busqueda_media_s": 210.5,
+                      "falsas_liberaciones_100": 1.2,
+                      "precision_mapa": 0.91
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Paso recibido (se difunde como mucho 1 por s simulado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aceptado"
+                },
+                "example": {
+                  "aceptado": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TOKEN_SIM_INVALIDO": {
+                    "value": {
+                      "error": {
+                        "codigo": "TOKEN_SIM_INVALIDO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/espejo/candidatos": {
+      "get": {
+        "tags": [
+          "espejo"
+        ],
+        "summary": "Autos con app que se pueden seguir",
+        "description": "Vehículos con app del último paso que todavía no estacionan.",
+        "operationId": "candidatos_api_v1_espejo_candidatos_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CandidatoEspejo"
+                  },
+                  "type": "array",
+                  "title": "Response Candidatos Api V1 Espejo Candidatos Get"
+                },
+                "example": [
+                  {
+                    "id": "sim_veh42",
+                    "destino_nombre": "Parque Calderón",
+                    "estado": "BUSCANDO",
+                    "t_sim": 1234.0
+                  },
+                  {
+                    "id": "sim_veh57",
+                    "destino_nombre": "Mercado 10 de Agosto",
+                    "t_sim": 1234.0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/salud": {
+      "get": {
+        "tags": [
+          "sistema"
+        ],
+        "summary": "Healthcheck (raíz)",
+        "operationId": "salud_raiz_salud_get",
+        "responses": {
+          "200": {
+            "description": "Servicio vivo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                },
+                "example": {
+                  "ok": true,
+                  "contrato": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Aceptado": {
+        "properties": {
+          "aceptado": {
+            "type": "boolean",
+            "const": true,
+            "title": "Aceptado",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Aceptado",
+        "description": "Respuesta de las rutas que devuelven 202."
+      },
+      "Billetera": {
+        "properties": {
+          "saldo": {
+            "type": "number",
+            "title": "Saldo",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "retenido": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Retenido",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "disponible": {
+            "type": "number",
+            "title": "Disponible",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "bloqueada": {
+            "type": "boolean",
+            "title": "Bloqueada"
+          },
+          "movimientos": {
+            "items": {
+              "$ref": "#/components/schemas/Movimiento"
+            },
+            "type": "array",
+            "title": "Movimientos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "saldo",
+          "retenido",
+          "disponible",
+          "bloqueada",
+          "movimientos"
+        ],
+        "title": "Billetera",
+        "description": "`GET /billetera/{usuario_id}`: saldos derivados del libro y sus movimientos."
+      },
+      "CandidatoEspejo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^sim_.+$",
+            "title": "Id",
+            "description": "sim_<vehId>"
+          },
+          "destino_nombre": {
+            "type": "string",
+            "title": "Destino Nombre"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EstadoSesion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "t_sim": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T Sim",
+            "description": "Segundos de simulación"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "destino_nombre",
+          "t_sim"
+        ],
+        "title": "CandidatoEspejo",
+        "description": "Un vehículo con app que el teléfono puede elegir seguir."
+      },
+      "CierreSesion": {
+        "properties": {
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          },
+          "motivo": {
+            "$ref": "#/components/schemas/MotivoCierre"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ts",
+          "motivo"
+        ],
+        "title": "CierreSesion",
+        "description": "`POST /sesiones/{id}/cerrar`: salida detectada (o cierre manual)."
+      },
+      "CodigoError": {
+        "type": "string",
+        "enum": [
+          "VALIDACION",
+          "CONTRATO_INCOMPATIBLE",
+          "TOKEN_SIM_INVALIDO",
+          "SALDO_INSUFICIENTE",
+          "SESIONES_BLOQUEADAS",
+          "PUESTO_NO_EXISTE",
+          "SESION_NO_EXISTE",
+          "VEHICULO_NO_EXISTE",
+          "SIN_PUESTOS_LIBRES",
+          "PUESTO_LLENO",
+          "SESION_ACTIVA",
+          "SESION_YA_CERRADA",
+          "TRANSICION_INVALIDA",
+          "RECARGA_MINIMA",
+          "ERROR_INTERNO"
+        ],
+        "title": "CodigoError",
+        "description": "Códigos de error del backend (§4.2)."
+      },
+      "CuerpoError": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/DetalleError"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "CuerpoError",
+        "description": "Cuerpo de toda respuesta 4xx/5xx: `{\"error\": {...}}`."
+      },
+      "DatosVerdad": {
+        "properties": {
+          "puestos": {
+            "items": {
+              "$ref": "#/components/schemas/OcupacionPuesto"
+            },
+            "type": "array",
+            "title": "Puestos"
+          },
+          "estacionados": {
+            "items": {
+              "type": "string",
+              "pattern": "^sim_.+$",
+              "description": "sim_<vehId>"
+            },
+            "type": "array",
+            "title": "Estacionados"
+          },
+          "falsas_liberaciones": {
+            "items": {
+              "type": "string",
+              "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "description": "ses_<uuid4>"
+            },
+            "type": "array",
+            "title": "Falsas Liberaciones"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "puestos"
+        ],
+        "title": "DatosVerdad",
+        "description": "Ocupación real de SUMO; solo existe en simulación."
+      },
+      "Destino": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nombre",
+          "lat",
+          "lon"
+        ],
+        "title": "Destino",
+        "description": "Lugar al que va el conductor (de `destinos.csv` de Tyrone)."
+      },
+      "DetalleError": {
+        "properties": {
+          "codigo": {
+            "$ref": "#/components/schemas/CodigoError"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "mensaje"
+        ],
+        "title": "DetalleError",
+        "description": "Contenido de un error: código estable y mensaje legible en español."
+      },
+      "EstadoActualSesion": {
+        "properties": {
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoSesion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sesion_id",
+          "estado"
+        ],
+        "title": "EstadoActualSesion",
+        "description": "Respuesta de `POST /sesiones/{id}/transicion`."
+      },
+      "EstadoSesion": {
+        "type": "string",
+        "enum": [
+          "BUSCANDO",
+          "GUIADO",
+          "ESTACIONADO",
+          "A_PIE",
+          "REGRESANDO",
+          "SALIENDO",
+          "CERRADA"
+        ],
+        "title": "EstadoSesion",
+        "description": "Estados de la máquina de estados (§3). BUSCANDO y GUIADO son del vehículo, sin sesión."
+      },
+      "EventoModo": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Usuario Id",
+            "description": "sim_<vehId> o app_<uuid4>"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          },
+          "modo": {
+            "$ref": "#/components/schemas/Modo"
+          },
+          "confianza": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confianza"
+          },
+          "fuente": {
+            "$ref": "#/components/schemas/FuenteModo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "ts",
+          "modo",
+          "confianza",
+          "fuente"
+        ],
+        "title": "EventoModo",
+        "description": "`POST /eventos/modo`: resultado de la IA para un usuario."
+      },
+      "EventoUbicacion": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Usuario Id",
+            "description": "sim_<vehId> o app_<uuid4>"
+          },
+          "origen": {
+            "$ref": "#/components/schemas/OrigenUbicacion"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "velocidad_mps": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Velocidad Mps"
+          },
+          "precision_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "origen",
+          "ts",
+          "lat",
+          "lon"
+        ],
+        "title": "EventoUbicacion",
+        "description": "`POST /eventos/ubicacion`: una posición GPS (con ruido si viene del emulador)."
+      },
+      "FuenteModo": {
+        "type": "string",
+        "enum": [
+          "rf",
+          "umbral"
+        ],
+        "title": "FuenteModo",
+        "description": "Origen de la clasificación: Random Forest o la regla de umbral (línea base)."
+      },
+      "Guia": {
+        "properties": {
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "distancia_m": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Distancia M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "puesto_id",
+          "lat",
+          "lon",
+          "distancia_m"
+        ],
+        "title": "Guia",
+        "description": "Puesto libre asignado por `GET /guia`."
+      },
+      "MensajeKpi": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "const": "kpi",
+            "title": "Tipo",
+            "default": "kpi"
+          },
+          "t_sim": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T Sim",
+            "description": "Segundos de simulación"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "valores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Valores"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "t_sim",
+          "ts",
+          "valores"
+        ],
+        "title": "MensajeKpi",
+        "description": "`{\"tipo\": \"kpi\"}`: KPIs en vivo, `nombre → valor`."
+      },
+      "Modo": {
+        "type": "string",
+        "enum": [
+          "a_pie",
+          "quieto",
+          "vehiculo"
+        ],
+        "title": "Modo",
+        "description": "Modo de movimiento que decide la IA."
+      },
+      "MotivoCierre": {
+        "type": "string",
+        "enum": [
+          "deteccion",
+          "manual"
+        ],
+        "title": "MotivoCierre",
+        "description": "Por qué se cierra la sesión."
+      },
+      "Movimiento": {
+        "properties": {
+          "movimiento_id": {
+            "type": "string",
+            "pattern": "^mov_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Movimiento Id",
+            "description": "mov_<uuid4>"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/TipoMovimiento"
+          },
+          "monto": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Monto",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "sesion_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "description": "ses_<uuid4>"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sesion Id"
+          },
+          "referencia_payphone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencia Payphone"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "movimiento_id",
+          "tipo",
+          "monto",
+          "ts"
+        ],
+        "title": "Movimiento",
+        "description": "Un asiento del libro de la billetera. `monto` siempre positivo."
+      },
+      "NuevaSesion": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Usuario Id",
+            "description": "sim_<vehId> o app_<uuid4>"
+          },
+          "placa": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}-?\\d{3,4}$",
+            "title": "Placa",
+            "description": "ABC-1234 o SIM-0042"
+          },
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "ts": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ts"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "placa",
+          "puesto_id"
+        ],
+        "title": "NuevaSesion",
+        "description": "`POST /sesiones`: llegada confirmada (placa + puesto). Crea la sesión en ESTACIONADO."
+      },
+      "OcupacionPuesto": {
+        "properties": {
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "ocupados": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Ocupados"
+          },
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Capacidad"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "puesto_id",
+          "ocupados",
+          "capacidad"
+        ],
+        "title": "OcupacionPuesto",
+        "description": "Ocupación de un puesto (estimada en `snapshot`, real en `verdad`)."
+      },
+      "OrigenUbicacion": {
+        "type": "string",
+        "enum": [
+          "sumo",
+          "app"
+        ],
+        "title": "OrigenUbicacion",
+        "description": "Quién produjo la ubicación."
+      },
+      "PasoSimulacion": {
+        "properties": {
+          "t_sim": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T Sim",
+            "description": "Segundos de simulación"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "vehiculos": {
+            "items": {
+              "$ref": "#/components/schemas/VehiculoSim"
+            },
+            "type": "array",
+            "title": "Vehiculos"
+          },
+          "peatones": {
+            "items": {
+              "$ref": "#/components/schemas/Peaton"
+            },
+            "type": "array",
+            "title": "Peatones"
+          },
+          "verdad": {
+            "$ref": "#/components/schemas/DatosVerdad"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "t_sim",
+          "ts",
+          "vehiculos",
+          "peatones",
+          "verdad"
+        ],
+        "title": "PasoSimulacion",
+        "description": "`POST /sim/paso`: el controlador TraCI envía el estado del mundo (≤ 1 por s simulado)."
+      },
+      "Peaton": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ped_.+$",
+            "title": "Id",
+            "description": "ped_<vehId>"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "lat",
+          "lon"
+        ],
+        "title": "Peaton",
+        "description": "Peatón simulado (el conductor que se bajó)."
+      },
+      "Puesto": {
+        "properties": {
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "calle": {
+            "type": "string",
+            "title": "Calle"
+          },
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Capacidad"
+          },
+          "ocupados": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Ocupados"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "puesto_id",
+          "lat",
+          "lon",
+          "calle",
+          "capacidad",
+          "ocupados"
+        ],
+        "title": "Puesto",
+        "description": "Un puesto (`parkingArea`) con su capacidad y la ocupación que estima el sistema."
+      },
+      "Recarga": {
+        "properties": {
+          "monto": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Monto"
+          },
+          "referencia_payphone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencia Payphone"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "monto"
+        ],
+        "title": "Recarga",
+        "description": "`POST /billetera/{usuario_id}/recarga`. Los autos simulados no envían referencia."
+      },
+      "RecargaHecha": {
+        "properties": {
+          "movimiento_id": {
+            "type": "string",
+            "pattern": "^mov_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Movimiento Id",
+            "description": "mov_<uuid4>"
+          },
+          "saldo": {
+            "type": "number",
+            "title": "Saldo",
+            "description": "Dólares, 2 decimales como máximo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "movimiento_id",
+          "saldo"
+        ],
+        "title": "RecargaHecha",
+        "description": "Respuesta de la recarga."
+      },
+      "Salud": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "contrato": {
+            "type": "integer",
+            "title": "Contrato"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ok",
+          "contrato"
+        ],
+        "title": "Salud",
+        "description": "Respuesta de `GET /salud`."
+      },
+      "Sesion": {
+        "properties": {
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          },
+          "usuario_id": {
+            "type": "string",
+            "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Usuario Id",
+            "description": "sim_<vehId> o app_<uuid4>"
+          },
+          "placa": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}-?\\d{3,4}$",
+            "title": "Placa",
+            "description": "ABC-1234 o SIM-0042"
+          },
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoSesion"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Inicio"
+          },
+          "fin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fin"
+          },
+          "t_sim_inicio": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim Inicio"
+          },
+          "t_sim_fin": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim Fin"
+          },
+          "retenido": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Retenido",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "minutos_reales": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minutos Reales"
+          },
+          "minutos_cobrados": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minutos Cobrados"
+          },
+          "debitado": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Dólares, 2 decimales como máximo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debitado"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sesion_id",
+          "usuario_id",
+          "placa",
+          "puesto_id",
+          "estado",
+          "inicio",
+          "retenido"
+        ],
+        "title": "Sesion",
+        "description": "Sesión completa (`GET /sesiones/{id}`). Los campos de cierre son null hasta cerrar."
+      },
+      "SesionCerrada": {
+        "properties": {
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          },
+          "minutos_reales": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minutos Reales"
+          },
+          "minutos_cobrados": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Minutos Cobrados"
+          },
+          "debitado": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Debitado",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "saldo": {
+            "type": "number",
+            "title": "Saldo",
+            "description": "Dólares, 2 decimales como máximo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sesion_id",
+          "minutos_reales",
+          "minutos_cobrados",
+          "debitado",
+          "saldo"
+        ],
+        "title": "SesionCerrada",
+        "description": "Respuesta de `POST /sesiones/{id}/cerrar`."
+      },
+      "SesionCreada": {
+        "properties": {
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          },
+          "estado": {
+            "type": "string",
+            "const": "ESTACIONADO",
+            "title": "Estado"
+          },
+          "retenido": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Retenido",
+            "description": "Dólares, 2 decimales como máximo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sesion_id",
+          "estado",
+          "retenido"
+        ],
+        "title": "SesionCreada",
+        "description": "Respuesta de `POST /sesiones`."
+      },
+      "Tarifa": {
+        "properties": {
+          "valor_hora_usd": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Valor Hora Usd"
+          },
+          "bloque_minimo_min": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Bloque Minimo Min"
+          },
+          "fraccion_min": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Fraccion Min"
+          },
+          "cobro_minimo_min": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cobro Minimo Min"
+          },
+          "saldo_negativo_max_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Saldo Negativo Max Usd"
+          },
+          "aviso_saldo_min": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Aviso Saldo Min"
+          },
+          "tiempo_maximo_min": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tiempo Maximo Min"
+          },
+          "aviso_tiempo_min": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Aviso Tiempo Min"
+          },
+          "recarga_minima_usd": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Recarga Minima Usd"
+          },
+          "tarjeta_bloque_min": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tarjeta Bloque Min"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "valor_hora_usd",
+          "bloque_minimo_min",
+          "fraccion_min",
+          "cobro_minimo_min",
+          "saldo_negativo_max_usd",
+          "aviso_saldo_min",
+          "tiempo_maximo_min",
+          "aviso_tiempo_min",
+          "recarga_minima_usd",
+          "tarjeta_bloque_min"
+        ],
+        "title": "Tarifa",
+        "description": "Parámetros de cobro (`tarifa.json`, §5)."
+      },
+      "TipoMovimiento": {
+        "type": "string",
+        "enum": [
+          "recarga",
+          "retencion",
+          "debito",
+          "liberacion"
+        ],
+        "title": "TipoMovimiento",
+        "description": "Tipos de asiento del libro de la billetera."
+      },
+      "TransicionSesion": {
+        "properties": {
+          "estado": {
+            "$ref": "#/components/schemas/EstadoSesion"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "t_sim": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0,
+                "description": "Segundos de simulación"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Sim"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "estado",
+          "ts"
+        ],
+        "title": "TransicionSesion",
+        "description": "`POST /sesiones/{id}/transicion`: el controlador informa un cambio de estado."
+      },
+      "VehiculoSim": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^sim_.+$",
+            "title": "Id",
+            "description": "sim_<vehId>"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EstadoSesion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "con_app": {
+            "type": "boolean",
+            "title": "Con App"
+          },
+          "modo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Modo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "destino": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Destino"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "puesto_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^pa_.+_\\d+$",
+                "description": "pa_<edgeId>_<n>"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puesto Id"
+          },
+          "ruta": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "description": "[lat, lon]"
+            },
+            "type": "array",
+            "title": "Ruta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "lat",
+          "lon",
+          "con_app"
+        ],
+        "title": "VehiculoSim",
+        "description": "Vehículo en `/sim/paso`: lo del snapshot más datos para el espejo (solo con app)."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "sistema",
+      "description": "Salud del servicio y tarifa vigente."
+    },
+    {
+      "name": "puestos",
+      "description": "Puestos (`parkingArea`) con la ocupación que estima el sistema."
+    },
+    {
+      "name": "guia",
+      "description": "Asignación del puesto libre más cercano al destino."
+    },
+    {
+      "name": "eventos",
+      "description": "Ubicación GPS y modo de movimiento de cada usuario."
+    },
+    {
+      "name": "sesiones",
+      "description": "Ciclo de vida de la sesión de parqueo y cobro."
+    },
+    {
+      "name": "billetera",
+      "description": "Saldo, retenciones y recargas (libro de movimientos)."
+    },
+    {
+      "name": "simulacion",
+      "description": "[sim] Entrada del controlador TraCI (rutas 🔒 del contrato)."
+    },
+    {
+      "name": "espejo",
+      "description": "Modo espejo: el teléfono sigue a un auto simulado."
+    }
+  ]
+}

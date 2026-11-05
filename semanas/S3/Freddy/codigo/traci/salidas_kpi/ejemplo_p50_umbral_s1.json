@@ -1,0 +1,52 @@
+{
+  "id": "p50_umbral_s1",
+  "porc_app": 50,
+  "clasificador_pedido": "umbral",
+  "clasificador_usado": "umbral",
+  "ventanas_por_fuente": {
+    "umbral": 1337
+  },
+  "t_sim_final": 900.0,
+  "pasos": 900,
+  "tiempo_real_s": 139.18,
+  "ms_por_paso": 154.644,
+  "sesiones_maquina": {
+    "coords_invalidas": 0,
+    "sesiones": 69,
+    "cerradas": 39,
+    "abiertas_al_final": 30,
+    "falsas_liberaciones": 39,
+    "falsas_por_100_sesiones": 56.52,
+    "clasificador": "ia.inferencia",
+    "ventanas_por_fuente": {
+      "umbral": 1337
+    }
+  },
+  "costo_kpis": {
+    "s_en_kpis": 4.786,
+    "s_resto": 134.393,
+    "sobrecosto_pct": 3.56
+  },
+  "kpis": {
+    "falsas_lib_100": 100.0,
+    "n_sesiones": 39,
+    "n_falsas": 39,
+    "sin_cierre": 30,
+    "retardo_cierre_mediana_s": null,
+    "retardo_cierre_p90_s": null,
+    "error_fact_medio_usd": null,
+    "error_fact_abs_max_usd": null,
+    "ahorro_vs_tarjeta_medio_usd": null,
+    "precision_mapa": 0.8178142076502731,
+    "precision_mapa_app": 1.0,
+    "libres_fantasma_medio": 111.13333333333334,
+    "retardo_cierre_max_s": null,
+    "error_fact_abs_medio_usd": null,
+    "n_cierre_manual": 0,
+    "n_sin_estadia_real": 39,
+    "mae_mapa": 7.485136612021859,
+    "mae_mapa_app": 0.014972677595628417,
+    "libres_fantasma_app_medio": 0.0,
+    "n_muestras_mapa": 15
+  }
+}

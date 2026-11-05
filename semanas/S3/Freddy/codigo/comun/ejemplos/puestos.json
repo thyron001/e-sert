@@ -1,0 +1,18 @@
+[
+  {
+    "puesto_id": "pa_-106945247#0_0",
+    "lat": -2.8898155,
+    "lon": -78.9956309,
+    "calle": "Del Chorro",
+    "capacidad": 17,
+    "ocupados": 3
+  },
+  {
+    "puesto_id": "pa_-118367899_0",
+    "lat": -2.8900644,
+    "lon": -78.9980747,
+    "calle": "Del Chorro",
+    "capacidad": 7,
+    "ocupados": 7
+  }
+]
