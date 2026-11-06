@@ -74,7 +74,7 @@ class KPIsSistema:
     """KPIs de sistema de una corrida. Hook del `Controlador` y oyente de cierres del núcleo."""
 
     def __init__(self, controlador, nucleo, intervalo_mapa_s: float = 60, verdad: Optional[VerdadSUMO] = None,
-                 intervalo_kpi_s: float = 10, publicador_kpi=None):
+                 intervalo_kpi_s: float = 10, publicador_kpi=None, contar_eventos: bool = True):
         self.ctrl = controlador
         self.nucleo = nucleo
         self.intervalo_mapa_s = intervalo_mapa_s
@@ -82,7 +82,7 @@ class KPIsSistema:
         self.publicador_kpi = publicador_kpi  # `Publicador` con ruta /api/v1/sim/kpi (opcional)
         self.verdad = verdad
         if self.verdad is None:
-            self.verdad = VerdadSUMO()
+            self.verdad = VerdadSUMO(contar_eventos)
             controlador.agregar_hook(self.verdad.on_paso)
         controlador.agregar_hook(self.on_paso)
         nucleo.al_cerrar.append(self._al_cerrar)

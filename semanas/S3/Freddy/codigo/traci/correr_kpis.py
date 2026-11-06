@@ -27,7 +27,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from .clasificacion import ClasificadorUsuario, buscar_proyecto
 from .controlador import ConfigControlador, Controlador
@@ -76,34 +76,79 @@ def _progreso(ctrl, t: float) -> None:
 _progreso.ultimo = -1
 
 
+class PublicadorNulo:
+    """Publicador sin red para medir el costo de armar el snapshot (serializa y descarta)."""
+
+    def __init__(self):
+        self.enviados = 0
+
+    def publicar(self, cuerpo: dict) -> None:
+        json.dumps(cuerpo)
+        self.enviados += 1
+
+    def cerrar(self) -> None:
+        pass
+
+    def resumen(self) -> dict:
+        return {"enviados": self.enviados}
+
+
 def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar: Optional[str] = None,
-           gps_semilla: int = 1, sufijo: str = "") -> dict:
-    """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso."""
+           gps_semilla: int = 1, sufijo: str = "", *, sigma_m: float = 5.0, p_perdida: float = 0.02,
+           rafaga_s: Optional[float] = None, frac_rafaga: float = 0.3, frac_apagado: float = 0.0,
+           libsumo: bool = False, en_lote: bool = True, solo_busca: bool = True, cache_parametros: bool = True,
+           contar_eventos: bool = True, args_sumo: Sequence[str] = (), geo_local: bool = True,
+           politica_datos_pobres: bool = True, ws_nulo: bool = False, guardar_csv: bool = True,
+           instrumentar: Optional[Callable[[dict], None]] = None) -> dict:
+    """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso.
+
+    S3-2: parámetros del GPS (`sigma_m`, `p_perdida`, ráfagas `rafaga_s`/`frac_rafaga`), teléfonos
+    apagados (`frac_apagado`), `libsumo`, inferencia en lote, suscripción solo a autos que buscan
+    (`solo_busca`), `ws_nulo` (arma el snapshot sin red, para el perfil) e `instrumentar(partes)`,
+    que recibe los componentes ya enchufados antes de correr (lo usa `perfil.py`).
+    """
     pen, clf, semilla = interpretar_id(id_corrida)
-    os.environ["ESERT_CLASIFICADOR"] = clf  # lo lee proyecto/ia/inferencia.py al cargar el modelo
+    os.environ["ESERT_CLASIFICADOR"] = clf  # lo lee la inferencia de Pablo al cargar el modelo
     cfg = preparar_escenario(pen, semilla)
     puente = PuenteNucleo(SUMO / "parqueos" / "puestos.csv", semilla=semilla)
     guia = Guia(puente, SUMO / "demanda" / "destinos.csv", "mapa")
     peatones = GestorPeatones(SUMO / "demanda" / "destinos.csv", semilla=semilla, registrar_trayectorias=False)
     clasificador = ClasificadorUsuario()
-    sesiones = ControlSesiones(EmuladorGPS(semilla=gps_semilla), SALIDAS, id_corrida, clasificador=clasificador,
-                               puente=puente, solo_con_app=True)
+    gps = EmuladorGPS(semilla=gps_semilla, sigma_m=sigma_m, p_perdida=p_perdida, rafaga_s=rafaga_s,
+                      frac_rafaga=frac_rafaga)
+    sesiones = ControlSesiones(gps, SALIDAS, id_corrida + sufijo, clasificador=clasificador, puente=puente,
+                               solo_con_app=True, politica_datos_pobres=politica_datos_pobres,
+                               frac_apagado=frac_apagado, semilla_apagado=semilla, en_lote=en_lote)
     registro = RegistroBusqueda()
     pub_kpi = Publicador(publicar, token=os.environ.get("ESERT_TOKEN_SIM"), ruta="/api/v1/sim/kpi") if publicar else None
     pub_paso = Publicador(publicar, token=os.environ.get("ESERT_TOKEN_SIM")) if publicar else None
+    if pub_paso is None and ws_nulo:
+        pub_paso = PublicadorNulo()
 
-    config = ConfigControlador(cfg=cfg, semilla=semilla, etiqueta=f"kpis_{id_corrida}_{int(con_kpis)}")
+    config = ConfigControlador(cfg=cfg, semilla=semilla, etiqueta=f"kpis_{id_corrida}{sufijo}_{int(con_kpis)}",
+                               libsumo=libsumo, cache_parametros=cache_parametros, args_extra=list(args_sumo))
     kpis = None
     reloj = {"s": 0.0}
     inicio = time.perf_counter()
     try:
         with Controlador(config) as ctrl:
+            if geo_local:
+                # (x, y) → (lat, lon) con pyproj local en vez de `convertGeo` por TraCI en cada
+                # muestra GPS (mismo resultado, < 1e-9°; lo comprueba test_integracion_sumo de S1).
+                from .generar_trazas import conversor_red
+
+                ctrl.a_geo = conversor_red(SUMO / "red" / "centro.net.xml")
+            if solo_busca:
+                # Solo los autos que buscan parqueo se leen por vehículo; el tráfico de fondo
+                # (~5 000 autos) no lo usa ningún hook y suscribirlo cuesta en cada paso.
+                ctrl.config.filtro_vehiculos = lambda v: ctrl.parametro(v, "clase") == "busca"
             ctrl.agregar_hook(peatones.on_paso)
             ctrl.agregar_hook(guia.on_paso)
             ctrl.agregar_hook(sesiones.on_paso)
             ctrl.agregar_hook(registro.on_paso)
             if con_kpis:
-                kpis = KPIsSistema(ctrl, puente, intervalo_mapa_s=60, publicador_kpi=pub_kpi)
+                kpis = KPIsSistema(ctrl, puente, intervalo_mapa_s=60, publicador_kpi=pub_kpi,
+                                   contar_eventos=contar_eventos)
                 # Sobrecosto medido en la misma corrida: se cronometran los hooks de KPIs
                 # (verdad + KPIs; los dos últimos registrados) y el oyente de cierres.
                 ctrl.hooks[-2:] = [_cronometrar(h, reloj) for h in ctrl.hooks[-2:]]
@@ -116,6 +161,10 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
                 ctrl.agregar_hook(PublicadorSnapshots(pub_paso, sesiones, guia, registro, peatones, net,
                                                       kpis=kpis).on_paso)
             ctrl.agregar_hook(_progreso)
+            if instrumentar is not None:
+                instrumentar({"ctrl": ctrl, "peatones": peatones, "guia": guia, "sesiones": sesiones,
+                              "registro": registro, "puente": puente, "kpis": kpis,
+                              "clasificador": clasificador, "progreso": _progreso})
             ctrl.correr(hasta)
             t_final, pasos = ctrl.t, ctrl.pasos
     finally:
@@ -136,17 +185,53 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
         "tiempo_real_s": round(tiempo_real, 2),
         "ms_por_paso": round(1000 * tiempo_real / max(1, pasos), 3),
         "sesiones_maquina": sesiones.resumen(),
+        "opciones": {"sigma_m": sigma_m, "p_perdida": p_perdida, "rafaga_s": rafaga_s, "frac_rafaga": frac_rafaga,
+                     "frac_apagado": frac_apagado, "libsumo": libsumo, "en_lote": en_lote, "solo_busca": solo_busca,
+                     "cache_parametros": cache_parametros, "contar_eventos": contar_eventos,
+                     "args_sumo": list(args_sumo), "geo_local": geo_local,
+                     "politica_datos_pobres": politica_datos_pobres},
     }
     if kpis is not None:
         resto = tiempo_real - reloj["s"]
         salida["costo_kpis"] = {"s_en_kpis": round(reloj["s"], 3), "s_resto": round(resto, 3),
                                 "sobrecosto_pct": round(100 * reloj["s"] / resto, 2)}
         salida["kpis"] = kpis.resumen()
-        SALIDAS.mkdir(parents=True, exist_ok=True)
-        nombre = id_corrida + sufijo
-        kpis.detalle_sesiones().to_csv(SALIDAS / f"kpis_sesiones_{nombre}.csv", index=False)
-        kpis.serie_mapa().to_csv(SALIDAS / f"kpis_mapa_{nombre}.csv", index=False)
+        if frac_apagado > 0:
+            salida["apagados"] = proyeccion_apagados(sesiones, kpis)
+        if guardar_csv:
+            SALIDAS.mkdir(parents=True, exist_ok=True)
+            nombre = id_corrida + sufijo
+            kpis.detalle_sesiones().to_csv(SALIDAS / f"kpis_sesiones_{nombre}.csv", index=False)
+            kpis.serie_mapa().to_csv(SALIDAS / f"kpis_mapa_{nombre}.csv", index=False)
     return salida
+
+
+def proyeccion_apagados(sesiones: ControlSesiones, kpis: KPIsSistema) -> dict:
+    """Teléfonos apagados: cuántas sesiones terminan en `timeout_sin_senal` y su error de cobro.
+
+    Una corrida de 30 min no llega al tope de 120 min, así que para las sesiones apagadas cuyo
+    auto ya salió se **proyecta** el cobro al tope: `costo(tiempo_maximo) − costo(estadía real)`.
+    """
+    from .puente_nucleo import tar
+
+    tope_min = sesiones.tiempo_maximo_s / 60
+    errores = []
+    for veh in sesiones.apagados:
+        llegada, salida = kpis.verdad.estadia(veh)
+        if llegada is not None and salida is not None:
+            errores.append(round(tar.costo(tope_min) - tar.costo((salida - llegada) / 60), 2))
+    cerradas = [s for s in kpis.sesiones if s["motivo"] == "timeout_sin_senal"]
+    return {
+        "telefonos_apagados": len(sesiones.apagados),
+        "apagados_efectivos": sesiones.apagados_efectivos,
+        "marcadas_sin_senal": sesiones.marcadas_sin_senal,
+        "cierres_timeout_en_corrida": len(cerradas),
+        "esperando_tope_al_final": len(sesiones.esperando_tope),
+        "auto_ya_salio": len(errores),
+        "error_proyectado_medio_usd": round(sum(errores) / len(errores), 3) if errores else None,
+        "error_proyectado_max_usd": max(errores) if errores else None,
+        "falsas_entre_apagados": sum(1 for s in kpis.sesiones if s["veh"] in sesiones.apagados and s["falsa"]),
+    }
 
 
 def _cronometrar(funcion, reloj: dict):
@@ -157,6 +242,7 @@ def _cronometrar(funcion, reloj: dict):
             return funcion(*args)
         finally:
             reloj["s"] += time.perf_counter() - t0
+    envuelta.__wrapped__ = funcion
     return envuelta
 
 

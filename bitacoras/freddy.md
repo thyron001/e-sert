@@ -436,3 +436,67 @@ El criterio «búsqueda con app menor que sin app» **no se cumple con la fuente
 - S3-2: rendimiento con 80 % de app y robustez.
 
 **Evidencias:** ![](../semanas/S3/Freddy/evidencias/s1_kpis-sistema.png) · [Explicación (PDF)](../semanas/S3/Freddy/explicaciones/s1_explicacion.pdf)
+
+## S3 · Sesión 2 · 2026-11-05 · Rendimiento y robustez (pérdida de GPS, teléfono apagado y 80 % de penetración)
+**Estado:** hecha (5/5 criterios; la meta del p95 no se cumple y queda documentado por qué, como permite el criterio)
+**Qué hice:**
+- **Perfil** (`traci/perfil.py`): cronómetros exclusivos por bloque, p95 por bloque, serie por paso y el paso separado en SUMO y controlador. Corrí `p80_rf_s1` 1 800 s en tres variantes (antes, después con traci, después con libsumo) y probé dos opciones de SUMO (`--device.rerouting.threads 4` y `--routing-algorithm astar`).
+- **Optimizaciones**, cada una medida:
+  - suscripción solo a los autos que buscan (los ~5 000 de fondo encarecían el `simulationStep` de 114 a 45 ms);
+  - caché de parámetros en el `Controlador`;
+  - ocupación real contada con eventos de parking (`ws` pasó de 151 a 4 ms);
+  - `a_geo` con pyproj local en vez de `convertGeo` por TraCI;
+  - inferencia en lote con `clasificar_lote` de Pablo S3;
+  - opción `--libsumo`;
+  - rutas `/eventos/*` como `async def` en el backend.
+- **Robustez** (`traci/robustez.py`): rejilla de 40 corridas (pérdida, ráfagas Gilbert-Elliott, ruido, teléfono apagado al 10 % y control sin política) × umbral/rf × 2 semillas, en 6 procesos `spawn` con libsumo y en segundo plano, vigilada con `Monitor`.
+- **Política de datos pobres** en `MaquinaSesion`: con < 50 % de las muestras, o *fallback* con confianza < 0,5, no hay transición.
+- **Teléfono apagado:** `sin_senal` tras 120 s sin datos; cierre al tope con el motivo nuevo `timeout_sin_senal` (en `esquemas.py`/`.ts` y en el contrato propuesto).
+- **Carga** (`backend/tests/test_carga.py`, `-m carga`): 200 usuarios a 1 Hz y 5 visores durante 60 s.
+- **Tests:** `traci/tests/test_robustez.py` (9 unitarios + 2 con SUMO).
+- **Contrato:** `comun/CONTRATO.propuesto.md` pasa a ser el contrato completo v1.2 propuesto, como pide `comun/tests/test_esquemas.py`. La versión de S3-1, con solo la lista de cambios, rompía 2 tests de `comun` que el verificador de S3-1 no corrió.
+**Archivos creados o modificados:**
+- `semanas/S3/Freddy/codigo/traci/{perfil,robustez,graficas_s2}.py` y `traci/tests/test_robustez.py`;
+- `traci/{controlador,sumo,verdad,clasificacion,estados,gps,correr_kpis,kpis_sistema,guiado,peatones,obtener_escenario}.py`;
+- `traci/salidas_kpi/{perfil_p80_rf_s1_*.json,robustez.csv,carga_backend.json,ejemplo_p50_rf_s1.json}`;
+- `backend/api/rutas/eventos.py`, `backend/tests/{test_carga,conftest}.py`, `backend/openapi.json`;
+- `comun/{esquemas.py,esquemas.ts,CONTRATO.propuesto.md}`;
+- `semanas/S3/Freddy/{estado.json,RESUMEN.md}`, `explicaciones/s2_explicacion.{md,pdf}`, `evidencias/s2_rendimiento-80.png`, `evidencias/s2_robustez-perdida-gps.png`.
+**Decisiones y por qué:**
+- Medir el p95 del controlador por separado del de SUMO: es la única parte que el controlador puede mejorar.
+- Descartar `astar`: no acelera y además cambia el comportamiento (184 cierres en vez de 170).
+- La rejilla usa libsumo, que da los mismos KPIs que traci (lo comprueba un test) y es ~1,3 veces más rápido.
+- En la prueba de carga los usuarios usan un cliente HTTP/1.1 mínimo en 4 procesos y no `httpx`: con `httpx` el generador gastaba más CPU por petición que el servidor (0,73 ms) y el p95 medido (45–54 ms) era del cliente. El simulador y los visores siguen igual.
+- La condición base (p = 0,02, σ = 5 m) se corre una vez y se reporta en dos familias: son 40 corridas y 44 filas.
+**Problemas encontrados:**
+- **Adaptaciones a SUMO 1.12:**
+  - no admite suscripciones a parkingArea ("Command not implemented"), así que la ocupación se cuenta con eventos; coincide exactamente con `getVehicleCount`, según un test;
+  - `libsumo` está fuera del `sys.path` (`/usr/lib/python3.10/site-packages`) y su `__init__` hace `from traci import ...`, que choca con nuestro paquete; se carga cambiando temporalmente `sys.modules["traci"]`;
+  - con libsumo, `getDepartedPersonIDList` no informa de las personas creadas con `person.add`: la primera corrida con libsumo no vio ningún peatón y dio 0 falsas, un resultado falso. Se corrigió con `person.getIDList()`, y ahora traci y libsumo dan los mismos KPIs.
+- **Meta p95 < 100 ms no cumplida:** el p95 de `simulationStep` solo es de 142 ms en `app80_s1` (5 000 autos estacionados y *rerouters* de parqueo) y crece en la segunda mitad de la corrida. El p95 del controlador es de 30 ms.
+- **Rejilla saturada:** sin `rf_v1.joblib`, las columnas rf y umbral son idénticas, y las falsas liberaciones están en 97–100 por 100 en todas las celdas, incluida la base, porque el umbral confunde al peatón que camina con un auto. Por eso la rejilla no muestra el efecto de p_perdida ni de las ráfagas, y la política no baja las falsas totales (97,9–99,0 con ella, 99,0–100 sin ella). Lo que sí se mide es que, sin la política, 7 y 8 falsas por corrida se deciden con ventanas incompletas, y con ella 0.
+- Observaciones del verificador que dejo como limitaciones:
+  - `falsas_entre_apagados` (14 y 12) cuenta las sesiones *sorteadas* para apagarse que se cerraron en falso **antes** de que el teléfono se apagara. No mide falsas con el teléfono apagado: eso lo cubre el test unitario, porque sin datos no hay transiciones;
+  - el test de ráfagas al 30 % sin falsas con ventanas incompletas se cumple por construcción; la evidencia real es el control sin política;
+  - `timeout_sin_senal` no ocurre en 1 800 s (el tope es de 7 200 s): su error de cobro (+0,83 USD) es una proyección;
+  - `_cerrar_por_tope` no pasa por la comprobación de `isStoppedParking` de la máquina, aunque `KPIsSistema` sí ve esos cierres;
+  - cada auto abre como máximo una sesión por corrida (`t_inicio` no se limpia), igual que supone `verdad.py`;
+  - `perfil_p80_rf_s1_antes.json` salió de una versión anterior de `perfil.py`: no trae el p95 del controlador, aunque usa las mismas opciones (`geo_local` no existía y equivale a `False`).
+- `traci/salidas_kpi/ejemplo_p50_rf_s1.json` (S3-1) se regeneró con el código de S3-2 al correr su test de integración: 37 falsas en 37 cierres (antes 39 en 39).
+**Pedidos a otros:**
+- @Tyrone: `correr_kpis.correr(id, hasta, libsumo=True)` da los mismos KPIs que traci y es ~1,3 veces más rápido (17,2× frente a 12,8× con 80 %): úsalo en el ejecutor, con un proceso por corrida. El p95 por paso lo limita SUMO en `app80_s1` (p95 de 142 ms): si importa, habría que bajar los autos de fondo o los *rerouters*.
+- @Pablo: tasa de *fallback* observada del 100 %: todas las ventanas usaron `fuente="umbral"` (14 001 en el perfil y todas las de la rejilla), porque `rf_v1.joblib` no está en el repo. Con tu umbral robusto, el peatón con ruido de 5 m sigue saliendo como `vehiculo`, y hay 97–100 falsas por 100. Necesito el modelo (o cómo regenerarlo) para repetir la rejilla.
+- @Miguel: el motivo nuevo `timeout_sin_senal` (contrato v1.2 propuesto) tiene que aparecer en el recibo: "Cerrada por tiempo máximo sin señal del teléfono".
+- @Tyrone [Plan] `docs/CONTRATO.md`: aprobar en la unificación el contrato v1.2 propuesto (`/sim/kpi`, `timeout_sin_senal`, `sin_senal`).
+**Bucle y verificación:** 4 vueltas.
+1. Perfil corto y primeras optimizaciones: las suscripciones a parkingArea fallaron y pasé a contar por eventos.
+2. Perfil largo: apareció la diferencia de KPIs entre traci y libsumo, causada por los peatones no detectados; corregido.
+3. `a_geo` local y rejilla relanzada desde cero, con el mismo código para las 40 corridas.
+4. Prueba de carga: de 45–54 ms con `httpx` en un proceso a 22–35 ms con el cliente mínimo, y rutas `async`.
+
+El verificador independiente reportó **5/5** (el 1 con la salvedad documentada): en el contenedor `test_robustez` dio 11 passed y 0 omitidos; la carga dio p95 de 20,3 y 16,7 ms; en la computadora, `backend` + `comun` + `traci` dieron 314 passed y 12 skipped.
+**Pendientes para la próxima sesión:**
+- Repetir la rejilla con `rf_v1`.
+- Decidir con Tyrone si se baja el costo del escenario para el p95.
+- S3-3: modo espejo en el backend y demo en el VPS.
+**Evidencias:** ![](../semanas/S3/Freddy/evidencias/s2_rendimiento-80.png) ![](../semanas/S3/Freddy/evidencias/s2_robustez-perdida-gps.png) · [Explicación (PDF)](../semanas/S3/Freddy/explicaciones/s2_explicacion.pdf)

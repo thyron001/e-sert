@@ -20,6 +20,27 @@
         "precision_mapa_app casi siempre da 1,0 por definición (libre = ocupados < capacidad total); usar también mae_mapa_app",
         "Aprobar POST /api/v1/sim/kpi (CONTRATO.propuesto.md) en la unificación"
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-05",
+      "resumen": "Perfil con 80 % de app: de 3,2× a 17,2× el tiempo real (libsumo, suscripción solo a buscadores, caché de parámetros, ocupación por eventos y geo local); el p95 por paso (162 ms) no llega a 100 ms porque el paso de SUMO solo tiene p95 de 142 ms (controlador 30 ms), documentado. Rejilla de robustez de 40 corridas, política de datos pobres (0 falsas con ventanas incompletas frente a 7-8 sin ella), teléfono apagado con sin_senal y timeout_sin_senal, y carga del backend con p95 de 17-35 ms.",
+      "evidencias": [
+        "evidencias/s2_rendimiento-80.png",
+        "evidencias/s2_robustez-perdida-gps.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Meta p95 < 100 ms por paso no cumplida por el propio simulationStep de SUMO (p95 142 ms); bajarla exige cambiar el escenario (decisión de Tyrone)",
+        "Repetir la rejilla de robustez con rf_v1.joblib: sin el modelo, las falsas liberaciones están saturadas en 97-100 por 100 y no se ve el efecto de la pérdida de GPS",
+        "timeout_sin_senal nunca se alcanza en 30 min (tope 120 min): su error de cobro es una proyección",
+        "Aprobar en la unificación el contrato v1.2 propuesto (/sim/kpi, timeout_sin_senal, sin_senal)"
+      ]
     }
   }
 }

@@ -27,6 +27,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from .controlador import parametro
+
 PARADA_EXTENDIDA_S = 86400
 ESPERA_CORTA_S = 60
 MIN_DILIGENCIA_S = 60
@@ -121,7 +123,7 @@ class GestorPeatones:
         """Llamado tras cada paso del `Controlador`."""
         tr = ctrl.traci
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
-            if tr.vehicle.getParameter(veh, "clase") == "busca" and veh not in self.activos:
+            if parametro(ctrl, veh, "clase") == "busca" and veh not in self.activos:
                 self._llegada(ctrl, veh, t)
         self._revisar_regresos(ctrl, t)
         if self._registrar and round(t) % INTERVALO_TRAYECTORIA_S == 0:

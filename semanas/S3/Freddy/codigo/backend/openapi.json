@@ -2209,7 +2209,8 @@
         "type": "string",
         "enum": [
           "deteccion",
-          "manual"
+          "manual",
+          "timeout_sin_senal"
         ],
         "title": "MotivoCierre",
         "description": "Por qué se cierra la sesión."

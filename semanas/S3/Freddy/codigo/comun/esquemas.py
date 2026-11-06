@@ -114,6 +114,8 @@ class MotivoCierre(str, Enum):
 
     deteccion = "deteccion"
     manual = "manual"
+    # S3-2 (propuesto en CONTRATO.propuesto.md): sin datos GPS, la sesión llegó a `tiempo_maximo_min`.
+    timeout_sin_senal = "timeout_sin_senal"
 
 
 class TipoMovimiento(str, Enum):

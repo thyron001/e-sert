@@ -21,6 +21,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Optional, Tuple
 
+from .controlador import parametro
 from .peatones import leer_destinos, texto_traci
 from .puente_nucleo import distancia_m
 
@@ -68,7 +69,7 @@ class Guia:
     def on_paso(self, ctrl, t: float) -> None:
         tr = ctrl.traci
         for veh in tr.simulation.getDepartedIDList():
-            if tr.vehicle.getParameter(veh, "clase") != "busca" or tr.vehicle.getParameter(veh, "con_app") != "1":
+            if parametro(ctrl, veh, "clase") != "busca" or parametro(ctrl, veh, "con_app") != "1":
                 continue
             self.puente.registrar(f"sim_{veh}")
             self.estado[veh] = "BUSCANDO"
@@ -152,9 +153,9 @@ class RegistroBusqueda:
     def on_paso(self, ctrl, t: float) -> None:
         tr = ctrl.traci
         for veh in tr.simulation.getDepartedIDList():
-            if tr.vehicle.getParameter(veh, "clase") == "busca":
+            if parametro(ctrl, veh, "clase") == "busca":
                 self.salida[veh] = t
-                self.con_app[veh] = tr.vehicle.getParameter(veh, "con_app") == "1"
+                self.con_app[veh] = parametro(ctrl, veh, "con_app") == "1"
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
             if veh in self.salida and veh not in self.llegada:
                 self.llegada[veh] = t

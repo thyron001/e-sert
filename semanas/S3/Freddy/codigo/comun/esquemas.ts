@@ -32,7 +32,7 @@ export type EstadoSesion =
   | 'SALIENDO'
   | 'CERRADA';
 export type OrigenUbicacion = 'sumo' | 'app';
-export type MotivoCierre = 'deteccion' | 'manual';
+export type MotivoCierre = 'deteccion' | 'manual' | 'timeout_sin_senal';
 export type TipoMovimiento = 'recarga' | 'retencion' | 'debito' | 'liberacion';
 export type Aviso =
   | 'saldo_bajo'

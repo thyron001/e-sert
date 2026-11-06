@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence
 
-from .sumo import cargar_traci
+from .sumo import cargar_libsumo, cargar_traci
 
 Hook = Callable[["Controlador", float], None]
 
@@ -36,6 +36,9 @@ class ConfigControlador:
     # Qué vehículos suscribir (por defecto, todos). El generador de trazas solo sigue algunos.
     filtro_vehiculos: Optional[Callable[[str], bool]] = None
     seguir_personas: bool = True
+    # S3-2: `libsumo` (SUMO en el mismo proceso, sin socket). Solo sin GUI y un proceso por corrida.
+    libsumo: bool = False
+    cache_parametros: bool = True  # S3-2: `parametro()` recuerda los parámetros de cada vehículo
 
 
 class Controlador:
@@ -50,7 +53,9 @@ class Controlador:
 
     def __init__(self, config: ConfigControlador):
         self.config = config
-        self.traci = cargar_traci()
+        if config.libsumo and config.gui:
+            raise ValueError("libsumo no tiene GUI: usa traci con --gui")
+        self.traci = cargar_libsumo() if config.libsumo else cargar_traci()
         tc = self.traci.constants
         self._vars_veh = [getattr(tc, n) for n in self.VARS_VEHICULO]
         self._vars_per = [getattr(tc, n) for n in self.VARS_PERSONA]
@@ -62,6 +67,7 @@ class Controlador:
         self.vistos_vehiculos = 0
         self.vistas_personas = 0
         self._personas_suscritas: set = set()
+        self._parametros: Dict[tuple, str] = {}
         self._activo = False
 
     # ------------------------------------------------------------------ ciclo de vida
@@ -79,7 +85,10 @@ class Controlador:
     def iniciar(self) -> "Controlador":
         """Arranca SUMO con `traci.start`."""
         preparar_salidas(Path(self.config.cfg), self.config.args_extra)
-        self.traci.start(self.comando(), label=self.config.etiqueta)
+        if self.config.libsumo:
+            self.traci.start(self.comando())
+        else:
+            self.traci.start(self.comando(), label=self.config.etiqueta)
         self._activo = True
         self.t = self.traci.simulation.getTime()
         return self
@@ -115,7 +124,12 @@ class Controlador:
                 self.vistos_vehiculos += 1
         self.vehiculos = tr.vehicle.getAllSubscriptionResults()
         if self.config.seguir_personas:
-            for per in tr.simulation.getDepartedPersonIDList():
+            nuevas = tr.simulation.getDepartedPersonIDList()
+            if self.config.libsumo:
+                # libsumo (1.12) no informa en getDepartedPersonIDList las personas creadas con
+                # `person.add` (los peatones de diligencia): se descubren con getIDList.
+                nuevas = [p for p in tr.person.getIDList() if p not in self._personas_suscritas]
+            for per in nuevas:
                 if per not in self._personas_suscritas:
                     tr.person.subscribe(per, self._vars_per)
                     self._personas_suscritas.add(per)
@@ -138,10 +152,31 @@ class Controlador:
         lon, lat = self.traci.simulation.convertGeo(x, y)
         return lat, lon
 
+    def parametro(self, veh: str, clave: str) -> str:
+        """`vehicle.getParameter` con caché: `clase`, `con_app` y `destino` no cambian en la corrida.
+
+        S3-2: varios hooks preguntan lo mismo por cada auto que sale; con ~5 000 autos al inicio
+        eran miles de llamadas TraCI repetidas.
+        """
+        if not self.config.cache_parametros:
+            return self.traci.vehicle.getParameter(veh, clave)
+        k = (veh, clave)
+        valor = self._parametros.get(k)
+        if valor is None:
+            valor = self._parametros[k] = self.traci.vehicle.getParameter(veh, clave)
+        return valor
+
     def estacionado(self, datos_vehiculo: dict) -> bool:
         """True si el vehículo está detenido en un parkingArea (bit de parking de STOPSTATE)."""
         estado = datos_vehiculo.get(self.traci.constants.VAR_STOPSTATE, 0)
         return bool(int(estado) & 2)
+
+
+def parametro(ctrl, veh: str, clave: str) -> str:
+    """Parámetro del vehículo con la caché del `Controlador`; con un controlador falso, la llamada directa."""
+    if hasattr(ctrl, "parametro"):
+        return ctrl.parametro(veh, clave)
+    return ctrl.traci.vehicle.getParameter(veh, clave)
 
 
 def preparar_salidas(cfg: Path, args_extra: Sequence[str] = ()) -> None:
