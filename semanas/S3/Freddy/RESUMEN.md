@@ -45,3 +45,23 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 ![Robustez del GPS](evidencias/s2_robustez-perdida-gps.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-11-06 · Modo espejo en el backend y demo en el VPS
+
+**Estado: parcial (5/6).** El modo espejo (contrato §7) funciona de punta a punta en local. La prueba en el VPS queda pendiente porque la demo corre `main` y el token lo tiene Tyrone.
+
+- **Controlador:** cada snapshot lleva un bloque interno `espejo` (`traci/espejo_publicador.py`) con los candidatos y el detalle de los autos que algún teléfono sigue: estado, posición del teléfono, modo, destino, puesto con la distancia por la red, ruta simplificada a ≤ 200 puntos (`traci/ruta_geo.py`), sesión con el costo en vivo, billetera, avisos y el recibo al cerrar.
+- **Backend:**
+  - `RegistroEspejo` guarda el bloque sin difundirlo y cuenta las pantallas por auto;
+  - `GET /api/v1/espejo/candidatos`;
+  - `WS /ws/espejo/{veh_id}`: ≤ 1 Hz con el dato más nuevo, latido cada 2 s, recibo una vez por sesión, `espejo_fin` y cierre 4404/1000;
+  - `espejos` en cada snapshot del visor y en la respuesta al controlador.
+- **Prueba local (`p50_umbral_s1` a 10×, 3 pantallas):**
+  - latencia **p50 = 76 ms y p95 = 178 ms** (meta < 1,5 s), un mensaje por segundo y 0 desconexiones;
+  - `sim_busca_3` recorrió GUIADO → ESTACIONADO → A_PIE → REGRESANDO → CERRADA (recibo de 0,08 USD frente a 0,25 USD de la tarjeta SERT) → `espejo_fin`;
+  - el cierre a los 1,4 min es una falsa liberación del umbral: sigue faltando `rf_v1`.
+- **Hallazgos corregidos:**
+  - con los escenarios de Tyrone **ningún auto se guiaba** (`param destino` trae coordenadas; el nombre va en `destino_nombre`), lo que afecta las cifras de S3-1 y S3-2;
+  - una posición −2^30 de SUMO volvía inválido el JSON del snapshot y congelaba el visor (fallo desde S2-3).
+
+![Modo espejo en vivo](evidencias/s3_espejo-en-vivo.png)

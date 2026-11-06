@@ -153,6 +153,7 @@ class ControlSesiones:
         self.falsas_con_datos_pobres = 0
         self.ventanas_retenidas = 0
         self.fuentes: Counter = Counter()
+        self.ultimo_modo: Dict[str, dict] = {}  # usuario → último ResultadoModo (lo ve el espejo, S3-3)
 
         salidas.mkdir(parents=True, exist_ok=True)
         self._archivos = {
@@ -303,6 +304,7 @@ class ControlSesiones:
         puesto = self.puesto_ll[veh]
         distancia = haversine_m(fila["lat"], fila["lon"], puesto[0], puesto[1])
         self.fuentes[resultado["fuente"]] += 1
+        self.ultimo_modo[usuario] = resultado
         retenidas_antes = maquina.retenidas
         transiciones = maquina.actualizar(resultado["modo"], distancia, t, resultado.get("cobertura", 1.0),
                                           resultado["fuente"], resultado["confianza"])

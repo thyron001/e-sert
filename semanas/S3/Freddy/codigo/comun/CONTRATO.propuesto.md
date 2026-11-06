@@ -1,6 +1,6 @@
 # Contrato de interfaces (v1.2 propuesta, Freddy S3, sobre v1.1 del 2026-11-01)
 
-> **Propuesta v1.2 (Freddy, S3-1 y S3-2):** aditiva. Ver "Cambios en v1.2 (propuesta)" al final.
+> **Propuesta v1.2 (Freddy, S3-1, S3-2 y S3-3):** aditiva. Ver "Cambios en v1.2 (propuesta)" al final.
 > Se aplica a `docs/CONTRATO.md` en la unificación del 8 de noviembre si es coherente.
 
 > **v1.1 (2026-11-01):** aplica la propuesta aditiva de Freddy de S2 (ver "Cambios en v1.1" al
@@ -233,6 +233,20 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
 - `modo`, `destino`, `puesto_id` y `ruta` son opcionales y solo se envían para autos con app.
 - `verdad` es la ocupación real de SUMO. El backend **no la usa** para su mapa de ocupación
   (que se estima con las sesiones) y solo la reenvía al visor como mensaje `verdad` (§6).
+- **v1.2 (S3-3), bloque interno `espejo` (opcional):** el cuerpo puede traer
+  `"espejo": {"candidatos": [...], "detalle": {veh_id: {...}}, "fin": false}` (modelo
+  `BloqueEspejo`; ejemplo en `comun/ejemplos/espejo.json`).
+  - `candidatos`: autos con app en `BUSCANDO` o `GUIADO`, con `{id, destino_nombre, estado, t_sim}`.
+  - `detalle[veh_id]` (`DetalleEspejo`), **solo** para los autos que algún teléfono sigue: `t_sim`,
+    `estado`, `lat/lon` del teléfono del conductor (el peatón si se bajó), `modo` y `confianza` del
+    último `ResultadoModo`, `destino`, `puesto` (con `distancia_m` por la red mientras conduce),
+    `ruta` (≤ 200 puntos), `sesion`, `billetera`, `avisos` y, al cerrar, `recibo` con su `sesion_id`.
+  - `fin: true` en el último snapshot de la corrida.
+  - El backend lo guarda y **nunca lo difunde por `/ws/estado`**; `confianza` y
+    `recibo.sesion_id` tampoco llegan al teléfono.
+- **v1.2 (S3-3), respuesta `202`:** `{"aceptado": true, "espejos": ["sim_veh42"]}` (`RespuestaSnapshot`):
+  los autos que algún teléfono sigue. El controlador arma `espejo.detalle` solo para esos, en el
+  snapshot siguiente.
 
 ## 5. Tarifa (`proyecto/comun/tarifa.json`)
 
@@ -352,6 +366,19 @@ Cada mensaje es JSON con un campo `tipo` (unión discriminada `MensajeWS` en `es
   `"fin_simulacion"` (terminó la corrida). Tras `espejo_fin` el backend cierra el socket.
 - Si `veh_id` no existe al conectar, el backend envía `espejo_fin` con
   `motivo: "no_existe"` y cierra.
+- **v1.2 (S3-3):**
+  - códigos de cierre: `4404` tras `no_existe` y `1000` tras `salio_simulacion` o `fin_simulacion`;
+  - el primer mensaje llega al conectar (último estado conocido); después, como mucho 1 por segundo
+    real aunque el controlador publique más rápido (cada mensaje trae el dato más nuevo), y al menos
+    uno cada 2 s aunque no haya datos nuevos (la app reconecta tras 5 s de silencio);
+  - `recibo` llega **una vez por sesión** en cada conexión, aunque el snapshot se repita; durante
+    60 s una pantalla que se reconecta lo vuelve a recibir;
+  - varias pantallas pueden seguir al mismo vehículo; mientras haya al menos una, su `veh_id`
+    aparece en `snapshot.espejos` (§6);
+  - `GET /espejo/candidatos` responde con `Cache-Control: no-store`, sale del bloque `espejo` del
+    controlador y solo lista autos que siguen en la simulación;
+  - `GET /salud` suma `ts` (hora UTC del servidor, con ms) para que la app estime el desfase de su
+    reloj al medir la latencia.
 
 ## 8. Trazas GPS (archivos CSV)
 
@@ -447,3 +474,10 @@ Aditivos; `X-Contrato-Version` y `Salud.contrato` siguen en `1`. Ya están imple
    recibo de la app debe mostrarlo (@Miguel).
 4. **§3 (S3-2):** marca `sin_senal` y política de datos pobres (ver §3). Opcional para v1.3:
    `SesionEstado.sin_senal: bool`.
+5. **§4.4 (S3-3):** bloque interno opcional `espejo` en `POST /interno/snapshot` y `/sim/paso`
+   (`BloqueEspejo`, `DetalleEspejo`, `ReciboEspejo`) y respuesta `RespuestaSnapshot` con `espejos`.
+   Un cliente de v1 que ignora la respuesta y no manda el bloque sigue funcionando: los candidatos
+   salen entonces del snapshot, como antes.
+6. **§7 (S3-3):** códigos de cierre `4404`/`1000`, ritmo de 1 Hz con latido de 2 s, recibo una vez
+   por sesión y conexión (60 s para reconexiones), `Cache-Control: no-store` en candidatos.
+7. **§4.3 (S3-3):** `Salud.ts` opcional (hora del servidor con ms), a pedido de Miguel.

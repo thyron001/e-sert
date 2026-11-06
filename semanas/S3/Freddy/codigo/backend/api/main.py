@@ -25,6 +25,7 @@ from comun import esquemas as e
 from . import errores
 from .dependencias import Servicios
 from .rutas import ROUTERS
+from ..espejo.ws_espejo import router as router_ws_espejo
 from .ws import router as router_ws
 
 log = logging.getLogger("e-sert.api")
@@ -43,6 +44,8 @@ Cuenca. Implementa el **contrato v1** (`docs/CONTRATO.md`).
   `X-Sim-Token: <token>` o `Authorization: Bearer <token>`.
 - WebSocket `ws://<host>/ws/estado?rol=visor|publico`: mensajes `snapshot`, `kpi` y `verdad`
   (este último solo para `rol=visor`).
+- WebSocket `ws://<host>/ws/espejo/{veh_id}`: mensajes `espejo` (≤ 1 Hz) de un solo vehículo y
+  `espejo_fin` al terminar.
 """
 
 ETIQUETAS = [
@@ -160,6 +163,7 @@ def crear_app(config: Optional[Config] = None) -> FastAPI:
     for r in ROUTERS:
         app.include_router(r, prefix=PREFIJO)
     app.include_router(router_ws)
+    app.include_router(router_ws_espejo)
 
     # Healthcheck de Dokploy en la raíz (DESPLIEGUE.md); mismo cuerpo que /api/v1/salud.
     @app.get("/salud", response_model=e.Salud, tags=["sistema"], summary="Healthcheck (raíz)",

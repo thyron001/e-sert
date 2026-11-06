@@ -10,6 +10,10 @@ Se ejecuta **dentro del contenedor** `van3twin`, desde `semanas/S3/Freddy/codigo
     python3 -m traci.correr_kpis --id p50_umbral_s1 --hasta 900
     python3 -m traci.correr_kpis --id p50_rf_s1 --hasta 900 --medir-costo 2   # con y sin KPIs
     python3 -m traci.correr_kpis --id p50_rf_s1 --publicar http://<host>:8000
+    python3 -m traci.correr_kpis --id p50_umbral_s1 --hasta 4500 --publicar http://localhost:8000 --ritmo 10
+
+Con `--publicar`, el snapshot lleva el bloque interno `espejo` (S3-3; `--sin-espejo` lo quita) y
+`--ritmo F` frena la simulación a F veces el tiempo real (1 = demo en vivo).
 
 Escribe `traci/salidas_kpi/ejemplo_<id>.json` (resumen; se sube al repo) y, en `traci/salidas/`
 (ignorada), `kpis_sesiones_<id>.csv` y `kpis_mapa_<id>.csv`.
@@ -99,7 +103,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
            libsumo: bool = False, en_lote: bool = True, solo_busca: bool = True, cache_parametros: bool = True,
            contar_eventos: bool = True, args_sumo: Sequence[str] = (), geo_local: bool = True,
            politica_datos_pobres: bool = True, ws_nulo: bool = False, guardar_csv: bool = True,
-           instrumentar: Optional[Callable[[dict], None]] = None) -> dict:
+           instrumentar: Optional[Callable[[dict], None]] = None, espejo: bool = True,
+           ritmo: Optional[float] = None) -> dict:
     """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso.
 
     S3-2: parámetros del GPS (`sigma_m`, `p_perdida`, ráfagas `rafaga_s`/`frac_rafaga`), teléfonos
@@ -128,6 +133,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
     config = ConfigControlador(cfg=cfg, semilla=semilla, etiqueta=f"kpis_{id_corrida}{sufijo}_{int(con_kpis)}",
                                libsumo=libsumo, cache_parametros=cache_parametros, args_extra=list(args_sumo))
     kpis = None
+    snapshots = None
+    pub_espejo = None
     reloj = {"s": 0.0}
     inicio = time.perf_counter()
     try:
@@ -155,11 +162,21 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
                 puente.al_cerrar[:] = [_cronometrar(h, reloj) for h in puente.al_cerrar]
             if pub_paso is not None:
                 from .correr_guiado import PublicadorSnapshots
+                from .espejo_publicador import EspejoPublicador
+                from .ruta_geo import RutaGeo
                 from .sumo import cargar_sumolib
 
                 net = cargar_sumolib().net.readNet(str(SUMO / "red" / "centro.net.xml"))
-                ctrl.agregar_hook(PublicadorSnapshots(pub_paso, sesiones, guia, registro, peatones, net,
-                                                      kpis=kpis).on_paso)
+                if espejo and publicar:
+                    pub_espejo = EspejoPublicador(sesiones, guia, puente, registro, guia.destinos, ctrl.a_geo,
+                                                  RutaGeo(net))
+                snapshots = PublicadorSnapshots(pub_paso, sesiones, guia, registro, peatones, net, kpis=kpis,
+                                                espejo=pub_espejo)
+                ctrl.agregar_hook(snapshots.on_paso)
+            if ritmo:
+                from .correr_guiado import Ritmo
+
+                ctrl.agregar_hook(Ritmo(ritmo).on_paso)
             ctrl.agregar_hook(_progreso)
             if instrumentar is not None:
                 instrumentar({"ctrl": ctrl, "peatones": peatones, "guia": guia, "sesiones": sesiones,
@@ -169,6 +186,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
             t_final, pasos = ctrl.t, ctrl.pasos
     finally:
         sesiones.cerrar()
+        if snapshots is not None:
+            snapshots.fin_corrida()
         for pub in (pub_kpi, pub_paso):
             if pub is not None:
                 pub.cerrar()
@@ -185,6 +204,11 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
         "tiempo_real_s": round(tiempo_real, 2),
         "ms_por_paso": round(1000 * tiempo_real / max(1, pasos), 3),
         "sesiones_maquina": sesiones.resumen(),
+        "espejo": None if pub_espejo is None else {
+            "detalles_armados": pub_espejo.detalles_armados, "recibos": len(pub_espejo.recibos),
+            "rutas_calculadas": pub_espejo.ruta_geo.calculadas, "rutas_en_cache": pub_espejo.ruta_geo.aciertos,
+            "errores": pub_espejo.errores},
+        "publicador": None if publicar is None or not hasattr(pub_paso, "resumen") else pub_paso.resumen(),
         "opciones": {"sigma_m": sigma_m, "p_perdida": p_perdida, "rafaga_s": rafaga_s, "frac_rafaga": frac_rafaga,
                      "frac_apagado": frac_apagado, "libsumo": libsumo, "en_lote": en_lote, "solo_busca": solo_busca,
                      "cache_parametros": cache_parametros, "contar_eventos": contar_eventos,
@@ -263,6 +287,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
     ap.add_argument("--hasta", type=float, default=900, help="Segundo de simulación final")
     ap.add_argument("--publicar", default=None, help="URL del backend (sin ruta)")
     ap.add_argument("--sufijo", default="", help="Sufijo de los archivos de salida (p. ej. _3600)")
+    ap.add_argument("--ritmo", type=float, default=None, help="Veces el tiempo real (1 = demo en vivo)")
+    ap.add_argument("--sin-espejo", action="store_true", help="No mandar el bloque interno espejo")
     ap.add_argument("--medir-costo", type=int, default=0, metavar="N",
                     help="Corre N pares (sin KPIs, con KPIs) y escribe costo_<id>.json")
     args = ap.parse_args(argv)
@@ -279,7 +305,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
         print(_json(costo))
         return costo
 
-    salida = correr(args.id, args.hasta, publicar=args.publicar, sufijo=args.sufijo)
+    salida = correr(args.id, args.hasta, publicar=args.publicar, sufijo=args.sufijo, espejo=not args.sin_espejo,
+                    ritmo=args.ritmo)
     (SALIDAS_KPI / f"ejemplo_{args.id}{args.sufijo}.json").write_text(_json(salida), encoding="utf-8")
     print(_json(salida))
     return salida

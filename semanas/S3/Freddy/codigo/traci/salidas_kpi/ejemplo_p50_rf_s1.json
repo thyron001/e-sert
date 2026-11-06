@@ -4,19 +4,19 @@
   "clasificador_pedido": "rf",
   "clasificador_usado": "umbral",
   "ventanas_por_fuente": {
-    "umbral": 1434
+    "umbral": 1223
   },
   "t_sim_final": 900.0,
   "pasos": 900,
-  "tiempo_real_s": 80.89,
-  "ms_por_paso": 89.879,
+  "tiempo_real_s": 28.2,
+  "ms_por_paso": 31.336,
   "sesiones_maquina": {
     "coords_invalidas": 0,
-    "sesiones": 69,
-    "cerradas": 37,
-    "abiertas_al_final": 32,
-    "falsas_liberaciones": 37,
-    "falsas_por_100_sesiones": 53.62,
+    "sesiones": 68,
+    "cerradas": 47,
+    "abiertas_al_final": 21,
+    "falsas_liberaciones": 47,
+    "falsas_por_100_sesiones": 69.12,
     "falsas_con_datos_pobres": 0,
     "ventanas_retenidas": 0,
     "telefonos_apagados": 0,
@@ -26,9 +26,11 @@
     "cierres_timeout_sin_senal": 0,
     "clasificador": "/home/vanet/results/e-sert/semanas/S3/Freddy/codigo/traci/escenario/pablo",
     "ventanas_por_fuente": {
-      "umbral": 1434
+      "umbral": 1223
     }
   },
+  "espejo": null,
+  "publicador": null,
   "opciones": {
     "sigma_m": 5.0,
     "p_perdida": 0.02,
@@ -45,29 +47,29 @@
     "politica_datos_pobres": true
   },
   "costo_kpis": {
-    "s_en_kpis": 1.778,
-    "s_resto": 79.112,
-    "sobrecosto_pct": 2.25
+    "s_en_kpis": 0.959,
+    "s_resto": 27.243,
+    "sobrecosto_pct": 3.52
   },
   "kpis": {
     "falsas_lib_100": 100.0,
-    "n_sesiones": 37,
-    "n_falsas": 37,
-    "sin_cierre": 32,
+    "n_sesiones": 47,
+    "n_falsas": 47,
+    "sin_cierre": 21,
     "retardo_cierre_mediana_s": null,
     "retardo_cierre_p90_s": null,
     "error_fact_medio_usd": null,
     "error_fact_abs_max_usd": null,
     "ahorro_vs_tarjeta_medio_usd": null,
-    "precision_mapa": 0.8178142076502731,
+    "precision_mapa": 0.8159562841530055,
     "precision_mapa_app": 1.0,
-    "libres_fantasma_medio": 111.13333333333334,
+    "libres_fantasma_medio": 112.26666666666667,
     "retardo_cierre_max_s": null,
     "error_fact_abs_medio_usd": null,
     "n_cierre_manual": 0,
-    "n_sin_estadia_real": 37,
-    "mae_mapa": 7.4843715846994545,
-    "mae_mapa_app": 0.014207650273224045,
+    "n_sin_estadia_real": 47,
+    "mae_mapa": 7.487322404371585,
+    "mae_mapa_app": 0.018032786885245903,
     "libres_fantasma_app_medio": 0.0,
     "n_muestras_mapa": 15
   }

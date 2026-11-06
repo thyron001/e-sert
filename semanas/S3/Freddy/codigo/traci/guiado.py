@@ -29,6 +29,27 @@ FUENTES = ("mapa", "verdad")
 Puesto = Tuple[float, float, int]  # (lat, lon, capacidad)
 
 
+def destino_de(ctrl, veh: str, destinos: Dict[str, Tuple[float, float, float]]) -> Optional[Tuple[str, float, float]]:
+    """`(nombre, lat, lon)` del destino de `veh`, o None.
+
+    S3-3: los escenarios unificados de Tyrone (S2) traen `param destino_nombre` (el nombre de
+    `destinos.csv`) y `param destino` con las coordenadas `"lat,lon"`; la demanda de S1 traía el
+    nombre en `destino`. Se aceptan los tres casos.
+    """
+    nombre = texto_traci(parametro(ctrl, veh, "destino_nombre") or "")
+    crudo = texto_traci(parametro(ctrl, veh, "destino") or "")
+    if not nombre and crudo in destinos:
+        nombre = crudo
+    if nombre in destinos:
+        lat, lon = destinos[nombre][:2]
+        return nombre, lat, lon
+    try:
+        lat, lon = (float(x) for x in crudo.split(","))
+    except ValueError:
+        return None
+    return (nombre or crudo), lat, lon
+
+
 def recomendar(destino: Tuple[float, float], puestos: Dict[str, Puesto],
                libres: Callable[[str], int], excluir: Iterable[str] = ()) -> Optional[str]:
     """Puesto con plazas libres más cercano al destino (haversine). None si todos están llenos."""
@@ -90,12 +111,12 @@ class Guia:
         return self.puestos[pid][2] - ocupados
 
     def _guiar(self, ctrl, veh: str, t: float, excluir: Iterable[str]) -> None:
-        nombre = texto_traci(ctrl.traci.vehicle.getParameter(veh, "destino"))
-        if nombre not in self.destinos:
+        destino = destino_de(ctrl, veh, self.destinos)
+        if destino is None:
             self.contadores["sin_destino"] += 1
             self.estado[veh] = "A_CIEGAS"
             return
-        lat, lon, _ = self.destinos[nombre]
+        _, lat, lon = destino
         excluidos = list(excluir)
         while True:
             pid = recomendar((lat, lon), self.puestos, lambda p: self._libres(ctrl, p), excluidos)

@@ -500,3 +500,113 @@ El verificador independiente reportó **5/5** (el 1 con la salvedad documentada)
 - Decidir con Tyrone si se baja el costo del escenario para el p95.
 - S3-3: modo espejo en el backend y demo en el VPS.
 **Evidencias:** ![](../semanas/S3/Freddy/evidencias/s2_rendimiento-80.png) ![](../semanas/S3/Freddy/evidencias/s2_robustez-perdida-gps.png) · [Explicación (PDF)](../semanas/S3/Freddy/explicaciones/s2_explicacion.pdf)
+
+## S3 · Sesión 3 · 2026-11-06 · Modo espejo en el backend y demo en el VPS
+**Estado:** parcial (5/6 criterios). Todo funciona y está medido en local. La prueba en línea en el VPS queda pendiente: la demo corre `main` (sin S3-3) y el `ESERT_TOKEN_SIM` lo tiene solo Tyrone.
+**Qué hice:**
+- **Controlador** (`traci/espejo_publicador.py`): bloque interno `espejo` en cada snapshot (≤ 1 por s simulado).
+  - `candidatos`: autos con app en BUSCANDO o GUIADO.
+  - `detalle`, solo de los autos seguidos (los `espejos` que devuelve el backend en la respuesta anterior): estado, posición del teléfono (el peatón si se bajó), último `ResultadoModo` con su confianza, destino, puesto con `getDrivingDistance`, ruta, sesión con `costo_en_curso` y retenido, billetera, avisos de `ServicioSesiones.avisos` y el recibo al cerrar (con `PuenteNucleo.al_cerrar`).
+- **Ruta** (`traci/ruta_geo.py`): `getRoute` desde `getRouteIndex` y cortada en la arista del puesto, formas con `sumolib`, Douglas-Peucker hasta ≤ 200 puntos y caché por `(ruta, índice, arista)`.
+- **`Publicador.al_responder`:** el hilo del publicador entrega `{"espejos": [...]}` a `PublicadorSnapshots`.
+- **`PublicadorSnapshots`:** `ts` con milisegundos, `fin_corrida()` (último snapshot con `espejo.fin`), y `--ritmo F` y `--sin-espejo` en `correr_guiado` y `correr_kpis`.
+- **Backend:**
+  - `backend/espejo/registro.py` (`RegistroEspejo`): candidatos, detalle con versión, suscriptores, recibos por `sesion_id` durante 60 s, salidas de la simulación y fin de corrida;
+  - `backend/espejo/rutas.py`: `GET /espejo/candidatos` con `no-store`;
+  - `backend/espejo/ws_espejo.py`: `WS /ws/espejo/{veh_id}` con 404 → `espejo_fin no_existe` + cierre 4404, ≤ 1 Hz con el dato más nuevo, latido de 2 s, recibo una vez por conexión, `espejo_fin` + cierre 1000 y varias pantallas por auto;
+  - `Servicios.publicar_snapshot` registra el bloque y lo borra del paso antes de armar el snapshot; `espejos` va en el snapshot y en la respuesta `RespuestaSnapshot`;
+  - `Salud.ts` con ms, a pedido de Miguel.
+- **Esquemas:**
+  - `BloqueEspejo`, `DetalleEspejo`, `ReciboEspejo`, `RespuestaSnapshot`, `PasoSimulacion.espejo` y `Salud.ts` en `esquemas.py`/`.ts`;
+  - ejemplo `comun/ejemplos/espejo.json`;
+  - §4.4 y §7 de `CONTRATO.propuesto.md` (cambios 5–7 de v1.2).
+- **Tests:**
+  - `backend/tests/test_espejo.py` (15, escritos por mí);
+  - `traci/tests/test_espejo_publicador.py` (24; el subagente escribió 19, uno de ellos con SUMO, y yo agregué 5 de regresión).
+- **Cliente de prueba** `backend/espejo/seguir.py`: sigue candidatos como el teléfono, escucha `/ws/estado` para el `ts` del controlador y el resaltado, y mide la latencia.
+- **Prueba local completa:** uvicorn, `p50_umbral_s1` a 10× publicando y el cliente con 3 pantallas, todo en el contenedor. Además, la captura del visor con `chrome-headless-shell` y la gráfica `traci/graficas_espejo.py`.
+- **VPS (solo lectura, sin token):** RTT de `/salud` y un WS `/ws/estado` abierto 10 min.
+**Archivos creados o modificados:**
+- `semanas/S3/Freddy/codigo/backend/espejo/{__init__,registro,rutas,ws_espejo,seguir}.py`;
+- `backend/api/{dependencias,main}.py`, `backend/api/rutas/{__init__,simulacion}.py`, `backend/nucleo/mundo.py`, `backend/openapi.json`;
+- `backend/tests/{test_espejo,test_api,test_api_ws}.py`;
+- `traci/{espejo_publicador,ruta_geo,graficas_espejo}.py`;
+- `traci/{correr_guiado,correr_kpis,puente_nucleo,estados,guiado,peatones}.py`;
+- `traci/tests/{test_espejo_publicador,test_guiado}.py`;
+- `traci/salidas_kpi/{espejo_local.json,visor_espejo_local.png}`;
+- `comun/{esquemas.py,esquemas.ts,CONTRATO.propuesto.md,ejemplos/espejo.json,tests/test_esquemas.py}`;
+- `semanas/S3/Freddy/{estado.json,RESUMEN.md}`, `explicaciones/s3_explicacion.{md,pdf}`, `evidencias/s3_espejo-en-vivo.png` y `evidencias/resumen_S3_Freddy.pdf`.
+**Decisiones y por qué:**
+- **Detalle solo de los autos seguidos,** que el controlador conoce por la respuesta del backend: armar ruta, distancia por la red y saldo para 600 autos por segundo sería caro e inútil.
+- **El recibo viaja con su `sesion_id` solo dentro del bloque interno** (`ReciboEspejo`). Al teléfono le llega el `Recibo` de §7 sin campos extra, porque la app de Miguel valida las claves.
+- **Contradicción del prompt y el contrato:** el prompt pide "404/cierre 4404" y §7 pide `espejo_fin no_existe`; se hacen las dos cosas (primero el mensaje, luego el cierre 4404).
+- **Latido de 2 s** aunque no haya datos nuevos: la app reconecta tras 5 s de silencio.
+- **Candidatos del bloque del controlador,** con *fallback* al cálculo anterior desde el snapshot si un controlador viejo no manda el bloque.
+- **Prueba local a 10×** para llegar al recibo y al `espejo_fin` en minutos; en la demo se usa `--ritmo 1`.
+- **Latencia contada solo con mensajes que traen dato nuevo:** el primero de cada `t_sim`; los latidos repiten el último dato y no cuentan.
+- **Backend en el contenedor** y no en la computadora: desde WSL no se llega al puerto publicado por Docker Desktop y la computadora no tiene las dependencias. El visor se capturó con el `chrome-headless-shell` de Playwright, copiado de forma temporal fuera del repo y borrado al terminar.
+**Problemas encontrados:**
+- **Ningún auto se guiaba en los escenarios de Tyrone (afecta a S3-1 y S3-2).** En `escenarios/app50_s1.rou.xml` los 1 277 `param destino` son coordenadas `"lat,lon"`, y el nombre va en `destino_nombre`. `Guia._guiar` buscaba `destino` en `destinos.csv`, así que todos los autos con app caían en `A_CIEGAS` (`sin_destino`). Los peatones también caían en un destino al azar.
+  - Corregido con `guiado.destino_de`, que acepta el nombre en `destino_nombre`, el nombre en `destino` (S1) o las coordenadas. Ahora se guían 142 autos en 900 s.
+  - **Las cifras de S3-1 (búsqueda, mapa) y el perfil de S3-2 se midieron sin guiado:** hay que repetirlas. Las falsas liberaciones casi no cambian, porque las domina el umbral.
+- **Posición −2^30 de SUMO.** Un auto que sale de un `parkingArea` recibió de SUMO una posición inválida (`inf` al convertirla).
+  - En la 1.ª corrida, el controlador se cayó con `math domain error` en el espejo.
+  - En la 2.ª, el `inf` volvió inválido el JSON de **todo** el snapshot (`Out of range float values are not JSON compliant`): el backend dejó de recibir snapshots en t = 1 467 s y el visor y el espejo quedaron congelados. El fallo existía desde S2-3.
+  - Ahora `PublicadorSnapshots._posicion` usa la última posición válida (si omitiera al auto, el espejo creería que salió) y un error en el detalle de un auto se cuenta y se salta. Hay tests de regresión.
+- **Los `traci` falsos de los tests lanzaban un error** con parámetros que no existían (`destino_nombre`), mientras que SUMO devuelve `""`. Se alinearon con SUMO (5 tests de `test_guiado.py`).
+- **Recibos de falsas liberaciones:** con el umbral (sin `rf_v1`), las sesiones de los 3 autos seguidos se cerraron a los 0,6–1,4 min con el auto estacionado. El espejo muestra bien el recibo (10 min cobrados, 0,08 USD), pero la sesión es falsa.
+- **3 de 608 latencias negativas** (−64, −64 y −1 970 ms). Dos las ven dos pantallas en el mismo instante y cambian de `t_sim` entre corridas: parece el reloj de pared, pero no se pudo aislar. No cambian el p95.
+**Resultados:**
+- Prueba local con 3 pantallas y 211 s reales: 610 mensajes (608 con dato nuevo), **latencia p50 = 76 ms y p95 = 178 ms** (máximo 922 ms), backend → pantalla p50 = 1,1 ms, intervalo de 1,002 s (mínimo 0,999 s) y 0 desconexiones.
+- `sim_busca_3`: GUIADO (1 536 → 0 m) → ESTACIONADO → A_PIE → REGRESANDO → CERRADA, con recibo de 1,4 min reales, 10 cobrados, 0,08 USD frente a 0,25 USD de tarjeta SERT y 0,17 de ahorro; luego `espejo_fin salio_simulacion` en t = 1 872 s.
+- El visor resaltó a los 3 autos en ~1 840–1 860 de 1 874 snapshots.
+- VPS (código de `main`):
+  - `/salud` 200; `candidatos` 200 `[]`; `/ws/espejo/...` 403 (la ruta no existe en `main`);
+  - RTT de `/salud` p50 = 661 ms y p95 = 937 ms (TLS nuevo por pedido, desde el contenedor);
+  - **`/ws/estado` abierto 601 s sin cortes** a través de Traefik (ping cada 20 s).
+**Pedidos a otros:**
+- @Miguel:
+  - URLs reales: `GET https://demo.e-sert.tesisucuenca.com/api/v1/espejo/candidatos` y `wss://demo.e-sert.tesisucuenca.com/ws/espejo/{veh_id}`, en cuanto Tyrone despliegue S3. En local: `http://<host>:8080` (o el puerto de uvicorn).
+  - Mensajes con las claves exactas de §7. `recibo` es un campo del mensaje `espejo`: `{minutos_reales, minutos_cobrados, cobrado_usd, tarjeta_sert_usd, ahorro_usd}`, una vez por sesión.
+  - Cierre 4404 tras `espejo_fin no_existe` y 1000 tras `salio_simulacion` o `fin_simulacion`. Latido cada 2 s.
+  - `GET /salud` ya trae `ts` con ms.
+  - Ojo: el primer mensaje al conectar puede venir sin `puesto` ni `ruta`. El detalle llega en el snapshot siguiente.
+- @Tyrone:
+  - `espejos` ya viene en cada snapshot de `/ws/estado`, y el visor lo resalta bien (captura en la evidencia).
+  - En tus escenarios `param destino` es `"lat,lon"` y el nombre está en `destino_nombre`. Mi código ya acepta los dos; si algo más tuyo lee `destino` como nombre, revísalo.
+- @Tyrone [VPS] (pasos exactos):
+  1. Tras la unificación de S3 en `main`, verifica que `esert-demo` se redesplegó (On Push) y que `curl https://demo.e-sert.tesisucuenca.com/salud` trae el campo `ts`; `wss://.../ws/espejo/x` debe responder `espejo_fin no_existe` en vez de 403.
+  2. Confirma en Dokploy → Environment que `ESERT_TOKEN_SIM` existe, y que `ESERT_DB_URL=sqlite:////data/esert.db` está con el volumen `/data` montado.
+  3. Corre la prueba en línea desde la laptop de la demo, con el token en su `.env` y en la misma máquina para que coincidan los relojes:
+     - `ESERT_TOKEN_SIM=<token> python3 -m traci.correr_kpis --id p50_umbral_s1 --hasta 4500 --publicar https://demo.e-sert.tesisucuenca.com --ritmo 1`;
+     - en paralelo, `python3 -m backend.espejo.seguir --url https://demo.e-sert.tesisucuenca.com --pantallas 1 --min-s 600 --max-s 900 --salida traci/salidas_kpi/espejo_vps.json`.
+     
+     Pásame el JSON, o pásame el token por privado para mi `.env` y la corro yo.
+  4. Comparte los logs del contenedor y su CPU/RAM durante esa prueba.
+- @Tyrone [Plan] `docs/CONTRATO.md`: aprobar los cambios 5–7 de v1.2 (bloque `espejo`, `RespuestaSnapshot`, cierres 4404/1000, latido, `Salud.ts`).
+- @Pablo: el espejo muestra el `modo` del último `ResultadoModo` y guarda su `confianza` en el bloque interno, sin enviarla al teléfono. Con el umbral la confianza llega siempre en 1,0 aunque se equivoque, así que en el espejo no sirve como indicador. Con `rf_v1` debería verse una confianza real: ¿qué umbral sugieres para mostrar "detectando…" en vez del modo?
+**Bucle y verificación:** 5 vueltas.
+1. Esquemas, publicador, registro y WS. Todos los tests pasan; 1 test viejo esperaba `{"aceptado": true}` sin `espejos` y lo actualicé.
+2. 1.ª prueba local: ningún candidato pasaba a GUIADO. Así encontré el fallo de `destino`/`destino_nombre`; lo corregí y verifiqué con 142 guiados en 900 s.
+3. 2.ª prueba: el controlador se cayó con `math domain error` en t = 1 467 s. Blindé el detalle.
+4. 3.ª prueba: el espejo y el visor se congelaron desde t = 1 467 s. Encontré el `inf` en el JSON del snapshot y lo corregí. La 4.ª prueba completó el ciclo hasta `espejo_fin`.
+5. Correcciones de lo que encontró el verificador y prueba final con el código definitivo (cifras de arriba).
+
+El **verificador independiente** reportó **5/6**: el criterio 5 (VPS) queda parcial, como admite el propio criterio. La suite dio 365 passed y 2 skipped (ninguno de SUMO). Encontró además 9 observaciones de código; corregí estas:
+- un aviso de despertar que se perdía (`evento.clear()` después de enviar; podía retrasar hasta 2 s);
+- el recibo se volvía a registrar cada 60 s y el de una sesión vieja viajaba con la nueva;
+- sin timeout de inactividad, si el controlador moría sin `fin` la pantalla recibía latidos para siempre (ahora `fin_simulacion` tras 30 s sin snapshots);
+- con SUMO relanzado, las pantallas viejas no se enteraban;
+- `_lugar_puesto` no tenía la guarda de puesto conocido;
+- se enviaba `puesto` después de CERRADA.
+
+Agregué 4 tests de regresión. Dejo como limitaciones:
+- el `except Exception` del detalle también cuenta un `FatalTraCIError` (SUMO caído) como error de dato;
+- las 3 latencias negativas no tienen un origen aislado.
+
+La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el resaltado.
+**Pendientes para la próxima sesión:**
+- Prueba en línea en el VPS (latencia y 10 min con datos móviles) cuando Tyrone despliegue S3 o pase el token.
+- Repetir S3-1 (búsqueda, mapa) y el perfil de S3-2 con el guiado ya funcionando.
+- Repetir con `rf_v1` para ver recibos de estadías reales.
+**Evidencias:** ![](../semanas/S3/Freddy/evidencias/s3_espejo-en-vivo.png) · [explicación (PDF)](../semanas/S3/Freddy/explicaciones/s3_explicacion.pdf) · [resumen semanal (PDF)](../semanas/S3/Freddy/evidencias/resumen_S3_Freddy.pdf)

@@ -13,6 +13,7 @@ de `verdad`, que solo se reenvía al visor.
 from __future__ import annotations
 
 import threading
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 
@@ -121,4 +122,6 @@ class EstadoMundo:
 
     def salud(self) -> e.Salud:
         """Respuesta de `GET /salud`."""
-        return e.Salud(ok=True, contrato=int(e.CONTRATO_VERSION), t_sim=self.t_sim)
+        ahora = datetime.now(timezone.utc)
+        return e.Salud(ok=True, contrato=int(e.CONTRATO_VERSION), t_sim=self.t_sim,
+                       ts=ahora.replace(microsecond=ahora.microsecond // 1000 * 1000))

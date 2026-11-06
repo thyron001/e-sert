@@ -15,6 +15,8 @@ from fastapi import Depends, Header, Request
 
 from comun import esquemas as e
 
+from ..espejo.registro import RegistroEspejo
+from ..espejo.ws_espejo import DifusorEspejo
 from ..nucleo.billetera import Billetera
 from ..nucleo.db import BaseDatos, puestos_iniciales
 from ..nucleo.errores import ErrorNucleo
@@ -35,6 +37,15 @@ class Servicios:
     mundo: EstadoMundo
     gestor: GestorConexiones
     token_sim: Optional[str] = None
+    espejo: Optional[RegistroEspejo] = None
+    difusor_espejo: Optional[DifusorEspejo] = None
+
+    def __post_init__(self) -> None:
+        if self.espejo is None:
+            self.espejo = RegistroEspejo()
+        if self.difusor_espejo is None:
+            self.difusor_espejo = DifusorEspejo()
+        self.espejo.al_cambiar = self.difusor_espejo.despertar
 
     @classmethod
     def armar(cls, db_url: str, puestos_csv: Optional[str] = None,
@@ -55,6 +66,10 @@ class Servicios:
         if isinstance(mensaje, e.MensajeKpi):
             self.gestor.publicar(mensaje)
             return True
+        # S3-3: el bloque interno `espejo` va al registro y se quita del paso antes de seguir;
+        # `snapshot` nunca lo copia, y así tampoco queda en `mundo.ultimo_paso`.
+        self.mundo.espejos = set(self.espejo.aplicar(mensaje))
+        mensaje.espejo = None
         difusion = self.mundo.aplicar_paso(mensaje)
         if difusion is None:
             return False

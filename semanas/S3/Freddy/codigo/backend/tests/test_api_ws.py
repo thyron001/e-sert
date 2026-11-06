@@ -156,7 +156,7 @@ def test_interno_snapshot_exige_token(app_token):
             assert c.post("/api/v1/interno/snapshot", json=EJEMPLO,
                           headers={"X-Sim-Token": "otro"}).status_code == 401
             r = c.post("/api/v1/interno/snapshot", json=EJEMPLO, headers={"Authorization": f"Bearer {TOKEN}"})
-            assert r.status_code == 202 and r.json() == {"aceptado": True}
+            assert r.status_code == 202 and r.json() == {"aceptado": True, "espejos": []}
             snap = e.leer_mensaje_ws(ws.receive_text())
             assert isinstance(snap, e.MensajeSnapshot) and snap.t_sim == 1234.0
             r = c.post("/api/v1/interno/snapshot", json=paso(1300.0), headers={"X-Sim-Token": TOKEN})
@@ -229,7 +229,7 @@ def test_candidatos_espejo_y_salud(app):
         c.post("/api/v1/sim/paso", json=EJEMPLO)
         assert c.get("/api/v1/espejo/candidatos").json() == [
             {"id": "sim_veh42", "destino_nombre": "Parque Calderón", "estado": "GUIADO", "t_sim": 1234.0}]
-        assert c.get("/salud").json() == {"ok": True, "contrato": 1, "t_sim": 1234.0}
+        assert {k: v for k, v in c.get("/salud").json().items() if k != "ts"} == {"ok": True, "contrato": 1, "t_sim": 1234.0}
 
 
 def test_sim_kpi_difunde_y_exige_token(app_token):

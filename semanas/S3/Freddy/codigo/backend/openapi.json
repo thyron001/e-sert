@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "e-sert API",
-    "description": "\nAPI del backend de **e-sert**, la app de parqueo para la zona SERT del Centro Histórico de\nCuenca. Implementa el **contrato v1** (`docs/CONTRATO.md`).\n\n- Todas las rutas van bajo `/api/v1` y toda respuesta trae `X-Contrato-Version: 1`.\n- Si la petición manda otro `X-Contrato-Version`, responde `400 CONTRATO_INCOMPATIBLE`.\n- Los errores siguen el formato `{\"error\": {\"codigo\", \"mensaje\", \"detalle\"}}`.\n- Las rutas 🔒 son del controlador TraCI: si el backend tiene `ESERT_TOKEN_SIM`, exigen\n  `X-Sim-Token: <token>` o `Authorization: Bearer <token>`.\n- WebSocket `ws://<host>/ws/estado?rol=visor|publico`: mensajes `snapshot`, `kpi` y `verdad`\n  (este último solo para `rol=visor`).\n",
+    "description": "\nAPI del backend de **e-sert**, la app de parqueo para la zona SERT del Centro Histórico de\nCuenca. Implementa el **contrato v1** (`docs/CONTRATO.md`).\n\n- Todas las rutas van bajo `/api/v1` y toda respuesta trae `X-Contrato-Version: 1`.\n- Si la petición manda otro `X-Contrato-Version`, responde `400 CONTRATO_INCOMPATIBLE`.\n- Los errores siguen el formato `{\"error\": {\"codigo\", \"mensaje\", \"detalle\"}}`.\n- Las rutas 🔒 son del controlador TraCI: si el backend tiene `ESERT_TOKEN_SIM`, exigen\n  `X-Sim-Token: <token>` o `Authorization: Bearer <token>`.\n- WebSocket `ws://<host>/ws/estado?rol=visor|publico`: mensajes `snapshot`, `kpi` y `verdad`\n  (este último solo para `rol=visor`).\n- WebSocket `ws://<host>/ws/espejo/{veh_id}`: mensajes `espejo` (≤ 1 Hz) de un solo vehículo y\n  `espejo_fin` al terminar.\n",
     "version": "1"
   },
   "paths": {
@@ -1141,7 +1141,7 @@
           "simulacion"
         ],
         "summary": "[sim] Paso de simulación",
-        "description": "Actualiza el mundo y difunde `snapshot` y `verdad` por `/ws/estado`.",
+        "description": "Actualiza el mundo y difunde `snapshot` y `verdad` por `/ws/estado`. El bloque interno\n`espejo` queda en el registro del espejo; la respuesta dice qué autos sigue algún teléfono.",
         "operationId": "sim_paso_api_v1_sim_paso_post",
         "parameters": [
           {
@@ -1263,7 +1263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Aceptado"
+                  "$ref": "#/components/schemas/RespuestaSnapshot"
                 },
                 "example": {
                   "aceptado": true
@@ -1442,7 +1442,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Aceptado"
+                  "$ref": "#/components/schemas/RespuestaSnapshot"
                 },
                 "example": {
                   "aceptado": true
@@ -1627,7 +1627,7 @@
           "espejo"
         ],
         "summary": "Autos con app que se pueden seguir",
-        "description": "Vehículos con app del último paso que todavía no estacionan.",
+        "description": "Vehículos con app que todavía no estacionan (`BUSCANDO` o `GUIADO`).",
         "operationId": "candidatos_api_v1_espejo_candidatos_get",
         "responses": {
           "200": {
@@ -1702,6 +1702,18 @@
         "title": "Aceptado",
         "description": "Respuesta de las rutas que devuelven 202."
       },
+      "Aviso": {
+        "type": "string",
+        "enum": [
+          "saldo_bajo",
+          "saldo_agotado",
+          "tiempo_maximo_cerca",
+          "tiempo_maximo_superado",
+          "sesiones_bloqueadas"
+        ],
+        "title": "Aviso",
+        "description": "Avisos que el backend envía al espejo (§5)."
+      },
       "Billetera": {
         "properties": {
           "saldo": {
@@ -1743,6 +1755,57 @@
         ],
         "title": "Billetera",
         "description": "`GET /billetera/{usuario_id}`: saldos derivados del libro y sus movimientos."
+      },
+      "BilleteraEspejo": {
+        "properties": {
+          "saldo": {
+            "type": "number",
+            "title": "Saldo",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "disponible": {
+            "type": "number",
+            "title": "Disponible",
+            "description": "Dólares, 2 decimales como máximo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "saldo",
+          "disponible"
+        ],
+        "title": "BilleteraEspejo",
+        "description": "Resumen de la billetera para el espejo."
+      },
+      "BloqueEspejo": {
+        "properties": {
+          "candidatos": {
+            "items": {
+              "$ref": "#/components/schemas/CandidatoEspejo"
+            },
+            "type": "array",
+            "title": "Candidatos"
+          },
+          "detalle": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DetalleEspejo"
+            },
+            "type": "object",
+            "title": "Detalle",
+            "description": "veh_id → detalle"
+          },
+          "fin": {
+            "type": "boolean",
+            "title": "Fin",
+            "description": "La corrida terminó: los espejos reciben `fin_simulacion`",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BloqueEspejo",
+        "description": "Bloque interno `espejo` de `POST /interno/snapshot` (v1.2). Nunca sale por `/ws/estado`."
       },
       "CandidatoEspejo": {
         "properties": {
@@ -1947,6 +2010,141 @@
         ],
         "title": "DetalleError",
         "description": "Contenido de un error: código estable y mensaje legible en español."
+      },
+      "DetalleEspejo": {
+        "properties": {
+          "t_sim": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T Sim",
+            "description": "Segundos de simulación"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EstadoSesion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "modo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Modo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confianza": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confianza",
+            "description": "Del último ResultadoModo (no se difunde)"
+          },
+          "destino": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Destino"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "puesto": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PuestoEspejo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ruta": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2,
+              "description": "[lat, lon]"
+            },
+            "type": "array",
+            "title": "Ruta"
+          },
+          "sesion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SesionEspejo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "billetera": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BilleteraEspejo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "avisos": {
+            "items": {
+              "$ref": "#/components/schemas/Aviso"
+            },
+            "type": "array",
+            "title": "Avisos"
+          },
+          "recibo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReciboEspejo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "t_sim",
+          "lat",
+          "lon"
+        ],
+        "title": "DetalleEspejo",
+        "description": "Lo que el controlador sabe de un vehículo seguido (bloque interno `espejo.detalle`)."
       },
       "EstadoActualSesion": {
         "properties": {
@@ -2396,6 +2594,16 @@
           },
           "verdad": {
             "$ref": "#/components/schemas/DatosVerdad"
+          },
+          "espejo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BloqueEspejo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -2408,7 +2616,7 @@
           "verdad"
         ],
         "title": "PasoSimulacion",
-        "description": "`POST /sim/paso`: el controlador TraCI envía el estado del mundo (≤ 1 por s simulado)."
+        "description": "`POST /sim/paso`: el controlador TraCI envía el estado del mundo (≤ 1 por s simulado).\n\nv1.2: `espejo` es un bloque **interno** (candidatos y detalle de los vehículos seguidos) que el\nbackend guarda en `RegistroEspejo` y nunca difunde por `/ws/estado`."
       },
       "Peaton": {
         "properties": {
@@ -2489,6 +2697,43 @@
         "title": "Puesto",
         "description": "Un puesto (`parkingArea`) con su capacidad y la ocupación que estima el sistema."
       },
+      "PuestoEspejo": {
+        "properties": {
+          "puesto_id": {
+            "type": "string",
+            "pattern": "^pa_.+_\\d+$",
+            "title": "Puesto Id",
+            "description": "pa_<edgeId>_<n>"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "distancia_m": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Distancia M"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "puesto_id",
+          "lat",
+          "lon",
+          "distancia_m"
+        ],
+        "title": "PuestoEspejo",
+        "description": "Puesto asignado al vehículo seguido, con la distancia que le falta."
+      },
       "Recarga": {
         "properties": {
           "monto": {
@@ -2539,6 +2784,78 @@
         "title": "RecargaHecha",
         "description": "Respuesta de la recarga."
       },
+      "ReciboEspejo": {
+        "properties": {
+          "minutos_reales": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minutos Reales"
+          },
+          "minutos_cobrados": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Minutos Cobrados"
+          },
+          "cobrado_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Cobrado Usd",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "tarjeta_sert_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Tarjeta Sert Usd",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "ahorro_usd": {
+            "type": "number",
+            "title": "Ahorro Usd",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "minutos_reales",
+          "minutos_cobrados",
+          "cobrado_usd",
+          "tarjeta_sert_usd",
+          "ahorro_usd",
+          "sesion_id"
+        ],
+        "title": "ReciboEspejo",
+        "description": "Recibo dentro del bloque interno `espejo`: lleva el `sesion_id` para que el backend lo\nenvíe una sola vez por sesión. Al teléfono le llega como `Recibo` (sin `sesion_id`)."
+      },
+      "RespuestaSnapshot": {
+        "properties": {
+          "aceptado": {
+            "type": "boolean",
+            "const": true,
+            "title": "Aceptado",
+            "default": true
+          },
+          "espejos": {
+            "items": {
+              "type": "string",
+              "pattern": "^sim_.+$",
+              "description": "sim_<vehId>"
+            },
+            "type": "array",
+            "title": "Espejos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RespuestaSnapshot",
+        "description": "Respuesta 202 de `POST /interno/snapshot` y `/sim/paso` (v1.2): qué vehículos sigue algún\nteléfono; el controlador calcula `espejo.detalle` solo para esos."
+      },
       "Salud": {
         "properties": {
           "ok": {
@@ -2561,6 +2878,18 @@
               }
             ],
             "title": "T Sim"
+          },
+          "ts": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ts"
           }
         },
         "additionalProperties": false,
@@ -2773,6 +3102,43 @@
         ],
         "title": "SesionCreada",
         "description": "Respuesta de `POST /sesiones`."
+      },
+      "SesionEspejo": {
+        "properties": {
+          "sesion_id": {
+            "type": "string",
+            "pattern": "^ses_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sesion Id",
+            "description": "ses_<uuid4>"
+          },
+          "minutos": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Minutos"
+          },
+          "costo_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Costo Usd",
+            "description": "Dólares, 2 decimales como máximo"
+          },
+          "retenido_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Retenido Usd",
+            "description": "Dólares, 2 decimales como máximo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sesion_id",
+          "minutos",
+          "costo_usd",
+          "retenido_usd"
+        ],
+        "title": "SesionEspejo",
+        "description": "Sesión en curso vista desde el espejo (costo en vivo)."
       },
       "Tarifa": {
         "properties": {
