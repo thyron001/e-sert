@@ -41,6 +41,27 @@
         "timeout_sin_senal nunca se alcanza en 30 min (tope 120 min): su error de cobro es una proyección",
         "Aprobar en la unificación el contrato v1.2 propuesto (/sim/kpi, timeout_sin_senal, sin_senal)"
       ]
+    },
+    "sesion-3": {
+      "estado": "parcial",
+      "fecha": "2026-11-06",
+      "resumen": "Modo espejo de punta a punta: bloque interno espejo en el snapshot del controlador (candidatos, detalle de los autos seguidos con ruta, distancia, costo en vivo, avisos y recibo), RegistroEspejo, GET /espejo/candidatos y WS /ws/espejo/{veh_id} a ≤ 1 Hz, y espejos en el snapshot del visor. En local, 3 pantallas siguieron autos desde GUIADO hasta el recibo y espejo_fin con latencia p50 76 ms y p95 178 ms. La prueba en el VPS queda pendiente: la demo corre main (sin S3-3) y el token lo tiene Tyrone.",
+      "evidencias": [
+        "evidencias/s3_espejo-en-vivo.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S3_Freddy.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 6
+      },
+      "pendientes": [
+        "Prueba en línea en el VPS (latencia de punta a punta y 10 min con datos móviles): requiere el redeploy de esert-demo con S3-3 y ESERT_TOKEN_SIM (pedido @Tyrone [VPS])",
+        "Repetir las cifras de S3-1 y S3-2 que dependen del guiado: con los escenarios de Tyrone ningún auto se guiaba (param destino trae coordenadas; el nombre va en destino_nombre). Corregido en S3-3",
+        "Recibos reales: sin rf_v1.joblib el umbral cierra las sesiones a los 0,6-1,4 min (falsas liberaciones)",
+        "Aprobar en la unificación el contrato v1.2 propuesto (bloque espejo, RespuestaSnapshot, cierres 4404/1000, Salud.ts)"
+      ]
     }
   }
 }
