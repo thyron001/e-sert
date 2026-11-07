@@ -449,3 +449,65 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 
 **Evidencias:**
 ![](../semanas/S4/Pablo/evidencias/s1_model-card-metricas.png)
+
+## S4 · Sesión 2 · 2026-11-07 · Sección de IA final y preguntas probables del profesor
+**Estado:** hecha
+**Qué hice:**
+- `ia/figuras_informe.py`: regenera sin reentrenar ocho figuras a 300 dpi (ventanas por clase y fuente, velocidad por clase, importancia por permutación sobre usuarios no vistos, matrices de confusión RF frente a umbral, F1 frente a σ, tráfico lento, suavizado y falsas liberaciones, y falsas por penetración) más la lámina `s2_figuras-ia.png`. Nuevos reportes de `ia/evaluar_final.py`: `importancia_permutacion_final.csv`, `velocidad_por_clase.csv`, `curvas_sigma_final.csv`.
+- Repetí con `rf_final` la simulación de suavizado de S3-2 (`suavizado_k_final*.csv`, con columnas de adelanto del cierre).
+- `informe/pablo.md` reescrito (2 657 palabras, subsecciones `###`, comentario de fuente por bloque, ninguna cifra de `rf_v1`). `informe/verificar_cifras.py` ahora acepta `ruta:clave`, pies de tabla en cursiva y lee `referencias.bib`: 128 cifras comprobadas sin huérfanas.
+- Auditor independiente: ~85 cifras contrastadas; halló 3 discrepancias (23,6 % frente a 24,9 %, el rango "0,2 a 0,3" y la frase sobre la mitad de GeoLife) y una comparación implícita con el modelo anterior; todo corregido.
+- Revisión externa del informe armado (10 debilidades): corregí las de mi parte: aclaré que SUMO mide robustez al ruido modelado y no desempeño real, añadí "sin cierre" a la tabla de suavizado, declaré la falta de conjunto de validación separado y los IC optimistas, y añadí la **línea base de un solo atributo** (`ia/linea_base_desplazamiento.py`).
+- `informe/anexos/preguntas_profesor.md`: 37 preguntas (22 de IA, 5 de Freddy, 5 de Tyrone, 5 de Miguel).
+
+**Archivos creados o modificados:** `semanas/S4/Pablo/codigo/ia/` (`figuras_informe.py`, `linea_base_desplazamiento.py`, `evaluar_final.py`, `model_card.py`, `simular_falsas.py`, `reportes/*final*`, `reportes/linea_base_desplazamiento.json`, `reportes/busqueda_hiperparametros.csv`), `codigo/informe/` (`pablo.md`, `anexos/preguntas_profesor.md`, `figuras/pablo/`, `verificar_cifras.py`), evidencias y explicaciones.
+
+**Decisiones y por qué:**
+- **Hallazgo que modera la conclusión:** un árbol de decisión de profundidad 3 con solo el desplazamiento neto obtiene F1 macro 0,750 en GeoLife no vistos (RF 0,872) y 0,775 en SUMO normal con las mismas 58 005 ventanas (RF 0,738). El RF aporta en datos reales, pero en SUMO no supera a esa regla; se declara en el informe, la model card y el anexo (P36).
+- La figura de tráfico lento lleva una nota: el umbral parece acertar solo porque con σ = 5 m clasifica todo como vehículo.
+- Se copió `cv_search_rf_v1.csv` como `busqueda_hiperparametros.csv` para citarlo sin nombrar el modelo anterior.
+
+**Problemas encontrados:**
+- No existe `origin/tyrone/s4` ni ningún resultado de Tyrone: la sección de impacto en el sistema y la figura 8 quedan como `[PENDIENTE: cifra de Tyrone S4-2]` (la figura es un panel marcado como pendiente, sin datos inventados).
+- La máquina de estados de Freddy cierra solo el 48,3 % de las sesiones con `k = 1`; el 0,78 de falsas liberaciones es bajo en parte por eso (el informe lo dice).
+- Los IC de la simulación remuestrean sesiones de 5 semillas (no del todo independientes) y los de GeoLife se apoyan en 10 usuarios: son optimistas (declarado).
+
+**Pedidos a otros:**
+- @Tyrone: `kpis/resultados/final/resumen.csv` en `origin/tyrone/s4` (falsas liberaciones por 100 sesiones con umbral y con RF y retardo mediano por penetración); confirma qué máquina de estados y qué `k` usó la corrida final (ver `rf_final.json:suavizado_recomendado`). Revisa tus 5 preguntas del anexo (P26 a P30).
+- @Freddy: revisa tus 5 preguntas (P21 a P25) y confirma si `REGRESANDO → A_PIE` se mantiene.
+- @Miguel: revisa tus 5 preguntas (P31 a P35); la política de privacidad real y la prueba en iPhone físico están como `[PENDIENTE]`.
+- Plazo para las 15 preguntas: sábado 14 a las 18:00.
+
+**Bucle y verificación:** 4 vueltas (figuras, texto, auditoría, revisión externa). Segunda auditoría independiente sobre la versión final (143 cifras por script, ~55 a mano): cero discrepancias.
+
+**Pendientes para la próxima sesión:** reemplazar los `[PENDIENTE]` cuando Tyrone entregue y repetir el armado.
+
+**Evidencias:**
+![](../semanas/S4/Pablo/evidencias/s2_figuras-ia.png)
+
+## S4 · Sesión 3 · 2026-11-07 · Integración del informe completo
+**Estado:** parcial
+**Qué hice:**
+- Partes comunes (`informe/comun/`: portada, resumen de 205 palabras, introducción, trabajo relacionado, glosario, resultados integrados, conclusiones y trabajo futuro), `referencias.bib` con 16 entradas verificadas contra Crossref (subagente), maestro `informe.md`, `construir_informe.py` (`--fuentes proyecto|ramas`, PDF con `fpdf2` porque no hay `pandoc`), `verificar_informe.py` y 19 pruebas (subagente, revisadas por mí).
+- Ejecuté el armado con `--fuentes ramas` y con `--fuentes proyecto`: ambos terminan con código 2 por las secciones ausentes y generan un PDF de 14 páginas con la sección de IA completa, las partes comunes y el anexo. Instalé PyMuPDF (a nivel de usuario) para las miniaturas (`informe/miniaturas_pdf.py`, `evidencias/s3_informe-paginas.png`).
+- Revisor externo sin contexto: 10 debilidades; corregí las de mis partes (glosario, objetivo de la introducción como hipótesis, límites concretos en las conclusiones, declaración de circularidad de SUMO y de la falta de validación separada) y anoté el resto como pedido.
+
+**Archivos creados o modificados:** `semanas/S4/Pablo/codigo/informe/` (`informe.md`, `comun/`, `referencias.bib`, `construir_informe.py`, `verificar_informe.py`, `tests/`, `miniaturas_pdf.py`, `verificacion_referencias_s4.md`), `evidencias/s3_informe-paginas.png`, `evidencias/resumen_S4_Pablo.pdf`.
+
+**Decisiones y por qué:**
+- Los `[PENDIENTE]` se conservan: no se inventa ninguna cifra ni sección ajena; el verificador hace fallar el documento final mientras existan (33 marcadores y 3 secciones ausentes).
+- `AVISO misma ruta ... sin valores en común`: 14 avisos entre `pablo.md` y el anexo por citar el mismo archivo para métricas distintas; no son fallos y se dejan sin `:clave` para no producir falsos errores.
+
+**Problemas encontrados:** no existen las ramas `origin/{freddy,tyrone,miguel}/s4`; faltan `freddy.md`, `tyrone.md` y `miguel.md`. No hay `pandoc` (el PDF no usa `--citeproc`; las citas se resuelven con la lista de referencias del armador).
+
+**Pedidos a otros (lista exacta del verificador y del revisor):**
+- @Freddy, @Tyrone, @Miguel: publicar su sección en `semanas/S4/<Nombre>/codigo/informe/<nombre>.md` (entre 1 500 y 2 500 palabras; el verificador exige al menos 800), con sus figuras en `informe/figuras/<nombre>/` y el formato de `GUIA_ESTILO.md`; quitar todos los `[PENDIENTE]`.
+- @Tyrone: el resumen, la tabla de resultados integrados, las conclusiones y la figura 8 esperan `kpis/resultados/final/resumen.csv`; reconciliar con la Sección de suavizado (qué máquina de estados y `k` usó la corrida final). El anexo P25 admite que en S2 la app no mejoró el tiempo de búsqueda (11,3 frente a 10,8 min): el informe debe presentarlo con honestidad.
+- @Tyrone [Plan]: la unificación del domingo debe ejecutar `python3 informe/construir_informe.py --fuentes proyecto` y `verificar_informe.py` tras fusionar `pablo/s3` y `pablo/s4`.
+
+**Bucle y verificación:** 3 vueltas (armado, verificación, revisión externa). Criterios cumplidos: 3 de 6 (armado con `--fuentes proyecto`, resumen ≤ 250 palabras, evidencias y PDF semanal); el resto depende de otras personas.
+
+**Pendientes para la próxima sesión:** repetir el armado y el verificador cuando existan las ramas `s4` de los demás.
+
+**Evidencias:**
+![](../semanas/S4/Pablo/evidencias/s3_informe-paginas.png)

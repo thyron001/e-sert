@@ -18,6 +18,45 @@
       "pendientes": [
         "Si Freddy corrige REGRESANDO->A_PIE (contrato), usar suavizado k=5 (ver rf_final.json:suavizado_recomendado)"
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-07",
+      "resumen": "Seccion de IA final (2 657 palabras) con todas las cifras de rf_final y comentario de fuente; ia/figuras_informe.py regenera 8 figuras a 300 dpi; 128+ cifras comprobadas y auditoria independiente (3 discrepancias corregidas); anexo con 37 preguntas del profesor. Hallazgo: un arbol de un solo atributo (desplazamiento neto) iguala al RF en SUMO normal (0,775 frente a 0,738) y pierde en GeoLife (0,750 frente a 0,872); declarado en el informe y la model card.",
+      "evidencias": [
+        "evidencias/s2_figuras-ia.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Cifras y figura de falsas liberaciones por penetracion: [PENDIENTE: cifra de Tyrone S4-2] (origin/tyrone/s4 aun no existe)",
+        "15 preguntas del anexo a confirmar por Freddy, Tyrone y Miguel antes del sabado 14 a las 18:00"
+      ]
+    },
+    "sesion-3": {
+      "estado": "parcial",
+      "fecha": "2026-11-07",
+      "resumen": "Maquinaria del informe lista: partes comunes, glosario, referencias.bib (16 entradas verificadas), informe.md, construir_informe.py (--fuentes proyecto|ramas), verificar_informe.py y 19 pruebas; el armado produce un PDF de 14 paginas con la seccion de IA completa. Faltan las secciones de Freddy, Tyrone y Miguel (sus ramas s4 no existen) y las cifras de Tyrone: el verificador falla solo por eso, con pedidos anotados.",
+      "evidencias": [
+        "evidencias/s3_informe-paginas.png",
+        "evidencias/resumen_S4_Pablo.pdf",
+        "explicaciones/s3_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 3,
+        "total": 6
+      },
+      "pendientes": [
+        "Armado completo con las cuatro secciones (depende de freddy.md, tyrone.md y miguel.md en sus ramas s4)",
+        "verificar_informe.py con codigo 0 (33 marcadores PENDIENTE y 3 secciones ausentes)",
+        "Resumen con las 3 cifras de kpis/resultados/final/resumen.csv de Tyrone",
+        "Repetir el armado con --fuentes proyecto tras la unificacion del domingo"
+      ]
     }
   }
 }
