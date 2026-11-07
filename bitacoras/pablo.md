@@ -411,3 +411,41 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 
 **Evidencias:**
 ![](../semanas/S3/Pablo/evidencias/s3_informe-ia-figuras.png)
+
+## S4 · Sesión 1 · 2026-11-07 · Modelo final congelado y model card
+**Estado:** hecha
+**Qué hice:**
+- Descubrí que la "aumentación con ruido" de S2-1 solo multiplicaba algunas características por factores aleatorios, sin ruido en las posiciones; por eso `rf_v1` era frágil con σ ≥ 3 m en SUMO. `ia/datos/construir_entrenamiento_final.py` aplica ruido AR(1) (σ 3–15 m, ρ 0,8) a las posiciones y recalcula las 18 características con `_features_2d` (el mismo código de producción).
+- Grabé episodios de parqueo de SUMO con semillas de entrenamiento 201 y 202 (las 101–105 siguen solo de prueba): 445 607 ventanas (GeoLife 300 136 y SUMO 145 471).
+- `ia/entrenar_final.py`: determinista (`random_state` 42, `n_jobs` 1); dos corridas dan el mismo SHA-256 `1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2`. Modelo `ia/modelos/rf_final.joblib` (48,0 MB, `compress=3`) y `rf_final.json`.
+- `ia/inferencia.py`: carga `rf_final` por defecto, verifica el SHA-256 antes de leerlo y, si no coincide, falta o no hay referencia, cae al umbral con un aviso en el log; los parámetros del fallback salen del JSON.
+- `ia/evaluar_final.py` (umbral, `rf_v1` y `rf_final` sobre las mismas ventanas, etiquetas de SUMO por tramos de modo constante): GeoLife no vistos 0,872 (umbral 0,698); SUMO normal 0,738 (umbral 0,204, `rf_v1` 0,562); curvas frente a σ; latencia p50 1,35 ms y p99 2,12 ms.
+- `ia/MODEL_CARD.md`, `ia/tests/test_modelo_final.py` con 30 ventanas golden, `informe/GUIA_ESTILO.md`, `requirements.txt` con `scikit-learn==1.9.1`. 174 tests pasan.
+- Repetí la simulación de suavizado con `rf_final` (300 sesiones, σ 5/10/15 m).
+
+**Archivos creados o modificados:** `semanas/S4/Pablo/codigo/ia/` (`entrenar_final.py`, `evaluar_final.py`, `model_card.py`, `evidencia_model_card.py`, `figuras_informe.py`, `inferencia.py`, `simular_falsas.py`, `datos/construir_entrenamiento_final.py`, `datos/generar_golden.py`, `modelos/rf_final.joblib/.json`, `reportes/*final*`, `MODEL_CARD.md`, `tests/test_modelo_final.py`), `codigo/informe/GUIA_ESTILO.md`, evidencias y explicaciones.
+
+**Decisiones y por qué:**
+- Hiperparámetros de S2-2 (200 árboles, hoja mínima 3) daban un `.joblib` de 106,6 MB con las ventanas ruidosas (límite del prompt: 50 MB): se redujo a 100 árboles y hoja mínima 5 (48,0 MB) y se documenta.
+- Con `rf_final` el suavizado depende de la máquina de estados: `k = 1` con la de Freddy actual (falsas ≈ 0,8 por 100, cierres correctos 48,3 %) y `k = 5` con la tabla literal del contrato (falsas de 13,1 a 5,4 por 100). El JSON guarda ambos (`suavizado_recomendado`).
+- Se versiona `rf_final.joblib` (excepción en `ia/modelos/.gitignore`) para que Tyrone lo tenga en `pablo/s4`.
+- La evaluación usa etiquetas de SUMO por tramos (corrige el sesgo de S2-3) y reutiliza `bootstrap_agrupado` de S2-3.
+
+**Problemas encontrados:**
+- `rf_final` empeora frente a `rf_v1` en tráfico lento (F1 macro 0,051; el 64 % de los vehículos a paso de peatón van a `a_pie`) y en peatón rápido (recall de `a_pie` 0,86; F1 macro 0,453): son escenarios artificiales y el primero es irresoluble con solo GPS; se reporta tal cual.
+- Con σ de 10 a 15 m y la tabla literal del contrato, el RF libera en falso 10,7 y 27,7 por 100 con `k = 1`: son liberaciones reales (mediana de 1 502 s antes de la salida), no adelantos de segundos.
+- Hubo que reinstalar numpy, pydantic y pyproj en el contenedor (se había detenido) y traer de `origin/pablo/s2` las versiones finales de `evaluar_generalizacion.py` y `escenarios_dificiles.py` (en `pablo/s3` estaban las anteriores).
+- La rama `pablo/s4` se creó desde `pablo/s3` porque `main` aún no tiene S3 (se unifica el domingo).
+
+**Pedidos a otros:**
+- @Tyrone: `ia/modelos/rf_final.joblib` en `pablo/s4`, SHA-256 `1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2`, para la corrida final de S4-2. Con la máquina de Freddy actual usa `k = 1`.
+- @Freddy: `inferencia.py` ya carga `rf_final` por defecto. Si corriges `REGRESANDO → A_PIE` para seguir el contrato, usa `k = 5` (`ClasificadorConEstado(usuario, metodo="mayoria", k=5)`); con la regla actual solo cierra bien el 48,3 % de las sesiones.
+- @todos: existe `informe/GUIA_ESTILO.md`.
+- @Tyrone [Plan]: la unificación del domingo debe incluir `pablo/s3` (y `pablo/s2` final); `pablo/s4` parte de `pablo/s3`.
+
+**Bucle y verificación:** 5 vueltas (tamaño del modelo, parquet de pruebas, PDF con cursivas en tablas, simulación con adelantos, maquetación de la evidencia). 6/6 criterios cumplidos; el verificador independiente se lanza al cierre de S4-2 sobre las cifras que se citan.
+
+**Pendientes para la próxima sesión:** reescribir `informe/pablo.md` con cifras de `rf_final` y las 30 preguntas del profesor (S4-2).
+
+**Evidencias:**
+![](../semanas/S4/Pablo/evidencias/s1_model-card-metricas.png)

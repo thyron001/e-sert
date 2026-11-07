@@ -1,0 +1,23 @@
+{
+  "persona": "Pablo",
+  "semana": "S4",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-07",
+      "resumen": "rf_final congelado (100 arboles, 48 MB, SHA-256 1bdac0d7...), entrenado con ruido AR(1) sobre las posiciones y episodios reales de SUMO 201-202; mismo hash en dos corridas. F1 macro GeoLife no vistos 0,872 (umbral 0,698), SUMO normal 0,738 (rf_v1 0,562). inferencia.py carga rf_final por defecto con verificacion de hash y fallback al umbral. Model card, 30 ventanas golden, 174 tests y GUIA_ESTILO.",
+      "evidencias": [
+        "evidencias/s1_model-card-metricas.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "Si Freddy corrige REGRESANDO->A_PIE (contrato), usar suavizado k=5 (ver rf_final.json:suavizado_recomendado)"
+      ]
+    }
+  }
+}
