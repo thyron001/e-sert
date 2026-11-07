@@ -35,6 +35,25 @@
       "pendientes": [
         "Validar k con la corrida p50_rf_s1 de 1800 s: el controlador no tiene parametro de suavizado (pedido a Freddy)"
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-06",
+      "resumen": "Borrador de la seccion de IA del informe (3 109 palabras, 9 subsecciones, 6 figuras a 300 dpi, 12 referencias verificadas, 190 cifras comprobadas sin huerfanas). La Seccion 8 queda con marcadores [PENDIENTE] porque las cifras de Tyrone (S3-2) aun no existen en origin/tyrone/s3.",
+      "evidencias": [
+        "evidencias/s3_informe-ia-figuras.png",
+        "evidencias/resumen_S3_Pablo.pdf",
+        "explicaciones/s3_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Reemplazar los [PENDIENTE: cifra de Tyrone S3-2] de la Seccion 8 cuando existan hallazgos.md y tabla_kpis.md de Tyrone",
+        "Render con pandoc y --citeproc (no hay pandoc en el equipo)"
+      ]
     }
   }
 }

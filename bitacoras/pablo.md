@@ -376,3 +376,38 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 ![](../semanas/S3/Pablo/evidencias/s2_suavizado-falsas-liberaciones.png)
 ![](../semanas/S3/Pablo/evidencias/s2_errores-contexto.png)
 ![](../semanas/S3/Pablo/evidencias/s2_peores-errores.png)
+
+## S3 · Sesión 3 · 2026-11-06 · Borrador de la sección de IA del informe
+**Estado:** hecha
+**Qué hice:**
+- `informe/pablo.md`: 9 subsecciones, 3 109 palabras, 6 figuras, 3 tablas y preguntas abiertas para S4. Cada bloque con cifras lleva `<!-- fuente: ... -->`.
+- `informe/verificar_cifras.py`: lee esos comentarios, abre cada fuente y comprueba las cifras (redondeo y escala), imágenes rotas y claves de cita; lista aparte los `[PENDIENTE]`. Resultado: 190 cifras comprobadas, 0 huérfanas.
+- Figuras 1 a 6 a 300 dpi (PNG y PDF) con `informe/figuras/ia/generar_figuras.py` (subagente); `bench_inferencia.py` ganó `--dpi`, `--pdf`, `--figsize`, `--titulo`.
+- `informe/referencias_ia.bib` (12 entradas) y `verificacion_referencias.md` (subagente): 11 verificadas contra Crossref o JMLR y 1 parcial (GeoLife 2010: volumen y páginas solo de un resumen de búsqueda).
+- Auditor independiente: contrastó ~110 cifras a mano; una discrepancia (0,667 → 0,666), corregida.
+- Montaje `evidencias/s3_informe-ia-figuras.png`, explicación PDF y PDF semanal.
+
+**Archivos creados o modificados:** `semanas/S3/Pablo/codigo/informe/` (`pablo.md`, `verificar_cifras.py`, `referencias_ia.bib`, `verificacion_referencias.md`, `tabla_clases.py`, `montaje_figuras.py`, `figuras/ia/*`); `ia/reportes/` (`clases_por_fuente.csv`, `sensibilidad_resumen.csv`, y copias de `metricas_generalizacion.json`, `curvas_sigma.csv`, `evaluacion_generalizacion.md` finales de S2-3, `bench_inferencia.json`); `ia/bench_inferencia.py`; `ia/calibracion/FUENTES.md` (DOI de Jun et al.); evidencias y explicaciones.
+
+**Decisiones y por qué:**
+- `main` tenía la versión anterior de los reportes de S2-3 (sin SUMO); los definitivos están en `origin/pablo/s2` y se copiaron a mi módulo para que las cifras tengan fuente.
+- Sin `pandoc`: se renderizó con la biblioteca `markdown` de Python (6 imágenes, 3 tablas, 9 secciones); queda `--citeproc` para S4.
+- Los números de latencia del informe (p95 1,74 ms individual y 0,356 ms por ventana en lote) son de la última corrida del benchmark y difieren algo de S3-1 (1,56 y 0,33) por la carga del equipo.
+- Los números que son parámetros (`30 s`, `80 %`) van entre comillas invertidas para que el comprobador no los trate como datos.
+
+**Problemas encontrados:**
+- Las cifras de Tyrone (`hallazgos.md`, `tabla_kpis.md`) no existen: no hay rama `origin/tyrone/s3` ni `proyecto/kpis/figuras/`. La Sección 8 usa `[PENDIENTE: cifra de Tyrone S3-2]`, sin inventar números.
+- **Corrección a S2-3:** el reporte decía que el ruido no era el factor dominante, pero `curvas_sigma.csv` muestra RF 0,906 con σ = 0 y 0,562 con σ = 5 m. El informe lo corrige. La variante «RF + suavizado» de S2 (histéresis con umbral 0,6) empeora al RF con ruido (0,19 a 0,33 contra 0,52 a 0,58); la causa no se investigó.
+- `FUENTES.md` tenía un DOI equivocado de Jun et al. (2006) y trataba a Groves (2011) como si fuera libro; es un artículo. Las cifras de σ y ρ siguen marcadas "por verificar"; en el informe se presentan como rango adoptado por el proyecto, no como cifra de un artículo.
+- El verificador de S3-2 sobrescribió `bench_inferencia.json` con una corrida corta (3 900 ventanas); se repitió el benchmark oficial.
+
+**Pedidos a otros:**
+- @Tyrone: confirma las cifras de `hallazgos.md` que cito en la Sección 8 cuando existan (falsas /100 y retardo con IC 95 % por penetración); hoy están como `[PENDIENTE]`. [Plan] la unificación debe incluir mi commit `f9e6872` de S2-3 (en `main` quedó la versión anterior de los reportes).
+- @Freddy, @Miguel: sus secciones deben seguir el mismo formato de trazabilidad (`<!-- fuente: archivo -->` y un comprobador de cifras).
+
+**Bucle y verificación:** 3 vueltas (comprobador contra CSV mal parseado, cifras derivadas y parámetros, latencias definitivas). El auditor reportó cumple con una corrección menor.
+
+**Pendientes para la próxima sesión (S4):** reemplazar los `[PENDIENTE]`, renderizar con `pandoc --citeproc`, recalcular las métricas de SUMO con etiquetas por tramo de modo constante.
+
+**Evidencias:**
+![](../semanas/S3/Pablo/evidencias/s3_informe-ia-figuras.png)
