@@ -29,3 +29,14 @@ máquina de Freddy (no está en el contrato) deja sin cerrar ~97 % de las sesion
 ![](evidencias/s2_errores-contexto.png)
 
 ![](evidencias/s2_peores-errores.png)
+
+## Sesión 3 · Borrador de la sección de IA del informe
+
+Se escribió `informe/pablo.md` (3 109 palabras, 9 subsecciones) con 6 figuras a 300 dpi, tres tablas,
+12 referencias BibTeX verificadas y un comprobador (`verificar_cifras.py`) que verifica 190 cifras contra
+sus archivos fuente, sin huérfanas; un auditor independiente contrastó unas 110 a mano. Hallazgos al redactar:
+las curvas frente a σ muestran que el ruido sí es el factor dominante (0,906 sin ruido contra 0,562 con
+σ = 5 m), lo contrario de lo que decía el texto de S2-3. La Sección 8 (efecto en el sistema) queda con
+marcadores `[PENDIENTE]` porque las cifras de Tyrone aún no existen.
+
+![](evidencias/s3_informe-ia-figuras.png)
