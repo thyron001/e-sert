@@ -165,9 +165,16 @@ def f06_trafico_lento():
     ax.set_xticks(x, etiquetas)
     ax.set_ylim(0, 1.1)
     ax.set_ylabel("Valor")
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, loc="upper right")
+    ax.text(0.0, -0.32, "El umbral acierta porque con σ = 5 m clasifica todo como vehículo\n"
+            "(en SUMO normal no acierta ningún quieto); aquí casi todo es vehículo.",
+            transform=ax.transAxes, fontsize=8, color=MUTED, va="top")
     _limpio(ax)
-    _guardar(fig, "f06_trafico-lento.png")
+    fig.subplots_adjust(bottom=0.3)
+    SALIDA.mkdir(parents=True, exist_ok=True)
+    fig.savefig(SALIDA / "f06_trafico-lento.png", dpi=DPI)
+    plt.close(fig)
+    print("->", SALIDA / "f06_trafico-lento.png")
 
 
 def f07_suavizado():
@@ -189,10 +196,15 @@ def f07_suavizado():
         ejes[1, col].set_xticks(range(3), ["k = 1", "k = 3", "k = 5"])
     ejes[0, 0].set_ylabel("Falsas liberaciones\npor 100 sesiones")
     ejes[1, 0].set_ylabel("Retardo mediano\nde cierre (s)")
-    ejes[0, 0].legend(frameon=False)
+    h, l = ejes[0, 0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=2, frameon=False)
     for ax in ejes.ravel():
         _limpio(ax)
-    _guardar(fig, "f07_suavizado-falsas-liberaciones.png")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    SALIDA.mkdir(parents=True, exist_ok=True)
+    fig.savefig(SALIDA / "f07_suavizado-falsas-liberaciones.png", dpi=DPI)
+    plt.close(fig)
+    print("->", SALIDA / "f07_suavizado-falsas-liberaciones.png")
 
 
 def _resumen_tyrone():
@@ -226,9 +238,29 @@ def f08_penetracion():
     _guardar(fig, "f08_falsas-por-penetracion.png")
 
 
+def montaje():
+    """Lámina 2x3 con miniaturas de las figuras finales (evidencias/s2_figuras-ia.png)."""
+    import matplotlib.image as mpimg
+
+    nombres = ["f01_ventanas-por-clase-fuente", "f03_importancia-permutacion", "f04_matrices-confusion",
+               "f05_f1-vs-sigma", "f06_trafico-lento", "f07_suavizado-falsas-liberaciones"]
+    fig, ejes = plt.subplots(2, 3, figsize=(15, 8))
+    for ax, n in zip(ejes.ravel(), nombres):
+        ax.imshow(mpimg.imread(SALIDA / f"{n}.png"))
+        ax.set_title(n.split("_", 1)[0].replace("f0", "Figura ") + ": " + n.split("_", 1)[1].replace("-", " "), fontsize=9, loc="left")
+        ax.axis("off")
+    fig.tight_layout()
+    destino = AQUI.parent.parent / "evidencias" / "s2_figuras-ia.png"
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(destino, dpi=150)
+    plt.close(fig)
+    print("->", destino)
+
+
 def main():
     for f in (f01_ventanas, f02_velocidad, f03_importancia, f04_matrices, f05_sigma, f06_trafico_lento, f07_suavizado, f08_penetracion):
         f()
+    montaje()
 
 
 if __name__ == "__main__":

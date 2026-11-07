@@ -119,6 +119,8 @@ En usuarios no vistos de GeoLife la diferencia RF menos umbral es de 0,183 punto
 
 **Escenarios difíciles.** Frente a `rf_v1`, `rf_final` empeora en tráfico lento (el RF clasifica el 64 % de los vehículos a paso de peatón como `a_pie`) y en peatón rápido (*recall* de `a_pie` de 0,86), a cambio de mejorar en SUMO normal. <!-- fuente: ia/reportes/metricas_rf_final.json -->
 
+**Línea base de un solo atributo.** Un árbol de decisión de profundidad 3 sobre el desplazamiento neto, entrenado con las mismas ventanas, obtiene un F1 macro de 0,750 en GeoLife no vistos (RF: 0,872) y de 0,775 en SUMO normal con las mismas ventanas (RF: 0,738): el RF aporta en datos reales, pero en SUMO no supera a esa regla. <!-- fuente: ia/reportes/linea_base_desplazamiento.json -->
+
 **Tráfico lento.** El F1 de `vehiculo` es 0,001 con el RF y 0,982 con el umbral; el *recall*
 de `vehiculo` con velocidad menor que 8 km/h es 0,000 y 0,000. <!-- fuente: ia/reportes/metricas_rf_final.json -->
 
@@ -144,15 +146,16 @@ modo, la confianza y la hora. Una trayectoria permite inferir hábitos y domicil
 
 1. **GeoLife es Beijing:** otro tráfico, otra geometría urbana y otros hábitos de movilidad que un centro histórico andino.
 2. **Con ruido de 10 a 15 m el RF sí libera en falso** (Sección 8): hace falta `k = 5` con la tabla del contrato, o más precisión de GPS.
-3. **Todo es simulado y no hay datos de campo:** SUMO no modela el multitrayecto real de las fachadas del Centro Histórico.
-4. **El ruido es un AR(1) calibrado con literatura** (σ de 3 a 15 m, ρ = 0,8): captura el error lento y correlacionado, no los saltos
+3. **SUMO mide robustez al ruido modelado, no desempeño real:** el entrenamiento y la prueba comparten el generador de ruido y el escenario; el único dato real es GeoLife.
+4. **Todo es simulado y no hay datos de campo:** SUMO no modela el multitrayecto real de las fachadas del Centro Histórico.
+5. **El ruido es un AR(1) calibrado con literatura** (σ de 3 a 15 m, ρ = 0,8): captura el error lento y correlacionado, no los saltos
    del multitrayecto; los valores exactos son una elección del proyecto.
-5. **Tráfico lento:** un auto a paso de peatón es indistinguible de una persona caminando solo con GPS.
-6. **Teléfono dentro del auto o en mano:** el modelo no sabe dónde está el teléfono; si queda en el auto, la sesión se cierra cuando
+6. **Tráfico lento:** un auto a paso de peatón es indistinguible de una persona caminando solo con GPS.
+7. **Teléfono dentro del auto o en mano:** el modelo no sabe dónde está el teléfono; si queda en el auto, la sesión se cierra cuando
    el auto sale aunque el dueño no esté. Un acelerómetro ayudaría.
-7. **Pocas semillas de SUMO en el entrenamiento** (201, 202) y una sola configuración de escenario.
-8. **Sin grabaciones caseras:** no hay validación con GPS real de un teléfono.
-9. **Etiqueta `quieto` derivada en GeoLife:** depende de los umbrales de velocidad y desplazamiento elegidos.
+8. **Pocas semillas de SUMO en el entrenamiento** (201, 202) y una sola configuración de escenario.
+9. **Sin grabaciones caseras:** no hay validación con GPS real de un teléfono.
+10. **Etiqueta `quieto` derivada en GeoLife:** depende de los umbrales de velocidad y desplazamiento elegidos.
 
 ## 11. Cómo reproducirlo
 

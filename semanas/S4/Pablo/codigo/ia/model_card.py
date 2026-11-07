@@ -67,6 +67,7 @@ def main():
     s1f = sf[(sf["sistema"] == "rf") & (sf["metodo"] == "mayoria")].set_index("k")
     umb = sk[(sk["sistema"] == "umbral") & (sk["metodo"] == "mayoria")].set_index("k")
 
+    lb = json.loads((REP / "linea_base_desplazamiento.json").read_text())
     vs = geo.get("vs_umbral", {}).get("rf_final", {})
     md = f"""# Model card: `rf_final`
 
@@ -166,6 +167,8 @@ En usuarios no vistos de GeoLife la diferencia RF menos umbral es de {f(vs.get('
 
 **Escenarios difíciles.** Frente a `rf_v1`, `rf_final` empeora en tráfico lento (el RF clasifica el {f(100 * F['sumo_trafico_lento']['rf_final']['confusion_conteos'][2][0] / sum(F['sumo_trafico_lento']['rf_final']['confusion_conteos'][2]), 0)} % de los vehículos a paso de peatón como `a_pie`) y en peatón rápido (*recall* de `a_pie` de {f(F['sumo_peaton_rapido']['rf_final']['por_clase']['a_pie']['recall'], 2)}), a cambio de mejorar en SUMO normal. <!-- fuente: ia/reportes/metricas_rf_final.json -->
 
+**Línea base de un solo atributo.** Un árbol de decisión de profundidad 3 sobre el desplazamiento neto, entrenado con las mismas ventanas, obtiene un F1 macro de {f(lb['geolife_prueba']['f1_macro'])} en GeoLife no vistos (RF: {f(lb['rf_final']['geolife_prueba'])}) y de {f(lb['sumo_normal_sigma5_semillas_101_105']['f1_macro'])} en SUMO normal con las mismas ventanas (RF: {f(lb['rf_final']['sumo_normal'])}): el RF aporta en datos reales, pero en SUMO no supera a esa regla. <!-- fuente: ia/reportes/linea_base_desplazamiento.json -->
+
 **Tráfico lento.** El F1 de `vehiculo` es {f(tl['rf_final']['f1_vehiculo'])} con el RF y {f(tl['umbral']['f1_vehiculo'])} con el umbral; el *recall*
 de `vehiculo` con velocidad menor que 8 km/h es {f(tl['rf_final']['recall_vehiculo_lt_8kmh'])} y {f(tl['umbral']['recall_vehiculo_lt_8kmh'])}. <!-- fuente: ia/reportes/metricas_rf_final.json -->
 
@@ -191,15 +194,16 @@ modo, la confianza y la hora. Una trayectoria permite inferir hábitos y domicil
 
 1. **GeoLife es Beijing:** otro tráfico, otra geometría urbana y otros hábitos de movilidad que un centro histórico andino.
 2. **Con ruido de 10 a 15 m el RF sí libera en falso** (Sección 8): hace falta `k = 5` con la tabla del contrato, o más precisión de GPS.
-3. **Todo es simulado y no hay datos de campo:** SUMO no modela el multitrayecto real de las fachadas del Centro Histórico.
-4. **El ruido es un AR(1) calibrado con literatura** (σ de 3 a 15 m, ρ = 0,8): captura el error lento y correlacionado, no los saltos
+3. **SUMO mide robustez al ruido modelado, no desempeño real:** el entrenamiento y la prueba comparten el generador de ruido y el escenario; el único dato real es GeoLife.
+4. **Todo es simulado y no hay datos de campo:** SUMO no modela el multitrayecto real de las fachadas del Centro Histórico.
+5. **El ruido es un AR(1) calibrado con literatura** (σ de 3 a 15 m, ρ = 0,8): captura el error lento y correlacionado, no los saltos
    del multitrayecto; los valores exactos son una elección del proyecto.
-5. **Tráfico lento:** un auto a paso de peatón es indistinguible de una persona caminando solo con GPS.
-6. **Teléfono dentro del auto o en mano:** el modelo no sabe dónde está el teléfono; si queda en el auto, la sesión se cierra cuando
+6. **Tráfico lento:** un auto a paso de peatón es indistinguible de una persona caminando solo con GPS.
+7. **Teléfono dentro del auto o en mano:** el modelo no sabe dónde está el teléfono; si queda en el auto, la sesión se cierra cuando
    el auto sale aunque el dueño no esté. Un acelerómetro ayudaría.
-7. **Pocas semillas de SUMO en el entrenamiento** ({', '.join(map(str, entr['semillas_sumo']))}) y una sola configuración de escenario.
-8. **Sin grabaciones caseras:** no hay validación con GPS real de un teléfono.
-9. **Etiqueta `quieto` derivada en GeoLife:** depende de los umbrales de velocidad y desplazamiento elegidos.
+8. **Pocas semillas de SUMO en el entrenamiento** ({', '.join(map(str, entr['semillas_sumo']))}) y una sola configuración de escenario.
+9. **Sin grabaciones caseras:** no hay validación con GPS real de un teléfono.
+10. **Etiqueta `quieto` derivada en GeoLife:** depende de los umbrales de velocidad y desplazamiento elegidos.
 
 ## 11. Cómo reproducirlo
 
