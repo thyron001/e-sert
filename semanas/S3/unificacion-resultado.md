@@ -26,7 +26,7 @@ Plazo: `2026-11-07T23:59:59-05:00`.
   - Las cifras de S3-1 y S3-2 se tomaron sin guiado. Con los escenarios de Tyrone ningún auto se guiaba, porque `param destino` trae coordenadas. Se corrigió en S3-3, pero esas corridas no se repitieron.
   - En la bitácora de S3-3, el pedido `[VPS]` le pide a Tyrone el token "por privado". `CLAUDE.md` no permite que una sesión que no es de Tyrone pida credenciales. Se anota para Tyrone; no se tocó nada.
 - **Pablo:** las tres sesiones están `hecha`. Lo que queda abierto:
-  - En S3-3 quedan 4 marcadores `[PENDIENTE: cifra de Tyrone S3-2]` en la Sección 8 de `informe/pablo.md`.
+  - En S3-3 quedan 9 marcadores `[PENDIENTE: cifra de Tyrone S3-2]` en la Sección 8 de `informe/pablo.md` (líneas 119–121: 3 filas × 3 columnas) y 1 `[PENDIENTE]` genérico en "Preguntas abiertas".
   - La bitácora de S3-2 anota 6 vueltas del bucle (el máximo de `CLAUDE.md` es 5).
   - La latencia que declaran `estado.json` y la bitácora (p95 de 1,56 ms individual y 0,33 ms por ventana en lote) no coincide con la de `ia/reportes/bench_inferencia.json` (1,74 ms y 0,35 ms). Las dos cumplen la meta de < 5 ms.
 - **Fuera del alcance de S3:** existe `origin/pablo/s4`, con 3 commits del 2026-11-07 (S4-1 y S4-2 `hecha`, S4-3 `parcial` con 3/6). No se fusiona aquí.
@@ -47,10 +47,10 @@ Plazo: `2026-11-07T23:59:59-05:00`.
 Se hizo con un script temporal fuera del repo, solo sobre archivos versionados y solo en las
 rutas del dueño (`docs/EQUIPO.md`).
 
-| Persona | Archivos revisados | Nuevos | Sobrescritos | Idénticos | Módulos |
+| Persona | Copiables (versionados en `codigo/` menos los no copiados) | Nuevos | Sobrescritos | Idénticos | Módulos |
 |---|---|---|---|---|---|
-| Freddy | 145 | 33 | 25 | 87 | `traci/`, `backend/` (sin `pagos/` ni `asistente/`), `comun/` |
-| Pablo | 94 | 42 | 8 | 44 | `ia/`, `informe/` (`pablo.md`, `figuras/ia/`, `referencias_ia.bib` y los scripts) |
+| Freddy | 145 (de 148) | 33 | 25 | 87 | `traci/`, `backend/` (sin `pagos/` ni `asistente/`), `comun/` |
+| Pablo | 94 (de 95) | 42 | 8 | 44 | `ia/`, `informe/` (`pablo.md`, `figuras/ia/`, `referencias_ia.bib` y los scripts) |
 
 - En total, el commit `[S3-U] Copia módulos de S3 a proyecto/` cambia 108 archivos.
 - **No copiados por estar fuera de su módulo:**
@@ -64,7 +64,9 @@ rutas del dueño (`docs/EQUIPO.md`).
 
 **Contrato v1.2 aplicado** en `docs/CONTRATO.md`, con fecha 2026-11-08. Es la propuesta de
 Freddy de S3, aditiva y ya implementada en `proyecto/comun/esquemas.py` y `proyecto/backend/`,
-con tests. `X-Contrato-Version` y `Salud.contrato` siguen en `1`.
+con tests. `X-Contrato-Version` y `Salud.contrato` siguen en `1`. Respecto de la propuesta solo cambian
+el encabezado (título y primer bloque de cita) y el título de la sección final, que pasa a
+`## Cambios en v1.2 (propuesta de Freddy, S3; aplicada el 2026-11-08)`.
 
 1. `POST /sim/kpi` 🔒, que se difunde como `kpi`.
 2. Aclaración del mensaje `verdad`: `ocupados`, `estacionados` y `falsas_liberaciones`.
@@ -163,7 +165,7 @@ no se pudo regenerar ninguna figura. Lo único disponible son las corridas de Fr
 | Error de facturación | sí | `salidas_kpi/` de Freddy |
 | Precisión del mapa | sí | `salidas_kpi/` de Freddy |
 
-**Cifras principales al 50 %** (Freddy, umbral, semilla 1, sin guiado; para comparar el próximo domingo):
+**Cifras principales al 50 %** (Freddy, semilla 1, sin guiado, siempre con el umbral; para comparar el próximo domingo). Las de 900 s salen de `ejemplo_p50_umbral_s1.json`; las de 3600 s, de `ejemplo_p50_rf_s1_3600.json` (`rf` pedido, umbral usado):
 
 | Indicador | Valor |
 |---|---|
@@ -174,7 +176,7 @@ no se pudo regenerar ninguna figura. Lo único disponible son las corridas de Fr
 | Error medio de facturación | −0,12 USD |
 | Precisión del mapa (solo app) | 1,00 |
 | Precisión del mapa (total) | 0,82 en 900 s; 0,62 en 3600 s |
-| Rejilla de robustez | 97,4–100 falsas por 100, saturada por el umbral |
+| Rejilla de robustez (`robustez.csv`, 44 corridas de 1800 s, semillas 1–2) | 97,4–100 falsas por 100, saturada por el umbral |
 
 ### Informativo
 
@@ -182,7 +184,7 @@ no se pudo regenerar ninguna figura. Lo único disponible son las corridas de Fr
 |---|---|
 | Latencia de `ia/inferencia.py` < 5 ms | No se pudo volver a correr: `python -m ia.bench_inferencia` necesita `geolife_etiquetado.parquet` (sin versionar). El último benchmark versionado (`ia/reportes/bench_inferencia.json`) da p95 de 1,74 ms individual y 0,35 ms por ventana en lote: cumple. |
 | `npx tsc --noEmit` en `proyecto/app/` | sin errores (`npm ci` y luego `tsc`; `node_modules/` se borró después) |
-| `proyecto/informe/pablo.md` | existe: 9 secciones más "Preguntas abiertas para S4" y "Referencias", con 4 `[PENDIENTE]` en la Sección 8 |
+| `proyecto/informe/pablo.md` | existe: 9 secciones más "Preguntas abiertas para S4" y "Referencias", con 9 `[PENDIENTE: cifra de Tyrone S3-2]` en la Sección 8 y 1 `[PENDIENTE]` en "Preguntas abiertas" |
 
 ## Pedidos cruzados
 
@@ -220,6 +222,7 @@ no se pudo regenerar ninguna figura. Lo único disponible son las corridas de Fr
 - **@Freddy:** añadir `httpx` (y lo que usa de `backend`) a `traci/requirements.txt`. Ya se pidió en S2 y sigue igual.
 - **@Pablo:**
   - añadir `hypothesis` y `pydantic` a `ia/requirements.txt`;
+  - `ia/datos/ventanas_prueba.py:12` arma la ruta del parquet con `parents[3] / "S2/Pablo/..."`, que solo funciona desde `semanas/S3/Pablo/codigo/`; desde `proyecto/` apunta fuera del repo y el benchmark no corre;
   - `pytest.skip` en los tests que necesitan `rf_v1.joblib` o los parquet;
   - publicar el modelo final de S4 de forma accesible, porque `rf_v1.joblib` no está en ningún sitio que la unificación o Freddy puedan usar.
 - **@Tyrone:** subir `tyrone/s3` (ejecutor de experimentos, agregados y figuras) o rehacerlo en S4, y atender el pedido `[VPS]` de Freddy.
