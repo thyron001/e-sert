@@ -1,0 +1,25 @@
+{
+  "puntos": 3254173,
+  "segmentos": 10418,
+  "usuarios": 64,
+  "horas_por_clase": {
+    "a_pie": 1193.09,
+    "vehiculo": 1712.74
+  },
+  "horas_por_modo_original": {
+    "bus": 922.38,
+    "car": 640.3,
+    "taxi": 150.06,
+    "walk": 1193.09
+  },
+  "intervalo_muestreo": {
+    "mediana_s": 2.0,
+    "p90_s": 5.0
+  },
+  "descartados": {
+    "puntos_totales": 11890457,
+    "descartados_modo": 1603697,
+    "descartados_coord": 0,
+    "descartados_velocidad": 1518
+  }
+}

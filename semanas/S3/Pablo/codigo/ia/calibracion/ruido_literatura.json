@@ -1,0 +1,22 @@
+{
+  "sigma_m_valores": [3, 5, 8, 10, 15],
+  "sigma_m_justificacion": "Rango de 3 m (cielo abierto, Zandbergen 2009) a 15 m (cañón urbano profundo, Groves 2011). Valores intermedios: 5 m en movimiento vehicular (Jun et al. 2006), 8 m típico A-GPS (Zandbergen y Barbeau 2011), 10 m urbano denso (Merry y Bettinger 2019). Para el Centro Histórico de Cuenca (calles estrechas, edificios de 2-4 pisos) los valores 8-10 m son los más representativos.",
+  "rho_1hz": 0.8,
+  "rho_justificacion": "Autocorrelación temporal del error GPS a muestreo de 1 Hz. Valor central 0.8 basado en análisis de errores correlacionados en series estáticas (Zandbergen y Barbeau 2011) y en movimiento vehicular (Jun, Guensler y Ogle 2006). Rango plausible: 0.7 (movimiento rápido, cambios de constelación) a 0.95 (estático, cielo abierto).",
+  "p_perdida_rango": [0.02, 0.10],
+  "p_perdida_justificacion": "Probabilidad de pérdida de fix GPS por segundo. Desde ~2 % en entorno suburbano abierto hasta ~10 % en cañón urbano profundo con obstrucción severa (Groves 2011). En el Centro Histórico de Cuenca se esperan valores de 0.03-0.07 según la calle.",
+  "precision_m_formula": "sigma_m * U(0.8, 1.5)",
+  "entrenamiento": {
+    "tipo": "mezcla",
+    "sigma_min": 3.0,
+    "sigma_max": 15.0,
+    "justificacion": "La mezcla U(3,15) fue elegida como la configuración más robusta. La diferencia entre σ_entr en la rejilla de sensibilidad es <0.3% en macro-F1, pero la mezcla entrena con diversidad de condiciones GPS (cielo abierto a cañón urbano), lo que es preferible para el Centro Histórico de Cuenca donde las condiciones varían por calle."
+  },
+  "fuentes": [
+    "Zandbergen2009",
+    "ZandbergenBarbeau2011",
+    "MerryBettinger2019",
+    "Groves2011",
+    "JunGuenslerOgle2006"
+  ]
+}

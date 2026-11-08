@@ -1,0 +1,21 @@
+fuente,escenario,sigma,semilla,usuario_id,segmento_id,t_inicio,modo_real,pred_rf,conf_rf,pred_umbral,vel_kmh,precision_m,tipo,motivo,idx_arr
+geolife,geolife,,-1,geolife_052,geolife_052_seg277_r2,1216266504.0,a_pie,vehiculo,0.997,vehiculo,28.786,,error_de_etiqueta,a_pie a 30 km/h de velocidad neta,6365
+geolife,geolife,,-1,geolife_062,geolife_062_seg526_r27,1224332148.0,a_pie,vehiculo,0.996,vehiculo,49.352,,error_de_etiqueta,a_pie a 51 km/h de velocidad neta,17578
+geolife,geolife,,-1,geolife_052,geolife_052_seg411_r6,1220339376.0,a_pie,vehiculo,0.99,vehiculo,40.114,,error_de_etiqueta,a_pie a 42 km/h de velocidad neta,9960
+geolife,geolife,,-1,geolife_062,geolife_062_seg760_r0,1229044793.0,a_pie,vehiculo,0.979,vehiculo,33.958,,error_de_etiqueta,a_pie a 32 km/h de velocidad neta,21297
+geolife,geolife,,-1,geolife_052,geolife_052_seg330_r0,1216802717.0,vehiculo,a_pie,0.974,a_pie,3.428,,error_del_modelo,"desplazamiento 27.9 m, velocidad neta 0.96 m/s: coherente con la etiqueta",7399
+geolife,geolife,,-1,geolife_052,geolife_052_seg119_r0,1213261807.0,vehiculo,a_pie,0.971,a_pie,3.236,,error_del_modelo,"desplazamiento 25.5 m, velocidad neta 0.88 m/s: coherente con la etiqueta",4175
+geolife,geolife,,-1,geolife_052,geolife_052_seg436_r1,1223216462.0,vehiculo,a_pie,0.968,a_pie,4.257,,error_del_modelo,"desplazamiento 32.4 m, velocidad neta 1.12 m/s: coherente con la etiqueta",10595
+geolife,geolife,,-1,geolife_062,geolife_062_seg362_r35,1221204316.0,vehiculo,a_pie,0.968,a_pie,4.14,,error_del_modelo,"desplazamiento 34.1 m, velocidad neta 1.18 m/s: coherente con la etiqueta",14210
+geolife,geolife,,-1,geolife_052,geolife_052_seg211_r3,1215085512.0,a_pie,vehiculo,0.968,vehiculo,24.607,,error_de_etiqueta,a_pie a 25 km/h de velocidad neta,5463
+geolife,geolife,,-1,geolife_052,geolife_052_seg223_r1,1215577531.0,vehiculo,a_pie,0.968,a_pie,4.138,,error_del_modelo,"desplazamiento 33.5 m, velocidad neta 1.16 m/s: coherente con la etiqueta",5991
+sumo,trafico_lento,15.0,101,101_trafico_lento_sim_paso_161,101_trafico_lento_sim_paso_161_s13_r0,1123.0,vehiculo,a_pie,0.883,vehiculo,35.98,16.653,error_del_modelo,"desplazamiento 35.1 m, velocidad neta 1.21 m/s: coherente con la etiqueta",91338
+sumo,trafico_lento,15.0,101,101_trafico_lento_sim_busca_109,101_trafico_lento_sim_busca_109_s1_r0,1187.0,vehiculo,a_pie,0.871,vehiculo,37.41,16.592,error_del_modelo,"desplazamiento 28.1 m, velocidad neta 0.97 m/s: coherente con la etiqueta",89772
+sumo,trafico_lento,15.0,101,101_trafico_lento_sim_paso_256,101_trafico_lento_sim_paso_256_s15_r0,1636.0,vehiculo,a_pie,0.859,vehiculo,39.966,16.931,error_del_modelo,"desplazamiento 35.6 m, velocidad neta 1.23 m/s: coherente con la etiqueta",91756
+sumo,normal,5.0,104,104_normal_sim_busca_215,104_normal_sim_busca_215_s15_r0,861.0,vehiculo,a_pie,0.859,vehiculo,25.122,5.672,error_del_modelo,"desplazamiento 30.3 m, velocidad neta 1.04 m/s: coherente con la etiqueta",54013
+sumo,trafico_lento,15.0,101,101_trafico_lento_sim_busca_310,101_trafico_lento_sim_busca_310_s4_r0,1836.0,vehiculo,a_pie,0.857,vehiculo,40.761,17.357,error_del_modelo,"desplazamiento 51.7 m, velocidad neta 1.78 m/s: coherente con la etiqueta",90688
+sumo,normal,10.0,101,101_normal_ped_p55,101_normal_ped_p55_s11_r0,1350.0,quieto,a_pie,0.845,vehiculo,29.428,10.696,error_del_modelo,"desplazamiento 36.0 m, velocidad neta 1.24 m/s: coherente con la etiqueta",81357
+sumo,normal,10.0,101,101_normal_ped_p21,101_normal_ped_p21_s5_r0,1088.0,quieto,a_pie,0.832,vehiculo,24.726,11.271,error_del_modelo,"desplazamiento 39.8 m, velocidad neta 1.37 m/s: coherente con la etiqueta",80652
+sumo,trafico_lento,10.0,101,101_trafico_lento_sim_busca_230,101_trafico_lento_sim_busca_230_s3_r0,1457.0,vehiculo,quieto,0.816,vehiculo,19.118,11.507,error_del_modelo,"desplazamiento 58.5 m, velocidad neta 2.02 m/s: coherente con la etiqueta",84362
+sumo,normal,10.0,101,101_normal_sim_busca_458,101_normal_sim_busca_458_s25_r0,2058.0,quieto,a_pie,0.814,vehiculo,25.124,10.996,error_del_modelo,"desplazamiento 30.6 m, velocidad neta 1.05 m/s: coherente con la etiqueta",82739
+sumo,normal,8.0,101,101_normal_sim_busca_135,101_normal_sim_busca_135_s18_r0,2044.0,quieto,a_pie,0.814,vehiculo,23.468,9.412,error_del_modelo,"desplazamiento 34.1 m, velocidad neta 1.18 m/s: coherente con la etiqueta",75994
