@@ -2,7 +2,8 @@
 Suavizado temporal de predicciones para reducir cambios espurios de modo.
 
 Metodos:
-  - media_movil: promedio de las ultimas k probabilidades y argmax.
+  - mayoria: voto de mayoria de los ultimos k modos (empate: gana el mas reciente).
+  - prob_media (= media_movil): promedio de las ultimas k probabilidades y argmax.
   - histeresis: cambia de modo solo si el nuevo supera umbral_cambio
     durante k ventanas seguidas.
 
@@ -14,17 +15,21 @@ import numpy as np
 
 
 CLASES = ["a_pie", "quieto", "vehiculo"]
+METODOS = ("mayoria", "prob_media", "media_movil", "histeresis", "ninguno")
 
 
 class Suavizador:
     """Suaviza una secuencia de probabilidades por ventana de un usuario."""
 
-    def __init__(self, metodo: str = "media_movil", k: int = 3,
+    def __init__(self, k: int = 3, metodo: str = "prob_media",
                  umbral_cambio: float = 0.6):
-        if metodo not in ("media_movil", "histeresis", "ninguno"):
+        if metodo not in METODOS:
             raise ValueError(f"Metodo no soportado: {metodo}")
+        if k < 1:
+            raise ValueError("k debe ser >= 1")
         self.metodo = metodo
         self.k = k
+        self._historial_modos: list[str] = []
         self.umbral_cambio = umbral_cambio
         self._historial_probas: list[np.ndarray] = []
         self._modo_actual: str | None = None
@@ -33,6 +38,7 @@ class Suavizador:
 
     def reset(self):
         self._historial_probas.clear()
+        self._historial_modos.clear()
         self._modo_actual = None
         self._contador_cambio = 0
         self._modo_candidato = None
@@ -41,10 +47,41 @@ class Suavizador:
         """Procesa una ventana y devuelve el modo suavizado."""
         if self.metodo == "ninguno":
             return CLASES[int(np.argmax(probas))]
-        elif self.metodo == "media_movil":
+        elif self.metodo == "mayoria":
+            return self._paso_mayoria(probas)
+        elif self.metodo in ("media_movil", "prob_media"):
             return self._paso_media_movil(probas)
         else:
             return self._paso_histeresis(probas)
+
+    def _paso_mayoria(self, probas: np.ndarray) -> str:
+        self._historial_modos.append(CLASES[int(np.argmax(probas))])
+        if len(self._historial_modos) > self.k:
+            self._historial_modos.pop(0)
+        votos = {c: self._historial_modos.count(c) for c in CLASES}
+        mejor = max(votos.values())
+        for modo in reversed(self._historial_modos):  # empate: gana el mas reciente
+            if votos[modo] == mejor:
+                return modo
+
+    def actualizar(self, resultado: dict, probas: np.ndarray | None = None) -> dict:
+        """
+        Suaviza un `ResultadoModo` (contrato §2) y devuelve otro `ResultadoModo`.
+
+        `probas` sigue el orden CLASES; si falta (fuente "umbral"), se usa un vector one-hot
+        del modo. La confianza es la probabilidad media (o fraccion de votos) del modo elegido.
+        """
+        if probas is None:
+            probas = np.zeros(len(CLASES))
+            probas[CLASES.index(resultado["modo"])] = 1.0
+        modo = self.paso(np.asarray(probas, dtype=float))
+        if self.metodo == "mayoria":
+            conf = self._historial_modos.count(modo) / len(self._historial_modos)
+        elif self.metodo in ("media_movil", "prob_media") and self._historial_probas:
+            conf = float(np.mean(self._historial_probas, axis=0)[CLASES.index(modo)])
+        else:
+            conf = float(resultado["confianza"])
+        return {"modo": modo, "confianza": min(max(conf, 0.0), 1.0), "fuente": resultado["fuente"]}
 
     def _paso_media_movil(self, probas: np.ndarray) -> str:
         self._historial_probas.append(probas.copy())
@@ -199,7 +236,7 @@ def elegir_suavizado(df_train, pipe, verbose: bool = True) -> dict:
                 fold_espurios_suav.append(res["espurios_h_suav"])
                 fold_espurios_crudo.append(res["espurios_h_crudo"])
                 fold_modos_suav.extend(
-                    Suavizador(config["metodo"], config["k"]).suavizar_secuencia(probas_u))
+                    Suavizador(k=config["k"], metodo=config["metodo"]).suavizar_secuencia(probas_u))
                 fold_modos_crudo.extend(
                     [CLASES[int(np.argmax(p))] for p in probas_u])
                 fold_modos_real.extend(modos_real_u)

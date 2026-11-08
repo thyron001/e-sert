@@ -33,6 +33,14 @@ def _bearing(lat1, lon1, lat2, lon2):
 def _mediana_movil(arr, k=3):
     """Mediana móvil de tamaño k, con padding en los bordes."""
     n = len(arr)
+    if k == 3 and n >= 3:
+        arr = np.asarray(arr, dtype=float)
+        res = np.empty(n)
+        a, b, c = arr[:-2], arr[1:-1], arr[2:]
+        res[1:-1] = np.maximum(np.minimum(a, b), np.minimum(np.maximum(a, b), c))
+        res[0] = (arr[0] + arr[1]) / 2
+        res[-1] = (arr[-2] + arr[-1]) / 2
+        return res
     resultado = np.empty(n)
     medio = k // 2
     for i in range(n):

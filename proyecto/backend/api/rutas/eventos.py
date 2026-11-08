@@ -1,4 +1,8 @@
-"""`POST /eventos/ubicacion` y `POST /eventos/modo` (202): último estado conocido del usuario."""
+"""`POST /eventos/ubicacion` y `POST /eventos/modo` (202): último estado conocido del usuario.
+
+S3-2: son `async def`. Solo guardan el último evento bajo un candado (microsegundos), así que no
+necesitan el *threadpool* de FastAPI; con 200 usuarios a 1 Hz ese salto de hilo pesaba en el p95.
+"""
 
 from __future__ import annotations
 
@@ -17,7 +21,7 @@ _ACEPTADO = {**ej.respuesta(202, "aceptado", "Evento registrado"), **ej.errores(
 
 @router.post("/ubicacion", status_code=status.HTTP_202_ACCEPTED, response_model=e.Aceptado,
              summary="Registrar una posición GPS", responses=_ACEPTADO)
-def ubicacion(
+async def ubicacion(
     ev: e.EventoUbicacion = Body(..., openapi_examples=ej.cuerpo("ubicacion", "GPS con ruido de un auto con app")),
     mundo: EstadoMundo = Depends(dep.mundo),
 ) -> e.Aceptado:
@@ -28,7 +32,7 @@ def ubicacion(
 
 @router.post("/modo", status_code=status.HTTP_202_ACCEPTED, response_model=e.Aceptado,
              summary="Registrar el modo que clasificó la IA", responses=_ACEPTADO)
-def modo(
+async def modo(
     ev: e.EventoModo = Body(..., openapi_examples=ej.cuerpo("modo", "Resultado del clasificador")),
     mundo: EstadoMundo = Depends(dep.mundo),
 ) -> e.Aceptado:

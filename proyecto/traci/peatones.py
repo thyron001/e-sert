@@ -27,6 +27,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from .controlador import parametro
+
 PARADA_EXTENDIDA_S = 86400
 ESPERA_CORTA_S = 60
 MIN_DILIGENCIA_S = 60
@@ -121,7 +123,7 @@ class GestorPeatones:
         """Llamado tras cada paso del `Controlador`."""
         tr = ctrl.traci
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
-            if tr.vehicle.getParameter(veh, "clase") == "busca" and veh not in self.activos:
+            if parametro(ctrl, veh, "clase") == "busca" and veh not in self.activos:
                 self._llegada(ctrl, veh, t)
         self._revisar_regresos(ctrl, t)
         if self._registrar and round(t) % INTERVALO_TRAYECTORIA_S == 0:
@@ -182,7 +184,10 @@ class GestorPeatones:
 
         Devuelve ((edge, pos), ida, t_ida, vuelta), o None si ningún destino tiene camino.
         """
-        nombre = texto_traci(tr.vehicle.getParameter(veh, "destino"))
+        # S3-3: los escenarios de Tyrone (S2) traen el nombre en `destino_nombre` y en `destino` las
+        # coordenadas; la demanda de S1 traía el nombre en `destino`.
+        nombre = texto_traci(tr.vehicle.getParameter(veh, "destino_nombre")) or \
+            texto_traci(tr.vehicle.getParameter(veh, "destino"))
         arista = self._arista_destino(tr, nombre)
         if arista is not None:
             ida = _camino(tr, edge_auto, arista[0])

@@ -114,6 +114,8 @@ class MotivoCierre(str, Enum):
 
     deteccion = "deteccion"
     manual = "manual"
+    # S3-2 (propuesto en CONTRATO.propuesto.md): sin datos GPS, la sesión llegó a `tiempo_maximo_min`.
+    timeout_sin_senal = "timeout_sin_senal"
 
 
 class TipoMovimiento(str, Enum):
@@ -236,6 +238,7 @@ class Salud(Modelo):
     ok: bool
     contrato: int
     t_sim: Optional[TSim] = None
+    ts: Optional[FechaISO] = None  # v1.2: hora UTC del servidor con ms (la app estima su desfase)
 
 
 class Tarifa(Modelo):
@@ -476,13 +479,26 @@ class DatosVerdad(Modelo):
 
 
 class PasoSimulacion(Modelo):
-    """`POST /sim/paso`: el controlador TraCI envía el estado del mundo (≤ 1 por s simulado)."""
+    """`POST /sim/paso`: el controlador TraCI envía el estado del mundo (≤ 1 por s simulado).
+
+    v1.2: `espejo` es un bloque **interno** (candidatos y detalle de los vehículos seguidos) que el
+    backend guarda en `RegistroEspejo` y nunca difunde por `/ws/estado`.
+    """
 
     t_sim: TSim
     ts: FechaISO
     vehiculos: List[VehiculoSim]
     peatones: List[Peaton]
     verdad: DatosVerdad
+    espejo: Optional["BloqueEspejo"] = None
+
+
+class RespuestaSnapshot(Modelo):
+    """Respuesta 202 de `POST /interno/snapshot` y `/sim/paso` (v1.2): qué vehículos sigue algún
+    teléfono; el controlador calcula `espejo.detalle` solo para esos."""
+
+    aceptado: Literal[True] = True
+    espejos: List[VehiculoId] = Field(default_factory=list)
 
 
 class PuestoEspejo(Modelo):
@@ -518,6 +534,39 @@ class Recibo(Modelo):
     cobrado_usd: UsdPositivo
     tarjeta_sert_usd: UsdPositivo
     ahorro_usd: Usd
+
+
+class ReciboEspejo(Recibo):
+    """Recibo dentro del bloque interno `espejo`: lleva el `sesion_id` para que el backend lo
+    envíe una sola vez por sesión. Al teléfono le llega como `Recibo` (sin `sesion_id`)."""
+
+    sesion_id: SesionId
+
+
+class DetalleEspejo(Modelo):
+    """Lo que el controlador sabe de un vehículo seguido (bloque interno `espejo.detalle`)."""
+
+    t_sim: TSim
+    estado: Optional[EstadoSesion] = None
+    lat: Latitud
+    lon: Longitud
+    modo: Optional[Modo] = None
+    confianza: Optional[float] = Field(None, ge=0, le=1, description="Del último ResultadoModo (no se difunde)")
+    destino: Optional[Destino] = None
+    puesto: Optional[PuestoEspejo] = None
+    ruta: List[Coordenada] = Field(default_factory=list)
+    sesion: Optional[SesionEspejo] = None
+    billetera: Optional[BilleteraEspejo] = None
+    avisos: List[Aviso] = Field(default_factory=list)
+    recibo: Optional[ReciboEspejo] = None
+
+
+class BloqueEspejo(Modelo):
+    """Bloque interno `espejo` de `POST /interno/snapshot` (v1.2). Nunca sale por `/ws/estado`."""
+
+    candidatos: List[CandidatoEspejo] = Field(default_factory=list)
+    detalle: Dict[str, DetalleEspejo] = Field(default_factory=dict, description="veh_id → detalle")
+    fin: bool = Field(False, description="La corrida terminó: los espejos reciben `fin_simulacion`")
 
 
 # ---------------------------------------------------------------------------
@@ -633,3 +682,6 @@ class FilaTraza(Modelo):
 
 
 __all__ = [n for n in dir() if not n.startswith("_") and n not in {"annotations", "datetime"}]
+
+
+PasoSimulacion.model_rebuild()

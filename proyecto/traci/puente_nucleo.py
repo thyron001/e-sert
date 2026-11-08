@@ -21,9 +21,9 @@ import threading
 import time
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
-CODIGO = Path(__file__).resolve().parents[1]  # semanas/S2/Freddy/codigo
+CODIGO = Path(__file__).resolve().parents[1]  # semanas/S3/Freddy/codigo
 if str(CODIGO) not in sys.path:
     sys.path.insert(0, str(CODIGO))
 
@@ -57,6 +57,8 @@ class PuenteNucleo:
         self.abiertas: Dict[str, dict] = {}
         self.cerradas: List[dict] = []
         self.no_abiertas: Counter = Counter()  # motivo → cuántas llegadas quedaron sin sesión
+        # Oyentes de cierre (S3-1): `KPIsSistema` recibe la fila de cada sesión cerrada.
+        self.al_cerrar: List[Callable[[dict], None]] = []
         self._placas = 0
 
     # ------------------------------------------------------------------ usuarios y sesiones
@@ -97,6 +99,8 @@ class PuenteNucleo:
                 "minutos_cobrados": r.minutos_cobrados, "debitado": r.debitado,
                 "motivo": motivo.value}
         self.cerradas.append(fila)
+        for oyente in self.al_cerrar:
+            oyente(fila)
         return fila
 
     # ------------------------------------------------------------------ salidas
@@ -146,7 +150,11 @@ class Publicador:
     RUTA = "/api/v1/interno/snapshot"
 
     def __init__(self, url: str, token: Optional[str] = None, timeout_s: float = 2.0,
-                 reintentos: int = 3, backoff_s: float = 0.5):
+                 reintentos: int = 3, backoff_s: float = 0.5, ruta: Optional[str] = None,
+                 al_responder: Optional[Callable[[dict], None]] = None):
+        self.ruta = ruta or self.RUTA
+        # S3-3: la respuesta trae `{"espejos": [...]}`; quien la necesite (PublicadorSnapshots) la recibe aquí.
+        self.al_responder = al_responder
         headers = {"Authorization": f"Bearer {token}"} if token else {}
         self._cliente = httpx.Client(base_url=url, headers=headers, timeout=timeout_s)
         self._cola: "queue.Queue[dict]" = queue.Queue(maxsize=1)
@@ -172,9 +180,14 @@ class Publicador:
             cuerpo = self._cola.get()
             for intento in range(self._reintentos):
                 try:
-                    r = self._cliente.post(self.RUTA, json=cuerpo)
+                    r = self._cliente.post(self.ruta, json=cuerpo)
                     if r.status_code < 300:
                         self.enviados += 1
+                        if self.al_responder is not None:
+                            try:
+                                self.al_responder(r.json())
+                            except ValueError:
+                                pass
                         break
                 except httpx.HTTPError:
                     pass

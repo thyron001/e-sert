@@ -1,0 +1,40 @@
+{
+  "candidatos": [
+    {"id": "sim_veh42", "destino_nombre": "Parque Calderón", "estado": "GUIADO", "t_sim": 1234.0},
+    {"id": "sim_veh9", "destino_nombre": "Mercado 10 de Agosto", "estado": "BUSCANDO", "t_sim": 1234.0}
+  ],
+  "detalle": {
+    "sim_veh42": {
+      "t_sim": 1234.0,
+      "estado": "GUIADO",
+      "lat": -2.897,
+      "lon": -79.004,
+      "modo": "vehiculo",
+      "confianza": 0.93,
+      "destino": {"nombre": "Parque Calderón", "lat": -2.897308, "lon": -79.004488},
+      "puesto": {"puesto_id": "pa_-106945247#0_0", "lat": -2.8898155, "lon": -78.9956309, "distancia_m": 180.0},
+      "ruta": [[-2.897, -79.004], [-2.8975, -79.005]],
+      "sesion": null,
+      "billetera": {"saldo": 4.85, "disponible": 4.85},
+      "avisos": [],
+      "recibo": null
+    },
+    "sim_veh7": {
+      "t_sim": 1234.0,
+      "estado": "CERRADA",
+      "lat": -2.8968,
+      "lon": -79.0039,
+      "modo": "vehiculo",
+      "confianza": 0.88,
+      "destino": {"nombre": "Catedral Nueva", "lat": -2.897443, "lon": -79.005237},
+      "puesto": {"puesto_id": "pa_-106945247#1_0", "lat": -2.8961, "lon": -79.0041, "distancia_m": 3.2},
+      "ruta": [],
+      "sesion": null,
+      "billetera": {"saldo": 4.47, "disponible": 4.47},
+      "avisos": ["saldo_bajo"],
+      "recibo": {"sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d", "minutos_reales": 42.3,
+                 "minutos_cobrados": 45, "cobrado_usd": 0.38, "tarjeta_sert_usd": 0.5, "ahorro_usd": 0.12}
+    }
+  },
+  "fin": false
+}
