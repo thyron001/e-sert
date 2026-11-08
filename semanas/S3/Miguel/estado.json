@@ -1,0 +1,25 @@
+{
+  "persona": "Miguel",
+  "semana": "S3",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-08",
+      "resumen": "La app pasa sola al recibo cuando la simulación cierra la sesión (WS del espejo de Freddy) o cuando el servidor la cierra (sondeo de GET /sesiones cada 10 s), una sola vez y sin volver atrás. El recibo compara con la tarjeta SERT usando montos del servidor; tarifa.ts portada con las cifras de Freddy (50 tests). Probado en Android contra el backend y la simulación reales (curl detectado en 7 s), con Ya me voy, en modo mock y en el simulador de iPhone.",
+      "evidencias": [
+        "evidencias/s1_recibo.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Que el backend envíe el motivo del cierre y la tarjeta SERT en GET /sesiones (hoy la app los deduce y calcula).",
+        "Recibo en un iPhone físico (solo simulador).",
+        "Incluir S2-3 (espejo por WS) en proyecto/: esta copia partió de miguel/s2."
+      ]
+    }
+  }
+}

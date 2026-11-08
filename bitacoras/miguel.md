@@ -395,3 +395,86 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 **Pendientes para la próxima sesión:** volver a la app en Android con una APK propia (`esert://`); probar en un iPhone físico; probar la recarga desde la app contra el backend del VPS (`EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`).
 **Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_payphone-pruebas.png)
 [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S3 · Sesión 1 · 2026-11-08 · Cierre automático en la app y recibo comparado con la tarjeta SERT
+**Estado:** hecha
+
+**Qué hice:**
+- **Copia de la app para S3:** `proyecto/app` no tiene S2-3 (el espejo por WS), porque la unificación de S2 se hizo antes de esa sesión. Por eso se copió la versión de `miguel/s2` (`fe9dc13`), que es `proyecto/app` + S2-3; se comprobó con `git diff` que es la única diferencia.
+- **Contrato:** la copia de `esquemas.ts` se actualizó a v1.2 y se verificó por hash.
+- **`src/logica/tarifa.ts` + 50 tests** (subagente):
+  - port de `tarifa.py`: `minutosCobrables`, `costo`, `bloquesTarjetaSert`, `costoTarjetaSert`, `ahorro` y `compararConServidor`;
+  - mismas cifras que `test_tarifa.py`: 12→15, 3→10, 47→50 = $0.42, tarjeta $0.50, ahorro $0.08, 120 sin ahorro.
+- **`src/servicios/seguimientoSesion.ts`:**
+  - `DetectorCierre` procesa el cierre una sola vez, venga del WS, de REST o del cierre manual;
+  - `usarSeguimientoPropio` consulta `GET /sesiones/{id}` cada 10 s y al volver a primer plano;
+  - `usarSeguimientoEspejo` toma los mensajes del `SocketEspejo` de S2-3 y solo usa REST de respaldo si el WS está caído.
+- **Recibo:** `src/pantallas/Recibo.tsx` en la ruta `app/recibo.tsx`, abierta con `router.replace` y sin gesto ni botón de volver. Muestra:
+  - motivo, placa o vehículo, puesto y calle;
+  - llegada y salida en America/Guayaquil;
+  - minutos reales y cobrados, débito y saldo;
+  - la comparación con la tarjeta SERT;
+  - el botón "¿No te fuiste? Avísanos", que guarda el caso en AsyncStorage.
+- **`app/sesion/activa.tsx`:** botón "Ya me voy" con `Alert.alert` y sondeo del cierre. Si el servidor ya no conoce la sesión (404), ofrece "Descartar sesión".
+- **`src/mocks/cierreMock.ts`:** CERRADA con recibo 20 s después de ESTACIONADO. El espejo lo usa en modo mock.
+- **Pruebas en Android por Tailscale**, contra el backend local de `proyecto/` y la simulación de Freddy en `van3twin`:
+  - cierre por la simulación;
+  - cierre por `curl`;
+  - "Ya me voy";
+  - modo mock.
+
+  Además, el recibo en el simulador de iPhone.
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/app/` (copia completa de la app, más):
+  - `src/logica/`, `src/servicios/`, `src/pantallas/`, `src/mocks/`
+  - `app/recibo.tsx`, `app/sesion/activa.tsx`, `app/espejo/[vehId].tsx`, `app/_layout.tsx`
+  - `src/espejo/usarEspejo.ts`, `src/api/cliente.ts`, `src/contrato/esquemas.ts`
+- `semanas/S3/Miguel/evidencias/s1_recibo.png` y `evidencias/capturas/`
+- `semanas/S3/Miguel/explicaciones/s1_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **expo-router:** la app usa expo-router, así que `navigation.replace("Recibo")` del prompt es `router.replace('/recibo')`, con la pantalla en `src/pantallas/Recibo.tsx` como pide el prompt.
+- **Navegar con el primer recibo:** Freddy envía el recibo una sola vez por conexión y el latido siguiente trae `recibo: null`, así que el modal de S2 desaparecía a los 2 s. Además, `usarEspejo` retiene el primer mensaje con recibo por si React agrupa estados.
+- **Motivo deducido:** ni `GET /sesiones` ni el recibo traen el motivo. Si llega al tope de 120 min, "falta de señal"; un auto del espejo, "la simulación lo detectó"; y "Ya me voy", manual. Si no, "El servidor registró el cierre".
+- **Tarjeta en la sesión propia:** el backend no envía la tarjeta para la sesión propia, así que se calcula con `tarifa.ts` y se indica "Tarjeta calculada con la tarifa vigente". En el espejo es la del servidor. Si `tarifa.ts` difiere en más de $0.01, se emite `console.warn`.
+- **Sondeo en pausa durante "Ya me voy":** el sondeo se pausa mientras se envía el cierre manual, para que conserve su motivo.
+- **Mock:** se aceptan `EXPO_PUBLIC_MOCK=1` (nombre del prompt) y `EXPO_PUBLIC_USE_MOCK=1`.
+- **iOS:** la captura salió del simulador con `/recibo?demo=mock` (solo `__DEV__`), que pasa el recorrido del mock por el mismo `DetectorCierre`. `simctl` no puede tocar la pantalla.
+
+**Problemas encontrados:**
+- **Sesiones simuladas fuera del backend:** el controlador crea sus sesiones en una base en memoria propia (`puente_nucleo.py`), así que `GET /sesiones/{id}` responde 404 para ellas. En el espejo, el respaldo REST no puede confirmar un cierre y el WS es la única fuente. Además, el mensaje CERRADA llega con `sesion: null`.
+- **Preparar la simulación:** hubo que correr `traci/obtener_escenario.py` en la computadora y `python3 -m traci.escenario_app` en el contenedor; ambos escriben en `traci/escenario/`, ignorado por git. También instalar `httpx`, `sqlalchemy` y `pydantic` en el contenedor: `traci/requirements.txt` no los trae.
+- **Sesiones muy cortas en la simulación:** con `--ritmo 15` y `5`, las sesiones duraron 0.6–4 min simulados y pasaron de A_PIE a CERRADA sin SALIENDO visible.
+- **Corridas que terminaban antes de tiempo:** la primera corrida a 15× terminó antes de que el auto seguido cerrara; se repitió a 5× con `--hasta 7200`.
+- **Sesión guardada de S2 en el simulador:** el simulador tenía una sesión de S2 (293 h, otro backend) que quedaba "activa" para siempre. Se añadió el aviso de sesión huérfana con "Descartar sesión".
+- **`.env` heredado de S2:** apuntaba el espejo al mock de S2 (`EXPO_PUBLIC_ESPEJO_URL`); se quitó.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - El mensaje `espejo` de `CERRADA` sí trae `recibo` completo (§7), pero llega con `sesion: null`. Pido mantener `sesion.sesion_id` también en el mensaje de cierre.
+  - `GET /sesiones/{id}` no refleja los cierres de la simulación, porque las sesiones viven en la base en memoria del controlador. Pido que el controlador cree y cierre las sesiones de los autos con app por la API del backend (o con la misma base), para que `GET /sesiones/{id}` responda.
+  - Pido añadir `motivo` (`deteccion` / `manual` / `timeout_sin_senal`) a `Sesion` y al `recibo` del espejo: la app hoy lo deduce.
+  - Pido añadir `tarjeta_sert_usd` y `ahorro_usd` a la respuesta del cierre o a `GET /sesiones/{id}` cerrada, para que la comparación de la sesión propia también salga del servidor.
+  - Pido añadir `httpx`, `sqlalchemy` y `pydantic` a `traci/requirements.txt`, y actualizar el docstring de `correr_guiado`/`obtener_escenario` (todavía dice `semanas/S1/Freddy/codigo`).
+- **@Tyrone [Plan]:** pido que la unificación de S4 traiga S2-3 (`fe9dc13` de `miguel/s2`) junto con `miguel/s3`. Esta copia ya lo incluye, así que basta con fusionar `miguel/s3`.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código y tests.
+  2. El `.env` heredado y la simulación sin escenario.
+  3. La corrida que terminaba antes y el motivo sin SALIENDO.
+  4. La sesión huérfana y la captura de iOS.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/5 criterios**. El 4 es parcial solo en la sesión propia, porque la tarjeta la calcula `tarifa.ts`: el backend no la envía. Encontró defectos menores, ya corregidos:
+  - la carrera entre "Ya me voy" y el sondeo;
+  - el recibo que podía perderse si React agrupaba mensajes;
+  - el `catch` que faltaba en "Avísanos".
+- Resultado final: Jest 204/204, `tsc` sin errores, `verificar-contrato` OK. Los 16 tests de `test_tarifa.py` de Freddy pasan con las mismas cifras.
+
+**Pendientes para la próxima sesión:**
+- S3-2: avisos de saldo bajo, tiempo máximo y bloqueo por saldo negativo.
+- Probar el recibo en un iPhone físico.
+- Usar el motivo y la tarjeta del servidor cuando Freddy los envíe.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s1_recibo.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s1_explicacion.pdf)
