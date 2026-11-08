@@ -141,7 +141,9 @@ def test_tarifa_y_salud(cliente):
     t = cliente.get(f"{PREF}/tarifa").json()
     assert e.Tarifa.model_validate(t).bloque_minimo_min == 30
     for ruta in ("/salud", f"{PREF}/salud"):
-        assert cliente.get(ruta).json() == {"ok": True, "contrato": 1, "t_sim": None}
+        salud = cliente.get(ruta).json()
+        assert e.Salud.model_validate(salud).ts is not None  # v1.2: hora del servidor (la app mide su desfase)
+        assert {k: salud[k] for k in ("ok", "contrato", "t_sim")} == {"ok": True, "contrato": 1, "t_sim": None}
 
 
 # ---------------------------------------------------------------- eventos

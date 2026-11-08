@@ -56,6 +56,7 @@ MODELO_POR_EJEMPLO = {
     "espejo_ws.json": e.MensajeEspejo,
     "espejo_recibo_ws.json": e.MensajeEspejo,
     "espejo_fin_ws.json": e.MensajeEspejoFin,
+    "espejo.json": e.BloqueEspejo,  # bloque interno de /interno/snapshot (v1.2), nunca sale por WS
 }
 
 

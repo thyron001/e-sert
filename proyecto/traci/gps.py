@@ -4,6 +4,9 @@
   muestras consecutivas y desviación estacionaria `sigma_m` por eje. Así se comporta un GPS
   real en un cañón urbano: el error se "arrastra" unos segundos en vez de saltar al azar.
 - Pérdida de muestras con probabilidad `p_perdida` (el proceso de error sigue avanzando).
+- S3-2: ráfagas de pérdida tipo **Gilbert-Elliott** (cañón urbano): cada agente alterna entre un
+  estado bueno y uno malo (sin señal). `rafaga_s` es la duración media del estado malo y
+  `frac_rafaga` la fracción del tiempo que se pasa en él; ambos tiempos son exponenciales.
 - `precision_m` reportada = `sigma_m × U(0,8; 1,5)`.
 - `velocidad_mps` como la calcularía un teléfono: distancia entre posiciones **ruidosas**
   consecutivas / tiempo, no la velocidad de SUMO.
@@ -60,6 +63,7 @@ class _EstadoAgente:
     ex: float
     ey: float
     t: float
+    malo: bool = False  # Gilbert-Elliott: en ráfaga sin señal
     x_emit: Optional[float] = None
     y_emit: Optional[float] = None
     t_emit: Optional[float] = None
@@ -69,9 +73,13 @@ class EmuladorGPS:
     """GPS ruidoso por agente. `observar()` devuelve una fila del CSV del contrato, o None si se pierde."""
 
     def __init__(self, semilla: int, sigma_m: float = 5.0, p_perdida: float = 0.02, tasa_hz: float = 1,
-                 rho: float = 0.8):
+                 rho: float = 0.8, rafaga_s: Optional[float] = None, frac_rafaga: float = 0.3):
         if not 0 <= rho < 1:
             raise ValueError("rho debe estar en [0, 1)")
+        if rafaga_s is not None and (rafaga_s <= 0 or not 0 < frac_rafaga < 1):
+            raise ValueError("rafaga_s > 0 y frac_rafaga en (0, 1)")
+        self.rafaga_s = rafaga_s
+        self.frac_rafaga = frac_rafaga
         self.rng = random.Random(semilla)
         self.sigma_m = sigma_m
         self.p_perdida = p_perdida
@@ -100,9 +108,17 @@ class EmuladorGPS:
         estado = self._agentes.get(agente_id)
         if estado is None:  # el error arranca en su distribución estacionaria
             estado = _EstadoAgente(self.rng.gauss(0, self.sigma_m), self.rng.gauss(0, self.sigma_m), t)
+            if self.rafaga_s is not None:  # y la ráfaga también
+                estado.malo = self.rng.random() < self.frac_rafaga
             self._agentes[agente_id] = estado
+            dt = 0.0
         else:
+            dt = t - estado.t
             self._avanzar_error(estado, t)
+        if self.rafaga_s is not None:
+            self._avanzar_rafaga(estado, dt)
+            if estado.malo:
+                return None
         if self.rng.random() < self.p_perdida:
             return None
         xr, yr = x + estado.ex, y + estado.ey
@@ -120,6 +136,17 @@ class EmuladorGPS:
             "velocidad_mps": None if velocidad is None else round(velocidad, 3),
             "modo_real": modo_real,
         }
+
+    def _avanzar_rafaga(self, estado: _EstadoAgente, dt: float) -> None:
+        """Cadena de Markov de dos estados en tiempo continuo (salidas exponenciales)."""
+        if dt <= 0:
+            return
+        if estado.malo:
+            salir = 1 - math.exp(-dt / self.rafaga_s)
+        else:  # media en estado bueno = rafaga_s · (1 − f) / f
+            salir = 1 - math.exp(-dt * self.frac_rafaga / ((1 - self.frac_rafaga) * self.rafaga_s))
+        if self.rng.random() < salir:
+            estado.malo = not estado.malo
 
     def error_actual(self, agente_id: str) -> Tuple[float, float]:
         """Error (ex, ey) en metros del agente (para tests y gráficas)."""

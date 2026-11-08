@@ -12,7 +12,7 @@ Tabla de referencia para calibrar el modelo de ruido AR(1) del módulo IA.
 | Merry y Bettinger (2019) | Urbano bajo dosel arbóreo | precision_m (percentil 95) | ~15 m (**por verificar**) |
 | Groves (2011), *Journal of Navigation* 64(3). DOI: [10.1017/S0373463311000087](https://doi.org/10.1017/S0373463311000087) | Cañón urbano profundo (shadow matching) | sigma_m (error en cañón urbano) | 10–15 m; hasta >20 m en cañones estrechos (**por verificar** cifra de shadow matching vs. convencional) |
 | Groves (2011) | Cañón urbano | p_perdida (probabilidad de pérdida de señal) | 0.05–0.10 en cañones profundos (**por verificar**) |
-| Jun, Guensler y Ogle (2006), *Transportation Research Record* 1972. DOI: [10.1177/0361198106197200116](https://doi.org/10.1177/0361198106197200116) | Vehículos en movimiento, GPS dedicado | sigma_m (error posicional aleatorio) | ~5 m (desviación estándar del error aleatorio) (**por verificar**) |
+| Jun, Guensler y Ogle (2006), *Transportation Research Record* 1972. DOI: [10.1177/0361198106197200117](https://doi.org/10.1177/0361198106197200117) | Vehículos en movimiento, GPS dedicado | sigma_m (error posicional aleatorio) | ~5 m (desviación estándar del error aleatorio) (**por verificar**) |
 | Jun, Guensler y Ogle (2006) | Vehículos en movimiento | rho (autocorrelación a 1 Hz) | ~0.7–0.85 (inferido del análisis de errores correlatados en velocidad) (**por verificar**) |
 | Jun, Guensler y Ogle (2006) | Vehículos en movimiento | precision_m (efecto en velocidad) | Error en velocidad ~1–3 m/s derivado de sigma_m ~5 m a 1 Hz (**por verificar**) |
 

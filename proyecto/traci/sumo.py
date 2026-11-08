@@ -46,3 +46,31 @@ def cargar_sumolib() -> ModuleType:
     import sumolib  # noqa: WPS433 (import tardío a propósito)
 
     return sumolib
+
+
+def cargar_libsumo() -> ModuleType:
+    """Devuelve `libsumo` (SUMO enlazado en el proceso, sin socket TraCI; solo sin GUI).
+
+    En el contenedor, el paquete compilado está en `/usr/lib/python3.10/site-packages/libsumo`, fuera
+    de `sys.path`; el `$SUMO_HOME/tools/libsumo` que trae `sumo-tools` no tiene el `.so`.
+    """
+    herramientas_sumo()
+    if "libsumo" in sys.modules and hasattr(sys.modules["libsumo"], "simulationStep"):
+        return sys.modules["libsumo"]
+    sys.modules.pop("libsumo", None)
+    for carpeta in (Path(sys.prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages",
+                    Path("/usr/lib") / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"):
+        if (carpeta / "libsumo" / "__init__.py").is_file() and str(carpeta) not in sys.path:
+            sys.path.insert(0, str(carpeta))
+    # `libsumo/__init__.py` hace `from traci import connection, ...`: mientras se importa, `traci`
+    # tiene que ser el TraCI de SUMO y no este paquete, que se llama igual.
+    nuestro = sys.modules.get("traci")
+    sys.modules["traci"] = cargar_traci()
+    try:
+        import libsumo  # noqa: WPS433
+    finally:
+        if nuestro is not None:
+            sys.modules["traci"] = nuestro
+        else:
+            sys.modules.pop("traci", None)
+    return libsumo

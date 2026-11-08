@@ -31,7 +31,7 @@ class _TraciFalso:
             getParkingStartingVehiclesIDList=lambda: list(self.llegadas),
         )
         self.vehicle = SimpleNamespace(
-            getParameter=lambda veh, clave: self.params[veh][clave],
+            getParameter=lambda veh, clave: self.params[veh].get(clave, ""),  # SUMO da "" si falta
             rerouteParkingArea=lambda veh, pid: self.reroutes.append((veh, pid)),
         )
         self.parkingarea = SimpleNamespace(getVehicleCount=lambda pid: self.conteo.get(pid, 0),

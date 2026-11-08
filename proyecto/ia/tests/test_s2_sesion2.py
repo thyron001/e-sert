@@ -112,13 +112,15 @@ class TestFallback:
         r = clasificar([])
         assert r["fuente"] == "umbral"
 
-    def test_ventana_corta_5_puntos_usa_umbral(self):
-        r = clasificar(_ventana_auto()[:5])
-        assert r["fuente"] == "umbral"
+    def test_ventana_4_puntos_usa_umbral(self):
+        # S3-1: menos de 5 puntos validos -> umbral con confianza 0 (o el previo)
+        r = clasificar(_ventana_auto()[:4])
+        assert r["fuente"] == "umbral" and r["confianza"] == 0.0
 
-    def test_ventana_9_puntos_usa_umbral(self):
-        r = clasificar(_ventana_auto()[:9])
-        assert r["fuente"] == "umbral"
+    def test_ventana_corta_contigua_usa_rf(self):
+        # S3-1: la regla pasa de "<10 puntos" a cobertura >= 0.6 y hueco <= 10 s
+        for n in (5, 9):
+            assert clasificar(_ventana_auto()[:n])["fuente"] == "rf"
 
     def test_modelo_inexistente_usa_umbral(self):
         os.environ["ESERT_MODELO"] = "/ruta/que/no/existe/modelo.joblib"

@@ -1,0 +1,151 @@
+{
+  "version": "v1",
+  "features": [
+    "vel_media",
+    "vel_mediana",
+    "vel_p10",
+    "vel_p85",
+    "vel_max",
+    "vel_std",
+    "acc_media_abs",
+    "acc_std",
+    "jerk_medio_abs",
+    "tasa_rumbo_media",
+    "prop_giros_30",
+    "prop_detenido",
+    "prop_lento",
+    "rectitud",
+    "distancia_total",
+    "precision_media",
+    "n_paradas_arranques",
+    "desplazamiento_neto"
+  ],
+  "clases": [
+    "a_pie",
+    "quieto",
+    "vehiculo"
+  ],
+  "hiperparametros": {
+    "n_estimators": 200,
+    "min_samples_leaf": 3,
+    "max_features": "sqrt",
+    "max_depth": 20,
+    "class_weight": "balanced"
+  },
+  "sklearn_version": "1.9.1",
+  "fecha": "2026-10-27T22:45:53.651497+00:00",
+  "hash_datos": "f93b0e1423f2d9c5",
+  "n_ventanas": 1650500,
+  "metricas_cv": {
+    "rf_v1_macro_f1": 0.9259292740469424,
+    "rf_v1_macro_f1_std": 0.021892426092220224,
+    "umbral_macro_f1": 0.7264993747157127,
+    "umbral_macro_f1_std": 0.07456705752719894
+  },
+  "importancia_features": {
+    "vel_media": -0.0003133219312352578,
+    "vel_mediana": -0.0002361168734404827,
+    "vel_p10": 0.0014772390260037428,
+    "vel_p85": 0.0014037051627611892,
+    "vel_max": 0.0018475501543102747,
+    "vel_std": 0.0018342949736716635,
+    "acc_media_abs": 0.0006875097054253538,
+    "acc_std": 0.0017707484065701367,
+    "jerk_medio_abs": 0.0037485098277107998,
+    "tasa_rumbo_media": -9.510505627955807e-06,
+    "prop_giros_30": -0.00014224749245002794,
+    "prop_detenido": 0.00034830397438168065,
+    "prop_lento": 0.0003261583500514531,
+    "rectitud": 0.017111470394647825,
+    "distancia_total": -0.0005748540985676614,
+    "precision_media": 1.9495629961014457e-05,
+    "n_paradas_arranques": 0.00029274611976014427,
+    "desplazamiento_neto": 0.35136872099336114
+  },
+  "suavizado": {
+    "metodo": "histeresis",
+    "k": 1
+  },
+  "suavizado_evaluacion": [
+    {
+      "metodo": "media_movil",
+      "k": 1,
+      "f1_media": 0.22776194998417218,
+      "f1_std": 0.1393491389725421,
+      "reduccion_media": 0.0,
+      "reduccion_std": 0.0,
+      "delta_f1_media": 0.0,
+      "delta_f1_std": 0.0
+    },
+    {
+      "metodo": "media_movil",
+      "k": 2,
+      "f1_media": 0.2286070263022888,
+      "f1_std": 0.1461617380890013,
+      "reduccion_media": 0.3452380952380953,
+      "reduccion_std": 0.30906559489874214,
+      "delta_f1_media": 0.0008450763181165853,
+      "delta_f1_std": 0.008368063632951367
+    },
+    {
+      "metodo": "media_movil",
+      "k": 3,
+      "f1_media": 0.23052959501557632,
+      "f1_std": 0.1453864409916266,
+      "reduccion_media": 0.4285714285714286,
+      "reduccion_std": 0.42056004125370694,
+      "delta_f1_media": 0.0027676450314041133,
+      "delta_f1_std": 0.00847052061397813
+    },
+    {
+      "metodo": "media_movil",
+      "k": 5,
+      "f1_media": 0.22748815165876776,
+      "f1_std": 0.1496876914360148,
+      "reduccion_media": 0.4285714285714286,
+      "reduccion_std": 0.42056004125370694,
+      "delta_f1_media": -0.0002737983254044382,
+      "delta_f1_std": 0.011967904593720182
+    },
+    {
+      "metodo": "histeresis",
+      "k": 1,
+      "f1_media": 0.22748815165876776,
+      "f1_std": 0.1496876914360148,
+      "reduccion_media": 0.6190476190476191,
+      "reduccion_std": 0.4416008807378906,
+      "delta_f1_media": -0.0002737983254044382,
+      "delta_f1_std": 0.011967904593720182
+    },
+    {
+      "metodo": "histeresis",
+      "k": 2,
+      "f1_media": 0.22748815165876776,
+      "f1_std": 0.1496876914360148,
+      "reduccion_media": 0.6190476190476191,
+      "reduccion_std": 0.4416008807378906,
+      "delta_f1_media": -0.0002737983254044382,
+      "delta_f1_std": 0.011967904593720182
+    },
+    {
+      "metodo": "histeresis",
+      "k": 3,
+      "f1_media": 0.22748815165876776,
+      "f1_std": 0.1496876914360148,
+      "reduccion_media": 0.6190476190476191,
+      "reduccion_std": 0.4416008807378906,
+      "delta_f1_media": -0.0002737983254044382,
+      "delta_f1_std": 0.011967904593720182
+    },
+    {
+      "metodo": "histeresis",
+      "k": 5,
+      "f1_media": 0.22748815165876776,
+      "f1_std": 0.1496876914360148,
+      "reduccion_media": 0.6190476190476191,
+      "reduccion_std": 0.4416008807378906,
+      "delta_f1_media": -0.0002737983254044382,
+      "delta_f1_std": 0.011967904593720182
+    }
+  ]
+}

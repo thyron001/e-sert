@@ -21,11 +21,33 @@ from collections import Counter
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Optional, Tuple
 
+from .controlador import parametro
 from .peatones import leer_destinos, texto_traci
 from .puente_nucleo import distancia_m
 
 FUENTES = ("mapa", "verdad")
 Puesto = Tuple[float, float, int]  # (lat, lon, capacidad)
+
+
+def destino_de(ctrl, veh: str, destinos: Dict[str, Tuple[float, float, float]]) -> Optional[Tuple[str, float, float]]:
+    """`(nombre, lat, lon)` del destino de `veh`, o None.
+
+    S3-3: los escenarios unificados de Tyrone (S2) traen `param destino_nombre` (el nombre de
+    `destinos.csv`) y `param destino` con las coordenadas `"lat,lon"`; la demanda de S1 traía el
+    nombre en `destino`. Se aceptan los tres casos.
+    """
+    nombre = texto_traci(parametro(ctrl, veh, "destino_nombre") or "")
+    crudo = texto_traci(parametro(ctrl, veh, "destino") or "")
+    if not nombre and crudo in destinos:
+        nombre = crudo
+    if nombre in destinos:
+        lat, lon = destinos[nombre][:2]
+        return nombre, lat, lon
+    try:
+        lat, lon = (float(x) for x in crudo.split(","))
+    except ValueError:
+        return None
+    return (nombre or crudo), lat, lon
 
 
 def recomendar(destino: Tuple[float, float], puestos: Dict[str, Puesto],
@@ -68,7 +90,7 @@ class Guia:
     def on_paso(self, ctrl, t: float) -> None:
         tr = ctrl.traci
         for veh in tr.simulation.getDepartedIDList():
-            if tr.vehicle.getParameter(veh, "clase") != "busca" or tr.vehicle.getParameter(veh, "con_app") != "1":
+            if parametro(ctrl, veh, "clase") != "busca" or parametro(ctrl, veh, "con_app") != "1":
                 continue
             self.puente.registrar(f"sim_{veh}")
             self.estado[veh] = "BUSCANDO"
@@ -89,12 +111,12 @@ class Guia:
         return self.puestos[pid][2] - ocupados
 
     def _guiar(self, ctrl, veh: str, t: float, excluir: Iterable[str]) -> None:
-        nombre = texto_traci(ctrl.traci.vehicle.getParameter(veh, "destino"))
-        if nombre not in self.destinos:
+        destino = destino_de(ctrl, veh, self.destinos)
+        if destino is None:
             self.contadores["sin_destino"] += 1
             self.estado[veh] = "A_CIEGAS"
             return
-        lat, lon, _ = self.destinos[nombre]
+        _, lat, lon = destino
         excluidos = list(excluir)
         while True:
             pid = recomendar((lat, lon), self.puestos, lambda p: self._libres(ctrl, p), excluidos)
@@ -152,9 +174,9 @@ class RegistroBusqueda:
     def on_paso(self, ctrl, t: float) -> None:
         tr = ctrl.traci
         for veh in tr.simulation.getDepartedIDList():
-            if tr.vehicle.getParameter(veh, "clase") == "busca":
+            if parametro(ctrl, veh, "clase") == "busca":
                 self.salida[veh] = t
-                self.con_app[veh] = tr.vehicle.getParameter(veh, "con_app") == "1"
+                self.con_app[veh] = parametro(ctrl, veh, "con_app") == "1"
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
             if veh in self.salida and veh not in self.llegada:
                 self.llegada[veh] = t

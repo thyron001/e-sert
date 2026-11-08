@@ -1,0 +1,52 @@
+{
+  "id": "p50_rf_s1",
+  "porc_app": 50,
+  "clasificador_pedido": "rf",
+  "clasificador_usado": "umbral",
+  "ventanas_por_fuente": {
+    "umbral": 40929
+  },
+  "t_sim_final": 3600.0,
+  "pasos": 3600,
+  "tiempo_real_s": 917.55,
+  "ms_por_paso": 254.874,
+  "sesiones_maquina": {
+    "coords_invalidas": 96,
+    "sesiones": 380,
+    "cerradas": 265,
+    "abiertas_al_final": 110,
+    "falsas_liberaciones": 246,
+    "falsas_por_100_sesiones": 64.74,
+    "clasificador": "ia.inferencia",
+    "ventanas_por_fuente": {
+      "umbral": 40929
+    }
+  },
+  "costo_kpis": {
+    "s_en_kpis": 15.18,
+    "s_resto": 902.365,
+    "sobrecosto_pct": 1.68
+  },
+  "kpis": {
+    "falsas_lib_100": 91.11,
+    "n_sesiones": 270,
+    "n_falsas": 246,
+    "sin_cierre": 110,
+    "retardo_cierre_mediana_s": 21.5,
+    "retardo_cierre_p90_s": 260.09999999999997,
+    "error_fact_medio_usd": -0.11919354838709677,
+    "error_fact_abs_max_usd": 0.34,
+    "ahorro_vs_tarjeta_medio_usd": 0.23516129032258065,
+    "precision_mapa": 0.6188251366120219,
+    "precision_mapa_app": 0.9996994535519126,
+    "libres_fantasma_medio": 232.51666666666668,
+    "retardo_cierre_max_s": 391.0,
+    "error_fact_abs_medio_usd": 0.12725806451612903,
+    "n_cierre_manual": 5,
+    "n_sin_estadia_real": 208,
+    "mae_mapa": 8.350765027322405,
+    "mae_mapa_app": 0.16469945355191257,
+    "libres_fantasma_app_medio": 0.18333333333333332,
+    "n_muestras_mapa": 60
+  }
+}
