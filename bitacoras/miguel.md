@@ -557,3 +557,76 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 - Probar el canal de alta importancia y las alarmas exactas con una APK propia.
 
 **Evidencias:** ![](../semanas/S3/Miguel/evidencias/s2_avisos.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S3 · Sesión 3 · 2026-11-08 · Entrada por lenguaje natural con LLM (opcional) o pulido de UX
+**Estado:** hecha
+
+**Decisión al inicio:** S3-1 y S3-2 estaban `"hecha"` en `estado.json`, así que se hizo el LLM. Con el tiempo que sobró se corrigió UX: el teclado que tapaba el panel y los objetivos táctiles de 44 pt.
+
+**Qué hice:**
+- **`backend/asistente/`**, mi módulo nuevo:
+  - `interprete.py`: Claude Haiku 5.5 con el SDK `anthropic` 1.x. Usa `Anthropic(timeout=8.0, max_retries=1)`, la herramienta `registrar_intencion` con esquema estricto y `tool_choice` forzado, y `max_tokens=200`. Valida con Pydantic, trata `refusal` como inválido, guarda una caché LRU de 256 (solo aciertos del LLM) y registra tokens y latencia. Solo envía el texto.
+  - `reglas.py`: duración con expresiones regulares ("media hora", "N horas y media", "1 hora y 30 minutos", números escritos).
+  - `destinos.py`: carga `destinos.csv` de Tyrone con alias y usa rapidfuzz ≥ 80, o difflib si no está instalado.
+  - `modelos.py`: recorte a [10, 120] min con aviso, según `tarifa.json`.
+  - `router.py` (`APIRouter` `/asistente`) y `app_dev.py` (FastAPI mínima en el puerto 8002).
+  - `.env.ejemplo` sin valores y `requirements.txt`.
+- **Tests:** `tests/test_interprete.py` y `conftest.py` (subagente), con un cliente de Anthropic simulado. Cubren los casos del prompt, la forma de la petición, la cadena de alternativas (sin clave, timeout, red, 429, 500, `refusal`, sin `tool_use`, JSON inválido), la caché, las reglas, los destinos, el router y la prueba real `@pytest.mark.llm`, que se omite sin clave.
+- **App:**
+  - `src/componentes/EntradaNatural.tsx`: campo de texto → "Catedral Nueva · 60 min. ¿Correcto?" con Editar y Buscar. El formulario (destino y duración de 10 a 120) está siempre disponible y se abre solo si el asistente falla o falta algo.
+  - `src/api/asistente.ts`: cliente con timeout de 10 s.
+  - `app/buscar.tsx` integra la entrada y usa `KeyboardAvoidingView`.
+  - La duración queda como plan en el flujo (`duracionPlanMin`) y se ve en la sesión activa.
+- **Prueba en Android por Tailscale**, sin clave, es decir con reglas: interpretación, recorte a 120 con aviso, Editar → formulario, "No entendí" → formulario, y asistente detenido → "El asistente no está disponible" → formulario. También el teclado, ya corregido.
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/backend/asistente/` (`__init__.py`, `interprete.py`, `reglas.py`, `destinos.py`, `modelos.py`, `router.py`, `app_dev.py`, `.env.ejemplo`, `requirements.txt`, `tests/`)
+- `semanas/S3/Miguel/codigo/app/`:
+  - `src/componentes/EntradaNatural.tsx`, `src/api/asistente.ts`
+  - `app/buscar.tsx`, `app/sesion/activa.tsx`, `src/estado/sesion.ts`
+  - `.env.example`
+- `semanas/S3/Miguel/evidencias/s3_entrada-natural.png`, `capturas/s3_*.jpeg`, `resumen_S3_Miguel.pdf`
+- `semanas/S3/Miguel/explicaciones/s3_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **API del SDK:** antes de escribir se consultó la skill `claude-api` (2026-11-08).
+- **Sin `temperature=0`:** en Claude Haiku 5.5 cualquier valor de muestreo distinto del de fábrica devuelve 400. El formato lo fijan la herramienta forzada, que Haiku 5.5 sí acepta, y el prompt.
+- **Destino validado contra la lista:** el destino del LLM se compara con `destinos.csv` y, si no coincide, se descarta. El LLM no puede inventar destinos, y una inyección en el texto no lleva a nada.
+- **Texto original al LLM:** al LLM va el texto original; la caché usa el texto normalizado como clave y solo guarda aciertos del LLM, para que un timeout no fije la frase a las reglas.
+- **`app_dev.py`:** sirve para probar mientras Freddy no monte el router; la app lo usa con `EXPO_PUBLIC_ASISTENTE_URL`.
+
+**Problemas encontrados:**
+- **No había clave de la API** de Anthropic (ni `ANTHROPIC_API_KEY` ni `ant`). El camino del LLM se probó con el cliente simulado; la prueba real queda lista para correr con clave.
+- **Teclado en Android:** con Expo Go (edge-to-edge) el teclado tapaba el panel "¿A dónde vas…?", lo reportó Miguel. Se corrigió con `KeyboardAvoidingView` y el desfase de la cabecera.
+- **Bugs del subagente de tests:** "2 horas y media" no se reconocía (plural) y la caché guardaba la caída a reglas tras un fallo del LLM. Ambos están corregidos y tienen tests.
+- **Clave falsa en un test:** un test usaba una clave falsa con el prefijo real de las claves de Anthropic, que habría ensuciado la búsqueda de claves con `git grep`. Se cambió a `clave-de-prueba-falsa`.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Montar `backend.asistente.router` en `backend/api/main.py` con el prefijo `/api/v1` (como `backend.pagos.rutas`) y añadir `anthropic`, `python-dotenv` y `rapidfuzz` a `requirements-servidor.txt`. Sin ellos funciona con difflib y reglas, pero sin LLM.
+  - Añadir a `CONTRATO.propuesto.md` el mensaje `POST /asistente/interpretar {texto}` → `{destino: {nombre, lat, lon} | null, duracion_min: int | null, fuente: "llm" | "reglas", confianza, avisos}`.
+- **@Tyrone:** confirmar los nombres de `destinos.csv`; la app y el asistente usan exactamente esos 12. Con la clave para la demo (`ANTHROPIC_API_KEY` en Dokploy, nunca en el repo), el asistente usaría el LLM.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Módulo y tests.
+  2. Los dos bugs del subagente.
+  3. La integración en la app y las capturas.
+  4. El teclado.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **3/4 criterios cumplidos**; faltaba el PDF semanal, que se generó en el cierre. Encontró:
+  - restos de la frase anterior en el formulario tras "No entendí";
+  - "1 hora y 30 minutos", que daba 60;
+  - chips de menos de 44 pt;
+  - la app no toleraba una respuesta sin `avisos`.
+
+  Todo está corregido, con test de regresión. Señaló además que la falta de `temperature=0` está justificada.
+- Resultado final: pytest 96 passed, 1 skipped; Jest 232/232; `tsc` sin errores; la búsqueda de claves con `git grep` solo encuentra el texto del prompt.
+
+**Pendientes para la próxima sesión:**
+- Probar contra la API real cuando haya una clave.
+- S4: lo que defina la semana final (demo integrada con el backend del VPS).
+- iPhone físico.
+- Validar las notificaciones y el regreso de Payphone con una APK propia.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s3_entrada-natural.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S3 (PDF)](../semanas/S3/Miguel/evidencias/resumen_S3_Miguel.pdf)

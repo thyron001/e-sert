@@ -176,6 +176,7 @@ export default function Activa() {
       <Text style={estilos.titulo}>Sesión activa</Text>
       <Text style={estilos.detalle}>
         {sesion.placa} · {sesion.puesto_id}
+        {flujo.duracionPlanMin ? ` · plan ${flujo.duracionPlanMin} min` : ''}
       </Text>
       <Text style={estilos.reloj}>{cronometro(segundos)}</Text>
       {vencidos.map((v) => (

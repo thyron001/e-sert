@@ -1,11 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 
 import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
+import { baseAsistente } from '@/src/api/asistente';
 import { getBilletera, getGuia, mensajeUsuario } from '@/src/api/cliente';
+import { EntradaNatural } from '@/src/componentes/EntradaNatural';
 import { montoRetencion } from '@/src/api/tarifa';
 import type { Destino } from '@/src/api/tipos';
 import { DESTINOS } from '@/src/datos/destinos';
@@ -18,7 +21,8 @@ const REGION_CENTRO = { latitude: -2.8975, longitude: -79.0045, latitudeDelta: 0
 
 // Todo es simulado: la partida es una esquina del Centro (o donde se toque el mapa), no el GPS.
 export default function Buscar() {
-  const { api, usuarioId } = useAjustes();
+  const { api, usuarioId, urlApi } = useAjustes();
+  const insets = useSafeAreaInsets();
   const { despachar } = useSesion();
   const [partida, setPartida] = useState<Punto>(PARTIDA_POR_DEFECTO);
   const [destino, setDestino] = useState<Destino>(DESTINOS[0]);
@@ -36,7 +40,7 @@ export default function Buscar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.destino, params.auto]);
 
-  async function buscar(elegido: Destino = destino) {
+  async function buscar(elegido: Destino = destino, duracionPlanMin: number | null = null) {
     setOcupado(true);
     setError(null);
     try {
@@ -46,7 +50,7 @@ export default function Buscar() {
         router.push('/recarga');
         return;
       }
-      despachar({ tipo: 'BUSCAR', partida, destino: elegido });
+      despachar({ tipo: 'BUSCAR', partida, destino: elegido, duracionPlanMin });
       const guia = await getGuia(
         { lat: partida.lat, lon: partida.lon, destino_lat: elegido.lat, destino_lon: elegido.lon },
         api,
@@ -62,7 +66,12 @@ export default function Buscar() {
   }
 
   return (
-    <View style={estilos.contenedor}>
+    // Al abrir el teclado el panel sube (en Android con edge-to-edge la pantalla no se encoge sola).
+    // El desplazamiento es la cabecera de la pila: barra de estado + 56 (Android) o 44 (iOS).
+    <KeyboardAvoidingView
+      style={estilos.contenedor}
+      behavior="padding"
+      keyboardVerticalOffset={insets.top + (Platform.OS === 'ios' ? 44 : 56)}>
       <MapView
         style={estilos.mapa}
         initialRegion={REGION_CENTRO}
@@ -87,27 +96,26 @@ export default function Buscar() {
         <Text style={estilos.ayuda}>
           Toca el mapa para mover la partida; mantén pulsado para elegir otro destino.
         </Text>
-        <Text style={estilos.etiqueta}>Destino</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={estilos.chips}>
-          {DESTINOS.map((d) => {
-            const elegido = d.nombre === destino.nombre;
-            return (
-              <Pressable
-                key={d.nombre}
-                onPress={() => setDestino(d)}
-                style={[estilos.chip, elegido && estilos.chipElegido]}>
-                <Text style={[estilos.chipTexto, elegido && estilos.chipTextoElegido]}>{d.nombre}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-        <Text style={estilos.resumen} numberOfLines={1}>
-          → {destino.nombre}
-        </Text>
+        <EntradaNatural
+          urlBase={baseAsistente(urlApi)}
+          destinoInicial={DESTINOS[0]}
+          ocupado={ocupado}
+          alBuscar={(d, minutos) => {
+            setDestino(d);
+            buscar(d, minutos);
+          }}
+        />
+        {destino.nombre === 'Punto en el mapa' && (
+          <>
+            <Text style={estilos.resumen} numberOfLines={1}>
+              → {destino.nombre}
+            </Text>
+            <Boton texto="Buscar en el punto marcado" onPress={() => buscar()} ocupado={ocupado} />
+          </>
+        )}
         {error && <Text style={estilos.error}>{error}</Text>}
-        <Boton texto="Buscar puesto" onPress={() => buscar()} ocupado={ocupado} />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -117,12 +125,6 @@ const estilos = StyleSheet.create({
   emoji: { fontSize: 26 },
   panel: { padding: 14, paddingBottom: 28 },
   ayuda: { color: COLORES.gris, fontSize: 13, marginBottom: 8 },
-  etiqueta: { fontWeight: '700', marginBottom: 6 },
-  chips: { gap: 8, paddingBottom: 4 },
-  chip: { borderWidth: 1, borderColor: COLORES.gris, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },
-  chipElegido: { backgroundColor: COLORES.miguel, borderColor: COLORES.miguel },
-  chipTexto: { fontSize: 13 },
-  chipTextoElegido: { color: '#fff', fontWeight: '700' },
   resumen: { marginTop: 8, fontSize: 16, fontWeight: '600' },
   error: { color: COLORES.lleno, marginTop: 6 },
 });

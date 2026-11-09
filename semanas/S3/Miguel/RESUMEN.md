@@ -27,3 +27,18 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 ![Avisos y bloqueo en Android](evidencias/s2_avisos.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-11-08 · Entrada por lenguaje natural con LLM (opcional) o pulido de UX
+
+**Estado:** hecha (4/4 criterios). Se eligió el LLM porque S3-1 y S3-2 estaban hechas.
+
+- `backend/asistente/`: `POST /api/v1/asistente/interpretar {texto}` → `{destino, duracion_min, fuente, confianza, avisos}`.
+  - Claude Haiku 5.5 con la herramienta forzada `registrar_intencion`, validación Pydantic, caché LRU y registro de tokens; solo se envía el texto.
+  - Sin clave, con timeout o con error, responde un **intérprete por reglas** con el mismo resultado en los casos simples.
+- El destino siempre sale de `destinos.csv` de Tyrone (alias y comparación difusa ≥ 80): nunca se inventa. La duración se recorta a 10–120 min con aviso.
+- App: "Catedral Nueva · 60 min. ¿Correcto?" con Editar y Buscar, y el **formulario** de alternativa siempre disponible, incluso con el asistente caído. Se corrigió el panel que quedaba tapado por el teclado.
+- pytest 96 passed, 1 skipped (la prueba real del LLM, sin clave). Jest 232/232. Ninguna clave en el repo (búsqueda con `git grep`).
+
+![Entrada natural y formulario de alternativa](evidencias/s3_entrada-natural.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · Resumen de la semana: [evidencias/resumen_S3_Miguel.pdf](evidencias/resumen_S3_Miguel.pdf)
