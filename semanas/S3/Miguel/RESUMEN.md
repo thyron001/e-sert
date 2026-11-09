@@ -13,3 +13,17 @@
 ![Recibos en Android y en el simulador de iPhone](evidencias/s1_recibo.png)
 
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)
+
+## Sesión 2 · 2026-11-08 · Avisos de saldo bajo, tiempo máximo y bloqueo por saldo negativo
+
+**Estado:** hecha (5/5 criterios).
+
+- Al confirmar la llegada se programan notificaciones locales: **saldo bajo** 10 min antes de que el disponible se acabe y **tope SERT** 10 min antes de los 120 min. Si caen a menos de 1 min, se combinan en una.
+- Con la app abierta aparece un **banner amarillo** y la notificación sale a la hora exacta. En segundo plano, Android la entrega con algo de retraso porque usa alarmas inexactas.
+- Al cerrar se **cancelan** todas: en la prueba quedaron 0. Tras recargar se reprograman sin repetir lo ya avisado.
+- Con **saldo negativo** se desactiva "Buscar puesto" y se muestra la deuda con "Recargar". Tras recargar $5 por Payphone (mock) se desbloquea.
+- Modo demo `EXPO_PUBLIC_ESCALA_TIEMPO=60`: 1 min de la regla = 1 s. Jest 232/232, `tsc` sin errores.
+
+![Avisos y bloqueo en Android](evidencias/s2_avisos.png)
+
+Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)

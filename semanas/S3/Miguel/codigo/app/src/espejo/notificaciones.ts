@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import type { EstadoSesion, MensajeEspejo } from '@/src/api/tipos';
+import { avisarUnaVez, olvidarSesion } from '@/src/servicios/avisos';
 
 // Notificaciones locales del modo espejo (en Expo Go no hay push remotas; las locales sí).
 
@@ -44,6 +45,15 @@ export function textoTransicion(m: MensajeEspejo): Aviso | null {
   }
 }
 
+const TEXTO_AVISO_ESPEJO: Partial<Record<string, (m: MensajeEspejo) => Aviso>> = {
+  saldo_bajo: (m) => ({
+    titulo: 'Saldo bajo',
+    cuerpo: `Disponible ${usd(m.billetera?.disponible ?? 0)}: recarga para no quedarte sin saldo`,
+  }),
+  tiempo_maximo_cerca: () => ({ titulo: 'Tope SERT cerca', cuerpo: 'En pocos minutos llegas al máximo de tiempo en el puesto.' }),
+  sesiones_bloqueadas: () => ({ titulo: 'Sesiones bloqueadas', cuerpo: 'Tu saldo es negativo: recarga para volver a parquear.' }),
+};
+
 const ESTADOS_QUE_NOTIFICAN: readonly EstadoSesion[] = ['GUIADO', 'ESTACIONADO', 'SALIENDO', 'CERRADA'];
 
 /**
@@ -52,6 +62,7 @@ const ESTADOS_QUE_NOTIFICAN: readonly EstadoSesion[] = ['GUIADO', 'ESTACIONADO',
  */
 export class NotificadorEspejo {
   private enviadas = new Set<string>();
+  private sesiones = new Set<string>();
 
   constructor(private readonly enviar: (a: Aviso) => void = enviarLocal) {}
 
@@ -65,13 +76,16 @@ export class NotificadorEspejo {
         nuevos.push(aviso);
       }
     }
-    const claveSaldo = `${m.veh_id}|saldo_bajo`;
-    if (m.avisos.includes('saldo_bajo') && !this.enviadas.has(claveSaldo)) {
-      this.enviadas.add(claveSaldo);
-      nuevos.push({
-        titulo: 'Saldo bajo',
-        cuerpo: `Disponible ${usd(m.billetera?.disponible ?? 0)}: recarga para no quedarte sin saldo`,
-      });
+    // Avisos que trae el mensaje espejo (§7): mismo texto y sin duplicar los que ya programó
+    // calcularAvisos para esa sesión (clave tipo + sesion_id, compartida con servicios/avisos).
+    const sesionId = m.sesion?.sesion_id ?? m.veh_id;
+    this.sesiones.add(sesionId);
+    for (const aviso of m.avisos) {
+      const texto = TEXTO_AVISO_ESPEJO[aviso];
+      if (!texto || this.enviadas.has(`${aviso}|${sesionId}`)) continue;
+      this.enviadas.add(`${aviso}|${sesionId}`);
+      if (!avisarUnaVez(aviso, sesionId)) continue;
+      nuevos.push(texto(m));
     }
     nuevos.forEach(this.enviar);
     return nuevos;
@@ -79,6 +93,8 @@ export class NotificadorEspejo {
 
   reiniciar(): void {
     this.enviadas.clear();
+    this.sesiones.forEach(olvidarSesion);
+    this.sesiones.clear();
   }
 }
 

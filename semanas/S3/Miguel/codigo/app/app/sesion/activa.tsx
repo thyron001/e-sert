@@ -8,6 +8,7 @@ import { cerrarSesion, getBilletera, mensajeUsuario } from '@/src/api/cliente';
 import { TARIFA } from '@/src/api/tarifa';
 import { BannerAvisos } from '@/src/espejo/componentes/BannerAvisos';
 import { useSesion } from '@/src/estado/sesion';
+import { avisosVencidos, cancelarAvisos, dispararSiVencio, leerProgramados, type Programados } from '@/src/servicios/avisos';
 import { DetectorCierre, usarSeguimientoPropio, type DatosRecibo } from '@/src/servicios/seguimientoSesion';
 import { cronometro, resumenCobro } from '@/src/sesion/cobro';
 import { COLORES } from '@/src/ui/colores';
@@ -28,6 +29,7 @@ export default function Activa() {
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [huerfana, setHuerfana] = useState(false);
+  const [programados, setProgramados] = useState<Programados | null>(null);
   const detector = useRef(
     new DetectorCierre({ origen: 'propia', usuario_id: usuarioId, placa: sesion?.placa ?? null }),
   ).current;
@@ -37,6 +39,7 @@ export default function Activa() {
     (d: DatosRecibo) => {
       if (navegado.current) return;
       navegado.current = true;
+      cancelarAvisos(); // al cerrar no queda ninguna notificación pendiente
       despachar({
         tipo: 'CERRADA',
         cierre: {
@@ -56,6 +59,17 @@ export default function Activa() {
   useFocusEffect(
     useCallback(() => {
       const id = setInterval(() => setAhora(Date.now()), 1000);
+      return () => clearInterval(id);
+    }, []),
+  );
+
+  // Avisos programados al llegar (o reprogramados tras una recarga): se releen al tomar el foco.
+  // confirmar los programa en segundo plano después de abrir esta pantalla: se releen cada 2 s.
+  useFocusEffect(
+    useCallback(() => {
+      const leer = () => leerProgramados().then(setProgramados);
+      leer();
+      const id = setInterval(leer, 2000);
       return () => clearInterval(id);
     }, []),
   );
@@ -112,10 +126,28 @@ export default function Activa() {
     }
   }, [sesion, cierre, usuarioId]);
 
+  // App abierta: el aviso vencido se notifica ya (no a la hora inexacta de Android).
+  const tiposVencidos =
+    sesion && programados?.sesion_id === sesion.sesion_id
+      ? avisosVencidos(programados, ahora)
+          .map((v) => v.tipo)
+          .join(',')
+      : '';
+  useEffect(() => {
+    tiposVencidos
+      .split(',')
+      .filter(Boolean)
+      .forEach((tipo) => dispararSiVencio(tipo as Programados['avisos'][number]['tipo']));
+  }, [tiposVencidos]);
+
   if (!sesion || cierre) return null;
 
   const segundos = (ahora - new Date(sesion.inicio).getTime()) / 1000;
   const r = resumenCobro(segundos / 60, saldo);
+  // Banner propio con los avisos programados ya vencidos (en iPhone la app hace poco en segundo
+  // plano). Los de "cerca" del cálculo en vivo se omiten para no repetirlos.
+  const vencidos = programados?.sesion_id === sesion.sesion_id ? avisosVencidos(programados, ahora) : [];
+  const enVivo = vencidos.length ? r.avisos.filter((x) => x === 'saldo_agotado' || x === 'tiempo_maximo_superado') : r.avisos;
 
   async function cerrarManual() {
     if (!sesion) return;
@@ -146,7 +178,13 @@ export default function Activa() {
         {sesion.placa} · {sesion.puesto_id}
       </Text>
       <Text style={estilos.reloj}>{cronometro(segundos)}</Text>
-      <BannerAvisos avisos={r.avisos} />
+      {vencidos.map((v) => (
+        <View key={v.tipo} style={estilos.aviso}>
+          <Text style={estilos.avisoTitulo}>⚠️ {v.titulo}</Text>
+          <Text style={estilos.avisoTexto}>{v.cuerpo}</Text>
+        </View>
+      ))}
+      <BannerAvisos avisos={enVivo} />
       <View style={estilos.tarjeta}>
         <Fila etiqueta="Minutos cobrables" valor={`${r.minutosCobrables} min`} />
         <Fila etiqueta="Costo acumulado" valor={usd(r.costo)} fuerte />
@@ -170,6 +208,7 @@ export default function Activa() {
           <Boton
             texto="Descartar sesión"
             onPress={() => {
+              cancelarAvisos();
               despachar({ tipo: 'REINICIAR' });
               router.replace('/sesion');
             }}
@@ -209,4 +248,14 @@ const estilos = StyleSheet.create({
   fuerte: { fontSize: 20, fontWeight: '800', color: COLORES.miguel },
   nota: { color: COLORES.gris, fontSize: 12, marginBottom: 4 },
   error: { color: COLORES.lleno, marginTop: 6 },
+  aviso: {
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F9A825',
+    backgroundColor: '#FFF8E1',
+    marginBottom: 8,
+  },
+  avisoTitulo: { fontWeight: '800', color: '#6D4C00' },
+  avisoTexto: { color: '#6D4C00', marginTop: 2 },
 });

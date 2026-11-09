@@ -478,3 +478,82 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 - Usar el motivo y la tarjeta del servidor cuando Freddy los envíe.
 
 **Evidencias:** ![](../semanas/S3/Miguel/evidencias/s1_recibo.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s1_explicacion.pdf)
+
+## S3 · Sesión 2 · 2026-11-08 · Avisos de saldo bajo, tiempo máximo y bloqueo por saldo negativo
+**Estado:** hecha
+
+**Qué hice:**
+- `src/logica/calcularAvisos.ts` (lógica pura):
+  - `calcularAvisos(sesion, billetera, tarifa, ahora, escala)`: el saldo bajo se avisa en `inicio + disponible/(valor_hora/60) − aviso_saldo_min`, y el tope en `inicio + tiempo_maximo_min − aviso_tiempo_min`;
+  - si dos avisos caen a menos de 1 min, se combinan; si ya pasaron, se disparan enseguida;
+  - `escalaTiempo()` lee `EXPO_PUBLIC_ESCALA_TIEMPO`;
+  - `estadoBloqueo()` aplica las reglas 1 y 5.
+- `src/servicios/avisos.ts`:
+  - `programarAvisos` usa un disparador `DATE` y guarda los IDs en AsyncStorage; `cancelarAvisos` los cancela;
+  - `dispararSiVencio`: con la app abierta, el aviso vencido sale ya;
+  - `avisosVencidos` alimenta el banner;
+  - `avisarUnaVez` es un registro tipo + sesion_id compartido con el espejo;
+  - canal "avisos", con el canal por defecto como respaldo en Expo Go.
+- `src/pantallas/Bloqueo.tsx`: `usarBloqueo` relee la billetera al tomar el foco, y la tarjeta muestra la deuda con el botón "Recargar". En la pestaña Sesión, "Buscar puesto" se desactiva si hay bloqueo.
+- Integración en las pantallas:
+  - `confirmar` programa los avisos al llegar;
+  - `activa` muestra el banner amarillo, dispara en primer plano y cancela al cerrar o al descartar;
+  - `recarga` reprograma si hay una sesión abierta;
+  - los avisos del espejo pasan por el mismo registro, sin duplicar.
+- **Tests:** 23 nuevos (subagente) más 5 de regresión; en total, Jest 232/232. Se añadió `jest.setup.js` con el mock oficial de AsyncStorage.
+- **Pruebas en Android por Tailscale con escala 60**, contra el backend local de `proyecto/`:
+  - saldo bajo y tope;
+  - cierre a los 15 s, sin ninguna notificación después;
+  - bloqueo con −$0.19 y desbloqueo con una recarga de $5 (Payphone mock).
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/app/`:
+  - `src/logica/calcularAvisos.ts` (+ test)
+  - `src/servicios/avisos.ts` (+ test)
+  - `src/pantallas/Bloqueo.tsx`
+  - `app/(tabs)/sesion.tsx`, `app/sesion/{confirmar,activa}.tsx`, `app/recarga.tsx`
+  - `src/espejo/notificaciones.ts` (+ test)
+  - `jest.setup.js`, `package.json`, `.env.example`
+- `semanas/S3/Miguel/evidencias/s2_avisos.png` y `capturas/s2_*.jpeg`
+- `semanas/S3/Miguel/explicaciones/s2_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **`aviso_tiempo_min`:** `tarifa.json` ya trae `aviso_tiempo_min: 10`, que es el `aviso_tope_antes_min` que pedía el prompt. Se usa ese parámetro, sin constante.
+- **Fórmula del saldo bajo:** se siguió la del prompt (disponible), aunque el núcleo usa `saldo − costo en curso`. Como el disponible ya descuenta la retención de esta sesión, el aviso sale unos 30 min de la regla antes que el del núcleo.
+- **IDs en AsyncStorage:** las notificaciones programadas sobreviven a un reinicio de la app, y así se pueden cancelar igual.
+- **Disparo en primer plano:** Android 12+ entrega con retraso las notificaciones con fecha (alarmas inexactas, sin permiso de alarma exacta en Expo Go): llegaban de 10 s a 1 min tarde. Con la app abierta, se cancela la programada y se dispara una inmediata.
+
+**Problemas encontrados:**
+- **Ventana de combinación sin escalar:** en la primera prueba, a escala 60, la ventana seguía siendo de 60 s reales y combinó avisos que estaban a 59 s. Se corrigió dividiéndola por la escala, con test de regresión.
+- **Banner que no aparecía:** `activa` leía los avisos programados una sola vez, antes de que `confirmar` terminara de guardarlos. Ahora se releen cada 2 s, y `confirmar` espera a programarlos antes de navegar.
+- **Tests de S2-3:** se rompieron por el registro global y por AsyncStorage sin módulo nativo en Jest. Se arregló con `olvidarAvisados()` en `beforeEach` y el mock global.
+- **Saldo de prueba:** para la demo se ajustó el saldo del teléfono en el backend local con sesiones de inicio atrasado cerradas por la API, aplicando las reglas reales de cobro, no editando la base.
+- **Log del teléfono:** se corta tras recargar Expo Go; la cancelación se confirmó en la última prueba.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - `aviso_tope_antes_min` no hace falta: `aviso_tiempo_min` ya existe en `tarifa.json` y cumple esa función. Si se renombra, aviso para seguirlo.
+  - Pido exponer los avisos del núcleo (`ServicioSesiones.avisos`) en `GET /sesiones/{id}`, para que la app y el backend avisen igual.
+  - Pido unificar la regla de saldo bajo: el núcleo usa `saldo − costo en curso`; el prompt de la app, `disponible`, que ya descuenta la retención.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código y tests.
+  2. Tests de S2-3 rotos por el registro global y AsyncStorage.
+  3. La ventana de combinación sin escalar y el banner que no se leía.
+  4. El retraso de Android y el disparo en primer plano.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/5 criterios**. Encontró:
+  - avisos ya vencidos que se repetían al reprogramar tras una recarga;
+  - un posible duplicado al volver a primer plano;
+  - una carrera entre programar y cerrar.
+
+  Los tres están corregidos, con tests. Además señaló que el aviso de saldo usa el disponible tras la retención; se dejó documentado como decisión.
+- Resultado final: Jest 232/232 y `tsc` sin errores.
+
+**Pendientes para la próxima sesión:**
+- S3-3: entrada por lenguaje natural con LLM (opcional) o pulido de UX.
+- Probar las notificaciones en segundo plano en un iPhone físico.
+- Probar el canal de alta importancia y las alarmas exactas con una APK propia.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s2_avisos.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s2_explicacion.pdf)

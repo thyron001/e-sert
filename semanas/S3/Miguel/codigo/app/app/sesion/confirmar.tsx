@@ -4,7 +4,8 @@ import { ScrollView, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View, useThemeColor } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
-import { crearSesion, mensajeUsuario } from '@/src/api/cliente';
+import { crearSesion, getBilletera, mensajeUsuario } from '@/src/api/cliente';
+import { programarAvisos } from '@/src/servicios/avisos';
 import { montoRetencion, TARIFA } from '@/src/api/tarifa';
 import { ErrorApi } from '@/src/api/tipos';
 import { useSesion } from '@/src/estado/sesion';
@@ -49,6 +50,14 @@ export default function Confirmar() {
         tipo: 'SESION_CREADA',
         sesion: { sesion_id: creada.sesion_id, placa, puesto_id: puesto.trim(), inicio: ts, retenido: creada.retenido },
       });
+      // Avisos de saldo bajo y tope SERT programados desde la llegada (S3-2). Se espera a tenerlos
+      // antes de navegar, para que un cierre inmediato los encuentre y los cancele.
+      try {
+        const b = await getBilletera(usuarioId, api);
+        await programarAvisos({ sesion_id: creada.sesion_id, inicio: ts }, b);
+      } catch (e) {
+        console.warn('[avisos] no se pudieron programar', e); // sin billetera, sin avisos
+      }
       router.replace('/sesion/activa');
     } catch (e) {
       setError(mensajeUsuario(e));

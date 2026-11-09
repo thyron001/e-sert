@@ -20,6 +20,25 @@
         "Recibo en un iPhone físico (solo simulador).",
         "Incluir S2-3 (espejo por WS) en proyecto/: esta copia partió de miguel/s2."
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-08",
+      "resumen": "Avisos locales de saldo bajo y tope SERT programados al llegar (con banner en la app y disparo exacto en primer plano), cancelados al cerrar y reprogramados tras recargar; bloqueo de nuevas sesiones con saldo negativo hasta recargar. Probado en Android con la escala de demo 60×: avisos a ~50 s y ~110 s, 0 notificaciones tras cerrar, bloqueo con −$0.19 y desbloqueo tras $5.",
+      "evidencias": [
+        "evidencias/s2_avisos.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Unificar con Freddy la regla de saldo bajo (la app usa el disponible tras la retención; el núcleo, saldo − costo en curso).",
+        "Probar en iPhone físico (las notificaciones en segundo plano de iOS).",
+        "Canal de alta importancia y alarmas exactas con una APK propia (Expo Go no los permite)."
+      ]
     }
   }
 }

@@ -1,8 +1,12 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 import type { MensajeEspejo } from '@/src/api/tipos';
 import { NotificadorEspejo, textoTransicion, type Aviso } from '../notificaciones';
 import { generarRecorrido } from '../recorridoMock';
+import { olvidarAvisados } from '@/src/servicios/avisos';
+
+// El registro tipo + sesion_id (S3-2) es global: cada test empieza limpio.
+beforeEach(() => olvidarAvisados());
 
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),

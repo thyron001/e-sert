@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
 import { rutaDelFlujo, useSesion } from '@/src/estado/sesion';
+import { Bloqueo, usarBloqueo } from '@/src/pantallas/Bloqueo';
 import { COLORES } from '@/src/ui/colores';
 import { Boton, usd } from '@/src/ui/comunes';
 
@@ -13,6 +14,8 @@ export default function SesionScreen() {
   const { modoMock } = useAjustes();
   const { flujo } = useSesion();
   const ruta = rutaDelFlujo(flujo);
+  const { billetera, bloqueo } = usarBloqueo();
+  const bloqueado = !ruta && !!bloqueo?.bloqueado;
 
   return (
     <ScrollView contentContainerStyle={styles.contenedor}>
@@ -33,7 +36,10 @@ export default function SesionScreen() {
       {ruta ? (
         <Boton texto={ruta === '/sesion/guiar' ? 'Continuar el guiado' : 'Ver sesión activa'} onPress={() => router.push(ruta)} />
       ) : (
-        <Boton texto="Buscar puesto" onPress={() => router.push('/buscar')} />
+        <>
+          <Boton texto="Buscar puesto" onPress={() => router.push('/buscar')} deshabilitado={bloqueado} />
+          {bloqueado && billetera && bloqueo && <Bloqueo bloqueo={bloqueo} billetera={billetera} />}
+        </>
       )}
       <Text style={styles.fuente}>{modoMock ? 'Datos: mock (sin backend)' : 'Datos: backend real'}</Text>
       <Boton
