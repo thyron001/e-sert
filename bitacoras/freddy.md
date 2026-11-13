@@ -703,3 +703,58 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - @Tyrone [Plan] `semanas/S4/Freddy/sesion-1.md`, paso 6: cambiar «300 s simulados» por «1 800 s»; en 300 s no hay sesiones que comprobar.
 
 **Estado tras la actualización:** sigue `parcial`, 4/6. «e2e pasa completo con SUMO» no cumple: el tiempo está bien (< 5 min), pero hay 2 fallos reales en el módulo de IA. El VPS sigue sin token.
+
+## S4 · Sesión 2 · 2026-11-13 · Documentación técnica, arquitectura y diagramas de secuencia
+**Estado:** hecha
+
+**Qué hice:**
+- Un subagente Explore hizo el inventario de puntos de entrada: rutas de FastAPI, mensajes WS, *hooks* del controlador, llamadas a la IA, guiado por TraCI, publicadores y variables de entorno.
+- Escribí 9 diagramas Mermaid en `comun/docs/diagramas/`: componentes, despliegue, `estados_sesion` y las secuencias de llegada, falsa liberación evitada, vehículo simulado, recarga con Payphone, snapshot por WS y modo espejo.
+- `generar_diagramas.py` los renderiza a PNG (`-s 2`) y SVG con mermaid-cli **10.9.1**:
+  - usa `npx` si hay Node ≥ 18, o si no la imagen Docker `minlag/mermaid-cli:10.9.1`;
+  - si no hay ninguno, explica qué instalar y sale con código 2.
+- `verificar_contrato_api.py`:
+  - vuelca `app.openapi()` a `openapi.json` y compara la tabla §4.3: método, ruta, 🔒 frente a 401, código de éxito, modelos y campos;
+  - genera `api.md`, con una tabla por endpoint y ejemplos de `comun/ejemplos/`;
+  - si `CONTRATO.propuesto.md` cubre todas las diferencias, sale con 0.
+- Encontré una diferencia: `Salud.ts` se aprobó en v1.2 pero no está en la tabla §4.3. La dejé propuesta en `comun/CONTRATO.propuesto.md` (v1.3, editorial) y actualicé `comun/ejemplos/salud.json`.
+- `medir_cifras.py` y `cifras.json` con las tres cifras:
+
+| Cifra | Valor |
+|---|---|
+| TraCI con 80 % de autos con app | 30,2 ms/paso |
+| Latencia de la API, p50 / p95 | 3,0 / 4,5 ms |
+| Mensajes WS por segundo (visor) | 2,12 |
+
+- Escribí `arquitectura.md` (componentes, los 9 diagramas y las cifras), `decisiones.md` (D1–D6) y `operacion.md` (cómo levantar cada pieza, variables, base de datos, logs y 14 fallas comunes).
+
+**Archivos creados o modificados:** `semanas/S4/Freddy/codigo/comun/docs/{arquitectura,api,decisiones,operacion}.md`, `openapi.json`, `cifras.json`, `generar_diagramas.py`, `verificar_contrato_api.py`, `medir_cifras.py`, `diagramas/*.{mmd,png,svg}`, `comun/CONTRATO.propuesto.md`, `comun/ejemplos/salud.json`, `semanas/S4/Freddy/evidencias/s2_*.png`.
+
+**Decisiones y por qué:**
+- **Render con la imagen Docker oficial**, autorizado por el usuario. En la computadora no hay Node, y el contenedor trae Node 12, cuando mermaid-cli necesita 18 o más. No caigo a Graphviz porque no interpreta Mermaid.
+- **Las cifras se miden con un script reproducible** y no se copian de S3.
+- **El verificador acepta las diferencias propuestas** en `CONTRATO.propuesto.md`, porque el criterio lo permite y solo la unificación cambia `docs/CONTRATO.md`.
+
+**Problemas encontrados:**
+- El modo automático bloqueó al principio la imagen externa de mermaid-cli; el usuario la autorizó.
+- En los diagramas de secuencia de Mermaid el `;` separa sentencias y rompía una nota.
+- El diagrama de componentes horizontal no dibujaba la flecha de TraCI hacia un subgrafo; lo rehíce de arriba a abajo, con flechas hacia nodos concretos.
+- El generador del PDF no admite negritas dentro de celdas de tablas.
+
+**Pedidos a otros:**
+- @Tyrone: para la diapositiva de arquitectura, `semanas/S4/Freddy/codigo/comun/docs/diagramas/componentes.png` (y `.svg` si prefieres un vectorial). Tras la unificación queda en `proyecto/comun/docs/diagramas/`.
+- @Pablo: para el informe, los diagramas en `comun/docs/diagramas/`; los más útiles son `componentes`, `estados_sesion` y `seq_falsa_liberacion_evitada`, con PNG y SVG. El texto está en `comun/docs/arquitectura.md` y `decisiones.md`.
+- @Miguel: revisa `comun/docs/diagramas/seq_recarga_payphone.mmd`. Lo armé con tu README y `backend/pagos/rutas.py` (preparar → ir → formulario → retorno → Confirm → `recargar` una vez → consulta de estado). Dime qué corregir.
+
+**Bucle y verificación:**
+- Hice 3 vueltas:
+  1. el `;` en Mermaid;
+  2. el rediseño del diagrama de componentes y del de estados;
+  3. las 2 inexactitudes de `operacion.md` que encontró el verificador: el orden real de búsqueda de `ESERT_IA_DIR` y el origen del valor por defecto de `PAYPHONE_MODO`.
+- El verificador independiente reportó **5/5 criterios cumplidos**. Comprobó que el verificador de contrato detecta errores introducidos a propósito y que los renders son deterministas (mismo md5).
+
+**Pendientes para la próxima sesión:**
+- El verificador de contrato no compara si los campos de las respuestas son obligatorios u opcionales; solo lo hace con los de los cuerpos.
+- Repetir `medir_cifras.py` con `rf_v1.joblib` cuando exista.
+
+**Evidencias:** ![](../semanas/S4/Freddy/evidencias/s2_arquitectura.png) · ![](../semanas/S4/Freddy/evidencias/s2_secuencia-cierre.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s2_explicacion.pdf)
