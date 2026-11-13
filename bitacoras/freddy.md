@@ -610,3 +610,68 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - Repetir S3-1 (búsqueda, mapa) y el perfil de S3-2 con el guiado ya funcionando.
 - Repetir con `rf_v1` para ver recibos de estadías reales.
 **Evidencias:** ![](../semanas/S3/Freddy/evidencias/s3_espejo-en-vivo.png) · [explicación (PDF)](../semanas/S3/Freddy/explicaciones/s3_explicacion.pdf) · [resumen semanal (PDF)](../semanas/S3/Freddy/evidencias/resumen_S3_Freddy.pdf)
+
+## S4 · Sesión 1 · 2026-11-13 · Pruebas de punta a punta (pytest -m e2e)
+**Estado:** parcial
+**Qué hice:**
+- Copié `traci/`, `backend/` (sin `pagos/` ni `asistente/`) y `comun/` desde `proyecto/` a `semanas/S4/Freddy/codigo/`.
+- Creé `pytest.ini` en `backend/` y en `traci/`, con los marcadores `e2e` y `vps` y `addopts = -m "not e2e and not vps"`.
+- `backend/tests/e2e/conftest.py`:
+  - `uvicorn` real en un hilo, en un puerto libre y con SQLite temporal;
+  - `cliente` con `X-Contrato-Version: 1`;
+  - `requiere_sumo`, que salta limpio y al final comprueba que no queden procesos `sumo`;
+  - `usuario_app` y `nuevo_usuario`, que recargan por Payphone mock si `backend/pagos` está montado y, si no, por `POST /recarga` con `PRUEBA` (marcado MOCK).
+- `test_flujo_app.py`: saldo 0 → 402 → recarga → `/guia` → `ESTACIONADO` con $0,25 retenidos → 40 m a pie, vuelta y 2 ventanas en vehículo → `CERRADA` sola, con el cobro de `tarifa.json` y la retención liberada. También el caso trampa (alejarse a pie no libera).
+- `traci/cierre_remoto.py`: la máquina de estados del controlador, ejecutada por HTTP para un usuario de la app.
+- `test_websocket.py`, sobre `/ws/estado` con clientes reales:
+  - cada mensaje se valida con `MensajeWS`;
+  - llega como máximo 1 snapshot por segundo simulado;
+  - `verdad` nunca llega a `rol=publico`;
+  - el snapshot coincide con `GET /puestos` y no con la verdad.
+- `test_errores_contrato.py`: 402, 409, 404 y 403 con el formato exacto, más 400 `CONTRATO_INCOMPATIBLE`.
+- `test_simulacion_completa.py`: `correr_kpis p20_rf_s1` de 300 s por `docker exec` contra el backend vivo. Comprueba:
+  - ninguna sesión `falsa`, es decir, `isStoppedParking` en `False` al cerrar;
+  - el invariante del libro;
+  - `precision_mapa_app ≥ 0,95`;
+  - el modo espejo (`espejos` en el snapshot y el recibo una sola vez);
+  - que el log no tenga excepciones.
+
+  Para eso añadí `--volcar` a `traci/correr_kpis.py`.
+- `traci/tests/e2e/test_cierre_automatico.py`: el escenario mínimo con SUMO (`escenario_cierre.py`) y 20 casos con ventanas ruidosas sin SUMO.
+- `test_vps.py` (`pytest -m vps`): `/salud`, puestos, candidatos, WebSocket de 5 s y rechazo de snapshots sin token.
+- Gráfica `backend/graficas/e2e_resultados.py`, que lee el JUnit XML.
+- Arreglé los 5 tests de `traci/tests/test_guiado.py` que fallaban fuera del contenedor: ahora usan `proyecto/sumo` cuando falta la copia del escenario.
+
+**Archivos creados o modificados:** `semanas/S4/Freddy/codigo/{backend,comun,traci}/` (copia), `backend/pytest.ini`, `traci/pytest.ini`, `backend/tests/e2e/*`, `backend/graficas/e2e_resultados.py`, `traci/cierre_remoto.py`, `traci/correr_kpis.py`, `traci/tests/e2e/*`, `traci/tests/test_volcado.py`, `traci/tests/test_guiado.py`, `semanas/S4/Freddy/{estado.json,RESUMEN.md,evidencias/,explicaciones/}`.
+
+**Decisiones y por qué:**
+- En el contrato, `GET /guia` no recibe el usuario ni mira el saldo. La exigencia de recargar la pone `POST /sesiones` con `SALDO_INSUFICIENTE`, y la prueba sigue el contrato.
+- El backend no cierra sesiones; las cierra el controlador. Por eso el recorrido HTTP usa `CierreRemoto` con la misma `MaquinaSesion`.
+- Se compara `precision_mapa_app` con S3 (1,00 − 5 puntos). La precisión total depende de la penetración: al 20 % no es comparable con el 50 % de S3.
+- En el VPS se sondea con un cuerpo inválido, así la prueba nunca escribe estado en la demo.
+
+**Problemas encontrados:**
+- **Sin Docker en esta distro WSL** (falta la integración de Docker Desktop). Las 2 pruebas con SUMO están escritas pero se saltaron, así que el criterio «e2e pasa con SUMO en < 5 min» queda sin verificar.
+- **Riesgo para cuando se corra con SUMO:** S3 dio 47/47 falsas liberaciones con el umbral. La aserción «0 falsas» puede fallar con SUMO, y eso sería un hallazgo real, no algo que haya que aflojar.
+- **La demo acepta snapshots sin token** (`/interno/snapshot` y `/sim/paso` responden 422 en vez de 401). La primera versión de la prueba mandó un paso de ejemplo válido y la demo lo publicó. No bloquea nada, porque un `t_sim` menor reinicia el reloj, y la prueba ya se corrigió.
+- **Oscilación de la máquina de estados:** entre 15 y 30 m pasa A_PIE → REGRESANDO → A_PIE. No afecta el cobro.
+
+**Pedidos a otros:**
+- @Tyrone [VPS]: configurar `ESERT_TOKEN_SIM` (un token largo y aleatorio) en el servicio `esert-demo` de Dokploy y pasárselo al controlador. Hoy cualquiera puede publicar un snapshot en el visor. Para comprobarlo: `ESERT_URL_PUBLICA=https://demo.e-sert.tesisucuenca.com pytest backend/tests -m vps`.
+- @Tyrone: comando para `verificar_demo.py`, desde `proyecto/`: `python -m pytest -c backend/pytest.ini backend/tests traci/tests -m e2e --junitxml=e2e.xml --durations=0` (necesita el contenedor `van3twin` para las 2 pruebas con SUMO; sin él se saltan).
+- @Tyrone [Plan] `semanas/S4/Freddy/sesion-1.md`: el paso 3 dice «`/guia` exige recargar», pero en el contrato `/guia` no recibe el usuario. Propongo cambiarlo por «`POST /sesiones` responde `SALDO_INSUFICIENTE`».
+- @Miguel: con `backend/pagos` montado en modo `mock`, el flujo preparar → decidir → retorno → `GET /pagos/{id}` funcionó contra el backend real (probado en una copia con tu carpeta: 10/10 pruebas HTTP). No encontré diferencias con el contrato.
+
+**Bucle y verificación:**
+- Hice 4 vueltas:
+  1. la aserción de transiciones contra la oscilación A_PIE/REGRESANDO;
+  2. el nombre del modelo de error, `CuerpoError`;
+  3. la prueba del VPS para que no escriba en la demo;
+  4. la comparación del snapshot con el mapa, que reforcé tras el verificador.
+- El verificador independiente reportó **4/6 criterios cumplidos**: el VPS no cumple (falta el token) y «e2e con SUMO» no es verificable aquí.
+
+**Pendientes para la próxima sesión:**
+- Correr `pytest -m e2e` con el contenedor `van3twin` y revisar las falsas liberaciones y el tiempo total.
+- Repetir `pytest -m vps` cuando Tyrone configure el token.
+
+**Evidencias:** ![](../semanas/S4/Freddy/evidencias/s1_e2e-resultados.png) · ![](../semanas/S4/Freddy/evidencias/s1_vps-humo.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s1_explicacion.pdf)

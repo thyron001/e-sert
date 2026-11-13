@@ -1,0 +1,23 @@
+{
+  "persona": "Freddy",
+  "semana": "S4",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "parcial",
+      "fecha": "2026-11-13",
+      "resumen": "Suite `pytest -m e2e` con backend uvicorn real: recorrido de la app con cierre automático, WebSocket, los 4 errores del contrato y simulación SUMO contra el backend vivo. Resultado: 30 pasan y 2 se omiten limpio (sin Docker) en 9,1 s. La prueba de humo del VPS encontró que la demo acepta snapshots sin token.",
+      "evidencias": [
+        "evidencias/s1_e2e-resultados.png",
+        "evidencias/s1_vps-humo.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 4, "total": 6},
+      "pendientes": [
+        "Correr `pytest -m e2e` con SUMO (activar la integración WSL de Docker Desktop y arrancar van3twin); verificar falsas liberaciones = 0 y la duración total < 5 min",
+        "@Tyrone [VPS]: configurar ESERT_TOKEN_SIM en Dokploy; hoy /interno/snapshot y /sim/paso aceptan pasos sin token (pytest -m vps: 2 fallos)",
+        "precision_mapa_app es un criterio débil (≈1 por construcción); valorar mae_mapa_app"
+      ]
+    }
+  }
+}
