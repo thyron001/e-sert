@@ -297,3 +297,168 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Ejecutor completo con KPIs y precisión del mapa.
 
 **Evidencias:** ![](../semanas/S2/Tyrone/evidencias/s3_penetracion-escenarios.png) ![](../semanas/S2/Tyrone/evidencias/s3_ocupacion-real.png) · [Explicación (PDF)](../semanas/S2/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S2/Tyrone/evidencias/resumen_S2_Tyrone.pdf)
+
+## S3 · Sesión 1 · 2026-11-13 · Ejecutor de experimentos: penetración × clasificador × semillas
+**Estado:** hecha
+**Qué hice:**
+- `kpis/correr_una.py`: una corrida aislada sobre el controlador real de Freddy (`proyecto/traci/correr_kpis.correr`).
+  - Redirige el escenario y las salidas a esta copia de `sumo/`.
+  - Calcula los KPIs de búsqueda de S2-1, con *warm-up* de 900 s, y toma los KPIs de sistema de `KPIsSistema`.
+  - Falla en voz alta si se pidió rf y la inferencia no usó ventanas `rf`.
+- `kpis/modelo_plano.py`: exporta `rf_final.joblib` de Pablo a arrays de numpy y lo reconstruye en el contenedor sin sklearn. Diferencia máxima de 5·10⁻⁹ y la misma clase en el 100 % de las ventanas.
+- `kpis/experimentos.py`:
+  - `Pool(spawn, maxtasksperchild=1)` y `hash_config` (cfg + red, parqueos, demanda y modelo);
+  - JSON atómicos, reintento único y `progreso.log`;
+  - `experimentos.csv` y `metadatos.json` (con `duracion_matriz_s` leída del log);
+  - opciones `--rapida`, `--speedup`, `--solo`, `--forzar` y `--dry-run`.
+- Matriz completa: 24/24 corridas, 0 fallidas, 2,9 h con 4 procesos y libsumo. Demandas de las semillas 1–5 generadas.
+- `kpis/evidencia_matriz.py` y 7 tests en el contenedor.
+
+**Archivos creados o modificados:** `semanas/S3/Tyrone/codigo/kpis/{correr_una,experimentos,modelo_plano,evidencia_matriz}.py`, `kpis/matriz.yaml`, `kpis/tests/test_experimentos.py`, `kpis/resultados/{experimentos.csv,metadatos.json,progreso.log,speedup.json,corridas/,sesiones/,rapida/}`, `kpis/.gitignore`, `sumo/escenarios/escenarios.json`, `evidencias/s1_matriz-progreso.png`, `explicaciones/s1_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **`rf_final` en lugar de `rf_v1`:** `rf_v1.joblib` no está en el repo y sklearn 1.9.1 no existe para el Python 3.10 del contenedor. Por eso el "rf" de S3 de Freddy era en realidad el umbral. Se usó el modelo congelado de `origin/pablo/s4` (SHA-256 comprobado), exportado a numpy.
+- **Timeout de 3600 s** (no 1800): una corrida completa tarda 1 321–2 175 s con 4 en paralelo.
+- **libsumo** en la matriz: da los mismos KPIs que TraCI (comprobado con `p50_rf_s1`) y es más rápido. El *speedup* se midió con TraCI.
+- **El sorteo de `con_app`** sigue siendo el `numpy.default_rng([semilla, 7])` de S2-3: cumple el anidamiento (test) sin regenerar escenarios.
+
+**Problemas encontrados:**
+- Unos SUMO huérfanos de un primer intento escribían en las mismas carpetas. Reinicié la matriz limpia.
+  - Causa: `pkill -f` dentro de `bash -lc` se mataba a sí mismo.
+- El proceso principal terminó con `gzip.open(mtime=)`, que no existe en Python 3.10.
+  - El código ya estaba corregido, pero ese proceso tenía la versión vieja cargada.
+  - Relanzar consolidó sin repetir ninguna corrida, lo que de paso probó la reanudación.
+- **Resultado importante:** umbral y rf dan **la misma búsqueda** a igual penetración, y la app no la reduce (436 s a ciegas; 429/435/446 s al 20/50/80 %).
+  - Causa: `Guia` usa la fuente `"mapa"`, que solo conoce las sesiones de la app. Con 87 % de ocupación real, guía a puestos llenos.
+  - Una falsa liberación nunca cambia la recomendación.
+  - Coincide con lo que Freddy midió en S2. En S4-2 se añade un oráculo de sensibilidad.
+
+**Pedidos a otros:**
+- @Freddy:
+  - el guiado con la fuente `"mapa"` no reduce la búsqueda: el mapa solo ve a los usuarios con app y, con 87 % de ocupación, recomienda puestos llenos. ¿Podemos discutir en la exposición una fuente mixta (mapa + ocupación agregada de la SERT) como trabajo futuro?
+  - `_alcanzable` acepta un puesto en la misma arista pero detrás del auto. Con la fuente `"verdad"`, SUMO 1.12 aborta (`MSBaseVehicle::replaceRoute`). La guarda está en `semanas/S4/Tyrone/codigo/kpis/correr_una.py:guia_oraculo`.
+  - confirma las claves de `KPIsSistema.resumen()` que uso: `falsas_lib_100`, `retardo_cierre_mediana_s`, `error_fact_medio_usd`, `precision_mapa`, `n_sesiones` y `n_falsas`.
+- @Pablo: uso `rf_final` de `origin/pablo/s4:semanas/S4/Pablo/codigo/ia/modelos/rf_final.joblib` (SHA-256 `1bdac0d7…`, igual a `rf_final.json`), exportado a numpy con `kpis/modelo_plano.py`. Avísame si lo vuelves a congelar.
+
+**Bucle y verificación:**
+- 4 vueltas:
+  1. sklearn ausente en el contenedor → RF exportado a numpy;
+  2. dependencias del backend en el contenedor y timeout de 3600 s;
+  3. procesos SUMO huérfanos → la matriz se reinició limpia;
+  4. `gzip.open(mtime=)` en Python 3.10 y `duracion_matriz_s` leída del log.
+- El verificador independiente reportó **6/6 criterios cumplidos**:
+  - `--rapida` en 60,3 s; 24/24 corridas sin `.error.json`;
+  - relanzar da "0 pendientes" sin cambiar el md5 del CSV;
+  - 0 % umbral = rf en las 3 semillas; *speedup* de 3,5×; `metadatos.json` completo;
+  - 7 tests pasan en el contenedor (222 s).
+- Sus observaciones:
+  - `duracion_total_s` se reescribe al relanzar (la duración real queda en `duracion_matriz_s`);
+  - el test de reanudación usa `pkill -f kpis_p50_rf_s1` en el contenedor y podría tocar otra corrida simultánea con esa etiqueta (la corrida final de S4 no se vio afectada).
+
+**Pendientes para la próxima sesión:**
+- Corrida final con las semillas 4 y 5 (S4-2), reutilizando estas 21 corridas por hash.
+
+**Evidencias:** ![](../semanas/S3/Tyrone/evidencias/s1_matriz-progreso.png) · [Explicación (PDF)](../semanas/S3/Tyrone/explicaciones/s1_explicacion.pdf)
+
+## S3 · Sesión 2 · 2026-11-13 · Análisis estadístico, figuras y tablas de la matriz
+**Estado:** hecha
+**Qué hice:**
+- `kpis/analisis.py`:
+  - IC t entre semillas y *bootstrap* BCa por vehículo (10 000);
+  - diferencias pareadas por semilla frente al 0 %;
+  - `ttest_rel` umbral frente a rf, con Holm;
+  - tablas `tabla_kpis.md` y `.tex` (booktabs), 10 hallazgos y `visor/datos/base.json`.
+- `kpis/figuras.py`: F1–F8 en PNG (150 dpi) y PDF, paleta Okabe-Ito y la línea base gris con su banda. Regenera todo en 13,3 s.
+- 8 tests (`ic95([1,2,3])`, pareado sintético, figuras con 24 filas y con `NaN`).
+- Evidencias: F1 y F4.
+
+**Archivos creados o modificados:** `semanas/S3/Tyrone/codigo/kpis/{analisis,figuras}.py`, `kpis/tests/test_analisis.py`, `kpis/figuras/F1…F8.{png,pdf}`, `kpis/resultados/{tabla_kpis.md,tabla_kpis.tex,hallazgos.md}`, `visor/datos/base.json`, `evidencias/s2_busqueda-vs-penetracion.png`, `evidencias/s2_falsas-liberaciones.png`, `explicaciones/s2_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- La réplica es la semilla: el IC principal es t con n = 3 (t = 4,303). El *bootstrap* por vehículos va aparte y rotulado.
+- **CO₂ en kg/h de la zona**, como pide F3. La corrida final añade g por vehículo.
+- **F4 rotula las barras del RF (0,0)** para que no parezcan faltantes.
+- Las figuras y las tablas no se delegaron en subagentes: la interfaz de `analisis.py` ya estaba fijada y eran pocas horas.
+
+**Problemas encontrados:**
+- `figuras.py` fallaba con los CSV de sesiones vacíos del 0 % (`EmptyDataError`). Corregido.
+- **Resultado:** ningún Δ de búsqueda es significativo (−1,5 %, −0,1 % y +2,4 %, todos con IC que cruza el cero). El RF elimina las falsas liberaciones: 0 frente a 86–90 por 100 sesiones con el umbral, Holm p < 0,001.
+- La precisión del mapa es de ≈58 % en todos los escenarios: el mapa solo ve a los usuarios con app.
+
+**Pedidos a otros:**
+- @Pablo: F4 (`kpis/figuras/F4_falsas_liberaciones.{png,pdf}`), F7 (`F7_precision_mapa`) y `kpis/resultados/hallazgos.md` son para tu sección de IA. Las cifras finales, con 5 semillas, saldrán de `semanas/S4/Tyrone/codigo/kpis/resultados/final/resumen.csv`.
+- @Freddy: revisa que F5 (retardo de cierre), F6 (error de facturación, negativo con el umbral porque cierra antes) y F7 (precisión del mapa ≈58 % incluso al 0 %) interpreten bien tus KPIs.
+
+**Bucle y verificación:**
+- 3 vueltas:
+  1. `EmptyDataError` con las sesiones vacías del 0 %;
+  2. legibilidad (n = 3, cifras de las barras del RF en F4);
+  3. redacción con signo de los hallazgos, tras el verificador.
+- El verificador independiente reportó **6/6 criterios cumplidos**: 16 archivos de figuras en 13,3 s, tablas md/tex con Δ pareado, 10 hallazgos y 26 tests de `kpis/tests` en la computadora.
+- Sus observaciones:
+  - el signo confuso de "baja 1 % (IC −17 a 14 %)" (corregido: "cambia −1,5 % (IC −16,7 a +13,8 %)");
+  - F5 con bigotes del umbral hasta ~700 s, que aplastan las medias (queda así; las medias van en la tabla);
+  - la tabla de 13 columnas es ancha para una página.
+
+**Pendientes para la próxima sesión:**
+- Repetir con las 5 semillas de la corrida final (S4-2).
+
+**Evidencias:** ![](../semanas/S3/Tyrone/evidencias/s2_busqueda-vs-penetracion.png) ![](../semanas/S3/Tyrone/evidencias/s2_falsas-liberaciones.png) · [Explicación (PDF)](../semanas/S3/Tyrone/explicaciones/s2_explicacion.pdf)
+
+## S3 · Sesión 3 · 2026-11-13 · Visor final: panel de KPIs, vehículo espejo y modo presentación
+**Estado:** hecha
+**Qué hice:**
+- El visor pasó a módulos ES:
+  - `principal.js`, `panel_kpis.js`, `capa_espejo.js`, `presentacion.js`;
+  - `logica.js`, la lógica pura testeada con `node --test`;
+  - `css/visor.css`.
+- **Panel de KPIs:**
+  - acepta los nombres reservados del contrato §6 y sus alias;
+  - muestra "−X % vs a ciegas" frente a `base.json` de la matriz real;
+  - minigráficas de Chart.js 4.4.1, redibujo limitado a 2 Hz.
+- **Espejo:** halo pulsante (`L.divIcon`), rastro de 60 s, ruta restante y puesto asignado por `/ws/espejo`. Retiro a los 5 s.
+- **Modo presentación:** `P` pantalla completa ×1,5, `E` sigue al espejo, `T` recorre las vistas, `H` ayuda. Reconexión exponencial (1–30 s).
+- `servidor_prueba.py`:
+  - reloj compartido entre clientes;
+  - `kpi` cada 5 s;
+  - espejos y `/ws/espejo` MOCK;
+  - `--snapshots` para el plan B.
+- `captura.py`: pruebas con Playwright (evidencias, rendimiento, reconexión, teclas y retiro).
+- QR de la demo y enlace "Demo en vivo" en `roadmap/templates/base.html`.
+- Prueba contra el backend real de Freddy con el controlador publicando.
+
+**Archivos creados o modificados:** `semanas/S3/Tyrone/codigo/visor/{index.html,package.json,servidor_prueba.py,captura.py}`, `visor/js/*.js`, `visor/css/visor.css`, `visor/datos/base.json`, `visor/tests/*`, `roadmap/templates/base.html`, `evidencias/s3_{visor-final,visor-presentacion,visor-backend-real,qr-demo}.png`, `explicaciones/s3_explicacion.{md,pdf}`, `evidencias/resumen_S3_Tyrone.pdf`.
+
+**Decisiones y por qué:**
+- **Canvas con `circleMarker`** y actualización en el sitio: con 800 autos, p95 de 16,8 ms por cuadro (meta < 33 ms).
+- **La ocupación y las sesiones activas se calculan del `snapshot`** porque el `kpi` del backend no las trae.
+- **El enlace del roadmap** apunta a `demo.e-sert.tesisucuenca.com/visor/`, que sirve el visor de `main`. Este visor llega ahí con la unificación; mientras tanto se verificó servido por el backend local en `/visor/`.
+
+**Problemas encontrados:**
+- El `kpi` real de Freddy no trae `busqueda_media_s` ni CO₂: esas tarjetas muestran "—" con el backend real.
+- La nota de la base partía las palabras (`word-break: break-all`). Se cambió a `overflow-wrap: anywhere`.
+
+**Pedidos a otros:**
+- @Freddy: el mensaje `kpi` de `/ws/estado` no trae `busqueda_media_s` ni `co2_busqueda_kg_h`, y llega cada 10 s simulados. Si los añades (de `RegistroBusqueda`), el panel los muestra sin cambios.
+- @Miguel: el visor acepta `?espejo=<veh_id>` para resaltar el auto que sigue tu teléfono; úsalo en el ensayo de S4-3.
+
+**Bucle y verificación:**
+- 4 vueltas:
+  1. el `kpi` llegaba antes de que el panel existiera → `kpi_cada_s` parametrizable en el servidor de prueba;
+  2. las teclas y el encuadre del modo presentación;
+  3. la prueba contra el backend real;
+  4. `base.json` de la matriz real y la nota con la palabra partida.
+- El verificador independiente reportó **6/7 criterios cumplidos**, y el 7.º solo pendiente del PDF semanal, generado en este cierre:
+  - `/visor/` sirve el visor desde el backend real (200);
+  - el panel cambia con `POST /sim/kpi` (211 s → 150 s);
+  - el espejo tiene ruta de 9 puntos, puesto y retiro en 5,3 s;
+  - `P`/`T`/`E`/`H` funcionan; reconexión en 5,1 s;
+  - con 800 vehículos, p95 de 16,8 ms;
+  - 12 tests de node y 11 de pytest.
+- Su observación: la URL pública todavía sirve el visor anterior hasta la unificación.
+
+**Pendientes para la próxima sesión:**
+- Probarlo en el proyector y con el teléfono real (ensayo de S4-3).
+- Que llegue a la URL pública con la unificación.
+
+**Evidencias:** ![](../semanas/S3/Tyrone/evidencias/s3_visor-final.png) ![](../semanas/S3/Tyrone/evidencias/s3_visor-presentacion.png) ![](../semanas/S3/Tyrone/evidencias/s3_qr-demo.png) · [Explicación (PDF)](../semanas/S3/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S3/Tyrone/evidencias/resumen_S3_Tyrone.pdf)

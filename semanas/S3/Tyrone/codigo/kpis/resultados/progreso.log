@@ -1,0 +1,55 @@
+2026-11-13T20:26Z inicio 24 pendientes de 24 con 4 procesos
+2026-11-13T20:26Z encolada p00_umbral_s1 intento 1
+2026-11-13T20:26Z encolada p00_rf_s1 intento 1
+2026-11-13T20:26Z encolada p20_umbral_s1 intento 1
+2026-11-13T20:26Z encolada p20_rf_s1 intento 1
+2026-11-13T20:26Z encolada p50_umbral_s1 intento 1
+2026-11-13T20:26Z encolada p50_rf_s1 intento 1
+2026-11-13T20:26Z encolada p80_umbral_s1 intento 1
+2026-11-13T20:26Z encolada p80_rf_s1 intento 1
+2026-11-13T20:26Z encolada p00_umbral_s2 intento 1
+2026-11-13T20:26Z encolada p00_rf_s2 intento 1
+2026-11-13T20:26Z encolada p20_umbral_s2 intento 1
+2026-11-13T20:26Z encolada p20_rf_s2 intento 1
+2026-11-13T20:26Z encolada p50_umbral_s2 intento 1
+2026-11-13T20:26Z encolada p50_rf_s2 intento 1
+2026-11-13T20:26Z encolada p80_umbral_s2 intento 1
+2026-11-13T20:26Z encolada p80_rf_s2 intento 1
+2026-11-13T20:26Z encolada p00_umbral_s3 intento 1
+2026-11-13T20:26Z encolada p00_rf_s3 intento 1
+2026-11-13T20:26Z encolada p20_umbral_s3 intento 1
+2026-11-13T20:26Z encolada p20_rf_s3 intento 1
+2026-11-13T20:26Z encolada p50_umbral_s3 intento 1
+2026-11-13T20:26Z encolada p50_rf_s3 intento 1
+2026-11-13T20:26Z encolada p80_umbral_s3 intento 1
+2026-11-13T20:26Z encolada p80_rf_s3 intento 1
+2026-11-13T20:52Z fin p00_umbral_s1 1573 s
+2026-11-13T20:52Z fin p00_rf_s1 1568 s
+2026-11-13T20:56Z fin p20_umbral_s1 1811 s
+2026-11-13T20:57Z fin p20_rf_s1 1851 s
+2026-11-13T21:18Z fin p50_umbral_s1 1556 s
+2026-11-13T21:21Z fin p50_rf_s1 1733 s
+2026-11-13T21:22Z fin p80_umbral_s1 1562 s
+2026-11-13T21:27Z fin p80_rf_s1 1798 s
+2026-11-13T21:43Z fin p00_umbral_s2 1466 s
+2026-11-13T21:46Z fin p00_rf_s2 1469 s
+2026-11-13T21:47Z fin p20_umbral_s2 1474 s
+2026-11-13T21:53Z fin p20_rf_s2 1540 s
+2026-11-13T22:11Z fin p50_umbral_s2 1717 s
+2026-11-13T22:19Z fin p50_rf_s2 1989 s
+2026-11-13T22:19Z fin p80_umbral_s2 1825 s
+2026-11-13T22:29Z fin p80_rf_s2 2175 s
+2026-11-13T22:41Z fin p00_umbral_s3 1803 s
+2026-11-13T22:45Z fin p00_rf_s3 1681 s
+2026-11-13T22:47Z fin p20_umbral_s3 1698 s
+2026-11-13T22:56Z fin p20_rf_s3 1610 s
+2026-11-13T23:09Z fin p50_umbral_s3 1643 s
+2026-11-13T23:13Z fin p50_rf_s3 1674 s
+2026-11-13T23:13Z fin p80_umbral_s3 1550 s
+2026-11-13T23:18Z fin p80_rf_s3 1321 s
+2026-11-13T23:18Z inicio 0 pendientes de 24 con 4 procesos
+2026-11-13T23:18Z listo 24/24 en 0 s
+2026-11-13T23:18Z inicio 0 pendientes de 24 con 4 procesos
+2026-11-13T23:18Z listo 24/24 en 0 s
+2026-11-13T23:24Z inicio 0 pendientes de 24 con 4 procesos
+2026-11-13T23:24Z listo 24/24 en 1 s
