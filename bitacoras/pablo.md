@@ -511,3 +511,8 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 
 **Evidencias:**
 ![](../semanas/S4/Pablo/evidencias/s3_informe-paginas.png)
+
+## S4 · 2026-11-13 · Cierre de lo pendiente de semanas anteriores
+- **S2-3 atrasada en el roadmap:** `main` conservaba `sesion-3: parcial` porque los tres commits finales de S2-3 (`1f87e8e`, `8a6cb1c`, `f9e6872`) se hicieron después de la unificación de S2. Abrí el PR https://github.com/thyron001/e-sert/pull/1 (`pablo/s2` hacia `main`; solo toca `semanas/S2/Pablo/` y esta bitácora; la fusión no tiene conflictos). @Tyrone: fusiónalo o inclúyelo en la unificación de S4; al hacerlo, el roadmap muestra las tres sesiones de S2 como hechas.
+- **S4:** `pablo/s4` se fusiona sin conflictos con el `main` actual (3 commits, solo `semanas/S3/Pablo/`, `semanas/S4/Pablo/` y esta bitácora). El SHA-256 de `ia/modelos/rf_final.joblib` es `1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2` (debe coincidir con `kpis/resultados/final/manifiesto.json` de Tyrone).
+- **S4-3 sigue en `parcial`:** al 13 de noviembre no existen `origin/{freddy,tyrone,miguel}/s4`. Cuando existan, basta `python3 informe/construir_informe.py --fuentes ramas` y `python3 informe/verificar_informe.py` desde `semanas/S4/Pablo/codigo`, y reemplazar los `[PENDIENTE]` de Tyrone.
