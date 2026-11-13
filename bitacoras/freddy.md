@@ -675,3 +675,31 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - Repetir `pytest -m vps` cuando Tyrone configure el token.
 
 **Evidencias:** ![](../semanas/S4/Freddy/evidencias/s1_e2e-resultados.png) · ![](../semanas/S4/Freddy/evidencias/s1_vps-humo.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s1_explicacion.pdf)
+
+**Actualización (misma sesión, con Docker ya activo):**
+- Arranqué `van3twin` e instalé en él las dependencias (`traci/requirements.txt` y `backend/requirements-servidor.txt`). Corrí `pytest -m e2e` con SUMO: **30 pasan y 2 fallan, en 3 min 18 s y 4 min 06 s** (dos corridas; las dos por debajo de 5 min). No quedaron procesos `sumo`.
+- Arreglos en mi escenario de cierre (`escenario_cierre.py`):
+  - recargar a cada auto (en `correr_kpis` lo hace `Guia`);
+  - marcar los trips con `con_app=1` (`VerdadSUMO` solo sigue esos);
+  - correr hasta 16 000 s, para que vuelvan todos los peatones;
+  - opciones `--guardar` (CSV para diagnóstico) y `--sigma`.
+- **Desvío:** `test_simulacion_completa` usa 1 800 s y no los 300 s del prompt. Con estadías de 10 a 120 min, en 300 s no se abre ninguna sesión y todas las comprobaciones quedarían vacías. Se puede cambiar con `ESERT_E2E_HASTA`. La corrida de 1 800 s tarda unos 90 s reales sola y 2-3 min dentro de la suite.
+- La prueba ahora junta todas las comprobaciones y falla al final con la lista completa. Resultado:
+  - **Cumplen:**
+    - las 93 billeteras cuadran (saldo = recargas − débitos, ninguna bajo −$0,50);
+    - `precision_mapa_app` = 1,0;
+    - modo espejo: 6 vehículos seguidos; los 3 que llegaron a `CERRADA` recibieron exactamente 1 recibo, y los 6 aparecieron en `espejos`;
+    - el log del controlador está limpio.
+  - **Falla:** 35 de 35 cierres con el auto todavía estacionado (`isStoppedParking`).
+- **Causa de las falsas liberaciones (verificada):**
+  - falta `rf_v1.joblib` (lo ignora `proyecto/ia/modelos/.gitignore`), así que `proyecto/ia/inferencia.py` cae al umbral de velocidad, con confianza 1,0;
+  - con el ruido del GPS de σ = 5 m, 59 de 71 ventanas de alguien caminando salieron `vehiculo`;
+  - con σ = 0 y σ = 2 m hay **0 falsas liberaciones**, y el retardo de cierre es de 12-13 s (con σ = 0, un caso de 440 s).
+
+  Mi máquina de estados funciona; el problema está en el clasificador.
+
+**Pedidos a otros (adicionales):**
+- @Pablo: publica `rf_v1.joblib` (o un camino para descargarlo en `proyecto/ia/modelos/`), o haz que el umbral de `inferencia.py` aguante el ruido de σ = 5 m, por ejemplo bajando la confianza del umbral bajo ruido para que mi política de datos pobres lo retenga. Hoy el 100 % de los cierres son falsas liberaciones. Lo reproduces con: `docker exec -w /home/vanet/results/e-sert/semanas/S4/Freddy/codigo van3twin python3 -m traci.tests.e2e.escenario_cierre --salida traci/salidas/c.json --guardar traci/salidas/dbg` (mira `ventanas_e2e_cierre.csv`: `modo_clasificado` frente a `modo_real`), o con `pytest -m e2e`.
+- @Tyrone [Plan] `semanas/S4/Freddy/sesion-1.md`, paso 6: cambiar «300 s simulados» por «1 800 s»; en 300 s no hay sesiones que comprobar.
+
+**Estado tras la actualización:** sigue `parcial`, 4/6. «e2e pasa completo con SUMO» no cumple: el tiempo está bien (< 5 min), pero hay 2 fallos reales en el módulo de IA. El VPS sigue sin token.

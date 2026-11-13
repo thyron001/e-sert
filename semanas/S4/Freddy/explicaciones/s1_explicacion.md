@@ -57,7 +57,7 @@ Con SUMO, en una máquina donde `docker exec van3twin which sumo` funciona, la m
 
 ```bash
 docker exec -w /home/vanet/results/e-sert/<codigo> -e ESERT_TOKEN_SIM=e2e-token van3twin \
-  bash -lc "python3 -m traci.correr_kpis --id p20_rf_s1 --hasta 300 --publicar http://<host>:<puerto> \
+  bash -lc "python3 -m traci.correr_kpis --id p20_rf_s1 --hasta 1800 --publicar http://<host>:<puerto> \
             --sufijo _e2e --volcar traci/salidas/e2e_<id>.json"
 ```
 
@@ -156,7 +156,15 @@ Al terminar lee el volcado y comprueba:
 
 ## 7. Resultados y evidencias
 
-**`pytest -m e2e`:** 32 tests, 30 pasan, 0 fallan y 2 se omiten (no hay SUMO en esta máquina). Tarda **9,1 s**, muy por debajo de los 5 min.
+**`pytest -m e2e`, sin SUMO:** 30 pasan y 2 se omiten, en 9,1 s.
+
+**`pytest -m e2e`, con SUMO** (contenedor `van3twin`): 32 tests, 30 pasan y **2 fallan**. Tarda 3 min 18 s a 4 min 06 s, por debajo de los 5 min.
+
+- **`test_simulacion_completa`** (p20, semilla 1, 1 800 s):
+  - cumplen el libro (93 billeteras cuadran), el mapa (`precision_mapa_app` = 1,0), el espejo (6 vehículos seguidos; los 3 que llegaron a `CERRADA` recibieron exactamente 1 recibo) y el log sin excepciones;
+  - falla en que **35 de 35 cierres son falsas liberaciones**.
+- **`test_cierre_automatico` con SUMO:** 4 de 5 cierres son falsos. El único cierre correcto tuvo un retardo de 12 s.
+- **Causa:** falta `rf_v1.joblib`, así que la IA usa el umbral de velocidad. Con el ruido del GPS (σ = 5 m), 59 de 71 ventanas de alguien caminando salen `vehiculo`. Con σ ≤ 2 m, el mismo escenario da **0 falsas liberaciones** y retardos de 12-13 s: la máquina de estados funciona, y el problema está en el clasificador (pedido a Pablo).
 
 ![Resultados de la suite e2e](../evidencias/s1_e2e-resultados.png)
 
@@ -178,8 +186,9 @@ En `traci` ya no hay fallos: los 5 tests de `test_guiado.py` que fallaban fuera 
 
 ## 8. Limitaciones y decisiones
 
-- **SUMO no se pudo correr en esta sesión.** En esta distro WSL no está activa la integración de Docker Desktop, así que `test_simulacion_completa` y `test_cierre_automatico[sumo]` están escritos pero se saltaron. El criterio «`pytest -m e2e` pasa completo con SUMO» queda **sin verificar**.
-- **Riesgo conocido:** en S3, `p50_rf_s1` dio 47 falsas liberaciones de 47 sesiones en 900 s (con el umbral, porque falta el modelo RF). La aserción «ninguna sesión `falsa`» es la que pide el prompt y puede fallar con SUMO. Si falla, no se va a aflojar: es justamente el defecto que la suite debe mostrar.
+- **Falsas liberaciones.** La aserción «ninguna sesión `falsa`» falla con SUMO, igual que en S3, donde fueron 47 de 47. No se aflojó: es justamente el defecto que la suite debe mostrar. La causa está en el módulo de IA (falta el modelo RF), y el arreglo depende de Pablo.
+- **1 800 s en lugar de 300 s.** Con estadías de 10 a 120 min, en 300 s no se abre ninguna sesión y las comprobaciones quedarían vacías. La duración se cambia con `ESERT_E2E_HASTA`, y se propone a Tyrone actualizar el prompt.
+- **Escenario mínimo de cierre.** Hubo que recargar a cada auto (en `correr_kpis` lo hace `Guia`) y marcar los trips con `con_app=1`, porque `VerdadSUMO` solo sigue la estadía de esos autos.
 - **`/guia` no exige recargar.** En el contrato `GET /guia` no recibe el usuario ni revisa el saldo. La exigencia de recargar la impone `POST /sesiones` con `SALDO_INSUFICIENTE`. La prueba sigue el contrato y se propone a Tyrone ajustar el prompt.
 - **Precisión del mapa.** Se compara `precision_mapa_app`: S3 dio 1,00, así que el umbral es 0,95. La precisión total depende de la penetración: con 20 % el mapa no ve al 80 % de los autos. Ya en S3 se advirtió que `precision_mapa_app` sale cerca de 1 casi por construcción, así que este criterio es débil.
 - **Oscilación de la máquina de estados.** Al alejarse entre 15 y 30 m pasa A_PIE → REGRESANDO → A_PIE, porque los umbrales se cruzan. No afecta el cobro, y la prueba lo acepta explícitamente.
@@ -191,4 +200,5 @@ En `traci` ya no hay fallos: los 5 tests de `test_guiado.py` que fallaban fuera 
 2. **¿Cómo se garantiza que `pytest` normal siga rápido?** `addopts = -m "not e2e and not vps"` en `pytest.ini`. Las pruebas e2e solo corren cuando se piden con `-m e2e`.
 3. **¿Quién cierra la sesión: la app, el backend o el controlador?** El controlador. Clasifica las ventanas del teléfono y, tras 2 ventanas en vehículo a más de 20 m, informa `SALIENDO` y cierra con el motivo `deteccion`. La app no cierra nada.
 4. **¿Qué es una falsa liberación y cómo se mide?** Cerrar la sesión con el auto todavía estacionado. Se mide con `traci.vehicle.isStoppedParking(veh)` en el mismo paso del cierre.
-5. **¿Qué encontró la prueba de humo del VPS?** Que la demo acepta snapshots sin token. Cualquiera podría publicar un estado falso en el visor, así que hay que configurar `ESERT_TOKEN_SIM` en Dokploy.
+5. **¿Por qué falla la prueba con SUMO?** Sin el modelo RF, la IA clasifica por velocidad. Con 5 m de ruido de GPS, alguien caminando parece ir a más de 8 km/h, así que 2 ventanas «vehículo» a más de 20 m cierran la sesión aunque el auto siga estacionado. Con menos ruido el cierre es correcto y tarda unos 12 s.
+6. **¿Qué encontró la prueba de humo del VPS?** Que la demo acepta snapshots sin token. Cualquiera podría publicar un estado falso en el visor, así que hay que configurar `ESERT_TOKEN_SIM` en Dokploy.

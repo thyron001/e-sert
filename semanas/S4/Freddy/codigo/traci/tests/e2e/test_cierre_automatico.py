@@ -96,7 +96,9 @@ def test_diligencias_no_cierran_y_la_salida_cierra_rapido_con_sumo(requiere_sumo
     cierres = datos["cierres"]
     assert len(cierres) == 5 and datos["abiertas_al_final"] == 0, datos
     # Diligencias: ninguna sesión se cerró mientras el auto seguía estacionado.
-    assert [c for c in cierres if c["falsa"]] == [], cierres
+    falsas = [c["veh"] for c in cierres if c["falsa"]]
+    assert not falsas, (f"falsas liberaciones: {len(falsas)}/{len(cierres)} cierres con el auto estacionado "
+                        f"({falsas}); clasificador {datos['sesiones_maquina'].get('ventanas_por_fuente')}")
     # Salida: cada auto que dejó el parkingArea se cerró por detección en menos de 30 s.
     for c in cierres:
         assert c["motivo"] == "deteccion", c

@@ -33,6 +33,10 @@ def escenario_mini(sumo: Path, carpeta: Path, n: int = 5, fin_s: int = 16000) ->
     rutas.append(raiz.find("vType"))
     for trip, estadia in zip(busca, ESTADIAS_S):
         trip.find("stop").set("duration", str(estadia))
+        # Los cinco son usuarios de la app (VerdadSUMO solo sigue la estadía de los `con_app=1`).
+        for p in [p for p in trip.findall("param") if p.get("key") == "con_app"]:
+            trip.remove(p)
+        ET.SubElement(trip, "param", key="con_app", value="1")
         rutas.append(trip)
     (carpeta / "demanda").mkdir(parents=True, exist_ok=True)
     ET.ElementTree(rutas).write(carpeta / "demanda" / "mini.rou.xml")
@@ -52,7 +56,7 @@ def escenario_mini(sumo: Path, carpeta: Path, n: int = 5, fin_s: int = 16000) ->
     return cfg
 
 
-def correr(hasta_s: float = 3000) -> dict:
+def correr(hasta_s: float = 16000, guardar: Path = None, sigma_m: float = 5.0) -> dict:
     from traci.clasificacion import buscar_proyecto
     from traci.controlador import ConfigControlador, Controlador
     from traci.correr_kpis import SUMO
@@ -67,13 +71,22 @@ def correr(hasta_s: float = 3000) -> dict:
                         ignore=shutil.ignore_patterns("salidas"))
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
+        if guardar is not None:  # CSV de ventanas, transiciones y falsas liberaciones, para diagnosticar
+            tmp = Path(guardar).resolve()
+            tmp.mkdir(parents=True, exist_ok=True)
         cfg = escenario_mini(SUMO, tmp)
         puente = PuenteNucleo(SUMO / "parqueos" / "puestos.csv", semilla=1)
         peatones = GestorPeatones(SUMO / "demanda" / "destinos.csv", semilla=1, p_regreso_corto=0.0,
                                   p_espera_en_auto=0.0)
-        sesiones = ControlSesiones(EmuladorGPS(semilla=1), tmp, "e2e_cierre", puente=puente)
+        sesiones = ControlSesiones(EmuladorGPS(semilla=1, sigma_m=sigma_m), tmp, "e2e_cierre", puente=puente)
+
+        def recargar(ctrl, t):
+            """Recarga inicial de cada auto que sale (en `correr_kpis` lo hace `Guia`)."""
+            for veh in ctrl.traci.simulation.getDepartedIDList():
+                puente.registrar(f"sim_{veh}")
         try:
             with Controlador(ConfigControlador(cfg=cfg, etiqueta="s4_e2e_cierre")) as ctrl:
+                ctrl.agregar_hook(recargar)
                 ctrl.agregar_hook(peatones.on_paso)
                 ctrl.agregar_hook(sesiones.on_paso)
                 kpis = KPIsSistema(ctrl, puente, intervalo_mapa_s=60)
@@ -90,6 +103,7 @@ def correr(hasta_s: float = 3000) -> dict:
         "peatones": peatones.resumen(),
         "sesiones_maquina": sesiones.resumen(),
         "abiertas_al_final": len(puente.abiertas),
+        "no_abiertas": dict(puente.no_abiertas),
         "parados_al_final": parados,
         "cierres": [{k: limpio(f.get(k)) for k in ("sesion_id", "veh", "motivo", "falsa", "t_fin",
                                                    "t_llegada_real", "t_salida_real", "retardo_cierre_s")}
@@ -100,9 +114,11 @@ def correr(hasta_s: float = 3000) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--salida", type=Path, required=True)
-    ap.add_argument("--hasta", type=float, default=3000)
+    ap.add_argument("--hasta", type=float, default=16000)
+    ap.add_argument("--sigma", type=float, default=5.0, help="ruido del GPS en metros (diagnóstico)")
+    ap.add_argument("--guardar", type=Path, default=None, help="carpeta donde dejar los CSV de la corrida")
     args = ap.parse_args()
-    r = correr(args.hasta)
+    r = correr(args.hasta, args.guardar, args.sigma)
     args.salida.parent.mkdir(parents=True, exist_ok=True)
     args.salida.write_text(json.dumps(r, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
     print(json.dumps({k: r[k] for k in ("peatones", "abiertas_al_final")}, ensure_ascii=False, default=str))
