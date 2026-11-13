@@ -25,3 +25,24 @@ Suite e2e que levanta el backend **real** (uvicorn en un puerto libre, SQLite te
 ![Humo del VPS](evidencias/s1_vps-humo.png)
 
 Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pdf)
+
+## Sesión 2 · 2026-11-13 · Documentación técnica, arquitectura y diagramas de secuencia
+
+Documentación técnica autocontenida en `comun/docs/`:
+- [`arquitectura.md`](codigo/comun/docs/arquitectura.md): visión general, tabla de componentes, los 9 diagramas y las cifras medidas.
+- **9 diagramas Mermaid** en `diagramas/` (componentes, despliegue, estados y 6 secuencias), renderizados a PNG y SVG con `generar_diagramas.py` (mermaid-cli 10.9.1 por npx o Docker).
+- **Verificación de la API**: `verificar_contrato_api.py` compara `app.openapi()` con la tabla §4.3 y genera `openapi.json` y `api.md`. Única diferencia: `Salud.ts`, aprobado en v1.2 pero ausente de la tabla; queda propuesto en `CONTRATO.propuesto.md` (v1.3, editorial).
+- `decisiones.md` (D1–D6) y `operacion.md` (cómo levantar cada pieza, variables, logs y fallas comunes).
+
+| Cifra (medida con `medir_cifras.py`) | Valor |
+|---|---|
+| TraCI, 80 % de penetración | 30,2 ms/paso |
+| Latencia de la API p50 / p95 | 3,0 / 4,5 ms |
+| Mensajes WS por segundo (visor) | 2,12 (1,01 snapshot · 1,01 verdad · 0,09 kpi) |
+
+![Arquitectura](evidencias/s2_arquitectura.png)
+
+![Secuencia de cierre](evidencias/s2_secuencia-cierre.png)
+
+Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+

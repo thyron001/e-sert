@@ -1,0 +1,48 @@
+{
+  "fecha": "2026-11-13 17:00",
+  "latencia_api": {
+    "n_por_ruta": 300,
+    "p50_ms": 2.99,
+    "p95_ms": 4.45,
+    "por_ruta": {
+      "GET /puestos": {
+        "p50_ms": 3.67,
+        "p95_ms": 4.97
+      },
+      "GET /guia": {
+        "p50_ms": 2.62,
+        "p95_ms": 3.54
+      },
+      "POST /eventos/ubicacion": {
+        "p50_ms": 1.73,
+        "p95_ms": 3.01
+      },
+      "GET /billetera/{id}": {
+        "p50_ms": 3.18,
+        "p95_ms": 4.62
+      }
+    },
+    "cliente": "httpx por loopback, un pedido a la vez"
+  },
+  "ws": {
+    "mensajes_por_s": 2.12,
+    "por_tipo_por_s": {
+      "kpi": 0.09,
+      "snapshot": 1.01,
+      "verdad": 1.01
+    },
+    "ventana_s": 78.0,
+    "ritmo": 1,
+    "penetracion": 80,
+    "cliente": "rol=visor"
+  },
+  "traci": {
+    "ms_por_paso": 30.206,
+    "pasos": 900,
+    "tiempo_real_s": 27.19,
+    "penetracion": 80,
+    "sesiones": 101,
+    "libsumo": false,
+    "hasta_s": 900
+  }
+}

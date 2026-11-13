@@ -22,6 +22,26 @@
         "@Tyrone [Plan]: 300 s es demasiado corto para test_simulacion_completa (ninguna sesión se abre); se usa 1 800 s",
         "precision_mapa_app es un criterio débil (≈1 por construcción); valorar mae_mapa_app"
       ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "Documentación técnica en comun/docs/: arquitectura con 9 diagramas Mermaid (render con mermaid-cli 10.9.1), referencia de la API verificada automáticamente contra el contrato (1 diferencia editorial propuesta en CONTRATO.propuesto.md), decisiones D1-D6 y guía de operación. Cifras: 30,2 ms/paso TraCI con p80, API p50 3,0 / p95 4,5 ms y 2,12 mensajes WS/s.",
+      "evidencias": [
+        "evidencias/s2_arquitectura.png",
+        "evidencias/s2_secuencia-cierre.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "@Miguel: validar seq_recarga_payphone.mmd",
+        "Aplicar CONTRATO.propuesto.md v1.3 (Salud.ts en la tabla §4.3) en la unificación",
+        "Repetir medir_cifras.py con rf_v1.joblib cuando exista"
+      ]
     }
   }
 }

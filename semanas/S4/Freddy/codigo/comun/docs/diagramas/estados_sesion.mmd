@@ -1,0 +1,19 @@
+%% Máquina de estados de la sesión (docs/CONTRATO.md §3, traci/estados.py MaquinaSesion)
+stateDiagram-v2
+  direction TB
+  [*] --> BUSCANDO
+  BUSCANDO --> GUIADO: GET /guia asigna puesto
+  GUIADO --> ESTACIONADO: llegada confirmada (POST /sesiones), retiene bloque mínimo
+  BUSCANDO --> ESTACIONADO: sin guía
+  ESTACIONADO --> A_PIE: a_pie y distancia > 15 m
+  A_PIE --> REGRESANDO: a_pie o quieto y distancia < 30 m
+  REGRESANDO --> A_PIE: a_pie y distancia > 30 m
+  ESTACIONADO --> SALIENDO: vehiculo 2 ventanas seguidas y distancia > 20 m
+  REGRESANDO --> SALIENDO: vehiculo 2 ventanas seguidas y distancia > 20 m
+  SALIENDO --> CERRADA: POST /cerrar motivo deteccion, debita y libera
+  CERRADA --> [*]
+  note right of A_PIE
+    El puesto sigue ocupado.
+    Ventanas con menos de 50 % de muestras o fallback con confianza < 0,5 no transicionan.
+    120 s sin muestras marca sin_senal; el silencio nunca cierra.
+  end note

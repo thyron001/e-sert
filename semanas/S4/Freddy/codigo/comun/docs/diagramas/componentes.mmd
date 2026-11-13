@@ -1,0 +1,52 @@
+%% Componentes de e-sert y el mensaje del contrato que viaja por cada flecha (docs/CONTRATO.md §0)
+flowchart TB
+  SUMO[("SUMO 1.12<br/>red Centro Histórico<br/>parkingAreas SERT")]
+
+  subgraph CTRL["Controlador TraCI · traci/ (contenedor van3twin)"]
+    direction LR
+    PEA["Peatones<br/>peatones.py"]
+    GUI["Guiado<br/>guiado.py"]
+    GPS["Emulador GPS<br/>gps.py"]
+    CLF["Clasificador por usuario<br/>clasificacion.py"]
+    MAQ["Máquina de estados<br/>estados.py"]
+    KPI["Verdad y KPIs<br/>verdad.py · kpis_sistema.py"]
+    NUC1["Núcleo en memoria<br/>PuenteNucleo"]
+    PUB["Publicadores<br/>puente_nucleo.py · espejo_publicador.py"]
+  end
+
+  IA["IA (Pablo)<br/>ia/inferencia.py<br/>RF o umbral"]
+
+  subgraph SRV["Backend FastAPI · backend/ (VPS o laptop)"]
+    direction LR
+    API["API REST /api/v1"]
+    NUC["Núcleo<br/>billetera · sesiones · ocupación<br/>SQLite"]
+    WS["WS /ws/estado"]
+    ESP["Modo espejo<br/>/espejo/candidatos<br/>/ws/espejo/{veh_id}"]
+    PAG["Pagos (Miguel)<br/>/pagos/*"]
+  end
+
+  VIS["Visor (Tyrone)<br/>/visor en el proyector"]
+  APP["App Expo (Miguel)<br/>teléfono espejo"]
+  PP["Payphone<br/>modo prueba"]
+
+  SUMO -->|"TraCI: suscripciones de autos y personas"| GPS
+  SUMO -->|"eventos de parqueo, isStoppedParking"| KPI
+  GUI -->|"rerouteParkingArea"| SUMO
+  PEA -->|"person.add · setParkingAreaStop"| SUMO
+  GPS -->|"ventana 30 s cada 5 s"| CLF
+  CLF -->|"clasificar_lote()"| IA
+  IA -.->|"{modo, confianza, fuente}"| CLF
+  CLF -->|"modo + distancia"| MAQ
+  MAQ -->|"iniciar · transicion · cerrar"| NUC1
+  GUI -->|"puesto libre"| NUC1
+  PUB ==>|"POST /interno/snapshot 🔒 PasoSimulacion (1 Hz)<br/>POST /sim/kpi 🔒 MensajeKpi"| API
+  API --> NUC
+  API -->|"snapshot + verdad"| WS
+  API -->|"bloque espejo"| ESP
+  PAG -->|"Billetera.recargar"| NUC
+  WS ==>|"snapshot · kpi · verdad (rol=visor)"| VIS
+  WS ==>|"snapshot · kpi (rol=publico)"| APP
+  ESP ==>|"espejo · espejo_fin (≤ 1 Hz, recibo una vez)"| APP
+  APP -->|"GET /espejo/candidatos · /puestos · /billetera"| API
+  APP -->|"POST /pagos/preparar"| PAG
+  PAG <-->|"Prepare · Confirm"| PP
