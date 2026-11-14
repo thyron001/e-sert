@@ -395,3 +395,331 @@ Fuera del código: `semanas/S2/Miguel/{estado.json,RESUMEN.md,explicaciones/s1_e
 **Pendientes para la próxima sesión:** volver a la app en Android con una APK propia (`esert://`); probar en un iPhone físico; probar la recarga desde la app contra el backend del VPS (`EXPO_PUBLIC_API_URL=https://demo.e-sert.tesisucuenca.com`).
 **Evidencias:** ![](../semanas/S2/Miguel/evidencias/s2_payphone-pruebas.png)
 [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s2_explicacion.pdf)
+## S2 · Sesión 3 · 2026-11-01 · Modo espejo conectado a la simulación
+**Estado:** hecha
+
+**Qué hice:**
+- `src/api/espejo.ts`: `getCandidatos()` con *timeout* de 8 s y `ErrorApi`; `urlWsEspejo` (https → wss, http → ws, sin `/api/v1`); `EXPO_PUBLIC_ESPEJO_URL` para apuntar solo el espejo a otro servidor.
+- `src/espejo/socketEspejo.ts`, clase `SocketEspejo`:
+  - reconexión 1, 2, 4, 8, 16, 30 s con *jitter* ±20 %, reiniciada con el primer mensaje;
+  - vigilancia de 5 s de silencio;
+  - con AppState, cierra en segundo plano y reconecta enseguida al volver;
+  - no reconecta tras `espejo_fin` ni `cerrar()`; descarta mensajes inválidos con `console.warn`.
+- `src/espejo/usarEspejo.ts` reemplaza a `suscribirMock` en la pantalla. El modo mock de la app (`EXPO_PUBLIC_USE_MOCK=1` o Ajustes) conserva el recorrido interno de S1-3.
+- La cabecera tiene un indicador de conexión (`IndicadorConexion`). El selector (`app/espejo/index.tsx`) muestra los candidatos reales con *pull to refresh*.
+- `src/espejo/notificaciones.ts` con `expo-notifications`: permisos, canal Android "espejo" y `setNotificationHandler`. Notifica una vez por (veh_id, estado) en GUIADO, ESTACIONADO, SALIENDO y CERRADA, y una vez por saldo bajo.
+- `src/espejo/latencia.ts`:
+  - desfase con el método de Cristian, sobre 5 peticiones a `/salud`, con el `ts` del cuerpo o el header `Date`;
+  - registra `lat_total` y `lat_cliente`;
+  - exporta el CSV con `expo-sharing`.
+- `mock_espejo/` (`# MOCK`): FastAPI que reproduce `recorrido_mock.json` a 1 Hz como simulación en vivo, con `ts` en ms. Tiene `--bucle`, `--cortar-en N`, `/salud` con `ts`, `/espejo/reiniciar` y `POST /espejo/latencias`, por donde el teléfono envía su CSV. Tiene 12 tests.
+- 41 tests nuevos de Jest con socket falso y temporizadores falsos:
+  - la secuencia 1, 2, 4, 8, 16, 30, 30 s;
+  - el silencio de 5 s;
+  - que `espejo_fin` no reconecta;
+  - una sola notificación por transición;
+  - la latencia y las URL.
+- `scripts/latencia_espejo.py` (histograma) y `scripts/mapa_espejo.py` (mapa del recorrido para la evidencia).
+- Pruebas en Android con Expo Go por Tailscale: 3 recorridos completos, corte cada 20 s, segundo plano de 11 s y 39 s, y la exportación de latencias.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Miguel/codigo/app/`:
+  - `src/api/espejo.ts`
+  - `src/espejo/{socketEspejo,usarEspejo,notificaciones,latencia}.ts`
+  - `src/espejo/componentes/IndicadorConexion.tsx`
+  - `src/espejo/__tests__/{socketEspejo,notificaciones,latencia,espejoApi}.test.ts`
+  - `app/espejo/index.tsx`, `app/espejo/[vehId].tsx`
+  - `mock_espejo/`
+  - `scripts/latencia_espejo.py`, `scripts/mapa_espejo.py`
+  - `.env.example`, `package.json` (`expo-notifications`)
+- `semanas/S2/Miguel/evidencias/`:
+  - `s3_espejo-en-vivo.png`, `s3_latencia-espejo.png`, `s3_latencias-espejo.csv`
+  - `capturas/s3_*.jpeg`
+  - `resumen_S2_Miguel.pdf`
+- `semanas/S2/Miguel/explicaciones/s3_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **Mock local en vez del backend:** el VPS responde `[]` en `/espejo/candidatos` y 404 en `/ws/espejo/...`, y `proyecto/backend/api/ws.py` solo tiene `/ws/estado`. El mock respeta el formato del contrato §7: cuando Freddy publique el WS, basta quitar `EXPO_PUBLIC_ESPEJO_URL`.
+- **El mock simula en vivo:** cada auto tiene su propio reloj; al reconectar se sigue donde va, no desde el principio. Así la prueba de reconexión es realista.
+- **Dependencias inyectables en `SocketEspejo`:** socket, AppState, azar y reloj se inyectan para probar la secuencia exacta con temporizadores falsos.
+- **Se espera al desfase antes de abrir el socket,** para que ninguna muestra use desfase 0. Se corrigió después de las pruebas; ver "Problemas".
+- **Sin sumo-gui:** Docker no estaba corriendo y el auto del mock no existe en SUMO. La evidencia une el teléfono con un mapa del recorrido dibujado con los mismos mensajes (`mapa_espejo.py`).
+- **Indicador "Finalizado":** al llegar `espejo_fin` el indicador ya no queda en "Sin conexión".
+
+**Problemas encontrados:**
+- **Canal de notificaciones en Expo Go (SDK 58, Android):** `setNotificationChannelAsync` falla con `NullPointerException`. Como el permiso se pedía después, al principio no llegaba ninguna notificación. Ahora el fallo del canal no impide pedir permiso y se usa el canal por defecto: permiso `granted`, 5 notificaciones por auto.
+- **Segundo plano largo:** al volver de 28 s en segundo plano el auto del mock ya había terminado. La app recibió `espejo_fin` bien, pero el indicador seguía en "Sin conexión" (corregido con "Finalizado"). La prueba de segundo plano se repitió con `--bucle`.
+- **El teléfono dejó de recibir los cambios de Metro** a mitad de las pruebas. Hubo que cerrar y abrir Expo Go.
+- **La copia del backend de Freddy en el scratchpad se borró** entre sesiones. Esta sesión no la necesitó.
+- **Las primeras muestras de cada recorrido usaron desfase 0,** porque el desfase se estimaba en paralelo. Puede inflar algo el p95 total; ya está corregido en el código.
+
+**Latencia evento → pantalla (modo local, mock por Tailscale, Android, 253 mensajes de 3 recorridos completos y 3 parciales):**
+- total (ts del servidor → pintado): **p50 174 ms, p95 412 ms**;
+- solo el teléfono (recepción → pintado): **p50 109 ms, p95 174 ms**.
+
+No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Publicar `WS /ws/espejo/{veh_id}` según el contrato §7 (S3-3): mensajes `espejo` a 1 Hz con `ts` en ms, y `espejo_fin` con `motivo` antes de cerrar.
+  - Añadir el `veh_id` a `mundo.espejos` mientras haya un WS abierto: hoy nada lo llena y el snapshot siempre manda `espejos: []`.
+  - Añadir `ts` (hora UTC con ms) a `GET /salud`. Sin él, la app estima el desfase con el header `Date`, que solo tiene resolución de 1 s.
+  - Diferencias con §7 que vi: el contrato no define códigos de cierre del WS. Propongo 1000 tras `espejo_fin` y 1011 por error.
+- **@Tyrone:** el visor ya resalta los ids de `espejos`, pero no se verá nada hasta que el backend llene el conjunto (pedido a Freddy).
+- **@Tyrone [Plan]:** esta sesión es S2-3, hecha el domingo 1-nov después de la unificación de S2. Pido incluir `miguel/s2` (commit de esta sesión) en la unificación de S3, o fusionarlo antes, para que el espejo por red llegue a `proyecto/app/`.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código, tests y servidor mock.
+  2. Notificaciones que no llegaban (canal rechazado por Expo Go).
+  3. El indicador tras `espejo_fin` y la prueba de segundo plano con `--bucle`.
+  4. El histograma y el mapa (etiquetas superpuestas y leyenda sobre el puesto).
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/6 criterios cumplidos**; faltaba el PDF semanal, que se generó en el cierre. Además encontró defectos que ya están corregidos:
+  - el motivo de corte mal registrado en el log del mock;
+  - las primeras muestras con desfase 0;
+  - que un `/salud` fallido anulaba toda la estimación;
+  - que exportar el CSV no manejaba errores.
+- Deja anotado que las notificaciones se repiten si se sale y se vuelve a entrar al mismo auto.
+- Resultado final: Jest 140/140, `tsc` sin errores, tests del mock 12/12.
+
+**Pendientes para la próxima sesión:**
+- Usar el WS real de Freddy cuando lo publique, y medir la latencia en modo VPS.
+- Probar el canal de notificaciones de alta importancia y el regreso de Payphone con una APK propia.
+- S3-1: cierre automático en la app y recibo comparado con la tarjeta SERT.
+
+**Evidencias:** ![](../semanas/S2/Miguel/evidencias/s3_espejo-en-vivo.png) ![](../semanas/S2/Miguel/evidencias/s3_latencia-espejo.png) · [Explicación (PDF)](../semanas/S2/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S2 (PDF)](../semanas/S2/Miguel/evidencias/resumen_S2_Miguel.pdf)
+## S3 · Sesión 1 · 2026-11-08 · Cierre automático en la app y recibo comparado con la tarjeta SERT
+**Estado:** hecha
+
+**Qué hice:**
+- **Copia de la app para S3:** `proyecto/app` no tiene S2-3 (el espejo por WS), porque la unificación de S2 se hizo antes de esa sesión. Por eso se copió la versión de `miguel/s2` (`fe9dc13`), que es `proyecto/app` + S2-3; se comprobó con `git diff` que es la única diferencia.
+- **Contrato:** la copia de `esquemas.ts` se actualizó a v1.2 y se verificó por hash.
+- **`src/logica/tarifa.ts` + 50 tests** (subagente):
+  - port de `tarifa.py`: `minutosCobrables`, `costo`, `bloquesTarjetaSert`, `costoTarjetaSert`, `ahorro` y `compararConServidor`;
+  - mismas cifras que `test_tarifa.py`: 12→15, 3→10, 47→50 = $0.42, tarjeta $0.50, ahorro $0.08, 120 sin ahorro.
+- **`src/servicios/seguimientoSesion.ts`:**
+  - `DetectorCierre` procesa el cierre una sola vez, venga del WS, de REST o del cierre manual;
+  - `usarSeguimientoPropio` consulta `GET /sesiones/{id}` cada 10 s y al volver a primer plano;
+  - `usarSeguimientoEspejo` toma los mensajes del `SocketEspejo` de S2-3 y solo usa REST de respaldo si el WS está caído.
+- **Recibo:** `src/pantallas/Recibo.tsx` en la ruta `app/recibo.tsx`, abierta con `router.replace` y sin gesto ni botón de volver. Muestra:
+  - motivo, placa o vehículo, puesto y calle;
+  - llegada y salida en America/Guayaquil;
+  - minutos reales y cobrados, débito y saldo;
+  - la comparación con la tarjeta SERT;
+  - el botón "¿No te fuiste? Avísanos", que guarda el caso en AsyncStorage.
+- **`app/sesion/activa.tsx`:** botón "Ya me voy" con `Alert.alert` y sondeo del cierre. Si el servidor ya no conoce la sesión (404), ofrece "Descartar sesión".
+- **`src/mocks/cierreMock.ts`:** CERRADA con recibo 20 s después de ESTACIONADO. El espejo lo usa en modo mock.
+- **Pruebas en Android por Tailscale**, contra el backend local de `proyecto/` y la simulación de Freddy en `van3twin`:
+  - cierre por la simulación;
+  - cierre por `curl`;
+  - "Ya me voy";
+  - modo mock.
+
+  Además, el recibo en el simulador de iPhone.
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/app/` (copia completa de la app, más):
+  - `src/logica/`, `src/servicios/`, `src/pantallas/`, `src/mocks/`
+  - `app/recibo.tsx`, `app/sesion/activa.tsx`, `app/espejo/[vehId].tsx`, `app/_layout.tsx`
+  - `src/espejo/usarEspejo.ts`, `src/api/cliente.ts`, `src/contrato/esquemas.ts`
+- `semanas/S3/Miguel/evidencias/s1_recibo.png` y `evidencias/capturas/`
+- `semanas/S3/Miguel/explicaciones/s1_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **expo-router:** la app usa expo-router, así que `navigation.replace("Recibo")` del prompt es `router.replace('/recibo')`, con la pantalla en `src/pantallas/Recibo.tsx` como pide el prompt.
+- **Navegar con el primer recibo:** Freddy envía el recibo una sola vez por conexión y el latido siguiente trae `recibo: null`, así que el modal de S2 desaparecía a los 2 s. Además, `usarEspejo` retiene el primer mensaje con recibo por si React agrupa estados.
+- **Motivo deducido:** ni `GET /sesiones` ni el recibo traen el motivo. Si llega al tope de 120 min, "falta de señal"; un auto del espejo, "la simulación lo detectó"; y "Ya me voy", manual. Si no, "El servidor registró el cierre".
+- **Tarjeta en la sesión propia:** el backend no envía la tarjeta para la sesión propia, así que se calcula con `tarifa.ts` y se indica "Tarjeta calculada con la tarifa vigente". En el espejo es la del servidor. Si `tarifa.ts` difiere en más de $0.01, se emite `console.warn`.
+- **Sondeo en pausa durante "Ya me voy":** el sondeo se pausa mientras se envía el cierre manual, para que conserve su motivo.
+- **Mock:** se aceptan `EXPO_PUBLIC_MOCK=1` (nombre del prompt) y `EXPO_PUBLIC_USE_MOCK=1`.
+- **iOS:** la captura salió del simulador con `/recibo?demo=mock` (solo `__DEV__`), que pasa el recorrido del mock por el mismo `DetectorCierre`. `simctl` no puede tocar la pantalla.
+
+**Problemas encontrados:**
+- **Sesiones simuladas fuera del backend:** el controlador crea sus sesiones en una base en memoria propia (`puente_nucleo.py`), así que `GET /sesiones/{id}` responde 404 para ellas. En el espejo, el respaldo REST no puede confirmar un cierre y el WS es la única fuente. Además, el mensaje CERRADA llega con `sesion: null`.
+- **Preparar la simulación:** hubo que correr `traci/obtener_escenario.py` en la computadora y `python3 -m traci.escenario_app` en el contenedor; ambos escriben en `traci/escenario/`, ignorado por git. También instalar `httpx`, `sqlalchemy` y `pydantic` en el contenedor: `traci/requirements.txt` no los trae.
+- **Sesiones muy cortas en la simulación:** con `--ritmo 15` y `5`, las sesiones duraron 0.6–4 min simulados y pasaron de A_PIE a CERRADA sin SALIENDO visible.
+- **Corridas que terminaban antes de tiempo:** la primera corrida a 15× terminó antes de que el auto seguido cerrara; se repitió a 5× con `--hasta 7200`.
+- **Sesión guardada de S2 en el simulador:** el simulador tenía una sesión de S2 (293 h, otro backend) que quedaba "activa" para siempre. Se añadió el aviso de sesión huérfana con "Descartar sesión".
+- **`.env` heredado de S2:** apuntaba el espejo al mock de S2 (`EXPO_PUBLIC_ESPEJO_URL`); se quitó.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - El mensaje `espejo` de `CERRADA` sí trae `recibo` completo (§7), pero llega con `sesion: null`. Pido mantener `sesion.sesion_id` también en el mensaje de cierre.
+  - `GET /sesiones/{id}` no refleja los cierres de la simulación, porque las sesiones viven en la base en memoria del controlador. Pido que el controlador cree y cierre las sesiones de los autos con app por la API del backend (o con la misma base), para que `GET /sesiones/{id}` responda.
+  - Pido añadir `motivo` (`deteccion` / `manual` / `timeout_sin_senal`) a `Sesion` y al `recibo` del espejo: la app hoy lo deduce.
+  - Pido añadir `tarjeta_sert_usd` y `ahorro_usd` a la respuesta del cierre o a `GET /sesiones/{id}` cerrada, para que la comparación de la sesión propia también salga del servidor.
+  - Pido añadir `httpx`, `sqlalchemy` y `pydantic` a `traci/requirements.txt`, y actualizar el docstring de `correr_guiado`/`obtener_escenario` (todavía dice `semanas/S1/Freddy/codigo`).
+- **@Tyrone [Plan]:** pido que la unificación de S4 traiga S2-3 (`fe9dc13` de `miguel/s2`) junto con `miguel/s3`. Esta copia ya lo incluye, así que basta con fusionar `miguel/s3`.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código y tests.
+  2. El `.env` heredado y la simulación sin escenario.
+  3. La corrida que terminaba antes y el motivo sin SALIENDO.
+  4. La sesión huérfana y la captura de iOS.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/5 criterios**. El 4 es parcial solo en la sesión propia, porque la tarjeta la calcula `tarifa.ts`: el backend no la envía. Encontró defectos menores, ya corregidos:
+  - la carrera entre "Ya me voy" y el sondeo;
+  - el recibo que podía perderse si React agrupaba mensajes;
+  - el `catch` que faltaba en "Avísanos".
+- Resultado final: Jest 204/204, `tsc` sin errores, `verificar-contrato` OK. Los 16 tests de `test_tarifa.py` de Freddy pasan con las mismas cifras.
+
+**Pendientes para la próxima sesión:**
+- S3-2: avisos de saldo bajo, tiempo máximo y bloqueo por saldo negativo.
+- Probar el recibo en un iPhone físico.
+- Usar el motivo y la tarjeta del servidor cuando Freddy los envíe.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s1_recibo.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s1_explicacion.pdf)
+
+## S3 · Sesión 2 · 2026-11-08 · Avisos de saldo bajo, tiempo máximo y bloqueo por saldo negativo
+**Estado:** hecha
+
+**Qué hice:**
+- `src/logica/calcularAvisos.ts` (lógica pura):
+  - `calcularAvisos(sesion, billetera, tarifa, ahora, escala)`: el saldo bajo se avisa en `inicio + disponible/(valor_hora/60) − aviso_saldo_min`, y el tope en `inicio + tiempo_maximo_min − aviso_tiempo_min`;
+  - si dos avisos caen a menos de 1 min, se combinan; si ya pasaron, se disparan enseguida;
+  - `escalaTiempo()` lee `EXPO_PUBLIC_ESCALA_TIEMPO`;
+  - `estadoBloqueo()` aplica las reglas 1 y 5.
+- `src/servicios/avisos.ts`:
+  - `programarAvisos` usa un disparador `DATE` y guarda los IDs en AsyncStorage; `cancelarAvisos` los cancela;
+  - `dispararSiVencio`: con la app abierta, el aviso vencido sale ya;
+  - `avisosVencidos` alimenta el banner;
+  - `avisarUnaVez` es un registro tipo + sesion_id compartido con el espejo;
+  - canal "avisos", con el canal por defecto como respaldo en Expo Go.
+- `src/pantallas/Bloqueo.tsx`: `usarBloqueo` relee la billetera al tomar el foco, y la tarjeta muestra la deuda con el botón "Recargar". En la pestaña Sesión, "Buscar puesto" se desactiva si hay bloqueo.
+- Integración en las pantallas:
+  - `confirmar` programa los avisos al llegar;
+  - `activa` muestra el banner amarillo, dispara en primer plano y cancela al cerrar o al descartar;
+  - `recarga` reprograma si hay una sesión abierta;
+  - los avisos del espejo pasan por el mismo registro, sin duplicar.
+- **Tests:** 23 nuevos (subagente) más 5 de regresión; en total, Jest 232/232. Se añadió `jest.setup.js` con el mock oficial de AsyncStorage.
+- **Pruebas en Android por Tailscale con escala 60**, contra el backend local de `proyecto/`:
+  - saldo bajo y tope;
+  - cierre a los 15 s, sin ninguna notificación después;
+  - bloqueo con −$0.19 y desbloqueo con una recarga de $5 (Payphone mock).
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/app/`:
+  - `src/logica/calcularAvisos.ts` (+ test)
+  - `src/servicios/avisos.ts` (+ test)
+  - `src/pantallas/Bloqueo.tsx`
+  - `app/(tabs)/sesion.tsx`, `app/sesion/{confirmar,activa}.tsx`, `app/recarga.tsx`
+  - `src/espejo/notificaciones.ts` (+ test)
+  - `jest.setup.js`, `package.json`, `.env.example`
+- `semanas/S3/Miguel/evidencias/s2_avisos.png` y `capturas/s2_*.jpeg`
+- `semanas/S3/Miguel/explicaciones/s2_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **`aviso_tiempo_min`:** `tarifa.json` ya trae `aviso_tiempo_min: 10`, que es el `aviso_tope_antes_min` que pedía el prompt. Se usa ese parámetro, sin constante.
+- **Fórmula del saldo bajo:** se siguió la del prompt (disponible), aunque el núcleo usa `saldo − costo en curso`. Como el disponible ya descuenta la retención de esta sesión, el aviso sale unos 30 min de la regla antes que el del núcleo.
+- **IDs en AsyncStorage:** las notificaciones programadas sobreviven a un reinicio de la app, y así se pueden cancelar igual.
+- **Disparo en primer plano:** Android 12+ entrega con retraso las notificaciones con fecha (alarmas inexactas, sin permiso de alarma exacta en Expo Go): llegaban de 10 s a 1 min tarde. Con la app abierta, se cancela la programada y se dispara una inmediata.
+
+**Problemas encontrados:**
+- **Ventana de combinación sin escalar:** en la primera prueba, a escala 60, la ventana seguía siendo de 60 s reales y combinó avisos que estaban a 59 s. Se corrigió dividiéndola por la escala, con test de regresión.
+- **Banner que no aparecía:** `activa` leía los avisos programados una sola vez, antes de que `confirmar` terminara de guardarlos. Ahora se releen cada 2 s, y `confirmar` espera a programarlos antes de navegar.
+- **Tests de S2-3:** se rompieron por el registro global y por AsyncStorage sin módulo nativo en Jest. Se arregló con `olvidarAvisados()` en `beforeEach` y el mock global.
+- **Saldo de prueba:** para la demo se ajustó el saldo del teléfono en el backend local con sesiones de inicio atrasado cerradas por la API, aplicando las reglas reales de cobro, no editando la base.
+- **Log del teléfono:** se corta tras recargar Expo Go; la cancelación se confirmó en la última prueba.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - `aviso_tope_antes_min` no hace falta: `aviso_tiempo_min` ya existe en `tarifa.json` y cumple esa función. Si se renombra, aviso para seguirlo.
+  - Pido exponer los avisos del núcleo (`ServicioSesiones.avisos`) en `GET /sesiones/{id}`, para que la app y el backend avisen igual.
+  - Pido unificar la regla de saldo bajo: el núcleo usa `saldo − costo en curso`; el prompt de la app, `disponible`, que ya descuenta la retención.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Código y tests.
+  2. Tests de S2-3 rotos por el registro global y AsyncStorage.
+  3. La ventana de combinación sin escalar y el banner que no se leía.
+  4. El retraso de Android y el disparo en primer plano.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **5/5 criterios**. Encontró:
+  - avisos ya vencidos que se repetían al reprogramar tras una recarga;
+  - un posible duplicado al volver a primer plano;
+  - una carrera entre programar y cerrar.
+
+  Los tres están corregidos, con tests. Además señaló que el aviso de saldo usa el disponible tras la retención; se dejó documentado como decisión.
+- Resultado final: Jest 232/232 y `tsc` sin errores.
+
+**Pendientes para la próxima sesión:**
+- S3-3: entrada por lenguaje natural con LLM (opcional) o pulido de UX.
+- Probar las notificaciones en segundo plano en un iPhone físico.
+- Probar el canal de alta importancia y las alarmas exactas con una APK propia.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s2_avisos.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S3 · Sesión 3 · 2026-11-08 · Entrada por lenguaje natural con LLM (opcional) o pulido de UX
+**Estado:** hecha
+
+**Decisión al inicio:** S3-1 y S3-2 estaban `"hecha"` en `estado.json`, así que se hizo el LLM. Con el tiempo que sobró se corrigió UX: el teclado que tapaba el panel y los objetivos táctiles de 44 pt.
+
+**Qué hice:**
+- **`backend/asistente/`**, mi módulo nuevo:
+  - `interprete.py`: Claude Haiku 5.5 con el SDK `anthropic` 1.x. Usa `Anthropic(timeout=8.0, max_retries=1)`, la herramienta `registrar_intencion` con esquema estricto y `tool_choice` forzado, y `max_tokens=200`. Valida con Pydantic, trata `refusal` como inválido, guarda una caché LRU de 256 (solo aciertos del LLM) y registra tokens y latencia. Solo envía el texto.
+  - `reglas.py`: duración con expresiones regulares ("media hora", "N horas y media", "1 hora y 30 minutos", números escritos).
+  - `destinos.py`: carga `destinos.csv` de Tyrone con alias y usa rapidfuzz ≥ 80, o difflib si no está instalado.
+  - `modelos.py`: recorte a [10, 120] min con aviso, según `tarifa.json`.
+  - `router.py` (`APIRouter` `/asistente`) y `app_dev.py` (FastAPI mínima en el puerto 8002).
+  - `.env.ejemplo` sin valores y `requirements.txt`.
+- **Tests:** `tests/test_interprete.py` y `conftest.py` (subagente), con un cliente de Anthropic simulado. Cubren los casos del prompt, la forma de la petición, la cadena de alternativas (sin clave, timeout, red, 429, 500, `refusal`, sin `tool_use`, JSON inválido), la caché, las reglas, los destinos, el router y la prueba real `@pytest.mark.llm`, que se omite sin clave.
+- **App:**
+  - `src/componentes/EntradaNatural.tsx`: campo de texto → "Catedral Nueva · 60 min. ¿Correcto?" con Editar y Buscar. El formulario (destino y duración de 10 a 120) está siempre disponible y se abre solo si el asistente falla o falta algo.
+  - `src/api/asistente.ts`: cliente con timeout de 10 s.
+  - `app/buscar.tsx` integra la entrada y usa `KeyboardAvoidingView`.
+  - La duración queda como plan en el flujo (`duracionPlanMin`) y se ve en la sesión activa.
+- **Prueba en Android por Tailscale**, sin clave, es decir con reglas: interpretación, recorte a 120 con aviso, Editar → formulario, "No entendí" → formulario, y asistente detenido → "El asistente no está disponible" → formulario. También el teclado, ya corregido.
+
+**Archivos creados o modificados:**
+- `semanas/S3/Miguel/codigo/backend/asistente/` (`__init__.py`, `interprete.py`, `reglas.py`, `destinos.py`, `modelos.py`, `router.py`, `app_dev.py`, `.env.ejemplo`, `requirements.txt`, `tests/`)
+- `semanas/S3/Miguel/codigo/app/`:
+  - `src/componentes/EntradaNatural.tsx`, `src/api/asistente.ts`
+  - `app/buscar.tsx`, `app/sesion/activa.tsx`, `src/estado/sesion.ts`
+  - `.env.example`
+- `semanas/S3/Miguel/evidencias/s3_entrada-natural.png`, `capturas/s3_*.jpeg`, `resumen_S3_Miguel.pdf`
+- `semanas/S3/Miguel/explicaciones/s3_explicacion.{md,pdf}`, `estado.json`, `RESUMEN.md`
+
+**Decisiones y por qué:**
+- **API del SDK:** antes de escribir se consultó la skill `claude-api` (2026-11-08).
+- **Sin `temperature=0`:** en Claude Haiku 5.5 cualquier valor de muestreo distinto del de fábrica devuelve 400. El formato lo fijan la herramienta forzada, que Haiku 5.5 sí acepta, y el prompt.
+- **Destino validado contra la lista:** el destino del LLM se compara con `destinos.csv` y, si no coincide, se descarta. El LLM no puede inventar destinos, y una inyección en el texto no lleva a nada.
+- **Texto original al LLM:** al LLM va el texto original; la caché usa el texto normalizado como clave y solo guarda aciertos del LLM, para que un timeout no fije la frase a las reglas.
+- **`app_dev.py`:** sirve para probar mientras Freddy no monte el router; la app lo usa con `EXPO_PUBLIC_ASISTENTE_URL`.
+
+**Problemas encontrados:**
+- **No había clave de la API** de Anthropic (ni `ANTHROPIC_API_KEY` ni `ant`). El camino del LLM se probó con el cliente simulado; la prueba real queda lista para correr con clave.
+- **Teclado en Android:** con Expo Go (edge-to-edge) el teclado tapaba el panel "¿A dónde vas…?", lo reportó Miguel. Se corrigió con `KeyboardAvoidingView` y el desfase de la cabecera.
+- **Bugs del subagente de tests:** "2 horas y media" no se reconocía (plural) y la caché guardaba la caída a reglas tras un fallo del LLM. Ambos están corregidos y tienen tests.
+- **Clave falsa en un test:** un test usaba una clave falsa con el prefijo real de las claves de Anthropic, que habría ensuciado la búsqueda de claves con `git grep`. Se cambió a `clave-de-prueba-falsa`.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - Montar `backend.asistente.router` en `backend/api/main.py` con el prefijo `/api/v1` (como `backend.pagos.rutas`) y añadir `anthropic`, `python-dotenv` y `rapidfuzz` a `requirements-servidor.txt`. Sin ellos funciona con difflib y reglas, pero sin LLM.
+  - Añadir a `CONTRATO.propuesto.md` el mensaje `POST /asistente/interpretar {texto}` → `{destino: {nombre, lat, lon} | null, duracion_min: int | null, fuente: "llm" | "reglas", confianza, avisos}`.
+- **@Tyrone:** confirmar los nombres de `destinos.csv`; la app y el asistente usan exactamente esos 12. Con la clave para la demo (`ANTHROPIC_API_KEY` en Dokploy, nunca en el repo), el asistente usaría el LLM.
+
+**Bucle y verificación:**
+- Hubo 5 vueltas:
+  1. Módulo y tests.
+  2. Los dos bugs del subagente.
+  3. La integración en la app y las capturas.
+  4. El teclado.
+  5. Las correcciones del verificador.
+- El verificador independiente reportó **3/4 criterios cumplidos**; faltaba el PDF semanal, que se generó en el cierre. Encontró:
+  - restos de la frase anterior en el formulario tras "No entendí";
+  - "1 hora y 30 minutos", que daba 60;
+  - chips de menos de 44 pt;
+  - la app no toleraba una respuesta sin `avisos`.
+
+  Todo está corregido, con test de regresión. Señaló además que la falta de `temperature=0` está justificada.
+- Resultado final: pytest 96 passed, 1 skipped; Jest 232/232; `tsc` sin errores; la búsqueda de claves con `git grep` solo encuentra el texto del prompt.
+
+**Pendientes para la próxima sesión:**
+- Probar contra la API real cuando haya una clave.
+- S4: lo que defina la semana final (demo integrada con el backend del VPS).
+- iPhone físico.
+- Validar las notificaciones y el regreso de Payphone con una APK propia.
+
+**Evidencias:** ![](../semanas/S3/Miguel/evidencias/s3_entrada-natural.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S3 (PDF)](../semanas/S3/Miguel/evidencias/resumen_S3_Miguel.pdf)

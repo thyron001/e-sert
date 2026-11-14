@@ -42,3 +42,20 @@ Explicación: [explicaciones/s1_explicacion.pdf](explicaciones/s1_explicacion.pd
 ![Payphone en modo de pruebas en el VPS](evidencias/s2_payphone-pruebas.png)
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
+
+## Sesión 3 · 2026-11-01 · Modo espejo conectado a la simulación
+
+**Estado:** hecha (6/6 criterios), contra un **servidor mock** local (`# MOCK`): el `WS /ws/espejo/{veh_id}` de Freddy todavía no existe (S3-3).
+
+- La app lista candidatos (`GET /api/v1/espejo/candidatos`) y sigue un auto por `WS /ws/espejo/{veh_id}` (CONTRATO §7).
+- El WebSocket se reconecta solo (1, 2, 4, 8, 16, 30 s con *jitter* ±20 %), cierra y reabre tras 5 s de silencio y al volver del segundo plano. Un indicador en la cabecera muestra En vivo, Reconectando, Sin conexión o Finalizado.
+- Notificaciones locales una sola vez por auto y estado: Puesto asignado, Sesión iniciada, Saldo bajo, Saliendo y Sesión cerrada.
+- Pruebas en Android por Tailscale: tras el corte del servidor cada 20 s, la app volvió en 1.0–1.6 s; tras 39 s en segundo plano, reconectó al volver.
+- Latencia evento → pantalla, modo local, 253 mensajes de 3 recorridos completos y 3 parciales: **p50 174 ms, p95 412 ms**; solo el teléfono, p50 109 ms y p95 174 ms.
+- Jest 140/140 (52 del espejo), `tsc` sin errores, tests del mock 12/12.
+
+![Espejo en vivo](evidencias/s3_espejo-en-vivo.png)
+
+![Latencia del espejo](evidencias/s3_latencia-espejo.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · Resumen de la semana: [evidencias/resumen_S2_Miguel.pdf](evidencias/resumen_S2_Miguel.pdf)

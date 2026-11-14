@@ -1,0 +1,63 @@
+{
+  "persona": "Miguel",
+  "semana": "S3",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-08",
+      "resumen": "La app pasa sola al recibo cuando la simulación cierra la sesión (WS del espejo de Freddy) o cuando el servidor la cierra (sondeo de GET /sesiones cada 10 s), una sola vez y sin volver atrás. El recibo compara con la tarjeta SERT usando montos del servidor; tarifa.ts portada con las cifras de Freddy (50 tests). Probado en Android contra el backend y la simulación reales (curl detectado en 7 s), con Ya me voy, en modo mock y en el simulador de iPhone.",
+      "evidencias": [
+        "evidencias/s1_recibo.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Que el backend envíe el motivo del cierre y la tarjeta SERT en GET /sesiones (hoy la app los deduce y calcula).",
+        "Recibo en un iPhone físico (solo simulador).",
+        "Incluir S2-3 (espejo por WS) en proyecto/: esta copia partió de miguel/s2."
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-08",
+      "resumen": "Avisos locales de saldo bajo y tope SERT programados al llegar (con banner en la app y disparo exacto en primer plano), cancelados al cerrar y reprogramados tras recargar; bloqueo de nuevas sesiones con saldo negativo hasta recargar. Probado en Android con la escala de demo 60×: avisos a ~50 s y ~110 s, 0 notificaciones tras cerrar, bloqueo con −$0.19 y desbloqueo tras $5.",
+      "evidencias": [
+        "evidencias/s2_avisos.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 5,
+        "total": 5
+      },
+      "pendientes": [
+        "Unificar con Freddy la regla de saldo bajo (la app usa el disponible tras la retención; el núcleo, saldo − costo en curso).",
+        "Probar en iPhone físico (las notificaciones en segundo plano de iOS).",
+        "Canal de alta importancia y alarmas exactas con una APK propia (Expo Go no los permite)."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-08",
+      "resumen": "Entrada por lenguaje natural: backend/asistente interpreta la frase con Claude Haiku 5.5 (herramienta forzada, validación Pydantic, caché) y cae a un intérprete por reglas sin clave o con fallos; el destino siempre sale de destinos.csv. En la app, confirmación con Editar/Buscar y formulario de alternativa siempre disponible. Probado en Android con reglas (sin clave): interpretación, recorte, no entendí y asistente caído.",
+      "evidencias": [
+        "evidencias/s3_entrada-natural.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S3_Miguel.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 4,
+        "total": 4
+      },
+      "pendientes": [
+        "Probar contra la API real con una clave (la prueba @pytest.mark.llm mide la latencia p50).",
+        "Que Freddy monte backend.asistente.router en la app principal y lo añada al contrato propuesto."
+      ]
+    }
+  }
+}
