@@ -838,3 +838,44 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - Ensayar el `demo/` real de Tyrone y la reconexión del espejo a través de un reinicio del backend.
 
 **Evidencias:** ![](../semanas/S4/Freddy/evidencias/s3_ensayo-demo-freddy.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s3_explicacion.pdf) · [resumen semanal (PDF)](../semanas/S4/Freddy/evidencias/resumen_S4_Freddy.pdf)
+
+## S2 · Reverificación de las sesiones 2 y 3 · 2026-11-14 · Criterios pendientes de S2
+**Estado:** S2-2 sigue parcial (4/5); S2-3 pasa de 4/7 a parcial (6/7).
+
+**Qué hice:** volví a medir los criterios pendientes de S2 con el código actual (`semanas/S4/Freddy/codigo`) y arreglé los que dependían de mi código.
+
+| Sesión | Criterio | Antes | Ahora |
+|---|---|---|---|
+| S2-2 | > 95 % de peatones vuelve en 30 min | 4 de 343 | 10 de 357, ninguno perdido (`liberados_sin_aparecer` = 0); no se cumple |
+| S2-3 | URL caída: misma velocidad | 3 % más lenta | ✅ 10,41× frente a 10,32× sin publicar (900 s, 2 repeticiones de cada una) |
+| S2-3 | Retención final 0 y libro cuadrado | 33,00 USD retenidos | ✅ 0; 141 sesiones liquidadas con motivo `manual`; `libro_cuadra` = True |
+| S2-3 | Búsqueda media con app < sin app | 11,3 frente a 10,8 min | ❌ 10,73 frente a 10,67 min (mediana 10,02 frente a 10,17) |
+
+- **`traci/puente_nucleo.py`, cortacircuitos en `Publicador`.** Tras un envío fallido, `listo()` devuelve False y `PublicadorSnapshots` no arma el cuerpo, que era el costo real. Solo hay una sonda cada `5 s`, y la primera respuesta buena reanuda los envíos. En la corrida con la URL caída se omitieron 855 de 900 cuerpos.
+- **`traci/correr_guiado.py`, `liquidar_al_final`.** Cierra con motivo `manual`, que el contrato §3 acepta desde cualquier estado abierto, las sesiones abiertas al terminar la simulación, como haría el operador al terminar la demo. Se informa en `liquidadas_fin_corrida` y se desactiva con `--sin-liquidar`.
+- **`traci/correr_guiado.py`, `libro_cuadra`.** Compara de forma independiente: recargas dadas, débitos = Σ cobrado por sesión, y saldo de la billetera.
+- **`traci/correr_sesiones.py`.** Encuentra `demanda/` con los escenarios de `sumo/escenarios/`; antes fallaba con `FileNotFoundError`.
+- **Pruebas nuevas:** `traci/tests/test_reverificacion_s2.py` (cortacircuitos y liquidación).
+
+**Archivos creados o modificados:** `semanas/S4/Freddy/codigo/traci/{puente_nucleo.py,correr_guiado.py,correr_sesiones.py,tests/test_reverificacion_s2.py}`, `semanas/S2/Freddy/{estado.json,RESUMEN.md}`.
+
+**Decisiones y por qué:**
+- **No cambié el guiado para «adivinar» la ocupación de los autos sin app.** Habría ido contra la decisión D4 y la semántica de `GET /guia` del contrato solo para pasar el criterio. La búsqueda con app ya es más corta con la ocupación real (10,0 frente a 10,7 min en S2): lo que falla es el mapa, por las falsas liberaciones del clasificador de reserva.
+- **La liquidación final se informa aparte** y no cuenta como detección, para no maquillar los KPIs. En `correr_kpis` no se aplica.
+
+**Problemas encontrados:**
+- El criterio de S2-2 no se puede cumplir con la demanda de Tyrone. Las estadías duran de 10 a 120 min y las llegadas se reparten durante la media hora, así que en 30 min casi ningún conductor *puede* haber terminado su diligencia. El código no pierde peatones.
+
+**Pedidos a otros:**
+- @Tyrone [Plan] `semanas/S2/Freddy/sesion-2.md`: el criterio «> 95 % de los peatones vuelve en 30 min» es inalcanzable con estadías de 10–120 min. Propongo medirlo sobre los peatones cuya diligencia programada terminó antes del corte (hoy, ninguno se pierde), o con un horizonte de `150 min`. No edité el prompt.
+- @Pablo: `rf_v1.joblib`. Con él se puede volver a medir el criterio de búsqueda de S2-3 con el mapa del sistema.
+
+**Bucle y verificación:**
+- Hice 2 vueltas:
+  1. `correr_sesiones` no encontraba `demanda/`;
+  2. hice independiente la comprobación del libro.
+- Suites tras los cambios: `traci` 74 pasan y 12 omitidas; `backend` 118 pasan y 1 omitida; e2e 30 pasan y 2 fallan (las 2 conocidas de cero falsas liberaciones, con el mismo mensaje; el modo espejo sigue cumpliendo).
+
+**Pendientes para la próxima sesión:** que Tyrone decida el criterio de S2-2; repetir la búsqueda de S2-3 con el modelo RF.
+
+**Evidencias:** sin PNG nuevo; los datos están en `semanas/S4/Freddy/codigo/traci/salidas/reverif_*.log`, que está ignorado por git, y resumidos en `semanas/S2/Freddy/RESUMEN.md`.
