@@ -817,7 +817,7 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - `docker exec` sin TTY no reenvía señales; mermaid tampoco acepta `;` en los mensajes de secuencia.
 
 **Pedidos a otros:**
-- @Pablo: la sección `informe/freddy.md` está lista en `freddy/s4`; el commit se indica en el mensaje del push de esta sesión. Las figuras están en `informe/figuras/freddy/` y las fuentes de cada cifra en `informe/datos/freddy/`. Tu verificador da OK con 2 488 palabras. Además, falta `ia/modelos/rf_v1.joblib` en el repo: sin él, 84,3 % de las ventanas a pie salen `vehiculo` con σ = 5 m y casi todas las sesiones se liberan en falso.
+- @Pablo: la sección `informe/freddy.md` está lista en `freddy/s4`, commit `138ea8f`. Las figuras están en `informe/figuras/freddy/` y las fuentes de cada cifra en `informe/datos/freddy/`. Tu verificador da OK con 2 488 palabras. Además, falta `ia/modelos/rf_v1.joblib` en el repo: sin él, 84,3 % de las ventanas a pie salen `vehiculo` con σ = 5 m y casi todas las sesiones se liberan en falso.
 - @Tyrone [demo]: no encontré `origin/tyrone/s4` ni `demo/`, así que el ensayo se hizo con el lanzamiento de `DESPLIEGUE.md`.
   1. Lanza el controlador con `docker exec -i … python3 -m traci.correr_kpis … --vigilar-stdin`, o con `-it` en una terminal. Si no, un Ctrl+C del lanzador deja `sumo` y el controlador vivos, publicando. Para reproducirlo: `Popen(["docker","exec","van3twin","bash","-lc","python3 -m traci.correr_kpis --id p50_rf_s1 --hasta 1500 --ritmo 5"])`, enviarle SIGINT y correr `docker exec van3twin pgrep -af "traci.correr_kpis|sumo"`.
   2. Publica `demo/` y `kpis/resultados/final/resumen.csv` para repetir el ensayo y poner los indicadores finales en el informe.
