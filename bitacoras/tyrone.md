@@ -462,6 +462,7 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Que llegue a la URL pública con la unificación.
 
 **Evidencias:** ![](../semanas/S3/Tyrone/evidencias/s3_visor-final.png) ![](../semanas/S3/Tyrone/evidencias/s3_visor-presentacion.png) ![](../semanas/S3/Tyrone/evidencias/s3_qr-demo.png) · [Explicación (PDF)](../semanas/S3/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S3/Tyrone/evidencias/resumen_S3_Tyrone.pdf)
+
 ## S4 · Sesión 1 · 2026-11-13 · Demo en un comando (backend, sumo-gui y visor)
 **Estado:** parcial (5/6: falta probar `demo.ps1` en Windows; esta máquina es Linux, sin `pwsh`)
 **Qué hice:**
