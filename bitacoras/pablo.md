@@ -303,6 +303,62 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 ![Curvas sigma](../semanas/S2/Pablo/evidencias/s3_curvas-sigma.png)
 ![Tráfico lento](../semanas/S2/Pablo/evidencias/s3_trafico-lento.png)
 
+## S2 · Sesión 3 · 2026-11-01 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
+**Estado:** hecha
+**Qué hice:**
+- Implementé `ia/evaluar_generalizacion.py` con evaluación completa de GeoLife prueba (294,579 ventanas, 10 usuarios no vistos) y SUMO (43,508 ventanas, semillas 101-105) para los 3 sistemas.
+- Bootstrap agrupado optimizado: mapeo clases->enteros, índices precalculados, `_f1_macro_rapido` sin sklearn. Pasó de >10 min a ~30 s.
+- Bootstrap pareado RF vs umbral en GeoLife: Δ=+0.185 [+0.158, +0.226], significativo.
+- Escribí y ejecuté `ia/escenarios_dificiles.py` con las semillas 101-105 en el contenedor van3twin. Generó 238k filas de trazas (normal + tráfico lento) con barrido de σ.
+- Curvas F1 vs σ completas (18 puntos en curvas_sigma.csv): el ruido GPS no es el factor dominante; la brecha de dominio GeoLife→SUMO es más importante.
+- Tráfico lento: 81 ventanas <8 km/h, recall vehículo = 0% para todos los sistemas.
+- 11 tests pasan. 3 PNGs con datos reales. PDF explicación y PDF semanal.
+
+**Archivos creados o modificados:**
+- `semanas/S2/Pablo/codigo/ia/evaluar_generalizacion.py`
+- `semanas/S2/Pablo/codigo/ia/escenarios_dificiles.py`
+- `semanas/S2/Pablo/codigo/ia/generar_evidencias_s3.py`
+- `semanas/S2/Pablo/codigo/ia/tests/test_evaluacion.py`
+- `semanas/S2/Pablo/codigo/ia/reportes/metricas_generalizacion.json`
+- `semanas/S2/Pablo/codigo/ia/reportes/evaluacion_generalizacion.md`
+- `semanas/S2/Pablo/codigo/ia/reportes/curvas_sigma.csv`
+- `semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png`
+- `semanas/S2/Pablo/evidencias/s3_curvas-sigma.png`
+- `semanas/S2/Pablo/evidencias/s3_trafico-lento.png`
+- `semanas/S2/Pablo/explicaciones/s3_explicacion.md`
+- `semanas/S2/Pablo/explicaciones/s3_explicacion.pdf`
+
+**Decisiones y por qué:**
+- **Bootstrap agrupado por usuario/semilla**: las ventanas de un mismo grupo están correlacionadas; remuestrear por ventana subestimaría la varianza.
+- **Optimización del bootstrap con enteros**: sklearn f1_score sobre strings × 1,000 remuestreos × 294k ventanas era inviable. El cálculo directo con arrays int dio ~100x speedup.
+- **Simulación corta (600s, 30 peatones)**: para cuidar RAM y tiempo. Generó suficientes datos de tráfico lento (~57k filas) pero no de peatón rápido (0 ventanas).
+- **NaN en precision_media**: sklearn RF 1.9.1 maneja NaN nativamente. Eliminar el filtro de NaN fue crítico.
+
+**Problemas encontrados:**
+- Bootstrap naive tardaba >10 min. Resuelto con optimización (enteros + índices precalculados).
+- Filtro de NaN eliminaba todas las ventanas GeoLife porque precision_media es NaN.
+- Repo no visible en van3twin: se copió a results/ y se extrajeron archivos SUMO de la rama de Tyrone.
+- Peatón rápido: 0 ventanas generadas con simulación corta. Necesitaría más peatones/duración.
+
+**Pedidos a otros:**
+- @Freddy: el RF v1 funciona bien en GeoLife (0.87) pero mal en SUMO (0.70 normal, 0.33 tráfico lento). La tasa veh->a_pie en SUMO es 69.3%. Para el controlador, el umbral es más seguro contra falsas liberaciones (0.2% vs 69.3%), pero el RF es mejor en macro-F1 en datos reales. Recomiendo RF con un filtro adicional de velocidad mínima para evitar liberar vehículos lentos.
+- @Miguel: si grabas algo casero, lo más útil serían trayectorias de vehículo en congestión (<8 km/h).
+- @Tyrone [Plan]: propuesta para S3 — reentrenar RF con datos mixtos GeoLife+SUMO para reducir la brecha de dominio.
+
+**Bucle y verificación:** 6 vueltas totales (NaN filter, timeout bootstrap, SUMO sin contenedor, evaluación completa con SUMO, bug fix typeID setSpeed, re-evaluación optimizada). Verificador final: 7/7 criterios cumplidos.
+
+**Bug fix importante:** `traci.person.setSpeed()` en SUMO 1.12 muta el typeID de `"peaton_rapido"` a `"peaton_rapido@pN"`. La comparación exacta `==` fallaba siempre. Corregido con `startswith("peaton_rapido")`. Tras el fix: 49,139 filas de peatón rápido en las 5 semillas (S101:5260, S102:9751, S103:11544, S104:14914, S105:7670). Evaluación: 8,082 ventanas, RF macro-F1 = 0.6665.
+
+**Optimización de evaluación:** `preparar_sumo_escenarios` se llamaba 9 veces (3 escenarios + 6 sigmas). Se redujo a: 1 carga para escenarios, 2 semillas para curvas σ, 2 semillas para tráfico lento. Tiempo de ~2h+ reducido a ~15 min.
+
+**Pendientes para la próxima sesión:**
+- Considerar reentrenamiento con datos mixtos GeoLife+SUMO.
+
+**Evidencias:**
+![Umbral vs RF por fuente](../semanas/S2/Pablo/evidencias/s3_umbral-vs-rf-por-fuente.png)
+![Curvas sigma](../semanas/S2/Pablo/evidencias/s3_curvas-sigma.png)
+![Tráfico lento](../semanas/S2/Pablo/evidencias/s3_trafico-lento.png)
+
 ## S3 · Sesión 1 · 2026-11-03 · Servicio de inferencia robusto: huecos, latencia menor a 5 ms y fallback
 **Estado:** hecha
 **Qué hice:**

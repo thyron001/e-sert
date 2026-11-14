@@ -125,7 +125,9 @@ La captura completa, con cada operación abierta y sus ejemplos (1400 × 24 458 
 
 ## 8. Limitaciones y decisiones
 
-- **Docker no está disponible** en esta máquina (WSL sin integración con Docker Desktop). Revisé el `Dockerfile` y simulé su etapa 1: la carpeta resultante arranca con uvicorn, `/salud` responde y el snapshot sin token da 401. Falta un `docker build` real.
+- **Docker (resuelto el 2026-11-05):** el 23 de octubre no había Docker en la máquina, porque faltaba la integración de WSL con Docker Desktop. Ya activada, `docker build -f semanas/S2/Freddy/codigo/backend/Dockerfile --build-arg ORIGEN=semanas/S2/Freddy/codigo .` construye la imagen (281 MB). El contenedor queda `healthy`, `/salud` responde 200, el snapshot sin token da 401 (`TOKEN_SIM_INVALIDO`), con `Bearer` da 202 y `/docs` responde 200.
+
+![](../evidencias/s1_docker-backend.png)
 - **Contrato v1 frente al prompt:** el prompt pedía `verdad` solo con `?verdad=1`, `Authorization: Bearer` y `/interno/snapshot`. El contrato congelado dice que el visor recibe `verdad` por defecto, `X-Sim-Token` y `/sim/paso`. Se aceptan las dos formas y la propuesta queda en `CONTRATO.propuesto.md`.
 - `/salud` no lleva `version` porque `Salud` del contrato no la admite (también va en la propuesta).
 - `POST /eventos/*` **no** cambian el mapa de ocupación: por diseño, el mapa lo deciden las sesiones. Los eventos guardan el último estado del usuario.

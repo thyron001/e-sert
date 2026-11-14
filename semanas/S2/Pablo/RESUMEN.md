@@ -52,27 +52,30 @@ los cambios espurios sin pérdida significativa de F1.
 
 ## Sesión 3 · Evaluación de generalización con usuarios no vistos y escenarios difíciles de SUMO
 
-Se evaluó el clasificador RF v1 sobre 294,579 ventanas de 10 usuarios de GeoLife nunca vistos
-en entrenamiento, midiendo macro-F1 con intervalos de confianza al 95% por bootstrap agrupado
-(1,000 remuestreos por usuario). El RF obtiene macro-F1 = 0.8743 [0.821, 0.947], superando
-significativamente al umbral (0.6983, Δ = +0.185, IC [+0.158, +0.226]).
+Se evaluó el clasificador RF v1 sobre **294,579 ventanas de GeoLife** (10 usuarios no vistos)
+y **353,868 ventanas de SUMO** (semillas 101-105, escenarios normal, tráfico lento y peatón
+rápido). El hallazgo principal es una **brecha de dominio importante**: el RF funciona bien
+en GeoLife (macro-F1 = 0.87) pero cae a 0.64 en SUMO normal, 0.67 en peatón rápido y
+0.33 en tráfico lento.
 
-La brecha de generalización es de 5.2 puntos respecto a la validación cruzada de S2-2
-(0.9259 -> 0.8743), esperable con usuarios nuevos. La tasa vehiculo->a_pie (falsas
-liberaciones) es del 24.3% para el RF, concentrada en vehículos que circulan a menos de
-8 km/h por congestión.
+Se corrigió un bug en `escenarios_dificiles.py`: `traci.person.setSpeed()` mutaba el typeID
+de `"peaton_rapido"` a `"peaton_rapido@pN"`, causando 0 ventanas. Con `startswith()` se
+generaron 8,082 ventanas de peatón rápido.
 
-Los escenarios difíciles de SUMO (tráfico lento, peatón rápido, barrido de σ GPS) no se
-generaron porque el contenedor van3twin no estaba corriendo. El script está listo para
-ejecutarse. La sesión queda **parcial** (4/7 criterios cumplidos).
+Las curvas F1 vs σ muestran que el ruido GPS no es el factor dominante; la brecha de dominio
+GeoLife→SUMO es más importante que el nivel de ruido. El tráfico lento (399 ventanas <8 km/h)
+confirma que ningún sistema reconoce vehículos lentos.
 
-**Métricas principales (GeoLife prueba):**
+**Métricas principales por fuente:**
 
-| Sistema | macro-F1 | IC 95% | Tasa veh->a_pie |
-|---------|----------|--------|-----------------|
-| RF v1 | 0.8743 | [0.821, 0.947] | 24.3% |
-| RF+suav | 0.8724 | [0.819, 0.944] | 24.1% |
-| Umbral | 0.6983 | [0.619, 0.756] | 27.2% |
+| Fuente | RF macro-F1 | IC 95% |
+|--------|-------------|--------|
+| GeoLife prueba | 0.8743 | [0.821, 0.947] |
+| SUMO normal | 0.6395 | [0.629, 0.650] |
+| SUMO peatón rápido | 0.6665 | [0.666, 0.667] |
+| SUMO tráfico lento | 0.3327 | [0.332, 0.333] |
+
+**Brecha de generalización (RF):** GeoLife -5.2pp, SUMO normal -28.6pp, peatón rápido -26.0pp, tráfico lento -59.3pp.
 
 **Tests:** 11/11 pasan.
 

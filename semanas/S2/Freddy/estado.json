@@ -3,25 +3,24 @@
   "semana": "S2",
   "sesiones": {
     "sesion-1": {
-      "estado": "parcial",
+      "estado": "hecha",
       "fecha": "2026-10-23",
-      "resumen": "Capa FastAPI delgada sobre el núcleo: las 14 rutas del contrato v1 bajo /api/v1, el alias /interno/snapshot con token, WS /ws/estado (cola asyncio, 1 snapshot por segundo simulado, verdad solo para el visor) y Swagger con ejemplos y openapi.json. 102 tests con 99 % de cobertura. Queda parcial solo porque no hubo Docker para construir la imagen.",
+      "resumen": "Capa FastAPI delgada sobre el núcleo: las 14 rutas del contrato v1 bajo /api/v1, el alias /interno/snapshot con token, WS /ws/estado (cola asyncio, 1 snapshot por segundo simulado, verdad solo para el visor) y Swagger con ejemplos y openapi.json. 102 tests con 99 % de cobertura. El 2026-11-05 se construyó la imagen Docker (281 MB, healthy): /salud responde 200 y el snapshot sin token da 401.",
       "evidencias": [
         "evidencias/s1_swagger.png",
         "evidencias/s1_swagger-rutas.png",
+        "evidencias/s1_docker-backend.png",
         "evidencias/s1_swagger.pdf",
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
       "criterios": {
-        "cumplidos": 5,
+        "cumplidos": 6,
         "total": 6
       },
       "pendientes": [
-        "docker build real del Dockerfile (en WSL no hay integración con Docker Desktop)",
-        "WS /ws/espejo/{veh_id} (contrato §7)",
-        "límite de tasa de recargas (DESPLIEGUE.md), que necesita un código de error en el contrato",
-        "la aprobación de CONTRATO.propuesto.md en la unificación"
+        "WS /ws/espejo/{veh_id} (contrato §7): es trabajo de S3-3",
+        "límite de tasa de recargas (DESPLIEGUE.md), que necesita un código de error en el contrato"
       ]
     },
     "sesion-2": {

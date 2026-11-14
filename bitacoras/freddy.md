@@ -392,6 +392,20 @@ El criterio «búsqueda con app menor que sin app» **no se cumple con la fuente
 
 **Evidencias:** ![](../semanas/S2/Freddy/evidencias/s3_guiado-vs-ciegas.png) ![](../semanas/S2/Freddy/evidencias/s3_cobros-simulados.png) · [Resumen semanal (PDF)](../semanas/S2/Freddy/evidencias/resumen_S2_Freddy.pdf) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s3_explicacion.pdf)
 
+## S2 · Sesión 1 · 2026-11-05 · Cierre: imagen Docker del backend
+**Estado:** hecha (antes parcial, 5/6)
+**Qué hice:**
+- Con la integración de WSL con Docker Desktop ya activa, construí la imagen: `docker build -t esert-backend:s2 -f semanas/S2/Freddy/codigo/backend/Dockerfile --build-arg ORIGEN=semanas/S2/Freddy/codigo .` → `esert-backend:s2`, 281 MB.
+- La arranqué con `ESERT_TOKEN_SIM` y quedó `healthy`, con 0 reinicios. Resultados: `GET /salud` → 200 `{"ok":true,"contrato":1}`; `POST /api/v1/interno/snapshot` sin token → 401 `TOKEN_SIM_INVALIDO`; con `Authorization: Bearer` → 202; `/docs` → 200.
+
+**Archivos creados o modificados:** `semanas/S2/Freddy/evidencias/s1_docker-backend.png`, `semanas/S2/Freddy/estado.json`, `semanas/S2/Freddy/RESUMEN.md`, `semanas/S2/Freddy/explicaciones/s1_explicacion.{md,pdf}`, `semanas/S2/Freddy/evidencias/resumen_S2_Freddy.pdf`.
+**Decisiones y por qué:** no cambié el `Dockerfile`, que funcionó tal cual. El criterio pendiente era solo construir la imagen de verdad.
+**Problemas encontrados:** ninguno. `docker ps` muestra un "Up" más corto de lo real por la diferencia de reloj entre WSL y la VM de Docker; `RestartCount=0` confirma que no hubo reinicios.
+**Pedidos a otros:** ninguno.
+**Bucle y verificación:** 1 vuelta. Corrí `build`, `run` y `curl` y comparé con el criterio: cumple. Ahora son 6/6 criterios.
+**Pendientes para la próxima sesión:** `WS /ws/espejo/{veh_id}` (S3-3) y el límite de tasa de recargas.
+**Evidencias:** ![](../semanas/S2/Freddy/evidencias/s1_docker-backend.png) · [Explicación (PDF)](../semanas/S2/Freddy/explicaciones/s1_explicacion.pdf)
+
 ## S3 · Sesión 1 · 2026-11-05 · KPIs de sistema: falsas liberaciones, retardo de cierre, facturación y mapa
 **Estado:** hecha
 **Qué hice:**
