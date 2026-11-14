@@ -597,7 +597,7 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
   - figuras sin SUMO;
   - controles con cifras;
   - informe de 1 681 palabras con las 31 cifras verificadas contra `resumen.csv`.
-- Su salvedad: el `git_head` del manifiesto (91691cb) es anterior al código de S4. El código que ejecutó la corrida es el del commit de cierre `[S4-2][Tyrone]` en `tyrone/s4`.
+- Su salvedad: el `git_head` del manifiesto (91691cb) es anterior al código de S4. El código que ejecutó la corrida es el del commit de cierre `bc73ef6` en `tyrone/s4`.
 
 **Pendientes para la próxima sesión:**
 - Que Pablo integre `tyrone.md` en el informe.
