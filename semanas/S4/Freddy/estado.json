@@ -42,6 +42,26 @@
         "Aplicar CONTRATO.propuesto.md v1.3 (Salud.ts en la tabla §4.3) en la unificación",
         "Repetir medir_cifras.py con rf_v1.joblib cuando exista"
       ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-14",
+      "resumen": "Sección informe/freddy.md (2 488 palabras, 87 cifras con fuente, verificador de Pablo OK) con rendimiento medido a 0/20/50/80 %, emulador GPS AR(1), máquina de estados, billetera y KPIs. Ensayo de la demo con 5 pruebas: arranque 3,89 s, el controlador sobrevive al reinicio del backend, el espejo se reconecta sin duplicar el recibo, 35,9 ms/paso con GUI al 80 %; Ctrl+C dejaba SUMO vivo y se arregló con --vigilar-stdin y detención entre pasos.",
+      "evidencias": [
+        "evidencias/s3_ensayo-demo-freddy.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S4_Freddy.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 6,
+        "total": 6
+      },
+      "pendientes": [
+        "@Tyrone: publicar demo/ y kpis/resultados/final/resumen.csv; lanzar el controlador con `docker exec -i … --vigilar-stdin`",
+        "@Pablo: rf_v1.joblib; repetir las corridas del informe con el modelo y σ de 8 a 10 m",
+        "Ensayar la reconexión del espejo a través de un reinicio del backend (registro en memoria)"
+      ]
     }
   }
 }

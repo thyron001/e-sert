@@ -772,3 +772,83 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 - Repetir `medir_cifras.py` con `rf_v1.joblib` cuando exista.
 
 **Evidencias:** ![](../semanas/S4/Freddy/evidencias/s2_arquitectura.png) · ![](../semanas/S4/Freddy/evidencias/s2_secuencia-cierre.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s2_explicacion.pdf)
+
+## S4 · Sesión 3 · 2026-11-14 · Sección backend y TraCI del informe y ensayo de la demo
+**Estado:** hecha
+
+**Qué hice:**
+- Escribí `informe/freddy.md` (2 488 palabras con el método de Pablo) siguiendo `GUIA_ESTILO.md` de `origin/pablo/s4`. Cubre arquitectura, controlador TraCI, emulador GPS con la ecuación AR(1), máquina de estados, guiado, billetera con el ejemplo de 47 min frente a la tarjeta SERT, KPIs con sus fórmulas, pruebas y limitaciones.
+  - Tiene 4 figuras a 300 dpi en `informe/figuras/freddy/`.
+  - Todas las cifras se midieron hoy con `informe/freddy_cifras.py` (`corridas`, `cierre`, `pruebas`, `cobro`) y `generar_figuras.py`, y cada una apunta a `informe/datos/freddy/*.json`.
+  - El verificador de cifras de Pablo (copia temporal de `origin/pablo/s4`, sin editarlo) da OK: 87 cifras y 0 huérfanas.
+- Rendimiento, con 1 800 s simulados:
+
+| Penetración | 0 % | 20 % | 50 % | 80 % |
+|---|---:|---:|---:|---:|
+| ms por paso | 56,1 | 60,1 | 74,2 | 70,3 |
+
+- KPIs con la regla de reserva:
+  - 100, 99,17 y 99,42 falsas liberaciones por 100 sesiones;
+  - precisión del mapa total de 0,745 con cualquier penetración: es el techo que ponen los autos sin la app;
+  - con GPS σ = 5 m, el 84,3 % de las ventanas a pie salen `vehiculo`;
+  - con σ = 2 m, 0 falsas liberaciones y retardo de 12–13 s.
+- Un revisor independiente leyó la sección como el profesor y encontró 25 puntos, todos corregidos. Los graves:
+  - la explicación de la precisión del mapa estaba mal (era el techo de los autos sin la app, no las falsas liberaciones);
+  - el n de los indicadores de retardo y error, que salen de 1 a 6 sesiones;
+  - «sesiones abiertas» en realidad eran sesiones iniciadas;
+  - afirmaciones causales sin medición sobre el costo por paso;
+  - la descripción de los peatones del `0,15`;
+  - el diagrama de componentes ponía a la app en `/ws/estado`, en contra del contrato §6. Lo corregí en `comun/docs/diagramas/` y en `arquitectura.md`;
+  - un 3,98 mal transcrito (era 3,95);
+  - el texto se pasaba de 2 500 palabras.
+- **Ensayo de la demo** (`comun/docs/ensayo_demo_freddy.py` y `.md`). No existe `origin/tyrone/s4` ni `demo/`, así que ensayé el lanzamiento de `docs/DESPLIEGUE.md`: backend uvicorn real, controlador `--publicar` en el contenedor, visor de Tyrone capturado con Playwright 1.47.0 instalado en el contenedor y teléfono espejo.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 1 | Arranque en frío | primer snapshot a los 3,89 s |
+| 2 | Reinicio del backend | el controlador sobrevive; snapshots de nuevo tras 7,17 s |
+| 3 | Reconexión del teléfono espejo | mismo vehículo, misma sesión, 1 recibo |
+| 4 | 80 % con `sumo-gui` | 35,9 ms/paso (25,6 sin GUI) |
+| 5 | Ctrl+C | ❌ dejaba `python3 -m traci.correr_kpis` y `sumo` vivos; arreglado |
+
+- Arreglos en `traci/correr_kpis.py`:
+  - `--vigilar-stdin`;
+  - detención **entre pasos** al primer Ctrl+C o al cerrarse stdin, con salida 130 y sin traza;
+  - `--gui` y `--captura RUTA@T`.
+- Corregí la prueba intermitente `backend/tests/test_espejo.py::test_solo_su_vehiculo_a_1hz_con_10_snapshots_por_segundo`.
+
+**Archivos creados o modificados:** `semanas/S4/Freddy/codigo/informe/{freddy.md,freddy_cifras.py,datos/freddy/*.json,figuras/freddy/*}`, `comun/docs/{ensayo_demo_freddy.md,ensayo_demo_freddy.py,grafica_ensayo.py,ensayo/*}`, `comun/docs/{arquitectura.md,generar_diagramas.py,diagramas/componentes.*,diagramas/seq_snapshot_ws.*}`, `traci/correr_kpis.py`, `backend/tests/test_espejo.py`, `evidencias/s3_ensayo-demo-freddy.png`, `evidencias/s2_arquitectura.png` (diagrama corregido).
+
+**Decisiones y por qué:**
+- **Sin KPIs finales de Tyrone**, porque no hay `kpis/resultados/final/resumen.csv`: los indicadores salen de corridas propias con sus escenarios. Lo dice el texto y queda en Limitaciones. No se inventó ninguna cifra.
+- **Detener entre pasos y no con SIGINT.** La primera versión del arreglo se mandaba SIGINT a sí misma y la señal caía en medio de un `recv` de TraCI: `struct.error` en `close()` y `malloc_consolidate` en SUMO, con código 1. La marca revisada entre pasos cierra limpio.
+- **Prueba de 1 Hz.** Fallaba más o menos 1 de cada 20 veces con la CPU cargada, porque medía las pausas al recibir en el cliente. Ahora exige cada pausa ≥ 0,5 s y cada par de pausas seguidas ≥ 1,9 s: sigue rechazando 2 Hz y tolera el corrimiento de un mensaje.
+- **El «puerto ocupado» del primer ensayo era un falso positivo de mi comprobación**, un `bind` sin `SO_REUSEADDR` frente a conexiones en `TIME_WAIT`. Lo corregí en el script; uvicorn reabre el mismo puerto sin problema.
+
+**Problemas encontrados:**
+- **Una medición de la e2e anómala.** Salió en 27 s y no se reprodujo. Coincidió con pruebas manuales mías en el contenedor y con cambios a `correr_kpis.py` a mitad de corrida. La dejé fuera; la medición limpia dio 216 s y la del verificador, 198,7 s.
+- El verificador de `proyecto/informe` resuelve las rutas desde su propia carpeta; usé la versión de `origin/pablo/s4` copiada temporalmente (y borrada).
+- `docker exec` sin TTY no reenvía señales; mermaid tampoco acepta `;` en los mensajes de secuencia.
+
+**Pedidos a otros:**
+- @Pablo: la sección `informe/freddy.md` está lista en `freddy/s4`, commit `138ea8f`. Las figuras están en `informe/figuras/freddy/` y las fuentes de cada cifra en `informe/datos/freddy/`. Tu verificador da OK con 2 488 palabras. Además, falta `ia/modelos/rf_v1.joblib` en el repo: sin él, 84,3 % de las ventanas a pie salen `vehiculo` con σ = 5 m y casi todas las sesiones se liberan en falso.
+- @Tyrone [demo]: no encontré `origin/tyrone/s4` ni `demo/`, así que el ensayo se hizo con el lanzamiento de `DESPLIEGUE.md`.
+  1. Lanza el controlador con `docker exec -i … python3 -m traci.correr_kpis … --vigilar-stdin`, o con `-it` en una terminal. Si no, un Ctrl+C del lanzador deja `sumo` y el controlador vivos, publicando. Para reproducirlo: `Popen(["docker","exec","van3twin","bash","-lc","python3 -m traci.correr_kpis --id p50_rf_s1 --hasta 1500 --ritmo 5"])`, enviarle SIGINT y correr `docker exec van3twin pgrep -af "traci.correr_kpis|sumo"`.
+  2. Publica `demo/` y `kpis/resultados/final/resumen.csv` para repetir el ensayo y poner los indicadores finales en el informe.
+  3. Tras reiniciar el backend, el teléfono espejo tiene que reconectarse, porque el registro vive en memoria.
+
+**Bucle y verificación:**
+- Hice 5 vueltas:
+  1. las cifras huérfanas y las fuentes de las tablas;
+  2. las correcciones del revisor;
+  3. Ctrl+C con SIGINT, que salía sucio, cambiado a la detención entre pasos;
+  4. la prueba intermitente;
+  5. la gráfica del ensayo, ilegible al principio.
+- El verificador independiente reportó **cumplidos los criterios 1–4**, con el PDF semanal y el commit pendientes del cierre, que se hicieron a continuación.
+  - Comprobó a mano más de 15 cifras, el Ctrl+C real (código 130, sin procesos) y las suites: unitarias 118/72/169 y **e2e 30 pasan y 2 fallan (las 2 de cero falsas liberaciones de S4-1, sin fallas nuevas)**.
+
+**Pendientes para la próxima sesión:**
+- Repetir las corridas del informe con `rf_v1.joblib`, σ de 8 a 10 m y varias semillas.
+- Ensayar el `demo/` real de Tyrone y la reconexión del espejo a través de un reinicio del backend.
+
+**Evidencias:** ![](../semanas/S4/Freddy/evidencias/s3_ensayo-demo-freddy.png) · [explicación (PDF)](../semanas/S4/Freddy/explicaciones/s3_explicacion.pdf) · [resumen semanal (PDF)](../semanas/S4/Freddy/evidencias/resumen_S4_Freddy.pdf)
