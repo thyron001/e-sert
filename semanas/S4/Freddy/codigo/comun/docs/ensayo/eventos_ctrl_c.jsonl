@@ -1,0 +1,11 @@
+{"t": 1.14, "fuente": "backend", "evento": "INFO:     Application startup complete.", "incidente": false}
+{"t": 1.28, "fuente": "backend", "evento": "responde /salud (1.27 s)", "incidente": false, "arranque_s": 1.27}
+{"t": 1.31, "fuente": "visor", "evento": "WS /ws/estado conectado", "incidente": false}
+{"t": 1.42, "fuente": "controlador", "evento": "lanzado: correr_kpis --id p50_rf_s1 --hasta 1500 --ritmo 5 --sufijo _ensayo_c", "incidente": false}
+{"t": 5.26, "fuente": "visor", "evento": "primer snapshot (t_sim=1.0)", "incidente": false}
+{"t": 25.28, "fuente": "ensayo", "evento": "Ctrl+C (SIGINT) al `docker exec` del controlador", "incidente": true}
+{"t": 28.45, "fuente": "contenedor", "evento": "Ctrl+C: no quedan procesos", "incidente": false}
+{"t": 28.45, "fuente": "ensayo", "evento": "Ctrl+C (SIGINT) al backend", "incidente": false}
+{"t": 28.51, "fuente": "backend", "evento": "INFO:     Shutting down", "incidente": false}
+{"t": 28.52, "fuente": "visor", "evento": "WS cortado: ConnectionClosedError", "incidente": false}
+{"t": 29.78, "fuente": "backend", "evento": "puerto 53073 libre", "incidente": false}

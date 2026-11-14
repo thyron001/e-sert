@@ -174,7 +174,12 @@ def test_solo_su_vehiculo_a_1hz_con_10_snapshots_por_segundo(c, app):
     assert len(espejos) >= 4
     # ≤ 1 Hz: entre dos mensajes espejo pasa al menos ~1 s (con 10 snapshots por segundo)
     pausas = [b - a for a, b in zip(horas, horas[1:len(espejos)])]
-    assert min(pausas) >= 0.95, pausas
+    # Las horas son de recepción en el cliente: si el sistema está cargado, un mensaje que llega tarde
+    # alarga una pausa y acorta la siguiente aunque el servidor respete 1 Hz (falló así 1 de ~20 veces
+    # en S4-3). Se exige el ritmo con tolerancia a ese corrimiento: cada pausa ≥ 0,5 s y cada par de
+    # pausas seguidas ≥ 1,9 s (dos mensajes por segundo no pasarían).
+    assert min(pausas) >= 0.5, pausas
+    assert all(a + b >= 1.9 for a, b in zip(pausas, pausas[1:])), pausas
     assert len(espejos) <= (horas[len(espejos) - 1] - horas[0]) + 1.5
     # y cada mensaje trae el dato más nuevo, no uno viejo encolado
     assert all(b.t_sim - a.t_sim >= 5 for a, b in zip(espejos[1:], espejos[2:]))

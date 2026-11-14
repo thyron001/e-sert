@@ -1,0 +1,73 @@
+[    2.77]  Retrying in 1 seconds
+[    2.80] ***Starting server on port 40185 ***
+[    4.10] Loading net-file from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.net.xml' ... done (319ms).
+[    4.31] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.poly.xml' ... done (145ms).
+[    4.31] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../parqueos/parqueos.add.xml' ... done (8ms).
+[    4.61] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../demanda/rerouters.add.xml' ... done (292ms).
+[    4.98] Loading done.
+[    5.01] Simulation version 1.12.0 started with time: 0.00
+[   50.49] /home/vanet/results/e-sert/proyecto/ia/inferencia.py:350: UserWarning: Modelo RF no disponible, usando fallback por umbral
+[   50.49]   modelo = _intentar_modelo()
+[   57.52] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[   60.06] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[   60.07] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[   65.06] Warning: No connection between edge '893253783' and edge '1296513963' found.
+[   65.23] progreso t=300 s, autos en red=103
+[   68.86] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[   68.87] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[   80.67] Warning: No connection between edge '1053072563' and edge '1296513963' found.
+[   92.05] Warning: No connection between edge '337277957#0' and edge '1296513963' found.
+[   94.47] Warning: No connection between edge '337277973#1' and edge '1296513963' found.
+[   94.48] Warning: No connection between edge '337277957#0' and edge '1296513963' found.
+[   94.48] Warning: No connection between edge '337277957#0' and edge '1296513963' found.
+[  100.86] Warning: No connection between edge '1053072563' and edge '1296513963' found.
+[  117.06] Warning: No connection between edge '567060339#3' and edge '1296513963' found.
+[  117.07] Warning: No connection between edge '567060339#3' and edge '1296513963' found.
+[  117.87] Warning: No connection between edge '337277957#2' and edge '1296513963' found.
+[  122.91] Warning: No connection between edge '337277957#2' and edge '1296513963' found.
+[  125.23] progreso t=600 s, autos en red=182
+[  127.07] Warning: No connection between edge '42201281#2' and edge '1296513963' found.
+[  128.86] Warning: No connection between edge '42492699#7' and edge '1296513963' found.
+[  130.46] Warning: No connection between edge '337277984#1' and edge '1296513963' found.
+[  131.93] Warning: No connection between edge '337277984#1' and edge '1296513963' found.
+[  132.09] Warning: No connection between edge '42201278#0' and edge '1296513963' found.
+[  135.49] Warning: No connection between edge '542428844#2' and edge '1296513963' found.
+[  135.49] Warning: No connection between edge '542428844#2' and edge '1296513963' found.
+[  135.49] Warning: No connection between edge '542428844#2' and edge '1296513963' found.
+[  137.66] Warning: No connection between edge '49217109#3' and edge '1296513963' found.
+[  137.87] Warning: No connection between edge '337277977#0' and edge '1296513963' found.
+[  139.87] Warning: No connection between edge '49217109#3' and edge '1296513963' found.
+[  143.27] Warning: No connection between edge '42201277#5' and edge '1296513963' found.
+[  152.50] Warning: No connection between edge '337277957#4' and edge '1296513963' found.
+[  156.29] Warning: No connection between edge '337277977#0' and edge '1296513963' found.
+[  157.66] Warning: No connection between edge '337277977#0' and edge '1296513963' found.
+[  161.68] Warning: No connection between edge '337277984#1' and edge '1296513963' found.
+[  168.37] Warning: No connection between edge '492471759#4' and edge '1296513963' found.
+[  172.86] Warning: No connection between edge '42141326#16' and edge '1296513963' found.
+[  177.98] Warning: No connection between edge '42201277#5' and edge '1296513963' found.
+[  181.17] Warning: No connection between edge '49217102' and edge '1296513963' found.
+[  181.17] Warning: No connection between edge '49217102' and edge '1296513963' found.
+[  182.28] Warning: No connection between edge '49217102' and edge '1296513963' found.
+[  185.23] progreso t=900 s, autos en red=284
+[  187.88] Warning: No connection between edge '351440624#11' and edge '1296513963' found.
+[  187.89] Warning: No connection between edge '49217124#0' and edge '1296513963' found.
+[  189.07] Warning: No connection between edge '49217124#0' and edge '1296513963' found.
+[  192.86] Warning: No connection between edge '49217124#1' and edge '1296513963' found.
+[  206.47] Warning: No connection between edge '492471759#3' and edge '1296513963' found.
+[  206.74] Warning: No connection between edge '337277962#3' and edge '1296513963' found.
+[  206.75] Warning: No connection between edge '337277962#3' and edge '1296513963' found.
+[  207.51] Warning: No connection between edge '337277957#5' and edge '1296513963' found.
+[  208.46] Warning: No connection between edge '553352498#8' and edge '1296513963' found.
+[  222.45] Warning: No connection between edge '337277984#4' and edge '1296513963' found.
+[  223.88] Warning: No connection between edge '351440624#11' and edge '1296513963' found.
+[  225.90] Warning: No connection between edge '337277962#4' and edge '1296513963' found.
+[  228.90] Warning: No connection between edge '49217124#3' and edge '1296513963' found.
+[  241.90] Warning: No connection between edge '45429543#6' and edge '1296513963' found.
+[  245.24] progreso t=1200 s, autos en red=355
+[  245.52] Warning: No connection between edge '337277977#1' and edge '1296513963' found.
+[  248.93] Warning: No connection between edge '42143918#1' and edge '1296513963' found.
+[  252.33] Warning: No connection between edge '567060339#3' and edge '1296513963' found.
+[  252.33] Warning: No connection between edge '567060339#3' and edge '1296513963' found.
+[  254.14] Warning: No connection between edge '337277984#4' and edge '1296513963' found.
+[  258.08] Warning: No connection between edge '492471759#4' and edge '1296513963' found.
+[  260.36] Warning: No connection between edge '553352498#7' and edge '1296513963' found.

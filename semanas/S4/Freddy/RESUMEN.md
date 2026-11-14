@@ -46,3 +46,31 @@ Documentación técnica autocontenida en `comun/docs/`:
 
 Explicación: [explicaciones/s2_explicacion.pdf](explicaciones/s2_explicacion.pdf)
 
+## Sesión 3 · 2026-11-14 · Sección backend y TraCI del informe y ensayo de la demo
+
+**Informe** ([`informe/freddy.md`](codigo/informe/freddy.md), 2 488 palabras):
+- arquitectura, controlador, emulador GPS AR(1), máquina de estados, guiado, billetera con un ejemplo de 47 min, indicadores y pruebas;
+- 87 cifras con fuente; el verificador de cifras de Pablo da OK;
+- un revisor independiente encontró 25 puntos, corregidos (los más serios: la explicación de la precisión del mapa, el n de los indicadores y una transcripción errónea).
+
+| Medida (1 800 s, semilla 1) | 0 % | 20 % | 50 % | 80 % |
+|---|---:|---:|---:|---:|
+| ms por paso | 56,1 | 60,1 | 74,2 | 70,3 |
+| Falsas liberaciones por 100 sesiones | — | 100 | 99,17 | 99,42 |
+
+La causa de las falsas liberaciones está medida: con GPS σ = 5 m, el 84,3 % de las ventanas a pie salen `vehiculo` con la regla de reserva; con σ = 2 m, 0 %, y entonces no hay falsas liberaciones y el retardo es de 12–13 s.
+
+**Ensayo de la demo** ([`comun/docs/ensayo_demo_freddy.md`](codigo/comun/docs/ensayo_demo_freddy.md)). `demo/` de Tyrone no está publicada; se ensayó el lanzamiento de `DESPLIEGUE.md`.
+
+| Prueba | Resultado |
+|---|---|
+| Arranque en frío | primer snapshot a los 3,89 s |
+| Reinicio del backend | el controlador sobrevive; snapshots de nuevo tras 7,17 s |
+| Reconexión del teléfono espejo | misma sesión, 1 recibo |
+| 80 % con `sumo-gui` | 35,9 ms/paso |
+| Ctrl+C | dejaba `sumo` vivo; **arreglado** con `--vigilar-stdin` y detención entre pasos |
+
+![Ensayo](evidencias/s3_ensayo-demo-freddy.png)
+
+Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · Resumen semanal: [evidencias/resumen_S4_Freddy.pdf](evidencias/resumen_S4_Freddy.pdf)
+

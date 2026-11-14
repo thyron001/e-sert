@@ -45,8 +45,7 @@ flowchart TB
   API -->|"bloque espejo"| ESP
   PAG -->|"Billetera.recargar"| NUC
   WS ==>|"snapshot · kpi · verdad (rol=visor)"| VIS
-  WS ==>|"snapshot · kpi (rol=publico)"| APP
   ESP ==>|"espejo · espejo_fin (≤ 1 Hz, recibo una vez)"| APP
   APP -->|"GET /espejo/candidatos · /puestos · /billetera"| API
-  APP -->|"POST /pagos/preparar"| PAG
+  APP -->|"POST /pagos/preparar (router de Miguel, fuera de §4.3)"| PAG
   PAG <-->|"Prepare · Confirm"| PP

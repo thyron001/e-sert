@@ -126,8 +126,9 @@ Cómo leer las cifras:
   **33 veces más rápido que el tiempo real**. Para la demo en vivo se frena con `--ritmo`.
 - **Latencia:** está muy por debajo de lo que nota una persona. En el VPS hay que sumar la red
   (TLS y la distancia hasta el servidor).
-- **Carga del WebSocket:** unos 2 mensajes por segundo para el visor. La app (`rol=publico`)
-  recibe uno menos por segundo, porque no le llega `verdad`. Esto confirma el límite de un
+- **Carga del WebSocket:** unos 2 mensajes por segundo para el visor. Un cliente `rol=publico`
+  recibe uno menos por segundo, porque no le llega `verdad`. La app no usa este canal: usa
+  `/ws/espejo/{veh_id}` (§7). Esto confirma el límite de un
   snapshot por segundo simulado del §6.
 
 ## 6. Dónde está cada cosa

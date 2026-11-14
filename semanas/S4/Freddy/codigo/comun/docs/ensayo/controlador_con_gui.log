@@ -1,0 +1,82 @@
+[  284.15]  Retrying in 1 seconds
+[  292.63] /home/vanet/results/e-sert/proyecto/ia/inferencia.py:350: UserWarning: Modelo RF no disponible, usando fallback por umbral
+[  292.63]   modelo = _intentar_modelo()
+[  294.28] progreso t=300 s, autos en red=103
+[  298.53] captura sumo-gui en t=450 s → /home/vanet/results/e-sert/semanas/S4/Freddy/codigo/comun/docs/ensayo/captura_sumo_gui.png
+[  305.20] progreso t=600 s, autos en red=182
+[  305.77] {
+[  305.77]   "id": "p80_rf_s1",
+[  305.77]   "porc_app": 80,
+[  305.77]   "clasificador_pedido": "rf",
+[  305.77]   "clasificador_usado": "umbral",
+[  305.77]   "ventanas_por_fuente": {
+[  305.77]     "umbral": 341
+[  305.77]   },
+[  305.77]   "t_sim_final": 600.0,
+[  305.77]   "pasos": 600,
+[  305.77]   "tiempo_real_s": 21.53,
+[  305.77]   "ms_por_paso": 35.88,
+[  305.77]   "sesiones_maquina": {
+[  305.77]     "coords_invalidas": 0,
+[  305.77]     "sesiones": 41,
+[  305.77]     "cerradas": 25,
+[  305.77]     "abiertas_al_final": 16,
+[  305.77]     "falsas_liberaciones": 25,
+[  305.77]     "falsas_por_100_sesiones": 60.98,
+[  305.77]     "falsas_con_datos_pobres": 0,
+[  305.77]     "ventanas_retenidas": 0,
+[  305.77]     "telefonos_apagados": 0,
+[  305.77]     "apagados_efectivos": 0,
+[  305.77]     "marcadas_sin_senal": 0,
+[  305.77]     "esperando_tope_al_final": 0,
+[  305.77]     "cierres_timeout_sin_senal": 0,
+[  305.77]     "clasificador": "/home/vanet/results/e-sert/proyecto",
+[  305.77]     "ventanas_por_fuente": {
+[  305.77]       "umbral": 341
+[  305.77]     }
+[  305.77]   },
+[  305.77]   "espejo": null,
+[  305.77]   "publicador": null,
+[  305.77]   "opciones": {
+[  305.77]     "sigma_m": 5.0,
+[  305.77]     "p_perdida": 0.02,
+[  305.77]     "rafaga_s": null,
+[  305.77]     "frac_rafaga": 0.3,
+[  305.77]     "frac_apagado": 0.0,
+[  305.77]     "libsumo": false,
+[  305.77]     "en_lote": true,
+[  305.77]     "solo_busca": true,
+[  305.77]     "cache_parametros": true,
+[  305.77]     "contar_eventos": true,
+[  305.77]     "args_sumo": [],
+[  305.77]     "geo_local": true,
+[  305.77]     "politica_datos_pobres": true
+[  305.77]   },
+[  305.77]   "costo_kpis": {
+[  305.77]     "s_en_kpis": 1.206,
+[  305.77]     "s_resto": 20.322,
+[  305.77]     "sobrecosto_pct": 5.93
+[  305.77]   },
+[  305.77]   "kpis": {
+[  305.77]     "falsas_lib_100": 100.0,
+[  305.77]     "n_sesiones": 25,
+[  305.77]     "n_falsas": 25,
+[  305.77]     "sin_cierre": 16,
+[  305.77]     "retardo_cierre_mediana_s": null,
+[  305.77]     "retardo_cierre_p90_s": null,
+[  305.77]     "error_fact_medio_usd": null,
+[  305.77]     "error_fact_abs_max_usd": null,
+[  305.77]     "ahorro_vs_tarjeta_medio_usd": null,
+[  305.77]     "precision_mapa": 0.8375409836065574,
+[  305.77]     "precision_mapa_app": 1.0,
+[  305.77]     "libres_fantasma_medio": 99.1,
+[  305.77]     "retardo_cierre_max_s": null,
+[  305.77]     "error_fact_abs_medio_usd": null,
+[  305.77]     "n_cierre_manual": 0,
+[  305.77]     "n_sin_estadia_real": 25,
+[  305.77]     "mae_mapa": 7.142459016393443,
+[  305.77]     "mae_mapa_app": 0.007704918032786885,
+[  305.77]     "libres_fantasma_app_medio": 0.0,
+[  305.77]     "n_muestras_mapa": 10
+[  305.77]   }
+[  305.77] }

@@ -27,8 +27,10 @@ import math
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Callable, Optional, Sequence
@@ -80,6 +82,22 @@ def _progreso(ctrl, t: float) -> None:
 _progreso.ultimo = -1
 
 
+class _Captura:
+    """Hook: `traci.gui.screenshot` de la vista principal en el segundo simulado T (`ruta.png@T`)."""
+
+    def __init__(self, especificacion: str):
+        ruta, _, t = especificacion.rpartition("@")
+        self.ruta, self.t = (ruta, float(t)) if ruta else (especificacion, 60.0)
+        self.hecha = False
+
+    def on_paso(self, ctrl, t: float) -> None:
+        if not self.hecha and t >= self.t:
+            Path(self.ruta).parent.mkdir(parents=True, exist_ok=True)
+            ctrl.traci.gui.screenshot("View #0", str(self.ruta))
+            self.hecha = True
+            print(f"captura sumo-gui en t={int(t)} s → {self.ruta}", flush=True)
+
+
 class PublicadorNulo:
     """Publicador sin red para medir el costo de armar el snapshot (serializa y descarta)."""
 
@@ -104,7 +122,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
            contar_eventos: bool = True, args_sumo: Sequence[str] = (), geo_local: bool = True,
            politica_datos_pobres: bool = True, ws_nulo: bool = False, guardar_csv: bool = True,
            instrumentar: Optional[Callable[[dict], None]] = None, espejo: bool = True,
-           ritmo: Optional[float] = None, volcar: Optional[Path] = None) -> dict:
+           ritmo: Optional[float] = None, volcar: Optional[Path] = None, gui: bool = False,
+           captura: Optional[str] = None) -> dict:
     """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso.
 
     S3-2: parámetros del GPS (`sigma_m`, `p_perdida`, ráfagas `rafaga_s`/`frac_rafaga`), teléfonos
@@ -114,6 +133,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
 
     S4-1: `volcar` escribe un JSON con el libro de cada billetera y cada sesión cerrada (con la
     marca `falsa`: el auto seguía `isStoppedParking` al cerrarse); lo leen las pruebas e2e.
+    S4-3: `gui` abre `sumo-gui` (pantalla :99 del contenedor) y `captura="ruta.png@T"` guarda una
+    captura de la vista en el segundo simulado T (`traci.gui.screenshot`).
     """
     pen, clf, semilla = interpretar_id(id_corrida)
     os.environ["ESERT_CLASIFICADOR"] = clf  # lo lee la inferencia de Pablo al cargar el modelo
@@ -134,7 +155,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
         pub_paso = PublicadorNulo()
 
     config = ConfigControlador(cfg=cfg, semilla=semilla, etiqueta=f"kpis_{id_corrida}{sufijo}_{int(con_kpis)}",
-                               libsumo=libsumo, cache_parametros=cache_parametros, args_extra=list(args_sumo))
+                               libsumo=libsumo, cache_parametros=cache_parametros, args_extra=list(args_sumo),
+                               gui=gui)
     kpis = None
     snapshots = None
     pub_espejo = None
@@ -180,6 +202,9 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
                 from .correr_guiado import Ritmo
 
                 ctrl.agregar_hook(Ritmo(ritmo).on_paso)
+            if captura:
+                ctrl.agregar_hook(_Captura(captura).on_paso)
+            ctrl.agregar_hook(_detener_entre_pasos)
             ctrl.agregar_hook(_progreso)
             if instrumentar is not None:
                 instrumentar({"ctrl": ctrl, "peatones": peatones, "guia": guia, "sesiones": sesiones,
@@ -305,6 +330,47 @@ def _json(obj) -> str:
     return json.dumps(limpiar(obj), indent=2, ensure_ascii=False)
 
 
+DETENER = threading.Event()
+
+
+class CorridaDetenida(Exception):
+    """La corrida se detuvo a pedido (Ctrl+C o stdin cerrado), entre dos pasos de SUMO."""
+
+
+def _detener_entre_pasos(ctrl, t: float) -> None:
+    """Hook: si se pidió detener, corta la corrida **entre** pasos, con el protocolo TraCI en un estado
+    limpio; así `traci.close()` funciona y SUMO termina bien (S4-3)."""
+    if DETENER.is_set():
+        raise CorridaDetenida(f"detenida en t={int(t)} s")
+
+
+def pedir_detencion(signum=None, frame=None) -> None:
+    """Primer Ctrl+C: pide detener entre pasos. Segundo Ctrl+C: interrumpe ya (por si algo se cuelga)."""
+    if DETENER.is_set():
+        raise KeyboardInterrupt
+    DETENER.set()
+    print("deteniendo la corrida al terminar el paso actual (otro Ctrl+C la corta ya)", flush=True)
+
+
+def vigilar_stdin() -> threading.Thread:
+    """S4-3: pide detener la corrida cuando se cierra la entrada estándar.
+
+    `docker exec` sin TTY no reenvía Ctrl+C al proceso del contenedor: si el lanzador muere, el
+    controlador y `sumo` quedan vivos. Lanzado con `docker exec -i … --vigilar-stdin`, al morir el
+    cliente se cierra stdin y la corrida se detiene entre dos pasos, como con un Ctrl+C.
+    """
+
+    def bucle():
+        while sys.stdin.buffer.read(4096):
+            pass
+        print("stdin cerrado: deteniendo la corrida", flush=True)
+        DETENER.set()
+
+    hilo = threading.Thread(target=bucle, name="vigilar-stdin", daemon=True)
+    hilo.start()
+    return hilo
+
+
 def main(argv: Optional[Sequence[str]] = None) -> dict:
     ap = argparse.ArgumentParser(description="Corrida con KPIs de sistema (S3-1)")
     ap.add_argument("--id", default="p50_rf_s1", help="p{pen:02d}_{umbral|rf}_s{semilla}")
@@ -313,11 +379,19 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
     ap.add_argument("--sufijo", default="", help="Sufijo de los archivos de salida (p. ej. _3600)")
     ap.add_argument("--ritmo", type=float, default=None, help="Veces el tiempo real (1 = demo en vivo)")
     ap.add_argument("--sin-espejo", action="store_true", help="No mandar el bloque interno espejo")
+    ap.add_argument("--vigilar-stdin", action="store_true",
+                    help="termina al cerrarse stdin (lanzar con `docker exec -i`; Ctrl+C del lanzador)")
+    ap.add_argument("--gui", action="store_true", help="abre sumo-gui (pantalla :99, VNC 5901)")
+    ap.add_argument("--captura", default=None, help="ruta.png@T: captura de sumo-gui en el segundo simulado T")
     ap.add_argument("--volcar", type=Path, default=None,
                     help="JSON con libro de billeteras y sesiones (pruebas e2e, S4-1)")
     ap.add_argument("--medir-costo", type=int, default=0, metavar="N",
                     help="Corre N pares (sin KPIs, con KPIs) y escribe costo_<id>.json")
     args = ap.parse_args(argv)
+    if threading.current_thread() is threading.main_thread():
+        signal.signal(signal.SIGINT, pedir_detencion)
+    if args.vigilar_stdin:
+        vigilar_stdin()
     SALIDAS_KPI.mkdir(parents=True, exist_ok=True)
 
     if args.medir_costo:
@@ -332,11 +406,18 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
         return costo
 
     salida = correr(args.id, args.hasta, publicar=args.publicar, sufijo=args.sufijo, espejo=not args.sin_espejo,
-                    ritmo=args.ritmo, volcar=args.volcar)
+                    ritmo=args.ritmo, volcar=args.volcar, gui=args.gui, captura=args.captura)
     (SALIDAS_KPI / f"ejemplo_{args.id}{args.sufijo}.json").write_text(_json(salida), encoding="utf-8")
     print(_json(salida))
     return salida
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except CorridaDetenida as motivo:
+        print(f"corrida {motivo}; TraCI y SUMO cerrados", flush=True)
+        sys.exit(130)
+    except KeyboardInterrupt:
+        print("corrida interrumpida (segundo Ctrl+C)", flush=True)
+        sys.exit(130)

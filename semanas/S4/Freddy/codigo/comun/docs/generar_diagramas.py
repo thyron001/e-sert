@@ -61,15 +61,16 @@ def elegir_motor(pedido: Optional[str]) -> Optional[str]:
     return None
 
 
-def comando(motor: str, entrada: Path, salida: Path) -> List[str]:
-    opciones = ["-b", "white"] + (["-s", "2"] if salida.suffix == ".png" else [])
+def comando(motor: str, entrada: Path, salida: Path, escala: int = 2) -> List[str]:
+    opciones = ["-b", "white"] + (["-s", str(escala)] if salida.suffix == ".png" else [])
     if motor == "npx":
         return ["npx", "-y", PAQUETE_NPM, "-i", str(entrada), "-o", str(salida), *opciones]
     # Docker: la carpeta de diagramas se monta en /data; el usuario es el de la computadora para
     # que los archivos no queden de root.
     usuario = [] if os.name == "nt" else ["-u", f"{os.getuid()}:{os.getgid()}"]
-    return ["docker", "run", "--rm", *usuario, "-v", f"{DIAGRAMAS}:/data", IMAGEN_DOCKER,
-            "-i", f"/data/{entrada.name}", "-o", f"/data/{salida.name}", *opciones]
+    # La entrada y la salida pueden estar en carpetas distintas (figuras del informe): se monta cada una.
+    return ["docker", "run", "--rm", *usuario, "-v", f"{entrada.parent}:/entrada", "-v", f"{salida.parent}:/salida",
+            IMAGEN_DOCKER, "-i", f"/entrada/{entrada.name}", "-o", f"/salida/{salida.name}", *opciones]
 
 
 def renderizar(motor: str, mmd: Path) -> List[Path]:
