@@ -1,0 +1,54 @@
+{
+  "persona": "Tyrone",
+  "semana": "S3",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "Ejecutor reanudable de la matriz 4 × 2 × 3 sobre el controlador real de Freddy y el rf_final de Pablo exportado a numpy: 24/24 corridas en 2,9 h con 4 procesos (speedup 3,5×). Con el guiado actual la app no reduce la búsqueda y umbral y rf dan la misma búsqueda, porque el mapa del sistema solo ve a los usuarios con app.",
+      "evidencias": [
+        "evidencias/s1_matriz-progreso.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Corrida final con las semillas 4 y 5 y el escenario de oráculo (S4-2)."
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "Análisis con IC t entre semillas, bootstrap BCa, diferencias pareadas y Holm; 8 figuras PNG+PDF en 13 s, tablas md/tex y 10 hallazgos. Ningún Δ de búsqueda es significativo (−1,5 %, −0,1 % y +2,4 %); el RF elimina las falsas liberaciones (0 frente a 86–90 por 100 sesiones con el umbral).",
+      "evidencias": [
+        "evidencias/s2_busqueda-vs-penetracion.png",
+        "evidencias/s2_falsas-liberaciones.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Repetir con 5 semillas en la corrida final (S4-2)."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "Visor final con panel de KPIs frente a la búsqueda a ciegas, halo del vehículo espejo con rastro, ruta y puesto, modo presentación (P, E, T, H) y reconexión automática; probado con el servidor de prueba y el backend real (800 vehículos: p95 de 16,8 ms; reconexión en 5,1 s).",
+      "evidencias": [
+        "evidencias/s3_visor-final.png",
+        "evidencias/s3_visor-presentacion.png",
+        "evidencias/s3_visor-backend-real.png",
+        "evidencias/s3_qr-demo.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S3_Tyrone.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {"cumplidos": 7, "total": 7},
+      "pendientes": [
+        "La URL pública sirve el visor anterior hasta la unificación del domingo.",
+        "Probar en el proyector y con el teléfono real (ensayo de S4-3)."
+      ]
+    }
+  }
+}
