@@ -1,0 +1,33 @@
+{
+ "tiempos": {
+  "modo": "local",
+  "id": "p50_rf_s1",
+  "ritmo": 1,
+  "gui": true,
+  "arranque_s": {
+   "backend": 5.3,
+   "controlador": 13.6,
+   "visor": 0.4,
+   "total": 20.6,
+   "apagado": 1.9
+  },
+  "demo_s": 116.2,
+  "apagado_s": 1.9,
+  "motivo_fin": "ctrl+c",
+  "captura_gui": "semanas/S4/Tyrone/codigo/demo/logs/20261113-155323/sumo_gui.png"
+ },
+ "visor": {
+  "veh": 22,
+  "espejos": []
+ },
+ "limpieza": {
+  "puertos_libres": {
+   "8000": true,
+   "8088": true
+  },
+  "sumo_gui_en_contenedor": [],
+  "sumo_en_contenedor": []
+ },
+ "captura_gui": true,
+ "evidencia": "/home/thyron001/v2x/van3twin-docker/results/e-sert/semanas/S4/Tyrone/evidencias/s1_demo-un-comando.png"
+}

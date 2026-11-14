@@ -1,0 +1,54 @@
+{
+  "persona": "Tyrone",
+  "semana": "S4",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "parcial",
+      "fecha": "2026-11-13",
+      "resumen": "demo.py levanta backend, controlador con sumo-gui y visor en ~10 s y lo apaga todo con Ctrl+C (también dentro del contenedor); modo remoto con caída a local; verificar_demo.py sale con código 0 (sesión cerrada y billetera que cuadra). Falta probar demo.ps1 en Windows.",
+      "evidencias": [
+        "evidencias/s1_demo-un-comando.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 5, "total": 6},
+      "pendientes": [
+        "Probar demo.ps1 en la laptop Windows de la exposición (esta máquina es Linux, sin pwsh).",
+        "Probar el modo remoto con ESERT_TOKEN_SIM cuando el VPS tenga el backend unificado.",
+        "Freddy: el mapa del backend queda en 0 ocupados con --publicar (el visor usa la ocupación real de verdad)."
+      ]
+    },
+    "sesion-2": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "Corrida final de 35 corridas (5 semillas) más 5 de oráculo, 40/40 en 2,3 h: con el mapa del sistema la app no reduce la búsqueda (+1,3 % al 50 %), rf_final deja 0 falsas liberaciones frente a 87/100 del umbral, y con ocupación real (oráculo) la búsqueda baja un 17,6 %. Informe tyrone.md con cifras generadas desde resumen.csv.",
+      "evidencias": [
+        "evidencias/s2_kpis-finales.png",
+        "evidencias/s2_falsas-liberaciones.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Que Pablo integre informe/tyrone.md en el informe."
+      ]
+    },
+    "sesion-3": {
+      "estado": "hecha",
+      "fecha": "2026-11-13",
+      "resumen": "15 diapositivas Marp con cifras generadas y verificadas contra resumen.csv, guion de 20 min por persona, dos ensayos de la demo desde arranque en frío sin tropiezos (arranque 9,8–11,3 s, recibo dentro de la demo, apagado 1,2–1,8 s), plan B en 3 escalones con la grabación reproducible y checklist para el lunes.",
+      "evidencias": [
+        "evidencias/s3_diapositiva-resultados.png",
+        "evidencias/s3_ensayo-cronometro.png",
+        "explicaciones/s3_explicacion.pdf",
+        "evidencias/resumen_S4_Tyrone.pdf"
+      ],
+      "explicacion": "explicaciones/s3_explicacion.pdf",
+      "criterios": {"cumplidos": 6, "total": 6},
+      "pendientes": [
+        "Ensayo con el teléfono físico de Miguel, el proyector y Windows el lunes antes de la clase (checklist_entrega.md).",
+        "Video de respaldo de Miguel (app/plan_b/ENLACE_VIDEO.md): su rama miguel/s4 no existe aún."
+      ]
+    }
+  }
+}

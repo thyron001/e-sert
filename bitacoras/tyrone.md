@@ -462,3 +462,215 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Que llegue a la URL pública con la unificación.
 
 **Evidencias:** ![](../semanas/S3/Tyrone/evidencias/s3_visor-final.png) ![](../semanas/S3/Tyrone/evidencias/s3_visor-presentacion.png) ![](../semanas/S3/Tyrone/evidencias/s3_qr-demo.png) · [Explicación (PDF)](../semanas/S3/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S3/Tyrone/evidencias/resumen_S3_Tyrone.pdf)
+
+## S4 · Sesión 1 · 2026-11-13 · Demo en un comando (backend, sumo-gui y visor)
+**Estado:** parcial (5/6: falta probar `demo.ps1` en Windows; esta máquina es Linux, sin `pwsh`)
+**Qué hice:**
+- `demo/demo.py` levanta en orden el backend FastAPI de Freddy, el controlador con `sumo-gui` en el contenedor y el visor.
+  - Antes de arrancar comprueba los prerrequisitos: Python, docker, el contenedor, `sumo-gui`, la pantalla `:99` (si se cayó la relanza), los puertos y el repo dentro de `results/`. Cada fallo trae su solución en español.
+  - Mide cada componente con `--cronometro` (`tiempos.json`) y lo apaga todo con Ctrl+C o al cerrarse `sumo-gui`, también dentro del contenedor.
+  - Modo remoto (VPS) con caída automática al local.
+- `demo.sh`, `demo.ps1`, `config_demo.yaml`, `README.md` (prerrequisitos, IP, firewall y errores frecuentes) y `requirements.txt`.
+- `demo/verificar_demo.py` (prueba de humo sin GUI, 120 s): **sale con código 0 y cumple los 7 criterios**:
+  - 1 151 snapshots válidos;
+  - 610 puestos en la API, igual que en el CSV;
+  - la sesión de `sim_busca_18` pasa a `CERRADA`;
+  - la billetera cuadra: 14,10 − 0,13 = 13,97;
+  - puertos libres y nada vivo en el contenedor.
+- `kpis/correr_una.py`: `--publicar`, `--ritmo`, `--gui`, `--captura-gui`, `--delay-ms` y `--libsumo`.
+- **Evidencia:** arranque con GUI en 9,8 s (backend 3,3 s, controlador 5,9 s, visor 0,3 s) y apagado en 2,0 s.
+  - El primer arranque del día, con imágenes en frío, tardó 20,6 s.
+  - El visor muestra 98 de 610 puestos llenos en rojo.
+
+**Archivos creados o modificados:** `semanas/S4/Tyrone/codigo/demo/{demo.py,demo.sh,demo.ps1,config_demo.yaml,README.md,requirements.txt,.gitignore,verificar_demo.py,verificacion.json,evidencia_demo.py}`, `semanas/S4/Tyrone/codigo/kpis/correr_una.py`, `semanas/S4/Tyrone/codigo/visor/js/{principal,panel_kpis}.js` (puestos con la ocupación real), `evidencias/s1_demo-un-comando.png`, `evidencias/s1_demo-evidencia.json`, `explicaciones/s1_explicacion.{md,pdf}`.
+
+**Decisiones y por qué:**
+- **Puertos 8000 (backend) y 8088 (visor):** el 8080 lo publica el contenedor de la materia.
+- **Escenario de la demo:** semilla 2, `ritmo: 2`.
+  - Con la semilla 1, la primera sesión cierra en t = 1 223 s, y el controlador no pasa de ~7× el tiempo real: en 120 s no se ve ningún cierre.
+  - Con la semilla 2, el primer cierre es en t = 1 014 s (según la corrida final).
+  - Sin GUI se usa libsumo (~9×).
+- **El controlador se detiene con `pkill` por un patrón único dentro del contenedor**, porque `docker exec` no propaga las señales.
+
+**Problemas encontrados:**
+- **El patrón de apagado `--subdir demo_<sello>` empezaba con guiones:**
+  - `pkill`/`pgrep` lo leían como una opción y fallaban sin matar nada;
+  - sin GUI quedaba vivo el controlador; con GUI no se notaba, porque termina al cerrarse `sumo-gui`;
+  - lo destapó `verificar_demo.py`; ahora el patrón es `subdir demo_<sello>`.
+- `verificar_demo.py` seguía a demasiados autos por `/ws/espejo` y frenaba al controlador. Ahora sigue a pocos candidatos y a los autos cuyo conductor ya vuelve.
+- La pantalla virtual `:99` del contenedor se había caído: la demo la relanza.
+- **El verificador encontró que el visor nunca pintaba puestos en rojo con el backend real:**
+  - el mapa del backend (`snapshot.puestos`, `GET /puestos`) se queda en 0 ocupados, porque las sesiones del controlador viven en su núcleo y no llegan a la base del backend;
+  - el visor ahora colorea con la ocupación real del mensaje `verdad`, y `?ocupacion=sistema` vuelve al mapa del sistema.
+- **El modo remoto sin `ESERT_TOKEN_SIM` solo avisaba:** ahora pasa a local, como cuando el VPS no responde.
+
+**Pedidos a otros:**
+- @Freddy:
+  - supuse que `correr_kpis.correr` no expone la GUI: la fuerzo con `ConfigControlador(gui=True)` desde `kpis/correr_una.py`;
+  - el `kpi` del WS no trae `busqueda_media_s` ni `co2_busqueda_kg_h`;
+  - el backend de la demo necesita `ESERT_VISOR_DIR` y `ESERT_PUESTOS_CSV` (ver `demo.py:arrancar_backend`);
+  - con `--publicar`, el mapa del backend (`snapshot.puestos` y `GET /puestos`) queda en 0 ocupados durante toda la corrida, aunque hay sesiones `ESTACIONADO` en el controlador: las sesiones del núcleo del controlador no llegan a la base del backend. ¿Puede el `sim/paso` actualizar la ocupación del mapa?
+- @Miguel, URL del modo espejo para la demo:
+  - **en remoto**, `https://demo.e-sert.tesisucuenca.com`;
+  - **en el plan B local**, `http://<IP de la laptop>:8000` (hoy `192.168.50.110:8000`, misma red o el *hotspot* de un teléfono). La demo la imprime en la tabla de arranque.
+
+**Bucle y verificación:**
+- 5 vueltas:
+  1. Xvfb caído;
+  2. tubería rota y `TIME_WAIT` al apagar;
+  3. ningún cierre en 120 s → semilla 2 + libsumo;
+  4. patrón de `pkill` con guiones y demasiados espejos;
+  5. tras el verificador, puestos en rojo con `verdad` y caída a local sin token.
+- El verificador independiente reportó **4/6 cumplidos, 1 parcial y 1 no verificable**:
+  - remoto → local cuando el VPS no responde;
+  - arranque en 10,0 s;
+  - Ctrl+C limpio, incluido el contenedor;
+  - `verificar_demo.py` con código 0;
+  - evidencia;
+  - **parcial:** el visor no pintaba puestos en rojo, corregido después y comprobado (59 y 98 llenos);
+  - **no verificable:** PowerShell.
+- También señaló el remoto sin token, ya corregido.
+
+**Pendientes para la próxima sesión:**
+- Probar `demo.ps1` en la laptop Windows de la exposición.
+- Probar el modo remoto con `ESERT_TOKEN_SIM` cuando el VPS tenga el backend unificado.
+
+**Evidencias:** ![](../semanas/S4/Tyrone/evidencias/s1_demo-un-comando.png) · [Explicación (PDF)](../semanas/S4/Tyrone/explicaciones/s1_explicacion.pdf)
+
+## S4 · Sesión 2 · 2026-11-13 · Corrida final de experimentos con el modelo y el controlador finales
+**Estado:** hecha
+**Qué hice:**
+- `kpis/corrida_final.py`: matriz 4 × 2 × 5 (35 corridas) más 5 corridas de sensibilidad "oráculo" (guiado con la ocupación real) al 50 %.
+  - Reutiliza por `hash_config` las 21 corridas de S3-1, así que corrieron 19 nuevas.
+  - Total: 40/40 en 8 213 s con 4 procesos y libsumo.
+  - `manifiesto.json` guarda el commit, SUMO 1.12, el SHA-256 del modelo (igual a `rf_final.json`) y de cada demanda, la CPU y los comandos.
+- `kpis/estadistica_final.py`:
+  - IC 95 % *bootstrap* jerárquico (10 000);
+  - Mann-Whitney U, Wilson y t entre semillas;
+  - búsqueda de los autos con app frente a los sin app;
+  - `resumen.csv`, `resumen.md` y `controles.json`.
+- `kpis/figuras_finales.py`: 5 figuras a 300 dpi para el informe y 2 evidencias a 150 dpi, desde `resumen.csv`.
+- `informe/tyrone.md` (1 677 palabras):
+  - escenario, diseño, resultados, controles, discusión y limitaciones;
+  - generado desde `tyrone.plantilla.md`: las 31 cifras salen de `resumen.csv` y cada una lleva su `<!-- fuente -->`.
+
+**Archivos creados o modificados:** `semanas/S4/Tyrone/codigo/kpis/{corrida_final,estadistica_final,figuras_finales,correr_una}.py`, `kpis/resultados/final/` (`<id>/kpis.json`, `vehiculos/`, `sesiones/`, `resumen.{csv,md}`, `controles.json`, `manifiesto.json`, `progreso.log`), `informe/{tyrone.plantilla.md,tyrone.md}`, `informe/figuras/tyrone/f01–f05.png`, `evidencias/s2_kpis-finales.png`, `evidencias/s2_falsas-liberaciones.png`, `explicaciones/s2_explicacion.{md,pdf}`; copias de `kpis/`, `sumo/` y `visor/` de S3.
+
+**Decisiones y por qué:**
+- **Oráculo de sensibilidad (no estaba en el prompt):** con el sistema real la app no reduce la búsqueda. Para interpretarlo hacía falta una cota: el mismo guiado de Freddy con la fuente `"verdad"`. Va aparte y rotulado; no cuenta entre las 35.
+- **Reutilizar las corridas de S3-1 por hash:** tienen las mismas entradas y SUMO es determinista. Ahorra ~1,5 h de cómputo.
+- **La estadística corre en la computadora:** en el contenedor, scipy es incompatible con su numpy (`numpy.dtype size changed`).
+
+**Problemas encontrados:**
+- **SUMO 1.12 aborta con la fuente `"verdad"`:**
+  - `MSBaseVehicle::replaceRoute: Assertion false` cuando el puesto nuevo está en la misma arista pero detrás del auto;
+  - `TraCIException` con `findRoute('')` cuando el auto está fuera de la red;
+  - `guia_oraculo` en `correr_una.py` añade las dos guardas, sin editar `proyecto/`;
+  - `p50_rf_s2_oraculo` falló en el primer intento y pasó en el reintento.
+- **Resultados** (controles de cordura cumplidos: teletransportes ≤ 0,166 %, línea base a −0,79 % de S3-1, `rf_final` ≤ umbral):
+  - con el mapa del sistema, la búsqueda cambia +0,4 / +1,3 / +4,1 % al 20 / 50 / 80 % (p = 0,865 / 0,125 / 0,054);
+  - umbral y `rf_final` dan la misma búsqueda;
+  - `rf_final` deja 0 falsas liberaciones frente a 87 por 100 sesiones con el umbral;
+  - con el oráculo, la búsqueda baja un **17,6 %** (357 s frente a 433 s, p < 0,001) y el CO₂ un 17,7 %.
+
+**Pedidos a otros:**
+- @Pablo:
+  - mi sección está en `semanas/S4/Tyrone/codigo/informe/tyrone.md` (se genera desde `tyrone.plantilla.md` con `demo/presentacion/generar_diapositivas.py --plantilla informe/tyrone.plantilla.md --salida informe/tyrone.md`);
+  - los números, en `semanas/S4/Tyrone/codigo/kpis/resultados/final/resumen.csv` y `resumen.md`;
+  - las figuras, en `informe/figuras/tyrone/`;
+  - tu `f08_falsas-por-penetracion.png` todavía es un marcador "PENDIENTE": con `resumen.csv` (columnas `falsas_100`, `falsas_100_wilson_lo/hi`) ya puedes generarla.
+- @Freddy:
+  - en la corrida, `Guia._alcanzable` acepta puestos en la misma arista detrás del auto y no maneja `getRoadID == ''`; con la fuente `"verdad"`, SUMO 1.12 aborta (guarda en `kpis/correr_una.py:guia_oraculo`);
+  - con la fuente `"mapa"` el guiado no reduce la búsqueda, porque el mapa no ve a los autos sin app (precisión del mapa ≈ 57 %);
+  - ninguna otra anomalía: ninguna corrida supera el 0,17 % de vehículos con teletransporte.
+
+**Bucle y verificación:**
+- 4 vueltas:
+  1. SUMO abortaba con el oráculo → guarda de la misma arista;
+  2. `findRoute('')` → guarda de auto fuera de la red y reintento;
+  3. barras de IC con `NaN` o negativas en las figuras;
+  4. signo menos y etiquetas, tras el verificador.
+- El verificador independiente reportó **6/6 criterios cumplidos**:
+  - 35 + 5 corridas;
+  - `resumen.csv` idéntico al recalcular;
+  - manifiesto completo;
+  - figuras sin SUMO;
+  - controles con cifras;
+  - informe de 1 681 palabras con las 31 cifras verificadas contra `resumen.csv`.
+- Su salvedad: el `git_head` del manifiesto (91691cb) es anterior al código de S4. El código que ejecutó la corrida es el del commit de cierre `[S4-2][Tyrone]` en `tyrone/s4`.
+
+**Pendientes para la próxima sesión:**
+- Que Pablo integre `tyrone.md` en el informe.
+
+**Evidencias:** ![](../semanas/S4/Tyrone/evidencias/s2_kpis-finales.png) ![](../semanas/S4/Tyrone/evidencias/s2_falsas-liberaciones.png) · [Explicación (PDF)](../semanas/S4/Tyrone/explicaciones/s2_explicacion.pdf)
+
+## S4 · Sesión 3 · 2026-11-13 · Presentación, guion, resultados y ensayo de la demo
+**Estado:** hecha
+**Qué hice:**
+- `demo/presentacion/diapositivas.md` y `.pdf`:
+  - 15 diapositivas Marp con tema claro y los colores del equipo;
+  - generadas desde `diapositivas.plantilla.md` con `generar_diapositivas.py`: las 37 cifras salen de `resumen.csv`, y `--verificar` comprueba que coinciden;
+  - resultados con 3 cifras grandes y su IC, y la figura 2×2 con el oráculo.
+- `guion.md`: 15 filas con minuto, persona, frase clave y transición. Total 20:00 (parámetro `DURACION_MIN = 20`) y la demo paso a paso.
+- **Dos ensayos desde arranque en frío con `sumo-gui`** (`ensayo.py`), sin tropiezos:
+
+  | Ensayo | Arranque | Demo guiada | Apagado |
+  |---|---:|---:|---:|
+  | 1 | 11,3 s | 280 s | 1,8 s |
+  | 2 | 9,8 s | 156 s | 1,2 s |
+
+  - halo visible en el visor;
+  - recibo de `sim_busca_18`: 0,13 USD frente a 0,25 USD de la tarjeta SERT.
+- **Plan B:**
+  - grabación del ensayo 1: 3 159 mensajes en `plan_b/snapshots_demo.jsonl.gz`, 14 MB;
+  - reproducida en el visor con `servidor_prueba` (visor conectado, autos, puestos y espejo);
+  - `ensayo.md` con la versión de Marp (4.2.3), el presupuesto, los ensayos, los tropiezos de la preparación y el plan B en 3 escalones.
+- `checklist_entrega.md` para el lunes 16. Evidencias: diapositiva de resultados y cronómetro de los ensayos.
+
+**Archivos creados o modificados:** `semanas/S4/Tyrone/codigo/demo/presentacion/{diapositivas.plantilla.md,diapositivas.md,diapositivas.pdf,cifras.json,generar_diapositivas.py,guion.md,ensayo.py,ensayo.plantilla.md,ensayo.md,tropiezos_preparacion.md,evidencia_ensayo.py,checklist_entrega.md,img/,ensayos/}`, `demo/plan_b/snapshots_demo.jsonl.gz`, `visor/servidor_prueba.py` (lee `.gz`), `visor/captura.py`, `visor/js/panel_kpis.js`, `visor/datos/base.json` (corrida final), `evidencias/s3_diapositiva-resultados.png`, `evidencias/s3_ensayo-cronometro.png`, `explicaciones/s3_explicacion.{md,pdf}`, `evidencias/resumen_S4_Tyrone.pdf`.
+
+**Decisiones y por qué:**
+- **Duración:** 20 min (15 + 5), porque nadie confirmó otra.
+- **Cifras generadas, nunca escritas:** el mismo motor arma el informe.
+- **Diapositivas honestas:** la búsqueda no baja con el mapa del sistema y sí con el oráculo. El mensaje es que el clasificador funciona y que falta información de ocupación.
+- **La figura `f08` de Pablo es un marcador "PENDIENTE":** se usó la de falsas liberaciones de la corrida final.
+- **Diagrama de arquitectura:** el de S1 de Freddy, porque `origin/freddy/s4` no tiene `comun/docs/`.
+- **Los ensayos corren a 10×** (caben en 5 min) **y la demo en vivo a 2×**.
+
+**Problemas encontrados:**
+- La grabación cruda pesa 136 MB, por encima del límite de GitHub: se versiona en `.gz`.
+- Marp necesitó `CHROME_NO_SANDBOX=1`.
+- `captura.py` daba 404 con una URL terminada en `/`.
+- Lo que no se pudo ensayar aquí: el teléfono físico de Miguel, el proyector y Windows. Va en el *checklist*.
+
+**Pedidos a otros** (parte del guion y minuto en que habla cada uno, `demo/presentacion/guion.md`):
+- @Freddy:
+  - diapositiva 4, **Arquitectura**, a las **02:30** (1:30): SUMO + TraCI → backend → visor y app;
+  - diapositiva 10, **Cobro por tiempo real frente a la tarjeta SERT**, a las **09:30** (1:00).
+- @Pablo:
+  - diapositiva 7, **IA: ¿el conductor se bajó?**, a las **06:00** (1:30), con tus matrices de confusión;
+  - diapositiva 8, **Falsas liberaciones en la simulación**, a las **07:30** (1:00).
+- @Miguel:
+  - diapositiva 9, **App en modo espejo**, a las **08:30** (1:00);
+  - **demo en vivo, de 13:00 a 18:00**: elegir un candidato que busca (halo en el visor) y, a las ~15:30, cambiar a un auto cuyo conductor vuelve (`REGRESANDO`) para mostrar el recibo a las ~16:30;
+  - falta el video de respaldo (`app/plan_b/ENLACE_VIDEO.md` en `miguel/s4`): es el escalón 3 del plan B.
+- @Tyrone (yo): diapositivas 1–3, 5, 6, 11, 12, 14 y 15 (00:00–05:00, 10:30–13:00 y 18:00–20:00), `sumo-gui` y el visor en la demo.
+
+**Bucle y verificación:**
+- 4 vueltas:
+  1. diapositivas desbordadas y la figura `f08` de Pablo, que era un marcador;
+  2. Marp sin *sandbox*;
+  3. recibo fuera de tiempo en el ensayo → seguir a los autos `REGRESANDO`;
+  4. grabación de 136 MB → `.gz`.
+- El verificador independiente reportó **4/4 criterios verificables cumplidos**, y el PDF semanal y el push pendientes del cierre (hechos en este cierre):
+  - las 37 cifras del PDF coinciden con `resumen.csv`, revisadas también a mano;
+  - el guion suma 20:00;
+  - dos ensayos sin tropiezos;
+  - el plan B se reproduce en el visor.
+- Encontró que 3 frases clave de `guion.md` (diapositivas 11, 12 y 15) decían que la búsqueda baja. Se reescribieron para que coincidan con los resultados.
+
+**Pendientes para la próxima sesión:**
+- El lunes, antes de clase: `checklist_entrega.md`, el ensayo con el teléfono de Miguel y el proyector.
+- Que la unificación lleve el visor y la demo a `proyecto/`.
+
+**Evidencias:** ![](../semanas/S4/Tyrone/evidencias/s3_diapositiva-resultados.png) ![](../semanas/S4/Tyrone/evidencias/s3_ensayo-cronometro.png) · [Explicación (PDF)](../semanas/S4/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S4/Tyrone/evidencias/resumen_S4_Tyrone.pdf)
