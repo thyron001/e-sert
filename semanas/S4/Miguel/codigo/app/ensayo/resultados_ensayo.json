@@ -41,5 +41,32 @@
   "notas": [
     "No hay CSV de latencias en latencias/.",
     "No existe eventos_ensayo.json."
-  ]
+  ],
+  "latencia_en_pantalla": {
+    "fuente": "resumen que muestra el teléfono en el espejo (no se pudo exportar el CSV: Expo Go se reinicia al compartir)",
+    "modo": "local",
+    "veh_id": "sim_busca_4",
+    "n": 55,
+    "total_p50_ms": 161,
+    "total_p95_ms": 237,
+    "cliente_p50_ms": 110,
+    "hora": "23:37",
+    "captura": "evidencias/s2_ensayo-montaje.png"
+  },
+  "reconexion": {
+    "modo": "local",
+    "veh_id": "sim_busca_4",
+    "evidencia": "log del backend: WebSocket /ws/espejo/sim_busca_4 aceptado de nuevo tras el modo avión en las 3 corridas",
+    "recuperacion_s": null,
+    "nota": "recuperación automática sin reiniciar la app; sin horas exactas de corte/recuperación"
+  },
+  "guion": {
+    "previsto_total_s": 405,
+    "dentro_de_30s": false,
+    "nota": "tomas 5–6 no cupieron: sim_busca_4 no cerró dentro del ensayo"
+  },
+  "vps": {
+    "estado": "no ensayado",
+    "motivo": "demo.py --remoto requiere ESERT_TOKEN_SIM (solo Tyrone); /salud ok a las 22:49:53"
+  }
 }

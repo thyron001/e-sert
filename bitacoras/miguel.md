@@ -800,7 +800,7 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s1_app-pantallas.png) · ![](../semanas/S4/Miguel/evidencias/s1_ios-simulador.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s1_explicacion.pdf)
 
 ## S4 · Sesión 2 · 2026-11-14 · Ensayo general de la demo con el teléfono espejo y video de respaldo
-**Estado:** parcial (2/6)
+**Estado:** parcial (3/6)
 
 **Qué hice:**
 - **Guion y checklist:** `ensayo/guion_demo.md` (7 tomas, 6 min 45 s, con las fallas y qué hacer) y `ensayo/checklist_previa.md`. Revisé que los estados y avisos del guion existan en el contrato (§3, §6, `espejos` §6).
@@ -812,7 +812,7 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - **Corridas:** tres, todas con 0 eventos fallidos: `--ritmo 5 --hasta 1800`, `--ritmo 2 --hasta 600` y `--ritmo 1 --hasta 240`.
   - El teléfono siguió a `sim_busca_4`.
   - Con el modo avión, el WS se reabrió solo: dos conexiones aceptadas por corrida en el log.
-- **Grabación de la laptop:** con la herramienta de macOS (7 min 22 s), fuera de git. Agregué un `.gitignore` propio en `plan_b/crudo/` que deja pasar solo `LEEME.md`.
+- **Videos:** grabación de la laptop con macOS y del teléfono con Android (vía WhatsApp), combinados con ffmpeg en `plan_b/crudo/ensayo_combinado.mp4`, fuera de git; el fotograma `s2_ensayo-montaje.png` muestra el mismo `sim_busca_4` en el visor (halo amarillo) y en el teléfono. Agregué un `.gitignore` propio en `plan_b/crudo/` que deja pasar solo `LEEME.md`.
 - **Análisis:** `ensayo/analizar_ensayo.py` (lo escribió un subagente y lo probé). Calcula p50/p95 por modo, reconexiones, tomas frente al guion y recibos frente a `tarifa.json` (±$0,01).
 
 **Archivos creados o modificados:**
@@ -827,7 +827,7 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - **Corridas cortas:** sirven para obtener `espejo_fin` y el botón Exportar CSV.
 
 **Problemas encontrados:**
-- **El CSV de latencias no se pudo exportar** en las dos primeras corridas. "Exportar CSV" solo aparece con `espejo_fin`, y `sim_busca_4` tarda ~14 min de reloj a ritmo 5 en cerrar.
+- **El CSV de latencias no se pudo exportar:** al tocar "Exportar CSV", Expo Go se cierra y reinicia la app (falla de `expo-sharing` en Expo Go Android; se revisa en S4-3). Las latencias se tomaron del resumen en pantalla, que da para local n=55: p50 161 ms, p95 237 ms y en el teléfono p50 110 ms (`resultados_ensayo.json`, `latencia_en_pantalla`). Antes, en las dos primeras corridas, no apareció el botón. "Exportar CSV" solo aparece con `espejo_fin`, y `sim_busca_4` tarda ~14 min de reloj a ritmo 5 en cerrar.
 - **Guion:** no se cumplió con ±30 s, porque las tomas 5 y 6 no cupieron.
 - **Plazo:** la sesión se empezó a las 22:50, con el plazo a las 23:59.
 
@@ -843,12 +843,14 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 
 **Bucle y verificación:**
 - Hubo 3 vueltas, una por corrida. No hubo verificador independiente por falta de tiempo antes del plazo.
-- Criterios cumplidos: el ensayo del VPS queda documentado junto con el local, y el video crudo está fuera de git con su `LEEME.md`.
+- Criterios cumplidos (3/6):
+  - el ensayo del VPS queda documentado junto con el local;
+  - el video crudo está fuera de git con su `LEEME.md`;
+  - las dos evidencias PNG existen. La de latencias no tiene datos del CSV; las cifras del ensayo están en `resultados_ensayo.json`.
 - Criterios no cumplidos:
   - el guion con ±30 s;
-  - el tiempo de recuperación medido en el JSON;
-  - las latencias por modo, porque no hay CSV;
-  - la gráfica de latencias, que existe pero sin datos reales.
+  - el tiempo de recuperación medido (la recuperación fue automática, pero sin horas exactas);
+  - las latencias por modo desde el CSV.
 
 **Pendientes para la próxima sesión:**
 - Exportar el CSV con una corrida corta.
