@@ -28,7 +28,9 @@ La app quedó lista para la demo final:
   - el modo avión provocó una reconexión, que se recuperó sola.
 - **Ensayo contra el VPS:** bloqueado. `demo.py --remoto` necesita `ESERT_TOKEN_SIM`, que solo tiene Tyrone.
 - **Guion:** no se cumplió con ±30 s, porque el auto elegido tarda más que las tomas 4–6.
-- **Video:** la grabación de la laptop está fuera de git; falta combinarla con la del teléfono.
+- **Video:** las grabaciones de la laptop y del teléfono están combinadas con ffmpeg, fuera de git.
+- **Latencia en pantalla (local, n=55):** p50 de 161 ms y p95 de 237 ms.
+- **CSV:** no se pudo exportar, porque Expo Go se reinicia al compartir.
 
 ![Ensayo: laptop con sumo-gui y visor](evidencias/s2_ensayo-montaje.png)
 

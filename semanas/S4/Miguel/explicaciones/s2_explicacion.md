@@ -59,6 +59,8 @@
 
 - **Simulación:** 3 corridas locales, todas con 0 eventos fallidos.
 - **Reconexión:** el WebSocket del espejo se recuperó solo tras el modo avión (2 conexiones aceptadas por corrida en el log del backend).
+- **Latencia en el ensayo (resumen en pantalla, local, n=55):** p50 de 161 ms, p95 de 237 ms y p50 en el teléfono de 110 ms.
+- **Exportar CSV:** reinicia Expo Go en Android, así que no hubo CSV.
 - **Latencia del espejo en S4-1, por Tailscale:** p50 de 124–158 ms y p95 de 174–218 ms.
 
 ![](../evidencias/s2_ensayo-montaje.png)
