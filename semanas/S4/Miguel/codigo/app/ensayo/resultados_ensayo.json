@@ -1,0 +1,45 @@
+{
+  "generado": "2026-11-14T23:40:00",
+  "tarifa": {
+    "valor_hora_usd": 0.5,
+    "fraccion_min": 5,
+    "cobro_minimo_min": 10
+  },
+  "latencias": {
+    "local": {
+      "n": 0,
+      "lat_total_ms": null,
+      "lat_cliente_ms": null,
+      "nota": "Sin datos del modo local."
+    },
+    "vps": {
+      "n": 0,
+      "lat_total_ms": null,
+      "lat_cliente_ms": null,
+      "nota": "Sin datos del modo vps."
+    }
+  },
+  "reconexiones": {
+    "numero": null,
+    "detalle": [],
+    "max_recuperacion_s": null,
+    "nota": "Sin datos de reconexiones."
+  },
+  "tomas": {
+    "detalle": [],
+    "total_previsto_s": null,
+    "total_real_s": null,
+    "diferencia_s": null,
+    "dentro_de_30s": null,
+    "nota": "Sin datos de tomas."
+  },
+  "recibos": {
+    "detalle": [],
+    "todos_cuadran": null,
+    "nota": "Sin datos de recibos."
+  },
+  "notas": [
+    "No hay CSV de latencias en latencias/.",
+    "No existe eventos_ensayo.json."
+  ]
+}

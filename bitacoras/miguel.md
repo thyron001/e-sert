@@ -798,3 +798,61 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - Preparar el guion de la demo con una corrida corta para mostrar `espejo_fin`.
 
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s1_app-pantallas.png) · ![](../semanas/S4/Miguel/evidencias/s1_ios-simulador.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s1_explicacion.pdf)
+
+## S4 · Sesión 2 · 2026-11-14 · Ensayo general de la demo con el teléfono espejo y video de respaldo
+**Estado:** parcial (2/6)
+
+**Qué hice:**
+- **Guion y checklist:** `ensayo/guion_demo.md` (7 tomas, 6 min 45 s, con las fallas y qué hacer) y `ensayo/checklist_previa.md`. Revisé que los estados y avisos del guion existan en el contrato (§3, §6, `espejos` §6).
+- **Ensayo B en local:**
+  - backend en :8000 con una base nueva;
+  - visor `proyecto/visor` en :8088;
+  - `correr_guiado --gui` en `van3twin` (sumo-gui por VNC);
+  - el Android por Tailscale.
+- **Corridas:** tres, todas con 0 eventos fallidos: `--ritmo 5 --hasta 1800`, `--ritmo 2 --hasta 600` y `--ritmo 1 --hasta 240`.
+  - El teléfono siguió a `sim_busca_4`.
+  - Con el modo avión, el WS se reabrió solo: dos conexiones aceptadas por corrida en el log.
+- **Grabación de la laptop:** con la herramienta de macOS (7 min 22 s), fuera de git. Agregué un `.gitignore` propio en `plan_b/crudo/` que deja pasar solo `LEEME.md`.
+- **Análisis:** `ensayo/analizar_ensayo.py` (lo escribió un subagente y lo probé). Calcula p50/p95 por modo, reconexiones, tomas frente al guion y recibos frente a `tarifa.json` (±$0,01).
+
+**Archivos creados o modificados:**
+- `semanas/S4/Miguel/codigo/app/ensayo/`: `guion_demo.md`, `checklist_previa.md`, `registro_ensayo.md`, `analizar_ensayo.py`, `resultados_ensayo.json` y `latencias/`.
+- `semanas/S4/Miguel/codigo/app/plan_b/crudo/`: `LEEME.md` y `.gitignore`.
+- `semanas/S4/Miguel/evidencias/`: `s2_ensayo-montaje.png` y `s2_latencias-ensayo.png`.
+- `semanas/S4/Miguel/explicaciones/s2_explicacion.*`.
+
+**Decisiones y por qué:**
+- **`demo.py` no se corrió:** desde la carpeta temporal de `git archive` busca la raíz del repo (`CLAUDE.md`) y `kpis/correr_una.py`, que solo existe en `tyrone/s4`. Para no editarlo, monté las mismas piezas a mano.
+- **Grabación con macOS:** OBS no está instalado.
+- **Corridas cortas:** sirven para obtener `espejo_fin` y el botón Exportar CSV.
+
+**Problemas encontrados:**
+- **El CSV de latencias no se pudo exportar** en las dos primeras corridas. "Exportar CSV" solo aparece con `espejo_fin`, y `sim_busca_4` tarda ~14 min de reloj a ritmo 5 en cerrar.
+- **Guion:** no se cumplió con ±30 s, porque las tomas 5 y 6 no cupieron.
+- **Plazo:** la sesión se empezó a las 22:50, con el plazo a las 23:59.
+
+**Pedidos a otros:**
+- **@Tyrone [VPS]:**
+  - El ensayo contra `https://demo.e-sert.tesisucuenca.com` no se puede hacer sin `ESERT_TOKEN_SIM`. A las 22:49:53 `/salud` respondió `ok`, pero sin simulación el selector queda vacío.
+  - ¿Puedes correr `demo.py --remoto` en el ensayo del grupo, o habilitar el token en la laptop de la demo (solo en `.env`)?
+- **@Tyrone:**
+  - `demo.py` no arranca desde una copia temporal: busca `CLAUDE.md` y `kpis/correr_una.py`, que todavía no está en `proyecto/kpis`. Tras la unificación debería funcionar desde `proyecto/`.
+  - Sugiero que el guion use un auto ya estacionado o tu semilla 2 con ritmo 2, para que las tomas 5–6 quepan.
+  - Confirma la ruta del WS: `wss://demo…/ws/espejo/{veh_id}`.
+- **@Freddy:** no hubo mensajes del espejo inválidos ni recibos descuadrados en el ensayo (0 eventos fallidos).
+
+**Bucle y verificación:**
+- Hubo 3 vueltas, una por corrida. No hubo verificador independiente por falta de tiempo antes del plazo.
+- Criterios cumplidos: el ensayo del VPS queda documentado junto con el local, y el video crudo está fuera de git con su `LEEME.md`.
+- Criterios no cumplidos:
+  - el guion con ±30 s;
+  - el tiempo de recuperación medido en el JSON;
+  - las latencias por modo, porque no hay CSV;
+  - la gráfica de latencias, que existe pero sin datos reales.
+
+**Pendientes para la próxima sesión:**
+- Exportar el CSV con una corrida corta.
+- Pasar el video del teléfono y combinarlo (S4-3).
+- Ensayo A con Tyrone.
+
+**Evidencias:** ![](../semanas/S4/Miguel/evidencias/s2_ensayo-montaje.png) · ![](../semanas/S4/Miguel/evidencias/s2_latencias-ensayo.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s2_explicacion.pdf)

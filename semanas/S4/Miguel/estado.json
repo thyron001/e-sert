@@ -12,11 +12,35 @@
         "explicaciones/s1_explicacion.pdf"
       ],
       "explicacion": "explicaciones/s1_explicacion.pdf",
-      "criterios": {"cumplidos": 5, "total": 6},
+      "criterios": {
+        "cumplidos": 5,
+        "total": 6
+      },
       "pendientes": [
         "Repetir la columna iPhone del checklist con un iPhone físico (el simulador no permite tocar).",
         "Freddy: hora de llegada vacía en algunos recibos del espejo.",
         "Tyrone: fusionar miguel/s3 y miguel/s4 en proyecto/app."
+      ]
+    },
+    "sesion-2": {
+      "estado": "parcial",
+      "fecha": "2026-11-14",
+      "resumen": "Guion cronometrado (6:45), checklist previa y ensayo local con sumo-gui, visor y el teléfono espejo (reconexión tras modo avión). Ensayo contra el VPS bloqueado sin ESERT_TOKEN_SIM; video del teléfono y ±30 s del guion pendientes.",
+      "evidencias": [
+        "evidencias/s2_ensayo-montaje.png",
+        "evidencias/s2_latencias-ensayo.png",
+        "explicaciones/s2_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s2_explicacion.pdf",
+      "criterios": {
+        "cumplidos": 2,
+        "total": 6
+      },
+      "pendientes": [
+        "Ensayo A contra el VPS con el token de Tyrone.",
+        "Ajustar el guion a ±30 s eligiendo un auto ya estacionado.",
+        "Pasar el video del teléfono y combinarlo con ffmpeg (S4-3).",
+        "CSV de latencias del ensayo si no se pudo exportar."
       ]
     }
   }
