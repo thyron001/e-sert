@@ -45,7 +45,7 @@ La app quedó lista para la demo final:
   - Las cifras llevan su fuente.
 - **Video del plan B:** 3 min 40 s, 1080p, 16,3 MB, con subtítulos en español, armado con la corrida 4 del ensayo.
   - Está fuera de git; `codigo/app/plan_b/ENLACE_VIDEO.md` trae su SHA-256.
-  - Falta subirlo a la carpeta del grupo.
+  - Está subido a [Google Drive](https://drive.google.com/file/d/1ufErqkQ4MXsW4aW3cylTH1iSYx_nXHb8/view?usp=sharing).
 - **Plazo:** se entregó después de las 23:59 del sábado, pero antes de la unificación.
 
 ![Fotogramas del video del plan B](evidencias/s3_plan-b-fotogramas.png)
