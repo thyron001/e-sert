@@ -1,0 +1,40 @@
+{
+  "version": "v1",
+  "features": [
+    "vel_media", "vel_mediana", "vel_p10", "vel_p85", "vel_max", "vel_std",
+    "acc_media_abs", "acc_std", "jerk_medio_abs",
+    "tasa_rumbo_media", "prop_giros_30",
+    "prop_detenido", "prop_lento",
+    "rectitud", "distancia_total",
+    "precision_media", "n_paradas_arranques", "desplazamiento_neto"
+  ],
+  "clases": ["a_pie", "quieto", "vehiculo"],
+  "hiperparametros": {
+    "n_estimators": 200,
+    "min_samples_leaf": 3,
+    "max_features": "sqrt",
+    "max_depth": 20,
+    "class_weight": "balanced"
+  },
+  "sklearn_version": "1.9.1",
+  "joblib_sha256": "6b35cb949701189d56dcc7ded8a2e4bd377996f0b08fec38ab622f6028e14cc1",
+  "fecha": "2026-10-27T22:45:53.651497+00:00",
+  "hash_datos": "f93b0e1423f2d9c5",
+  "n_ventanas_entrenamiento": 1650500,
+  "metricas_cv": {
+    "rf_v1_macro_f1": 0.9259,
+    "rf_v1_macro_f1_std": 0.0219,
+    "umbral_macro_f1": 0.7265,
+    "umbral_macro_f1_std": 0.0746
+  },
+  "metricas_generalizacion": {
+    "geolife_prueba_macro_f1": 0.8743,
+    "sumo_normal_macro_f1": 0.6395,
+    "sumo_peaton_rapido_macro_f1": 0.6665,
+    "sumo_trafico_lento_macro_f1": 0.3327
+  },
+  "suavizado": {
+    "metodo": "histeresis",
+    "k": 1
+  }
+}

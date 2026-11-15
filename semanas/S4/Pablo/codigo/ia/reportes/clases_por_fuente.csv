@@ -1,0 +1,6 @@
+fuente,uso,a_pie,quieto,vehiculo,total
+Entrenamiento (GeoLife + SUMO simulado + aumento),entrenamiento,519418,160951,970131,1650500
+"GeoLife, 10 usuarios no vistos",prueba,98112,28386,168081,294579
+SUMO normal (σ = 5 m),prueba,85540,41400,126445,253385
+SUMO tráfico lento (σ = 5 m),prueba,0,2837,89564,92401
+SUMO peatón rápido (σ = 5 m),prueba,7831,251,0,8082
