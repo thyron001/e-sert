@@ -1,0 +1,3 @@
+id,penetracion,clasificador,semilla,n_veh,n_busca,busqueda_media_s,busqueda_p90_s,distancia_busqueda_media_m,co2_busqueda_kg,ocupacion_media,falsas_lib_100,retardo_cierre_mediana_s,error_fact_medio_usd,precision_mapa,teleports,duracion_real_s
+p00_umbral_s1,0,umbral,1,5222,48,118.45833333333333,216.00000000000009,458.7052083333333,78.68894775,0.7964764288020665,,,,0.8388524590163934,0,24.8
+p50_rf_s1,50,rf,1,5222,52,117.36538461538461,191.0,453.91365384615386,79.44331949999999,0.796718598643849,,,,0.8377049180327869,0,35.0

@@ -1,0 +1,14 @@
+# Calles con estacionamiento tarifado SERT. Miguel verifica la lista contra la ordenanza (S1-3).
+incluir_tipos: [highway.residential, highway.tertiary, highway.secondary, highway.unclassified]
+# Los nombres se comparan sin tildes, sin mayúsculas y sin el prefijo "Avenida"/"Av.":
+# "Avenida Gaspar Sangurima" coincide con "Gaspar Sangurima" (así aparece en OSM).
+excluir_nombres: ["Avenida Huayna Cápac", "Avenida Gaspar Sangurima"]   # avenidas sin parqueo en vía
+incluir_nombres: []          # si no está vacía, SOLO estas calles
+excluir_sin_nombre: true     # los edges sin nombre en OSM no tienen puestos
+# Solo puestos con ambos extremos dentro de esta caja (la bbox de la red, S1-1): la red se
+# extiende más allá porque netconvert conserva completas las vías que la cruzan. null = sin recorte.
+bbox_s_w_n_e: [-2.9050, -79.0130, -2.8895, -78.9945]
+lado: derecho                # derecho | ambos (solo en calles anchas de doble sentido)
+largo_puesto_m: 5.5
+margen_esquina_m: 8.0        # sin parqueo cerca de las intersecciones
+largo_minimo_tramo_m: 12.0   # tramos más cortos no tienen puestos

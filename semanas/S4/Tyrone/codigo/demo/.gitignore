@@ -1,0 +1,4 @@
+logs/
+demo.db*
+.venv/
+plan_b/snapshots_demo.jsonl

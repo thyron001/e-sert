@@ -1,0 +1,51 @@
+{
+ "mensajes": {
+  "snapshot": 1018,
+  "verdad": 1018,
+  "kpi": 104
+ },
+ "snapshots_validos": 1018,
+ "snapshots_invalidos": 0,
+ "mas_de_1_por_s_sim": 0,
+ "cerradas_en_snapshot": [
+  "sim_busca_18"
+ ],
+ "recibos": [
+  {
+   "veh": "sim_busca_18",
+   "saldo_antes": 14.1,
+   "cobrado_usd": 0.13,
+   "saldo_despues": 13.97,
+   "minutos_cobrados": 15,
+   "cumple": true
+  }
+ ],
+ "errores": [],
+ "t_sim_ultimo": 1047.0,
+ "arranque_s": 7.8,
+ "seguidos_por_espejo": 38,
+ "puestos_api": 610,
+ "puestos_csv": 610,
+ "apagado_s": 1.5,
+ "puertos_libres": {
+  "8000": true,
+  "8088": true
+ },
+ "contenedor_tras_apagar": {
+  "sumo": [],
+  "controlador": []
+ },
+ "criterios": {
+  "snapshots_100_validos": true,
+  "max_1_snapshot_por_s_sim": true,
+  "puestos_api_igual_csv": true,
+  "sesion_cerrada": true,
+  "billetera_cuadra": true,
+  "puertos_libres": true,
+  "sin_procesos_en_contenedor": true
+ },
+ "ok": true,
+ "fecha": "2026-11-13T21:08:34-0500",
+ "segundos": 120,
+ "ritmo": 30
+}

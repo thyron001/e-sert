@@ -1,0 +1,17 @@
+{
+ "fuente": "kpis/resultados/final/<id>/kpis.json (corrida final S4-2, penetración 0, media entre semillas)",
+ "semillas": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "base": {
+  "busqueda_media_s": 432.6517,
+  "falsas_liberaciones_100": null,
+  "ocupacion": 0.8743,
+  "co2_busqueda_kg_h": 779.0018,
+  "distancia_busqueda_media_m": 1456.1406
+ }
+}

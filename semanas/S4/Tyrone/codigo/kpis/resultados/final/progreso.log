@@ -1,0 +1,22 @@
+2026-11-13T23:18Z inicio: 40 corridas, 21 reutilizadas de S3-1, 19 pendientes, 4 procesos
+2026-11-13T23:45Z fin p20_umbral_s4 1586 s
+2026-11-13T23:46Z fin p20_rf_s4 1664 s
+2026-11-13T23:46Z fin p00_umbral_s4 1677 s
+2026-11-13T23:48Z fin p50_umbral_s4 1745 s
+2026-11-14T00:11Z fin p00_umbral_s5 1423 s
+2026-11-14T00:12Z fin p80_umbral_s4 1549 s
+2026-11-14T00:13Z fin p50_rf_s4 1683 s
+2026-11-14T00:16Z fin p80_rf_s4 1766 s
+2026-11-14T00:36Z fin p20_umbral_s5 1510 s
+2026-11-14T00:39Z fin p20_rf_s5 1602 s
+2026-11-14T00:41Z fin p50_umbral_s5 1667 s
+2026-11-14T00:47Z fin p50_rf_s5 1855 s
+2026-11-14T00:55Z error p50_rf_s2_oraculo intento 1 {'id': 'p50_rf_s2_oraculo', 'ok': False, 's': 463.25002789497375, 'codigo': 0}
+2026-11-14T01:04Z fin p80_umbral_s5 1661 s
+2026-11-14T01:04Z fin p50_rf_s1_oraculo 1412 s
+2026-11-14T01:10Z fin p80_rf_s5 1871 s
+2026-11-14T01:20Z fin p50_rf_s3_oraculo 1533 s
+2026-11-14T01:24Z fin p50_rf_s4_oraculo 1206 s
+2026-11-14T01:25Z fin p50_rf_s5_oraculo 1225 s
+2026-11-14T01:35Z fin p50_rf_s2_oraculo 639 s
+2026-11-14T01:35Z listo 40/40 en 8213 s
