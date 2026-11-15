@@ -1,4 +1,8 @@
-# Contrato de interfaces (v1.2, 2026-11-08, unificación de S3)
+# Contrato de interfaces (v1.3 final, 2026-11-15, unificación de S4)
+
+> **v1.3 (2026-11-15, versión final):** aplica la propuesta editorial de Freddy de S4 (ver "Cambios
+> en v1.3" al final). La tabla §4.3 se alinea con lo ya aprobado en v1.2 (`Salud.ts`). No cambia el
+> código: `X-Contrato-Version` y `Salud.contrato` siguen valiendo `1`.
 
 > **v1.2 (2026-11-08):** aplica la propuesta aditiva de Freddy de S3 (ver "Cambios en v1.2" al
 > final). Ningún cambio rompe a los clientes de v1.1: `X-Contrato-Version` y `Salud.contrato`
@@ -176,7 +180,7 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 
 | Método y ruta | Cuerpo / parámetros | Respuesta | Modelo (`esquemas.py`) |
 |---|---|---|---|
-| `GET /salud` | — (responde también en la raíz, `/salud`, para el healthcheck de Dokploy) | `{ok, contrato: 1, t_sim}` | `Salud` |
+| `GET /salud` | — (responde también en la raíz, `/salud`, para el healthcheck de Dokploy) | `{ok, contrato: 1, t_sim, ts?}` | `Salud` |
 | `GET /tarifa` | — | El contenido de `tarifa.json` | `Tarifa` |
 | `GET /puestos` | — | `[{puesto_id, lat, lon, calle, capacidad, ocupados}]` | `Puesto` |
 | `GET /guia` | `?lat=&lon=&destino_lat=&destino_lon=` | `{puesto_id, lat, lon, distancia_m}` o `404 SIN_PUESTOS_LIBRES`. Se elige el puesto con plazas libres más cercano al **destino**; `distancia_m` es la distancia haversine del puesto al destino. | `ConsultaGuia` → `Guia` |
@@ -482,3 +486,14 @@ Aditivos; `X-Contrato-Version` y `Salud.contrato` siguen en `1`. Ya están imple
 6. **§7 (S3-3):** códigos de cierre `4404`/`1000`, ritmo de 1 Hz con latido de 2 s, recibo una vez
    por sesión y conexión (60 s para reconexiones), `Cache-Control: no-store` en candidatos.
 7. **§4.3 (S3-3):** `Salud.ts` opcional (hora del servidor con ms), a pedido de Miguel.
+
+## Cambios en v1.3 (propuesta de Freddy, S4-2; aplicada en la unificación de S4)
+
+Editorial; no cambia el código ni el header (`X-Contrato-Version` y `Salud.contrato` siguen en `1`).
+
+1. **§4.3:** la fila de `GET /salud` lista `ts?`, el campo opcional aprobado en v1.2 (punto 7 de
+   "Cambios en v1.2"), que la tabla no recogía.
+2. **Verificación automática:** `python comun/docs/verificar_contrato_api.py` compara método, ruta,
+   🔒, código de éxito, modelos y campos de cada fila de §4.3 con `app.openapi()`. Con esta
+   propuesta aplicada sale con código 0. Se sugiere correrlo en cada unificación.
+
