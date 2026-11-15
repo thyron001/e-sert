@@ -1,0 +1,6 @@
+# MOCK del modo espejo (servidor)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+# Pruebas
+pytest>=8
+httpx>=0.27

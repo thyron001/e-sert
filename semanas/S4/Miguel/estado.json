@@ -1,0 +1,23 @@
+{
+  "persona": "Miguel",
+  "semana": "S4",
+  "sesiones": {
+    "sesion-1": {
+      "estado": "parcial",
+      "fecha": "2026-11-14",
+      "resumen": "App pulida para la demo: errores del contrato traducidos con acción, Ajustes de demo ocultos (VPS/local, latencias), ESLint y MANUAL.md. QA de 19 casos en Android contra el backend local y la simulación de Freddy (18 pasan, 1 con observación); iPhone solo en el simulador de iOS.",
+      "evidencias": [
+        "evidencias/s1_app-pantallas.png",
+        "evidencias/s1_ios-simulador.png",
+        "explicaciones/s1_explicacion.pdf"
+      ],
+      "explicacion": "explicaciones/s1_explicacion.pdf",
+      "criterios": {"cumplidos": 5, "total": 6},
+      "pendientes": [
+        "Repetir la columna iPhone del checklist con un iPhone físico (el simulador no permite tocar).",
+        "Freddy: hora de llegada vacía en algunos recibos del espejo.",
+        "Tyrone: fusionar miguel/s3 y miguel/s4 en proyecto/app."
+      ]
+    }
+  }
+}

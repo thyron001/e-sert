@@ -723,3 +723,78 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - Validar las notificaciones y el regreso de Payphone con una APK propia.
 
 **Evidencias:** ![](../semanas/S3/Miguel/evidencias/s3_entrada-natural.png) · [Explicación (PDF)](../semanas/S3/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S3 (PDF)](../semanas/S3/Miguel/evidencias/resumen_S3_Miguel.pdf)
+
+## S4 · Sesión 1 · 2026-11-14 · Pulido final de la app y manual de usuario
+**Estado:** parcial (5/6: el checklist en iPhone solo se pudo hacer en el simulador de iOS)
+
+**Qué hice:**
+- **Errores traducidos** (`src/errores.ts`, `src/ui/AvisoError.tsx`):
+  - cada código del contrato y `SIN_CONEXION`/`TIEMPO_AGOTADO` tiene un mensaje en español y una acción (Recargar, Buscar otro puesto, Reintentar, Revisar conexión o Volver al inicio);
+  - lo desconocido da un mensaje genérico y el detalle va a `console.warn`;
+  - `AvisoError` está en el mapa, buscar, confirmar, la billetera, la recarga y el espejo.
+- **Ajustes de demo ocultos** (`app/demo.tsx`, `src/config/demo.ts`; pulsación larga de 3 s en el logo):
+  - botón VPS, IP local (puerto 8000, como `demo.py --local`) y URL libre;
+  - se guardan en AsyncStorage, sin reinstalar;
+  - "Probar conexión" mide `/salud`, candidatos y el WS del espejo.
+- **Pulido:**
+  - montos y decimales con coma (`$0,50`, "0,6 min");
+  - hora de Ecuador;
+  - botones de 44 pt con accesibilidad;
+  - hooks `usar*` renombrados a `use*`;
+  - `npx expo install --fix` (SDK 58, expo-doctor 20/20);
+  - **ESLint** configurado (`eslint.config.js`): 0 errores; 3 reglas del React Compiler quedan como avisos, con su justificación.
+- **QA de 19 casos** en el Android, contra el backend local (`proyecto/backend`, Payphone mock, base nueva) y la simulación de Freddy (`correr_guiado --escenario app50_s1`) en `van3twin`, por Tailscale. En el simulador de iOS se recorrieron las pantallas por enlaces profundos.
+- **Entregables:** `CHECKLIST_QA.md` completo, `MANUAL.md` con 8 capturas, el montaje `s1_app-pantallas.png` y `s1_ios-simulador.png`.
+
+**Archivos creados o modificados:**
+- `semanas/S4/Miguel/codigo/app/`:
+  - `src/errores.ts`, `src/ui/AvisoError.tsx`, `src/config/demo.ts`, `app/demo.tsx`, `src/componentes/LogoESert.tsx`;
+  - `src/sesion/placa.ts`, `app/sesion/confirmar.tsx`, `app/recarga.tsx`, `src/pantallas/Recibo.tsx`, `src/espejo/componentes/CostoVivo.tsx`;
+  - `eslint.config.js`;
+  - `CHECKLIST_QA.md`, `MANUAL.md`, `capturas/`;
+  - `__tests__/errores.test.ts`, `__tests__/placa.test.ts`.
+- `semanas/S4/Miguel/codigo/backend/asistente/`, `backend/pagos/` y `datos/`: copias, sin cambios.
+- `semanas/S4/Miguel/evidencias/` y `explicaciones/`.
+
+**Decisiones y por qué:**
+- **Desvío en la copia de la semana:** la app se copió de `origin/miguel/s3`, no de `proyecto/app`. La unificación de S3 se hizo sin mi rama, así que `proyecto/app` no tiene S2-3 ni S3. El asistente también sale de `miguel/s3`; `datos/` y `backend/pagos/` salen de `proyecto/`.
+- **Puesto validado en el cliente** con el mismo patrón del backend (`^pa_.+_\d+$`): así se da una ayuda concreta en lugar de "dato no válido".
+- **Saldo negativo del caso 13:** se creó con una sesión de prueba de 20 h abierta y cerrada por la API **local**. El VPS no se tocó.
+- **iPhone:** el grupo no tenía un iPhone físico disponible; se usó el simulador. `simctl` no permite tocar, así que esos casos quedan "n/a" y el criterio queda parcial, sin maquillarlo.
+
+**Problemas encontrados:**
+- **Caso 19:**
+  - `pa_no_existe` no llega a `PUESTO_NO_EXISTE`: el backend lo rechaza antes como `VALIDACION`, sin botón;
+  - corregido con la validación en el cliente;
+  - `pa_no_existe_999` sí da "Ese puesto no existe" + "Buscar otro puesto".
+- **Caso 4:** la recarga sin conexión mostraba el texto sin botón. Corregido: ahora usa `AvisoError`.
+- **Decimales con punto** en el recibo y en el espejo. Corregido.
+- **Caso 11 (`espejo_fin`):**
+  - con la corrida normal, todos los autos cierran sesión antes del final y el teléfono salta al recibo;
+  - se mostró con una corrida corta (`--ritmo 1 --hasta 180`);
+  - es el comportamiento correcto.
+- **Grabador:** no pide el permiso porque ya lo tenía Expo Go. Para probar el caso 1 hubo que quitarlo desde los Ajustes de Android.
+
+**Pedidos a otros:**
+- **@Freddy:**
+  - En QA, el recibo del espejo de `sim_busca_4` llegó sin la hora de llegada ("Llegada: —"); el de `sim_busca_7` sí la trae. Revisa que `recibo_sesion` / `GET /sesiones/{id}` incluya siempre `ts_llegada`.
+  - Siguen abiertos los pedidos de S3: montar el router del asistente y `/pagos/*` en el contrato.
+  - Sin otras fallas del backend: 7201 eventos enviados con 0 fallidos y el WS reconecta bien.
+- **@Tyrone:**
+  - Confirma para la demo que la app espera `WS /ws/espejo/{veh_id}` en el mismo origen que la API: `wss://demo.e-sert.tesisucuenca.com/ws/espejo/…` en el VPS y `ws://<ip>:8000/ws/espejo/…` con `demo.py --local`.
+  - `[Plan]` Fusionar `miguel/s3` y `miguel/s4` en `proyecto/app`.
+
+**Bucle y verificación:**
+- Hubo 4 vueltas:
+  1. Errores, Ajustes de demo y pulido.
+  2. ESLint y `expo install --fix`.
+  3. QA en el teléfono, con 3 correcciones.
+  4. Checklist, manual y montaje.
+- El verificador independiente reportó 6/6 criterios con evidencia (`tsc` sin errores, Jest 254/254, las 8 capturas enlazadas, el montaje de 1510×1734). Su salvedad es que la columna iPhone viene del simulador. Por eso la sesión queda **parcial 5/6**.
+
+**Pendientes para la próxima sesión:**
+- Repetir los casos con toques en un iPhone físico.
+- Repetir el caso 6 (saldo bajo).
+- Preparar el guion de la demo con una corrida corta para mostrar `espejo_fin`.
+
+**Evidencias:** ![](../semanas/S4/Miguel/evidencias/s1_app-pantallas.png) · ![](../semanas/S4/Miguel/evidencias/s1_ios-simulador.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s1_explicacion.pdf)
