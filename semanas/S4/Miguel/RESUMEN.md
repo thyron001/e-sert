@@ -37,3 +37,17 @@ La app quedó lista para la demo final:
 ![Latencias del ensayo](evidencias/s2_latencias-ensayo.png)
 
 [Explicación (PDF)](explicaciones/s2_explicacion.pdf) · [Guion](codigo/app/ensayo/guion_demo.md) · [Registro](codigo/app/ensayo/registro_ensayo.md)
+
+## Sesión 3 · Sección de la app en el informe y plan B de la demo en video (parcial)
+
+- **Informe:** `codigo/informe/miguel.md`, de unas 2 000 palabras.
+  - Cubre el diseño y el flujo de pantallas, el modo espejo, el cierre automático, la billetera y Payphone, las reglas SERT verificadas, el Grabador y el ensayo.
+  - Las cifras llevan su fuente.
+- **Video del plan B:** 3 min 40 s, 1080p, 16,3 MB, con subtítulos en español, armado con la corrida 4 del ensayo.
+  - Está fuera de git; `codigo/app/plan_b/ENLACE_VIDEO.md` trae su SHA-256.
+  - Falta subirlo a la carpeta del grupo.
+- **Plazo:** se entregó después de las 23:59 del sábado, pero antes de la unificación.
+
+![Fotogramas del video del plan B](evidencias/s3_plan-b-fotogramas.png)
+
+[Explicación (PDF)](explicaciones/s3_explicacion.pdf) · [Sección del informe](codigo/informe/miguel.md) · [Guion del video](codigo/app/plan_b/guion_video.md) · [Resumen de S4 (PDF)](evidencias/resumen_S4_Miguel.pdf)

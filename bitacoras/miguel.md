@@ -867,3 +867,65 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - Ensayo A con Tyrone.
 
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s2_ensayo-montaje.png) · ![](../semanas/S4/Miguel/evidencias/s2_latencias-ensayo.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s2_explicacion.pdf)
+
+## S4 · Sesión 3 · 2026-11-15 · Sección de la app en el informe y plan B de la demo en video
+**Estado:** parcial (3/5)
+
+**Qué hice:**
+- **`informe/miguel.md`** (unas 2 000 palabras, con la guía de estilo de Pablo):
+  - diseño de la app (diagrama Mermaid y capturas);
+  - modo espejo: candidatos, WS, reconexión de 1 a 30 s, notificaciones locales y segundo plano en iOS;
+  - sesión y cierre automático;
+  - billetera y Payphone en modo de prueba (credenciales solo en `.env`; los autos `sim_` nunca llaman a Payphone);
+  - reglas SERT verificadas (Art. 36 de la ordenanza, máximo de 2 h);
+  - el Grabador, con los minutos por clase de las grabaciones caseras;
+  - el ensayo de la demo, con latencias, reconexiones y recibos, y usabilidad y limitaciones.
+  - Cada cifra con `<!-- fuente -->`. Figuras en `informe/figuras/miguel/`, generadas por `generar_figuras.py`.
+- **Video del plan B** (`plan_b/crudo/e-sert_demo_plan_b.mp4`, fuera de git):
+  - 3 min 40 s, 1920×1080 H.264, 16,3 MB, subtítulos en español (`video_plan_b.srt` y pista `mov_text`);
+  - editado de la corrida 4 de S4-2, con la laptop y el teléfono lado a lado;
+  - 6 tomas según `plan_b/guion_video.md`;
+  - SHA-256 en `ENLACE_VIDEO.md`.
+- **Fotogramas:** `plan_b/fotogramas/toma_1..6.png` y la evidencia `s3_plan-b-fotogramas.png`.
+
+**Archivos creados o modificados:**
+- `semanas/S4/Miguel/codigo/informe/` (`miguel.md` y `figuras/miguel/`).
+- `semanas/S4/Miguel/codigo/app/plan_b/`: `guion_video.md`, `ENLACE_VIDEO.md`, `video_plan_b.srt`, `tarjeta.py` y `fotogramas/`.
+- `semanas/S4/Miguel/evidencias/s3_plan-b-fotogramas.png` y `evidencias/resumen_S4_Miguel.pdf`.
+- `semanas/S4/Miguel/explicaciones/s3_*`.
+
+**Decisiones y por qué:**
+- **Corrida usada:** la 4 del ensayo, porque es la única con un ciclo completo (Guiado → Estacionado → recibo) y con A pie (`sim_busca_4`). No se regrabó con `demo.py`.
+- **Recibo congelado 22 s:** en la grabación dura 4 s.
+- **Tarjetas y subtítulos:** las tarjetas se hicieron con Pillow y los subtítulos como pista de texto, porque el `ffmpeg` de Homebrew no tiene `drawtext` ni `libass`.
+- **Lo que el video no muestra se dice** en el guion y en el informe, en lugar de fingirlo.
+
+**Problemas encontrados:**
+- **El visor del ensayo marcó "Puestos llenos 0/610" y "Ocupación 0,0 %"** todo el tiempo, incluso con autos estacionados. La toma 4 no puede mostrar el puesto en rojo.
+- **Los KPIs del visor aparecían como "—".**
+- **Se ve la terminal de la laptop** en las tomas 2 y 3 del video.
+- **No pude subir el video** a la carpeta del grupo: no tengo acceso desde la sesión.
+- **Plazo:** la sesión empezó a las 23:58 del sábado y los commits son posteriores a las 23:59.
+
+**Pedidos a otros:**
+- **@Tyrone:** video del plan B en `plan_b/crudo/e-sert_demo_plan_b.mp4`, en la laptop de Miguel (3:40, SHA-256 en `ENLACE_VIDEO.md`). Miguel lo sube a la carpeta del grupo y te pasa el enlace; cópialo en tu laptop y en un USB.
+- **@Tyrone / @Freddy:** en el ensayo local (`correr_guiado --gui` + `proyecto/visor` con `?ws=ws://127.0.0.1:8000/ws/estado`), el visor nunca marcó puestos llenos ni KPIs. Revisen si `ws/estado` envía la ocupación de los puestos con `correr_guiado`, o si solo la envía `demo.py`.
+- **@Pablo:** mi sección está en `semanas/S4/Miguel/codigo/informe/miguel.md` (rama `miguel/s4`, commit de esta sesión), con sus figuras en `informe/figuras/miguel/`.
+
+**Bucle y verificación:**
+- Hubo 3 vueltas:
+  1. Edición del video.
+  2. Corrección de los fotogramas y de los subtítulos, porque el recibo duraba solo 4 s.
+  3. Informe y revisión.
+- No hubo verificador independiente de los criterios por el plazo. Sí hubo un revisor sin contexto (paso 6 del prompt), que contrastó las cifras y el guion con las fuentes y los fotogramas.
+- Criterios cumplidos (3/5): el informe sin TODO ni MOCK y con las figuras enlazadas; ningún video en git; la evidencia y el PDF semanal.
+- Criterios no cumplidos:
+  - el video no está subido ni tiene enlace;
+  - no se entregó antes de las 23:59.
+
+**Pendientes para la próxima sesión:**
+- Subir el video y poner el enlace en `ENLACE_VIDEO.md`.
+- Recortar la terminal de las tomas 2 y 3.
+- Arreglar Exportar CSV en Android.
+
+**Evidencias:** ![](../semanas/S4/Miguel/evidencias/s3_plan-b-fotogramas.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S4 (PDF)](../semanas/S4/Miguel/evidencias/resumen_S4_Miguel.pdf)
