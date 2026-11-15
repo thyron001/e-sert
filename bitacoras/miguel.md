@@ -869,7 +869,7 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s2_ensayo-montaje.png) · ![](../semanas/S4/Miguel/evidencias/s2_latencias-ensayo.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s2_explicacion.pdf)
 
 ## S4 · Sesión 3 · 2026-11-15 · Sección de la app en el informe y plan B de la demo en video
-**Estado:** parcial (3/5)
+**Estado:** parcial (4/5)
 
 **Qué hice:**
 - **`informe/miguel.md`** (unas 2 000 palabras, con la guía de estilo de Pablo):
@@ -904,11 +904,11 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - **El visor del ensayo marcó "Puestos llenos 0/610" y "Ocupación 0,0 %"** todo el tiempo, incluso con autos estacionados. La toma 4 no puede mostrar el puesto en rojo.
 - **Los KPIs del visor aparecían como "—".**
 - **Se ve la terminal de la laptop** en las tomas 2 y 3 del video.
-- **No pude subir el video** a la carpeta del grupo: no tengo acceso desde la sesión.
+- **Carpeta compartida:** el proyecto no define cuál es la carpeta del grupo. Miguel la creó en Google Drive y subió el video (enlace en `ENLACE_VIDEO.md`).
 - **Plazo:** la sesión empezó a las 23:58 del sábado y los commits son posteriores a las 23:59.
 
 **Pedidos a otros:**
-- **@Tyrone:** video del plan B en `plan_b/crudo/e-sert_demo_plan_b.mp4`, en la laptop de Miguel (3:40, SHA-256 en `ENLACE_VIDEO.md`). Miguel lo sube a la carpeta del grupo y te pasa el enlace; cópialo en tu laptop y en un USB.
+- **@Tyrone:** video del plan B (3:40, SHA-256 en `ENLACE_VIDEO.md`) en la carpeta compartida creada por Miguel: https://drive.google.com/file/d/1ufErqkQ4MXsW4aW3cylTH1iSYx_nXHb8/view?usp=sharing. Cópialo en tu laptop y en un USB, y comprueba el SHA-256. `[Plan]` Si el grupo usa otra carpeta oficial, indícala en `docs/DESPLIEGUE.md`.
 - **@Tyrone / @Freddy:** en el ensayo local (`correr_guiado --gui` + `proyecto/visor` con `?ws=ws://127.0.0.1:8000/ws/estado`), el visor nunca marcó puestos llenos ni KPIs. Revisen si `ws/estado` envía la ocupación de los puestos con `correr_guiado`, o si solo la envía `demo.py`.
 - **@Pablo:** mi sección está en `semanas/S4/Miguel/codigo/informe/miguel.md` (rama `miguel/s4`, commit de esta sesión), con sus figuras en `informe/figuras/miguel/`.
 
@@ -918,13 +918,11 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
   2. Corrección de los fotogramas y de los subtítulos, porque el recibo duraba solo 4 s.
   3. Informe y revisión.
 - No hubo verificador independiente de los criterios por el plazo. Sí hubo un revisor sin contexto (paso 6 del prompt), que contrastó las cifras y el guion con las fuentes y los fotogramas.
-- Criterios cumplidos (3/5): el informe sin TODO ni MOCK y con las figuras enlazadas; ningún video en git; la evidencia y el PDF semanal.
+- Criterios cumplidos (4/5): el informe sin TODO ni MOCK y con las figuras enlazadas; el video subido, con enlace y SHA-256; ningún video en git; la evidencia y el PDF semanal.
 - Criterios no cumplidos:
-  - el video no está subido ni tiene enlace;
   - no se entregó antes de las 23:59.
 
 **Pendientes para la próxima sesión:**
-- Subir el video y poner el enlace en `ENLACE_VIDEO.md`.
 - Recortar la terminal de las tomas 2 y 3.
 - Arreglar Exportar CSV en Android.
 

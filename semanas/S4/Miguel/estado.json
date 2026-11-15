@@ -46,7 +46,7 @@
     "sesion-3": {
       "estado": "parcial",
       "fecha": "2026-11-15",
-      "resumen": "Sección de la app en el informe (informe/miguel.md, ~2 000 palabras, cifras con fuente) y video del plan B de 3:40 (1080p, 16,3 MB, subtítulos) editado del ensayo de S4-2, fuera de git con SHA-256. Falta subir el video a la carpeta del grupo; entregado después del plazo de las 23:59.",
+      "resumen": "Sección de la app en el informe (informe/miguel.md, ~2 000 palabras, cifras con fuente) y video del plan B de 3:40 (1080p, 16,3 MB, subtítulos) editado del ensayo de S4-2, fuera de git con SHA-256. Video subido a Google Drive con enlace en ENLACE_VIDEO.md; entregado después del plazo de las 23:59.",
       "evidencias": [
         "evidencias/s3_plan-b-fotogramas.png",
         "explicaciones/s3_explicacion.pdf",
@@ -54,13 +54,13 @@
       ],
       "explicacion": "explicaciones/s3_explicacion.pdf",
       "criterios": {
-        "cumplidos": 3,
+        "cumplidos": 4,
         "total": 5
       },
       "pendientes": [
-        "Subir e-sert_demo_plan_b.mp4 a la carpeta del grupo y poner el enlace en ENLACE_VIDEO.md; copia en la laptop de Tyrone y en USB.",
         "Revisar con Tyrone/Freddy por qué el visor marca 0/610 puestos llenos.",
-        "Arreglar Exportar CSV en Expo Go Android."
+        "Arreglar Exportar CSV en Expo Go Android.",
+        "Copias del video en la laptop de Tyrone y en USB."
       ]
     }
   }

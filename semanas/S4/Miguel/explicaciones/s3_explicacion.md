@@ -5,7 +5,7 @@
 1. Se escribió `informe/miguel.md` (unas 2 000 palabras). Cubre el diseño de la app, el modo espejo, la sesión y el cierre automático, la billetera y Payphone en modo de prueba, las reglas SERT verificadas, el Grabador y el ensayo de la demo con cifras reales.
 2. Cada cifra lleva su fuente (`<!-- fuente: ... -->`), y las figuras se regeneran con `informe/figuras/miguel/generar_figuras.py`.
 3. Se editó el video del plan B (3 min 40 s, 1080p, 16,3 MB, con subtítulos en español) a partir de la corrida 4 del ensayo de S4-2: laptop y teléfono lado a lado.
-4. El video no va en git. `plan_b/ENLACE_VIDEO.md` trae su duración, tamaño y SHA-256; falta subirlo a la carpeta del grupo.
+4. El video no va en git. Está subido a Google Drive, y `plan_b/ENLACE_VIDEO.md` trae el enlace, la duración, el tamaño y el SHA-256.
 5. Un revisor sin contexto comparó las cifras y el guion con las fuentes y los fotogramas.
 
 ## 2. Conceptos clave
@@ -76,7 +76,7 @@ def main(salida: str, titulo: str, sub: str) -> None:
 
 ## 8. Limitaciones y decisiones
 
-- **El video aún no está subido:** Miguel tiene que subirlo a la carpeta del grupo y poner el enlace en `ENLACE_VIDEO.md`.
+- **Carpeta compartida:** el proyecto no definía una carpeta del grupo, así que Miguel creó una en Google Drive y subió ahí el video.
 - **Lo que el video no muestra:**
   - el puesto rojo durante A_PIE: el visor marcó 0/610 llenos;
   - REGRESANDO y SALIENDO: el cierre de `sim_busca_7` es casi inmediato;
