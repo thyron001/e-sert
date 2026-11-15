@@ -33,9 +33,9 @@ El plazo era `2026-11-14T23:59:59-05:00`.
 
 ## Conflictos, archivos revertidos y archivos no copiados
 
-- **Conflictos:** solo `bitacoras/freddy.md`, que se resolvió con la versión de main (ya traía las 3 entradas S4 de la rama). Los demás merges fueron limpios. No hubo conflictos no triviales.
+- **Conflictos:** solo `bitacoras/freddy.md`, que se resolvió con la versión de main (ya traía las 3 entradas S4 de la rama). Con eso se quedó fuera la entrada "S2 · Reverificación de las sesiones 2 y 3 · 2026-11-14" de la rama, coherente con haber revertido S2; se puede recuperar desde `origin/freddy/s4:bitacoras/freddy.md`. Los demás merges fueron limpios. No hubo conflictos no triviales.
 - **Revertidos a `origin/main`** (están fuera de la carpeta S4 de la persona):
-  - Freddy: `semanas/S2/Freddy/RESUMEN.md` y `semanas/S2/Freddy/estado.json`. Es su "Reverificación de S2" del 14-nov, que sube S2-3 de 4/7 a 6/7. Si Tyrone la acepta, puede traerla con `git checkout origin/freddy/s4 -- semanas/S2/Freddy/`.
+  - Freddy: `semanas/S2/Freddy/RESUMEN.md` y `semanas/S2/Freddy/estado.json`. Es su "Reverificación de S2" del 14-nov, que sube S2-3 de 4/7 a 6/7. Si Tyrone la acepta, puede traerla con `git checkout origin/freddy/s4 -- semanas/S2/Freddy/RESUMEN.md semanas/S2/Freddy/estado.json`. No conviene traer toda la carpeta: haría retroceder 4 archivos que main tiene más nuevos.
   - Tyrone: 175 archivos nuevos en `semanas/S3/Tyrone/codigo/`, del commit S3-3 `91691cb`, que viajó dentro de `tyrone/s4`. Se descartaron solo los añadidos; el `codigo/` que ya tenía main se conserva. Ese código ya está en S4, en `proyecto/`.
 - **Respetado:** `roadmap/templates/base.html` de Tyrone, que añade el enlace "Demo en vivo". Es planificación de Tyrone.
 - **Cambios a la planificación descartados:** ninguno. Freddy, Pablo y Miguel no tocaron archivos de planificación ni sus `sesion-*.md`.
@@ -67,14 +67,14 @@ En "Entorno limpio" se instaló solo lo que declaran los `requirements.txt`. En 
 | pytest `kpis/` | ok con entorno completado | Entorno limpio: error de colección (`scipy`). Completado (`scipy`, `statsmodels`, `tabulate`, `jinja2`): 23 passed, 6 skipped |
 | pytest `informe/` | **falla** | 1 failed, 18 passed. `test_genera_pdf_sin_pandoc` falla porque `RAIZ_REPO = AQUI.parents[4]` busca `/herramientas/explicacion_pdf.py` fuera del repo. El módulo no tiene `requirements.txt` (usa `markdown` y `fpdf2`) |
 | `requirements.txt` de `demo/` | falla | `-r ../../../../../proyecto/backend/requirements.txt` solo funciona desde `semanas/S4/Tyrone/codigo/demo/`. Se instaló a mano para seguir |
-| SUMO `centro_base.sumocfg --end 60` | **no verificable** | No hay Docker ni el contenedor `van3twin` en este entorno |
+| SUMO `centro_base.sumocfg --end 60` | **no verificable** | Está el CLI de `docker`, pero no hay daemon ni contenedor `van3twin` en este entorno |
 | `pytest -m e2e` (backend y traci) | **no verificable** | Necesita SUMO |
 | `demo/verificar_demo.py` | **no verificable** | Necesita SUMO |
 | Hash del modelo | **ok** | El SHA-256 de `rf_final.joblib` (`1bdac0d7…fd013e2`) coincide con `rf_final.json` y con `kpis/resultados/final/manifiesto.json` (`sha256_iguales: true`) |
 | Informe: `construir_informe.py --fuentes proyecto` | **parcial** | Con el comando oficial (`proyecto/informe/…`) sale con 0, pero solo genera HTML por el error de `RAIZ_REPO` (y no hay motor LaTeX para pandoc). El PDF se generó ejecutando el script idéntico de Pablo con `--carpeta proyecto/informe`: `proyecto/informe/salida/informe_e-sert.pdf` (8,9 MB, con las 4 secciones). Su carpeta no se modificó |
 | Informe: `verificar_informe.py` | **falla** (exit 1) | 30 marcadores `[PENDIENTE]`: el resumen (3), `80_resultados_integrados.md` (tabla completa), `90_conclusiones.md`, `pablo.md:123` y 8 en `anexos/preguntas_profesor.md`. Son las cifras finales de Tyrone que Pablo no alcanzó a integrar. Además hay avisos de cifras con la misma ruta y distinta clave. Las 4 secciones están presentes |
 | Higiene | **ok** | `git ls-files` no tiene `.env` reales, ni `*.mp4`/`*.mov`, ni archivos de más de 50 MB. La búsqueda de secretos no encontró valores reales (solo tokens falsos de test). Existen `proyecto/demo/README.md` y `proyecto/app/plan_b/ENLACE_VIDEO.md`, este con enlace de Drive |
-| `comun/docs/verificar_contrato_api.py` | **falla** (exit 1) | `POST /api/v1/pagos/preparar` y `GET /api/v1/pagos/{client_transaction_id}` están en la app pero no en la tabla §4.3. Es el pedido de Miguel de S2-2, que sigue abierto |
+| `comun/docs/verificar_contrato_api.py` | **falla** (exit 1) | `POST /api/v1/pagos/preparar` y `GET /api/v1/pagos/{client_transaction_id}` están en la app pero no en la tabla §4.3. Es el pedido de Miguel de S2-2, que sigue abierto. Además, al ejecutarlo se regeneran `comun/docs/openapi.json` (+285 líneas) y `api.md`, así que la copia versionada está desactualizada (se restauró la versionada) |
 
 **Criterios:**
 - **"Las pruebas pasan": NO.** Falla 1 pytest de `informe/`, y en el entorno limpio fallan en colección backend, traci, ia y kpis.
@@ -116,8 +116,8 @@ Freddy no las propuso.
 
 ## Riesgos para la entrega y la exposición del lunes 16
 
-- **`main` no tiene S4.** Si Tyrone acepta el estado actual, basta con
-  `git switch main && git pull && git merge --no-ff origin/unificacion/s4 -m "[S4-U] Versión final de entrega" && git push`.
+- **`main` no tiene S4.** `unificacion/s4` está publicada en origin al cierre de esta ejecución. Si Tyrone acepta el estado actual, basta con
+  `git fetch && git switch main && git pull && git merge --no-ff origin/unificacion/s4 -m "[S4-U] Versión final de entrega" && git push`.
   - El arreglo mínimo del test es cambiar `AQUI.parents[4]` por una búsqueda del directorio que contiene `herramientas/`.
   - Después, `python proyecto/informe/construir_informe.py --fuentes proyecto` debería dar el PDF directamente.
 - **El informe tiene 30 `[PENDIENTE]`** en el resumen, los resultados integrados y las conclusiones, que es lo primero que lee el profesor. Hay que reemplazarlos con `proyecto/kpis/resultados/final/resumen.csv` y volver a armarlo.
