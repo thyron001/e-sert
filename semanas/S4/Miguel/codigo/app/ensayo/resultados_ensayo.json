@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-14T23:47:55",
+  "generado": "2026-11-14T23:56:10",
   "tarifa": {
     "valor_hora_usd": 0.5,
     "fraccion_min": 5,
@@ -20,13 +20,19 @@
     }
   },
   "reconexiones": {
-    "numero": 1,
+    "numero": 2,
     "detalle": [
       {
         "modo": "local",
         "corte": "00:00:52",
         "recuperado": "00:01:18",
         "recuperacion_s": 26.0
+      },
+      {
+        "modo": "local",
+        "corte": "00:00:49",
+        "recuperado": "00:01:10",
+        "recuperacion_s": 21.0
       }
     ],
     "max_recuperacion_s": 26.0
@@ -35,27 +41,51 @@
     "detalle": [
       {
         "toma": 3,
-        "nombre": "Elegir el auto (Sesión → Modo espejo → sim_busca_4 en vivo)",
+        "nombre": "Corrida 4: elegir sim_busca_7",
         "previsto_s": 45,
-        "real_s": 32,
-        "diferencia_s": -13
+        "real_s": 34,
+        "diferencia_s": -11
       },
       {
         "toma": 4,
-        "nombre": "GUIADO (sim_busca_4 hasta el fin de la corrida, sin estacionar)",
+        "nombre": "Corrida 4: GUIADO de sim_busca_7 hasta el puesto",
         "previsto_s": 60,
-        "real_s": 220,
-        "diferencia_s": 160
+        "real_s": 56,
+        "diferencia_s": -4
+      },
+      {
+        "toma": 5,
+        "nombre": "Corrida 4: ESTACIONADO (sim_busca_7 no pasó por A_PIE; A_PIE se vio en sim_busca_4, 02:30–03:22)",
+        "previsto_s": 60,
+        "real_s": 60,
+        "diferencia_s": 0
+      },
+      {
+        "toma": 6,
+        "nombre": "Corrida 4: cierre y recibo de sim_busca_7",
+        "previsto_s": 60,
+        "real_s": 8,
+        "diferencia_s": -52
       }
     ],
-    "total_previsto_s": 105,
-    "total_real_s": 252,
-    "diferencia_s": 147,
+    "total_previsto_s": 225,
+    "total_real_s": 158,
+    "diferencia_s": -67,
     "dentro_de_30s": false
   },
   "recibos": {
-    "detalle": [],
-    "todos_cuadran": null
+    "detalle": [
+      {
+        "veh_id": "sim_busca_7",
+        "minutos_reales": 0.6,
+        "minutos_cobrados": 10,
+        "esperado_usd": 0.08,
+        "debitado_usd": 0.08,
+        "diferencia_usd": 0.0,
+        "cuadra": true
+      }
+    ],
+    "todos_cuadran": true
   },
   "notas": [
     "No hay CSV de latencias en latencias/."

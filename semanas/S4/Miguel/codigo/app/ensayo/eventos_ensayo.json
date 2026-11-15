@@ -1,11 +1,58 @@
 {
-  "fuente": "contador rojo de la grabación de pantalla del teléfono (WhatsApp Video 2026-11-14 at 23.42.08), leído cuadro a cuadro a 1 fps; horas relativas al inicio de la grabación (≈ 23:35:14)",
+  "fuente": "contador rojo de la grabación de pantalla del teléfono (WhatsApp Video 2026-11-14 at 23.42.08), leído cuadro a cuadro a 1 fps; horas relativas al inicio de la grabación (≈ 23:35:14); corrida 4 (23:50, --ritmo 5 --hasta 900): WhatsApp Video 2026-11-14 at 23.54.36, inicio ≈ 23:49:30",
   "reconexiones": [
-    {"modo": "local", "veh_id": "sim_busca_4", "corte": "00:00:52", "detectado": "00:00:57", "red_vuelve": "00:01:14", "recuperado": "00:01:18", "reintentos": 2}
+    {
+      "modo": "local",
+      "veh_id": "sim_busca_4",
+      "corte": "00:00:52",
+      "detectado": "00:00:57",
+      "red_vuelve": "00:01:14",
+      "recuperado": "00:01:18",
+      "reintentos": 2
+    },
+    {
+      "modo": "local",
+      "veh_id": "sim_busca_7",
+      "corrida": 4,
+      "corte": "00:00:49",
+      "detectado": "00:00:54",
+      "red_vuelve": "00:01:07",
+      "recuperado": "00:01:10",
+      "reintentos": 1
+    }
   ],
   "tomas": [
-    {"toma": 3, "nombre": "Elegir el auto (Sesión → Modo espejo → sim_busca_4 en vivo)", "previsto_s": 45, "real_s": 32},
-    {"toma": 4, "nombre": "GUIADO (sim_busca_4 hasta el fin de la corrida, sin estacionar)", "previsto_s": 60, "real_s": 220}
+    {
+      "toma": 3,
+      "nombre": "Corrida 4: elegir sim_busca_7",
+      "previsto_s": 45,
+      "real_s": 34
+    },
+    {
+      "toma": 4,
+      "nombre": "Corrida 4: GUIADO de sim_busca_7 hasta el puesto",
+      "previsto_s": 60,
+      "real_s": 56
+    },
+    {
+      "toma": 5,
+      "nombre": "Corrida 4: ESTACIONADO (sim_busca_7 no pasó por A_PIE; A_PIE se vio en sim_busca_4, 02:30–03:22)",
+      "previsto_s": 60,
+      "real_s": 60
+    },
+    {
+      "toma": 6,
+      "nombre": "Corrida 4: cierre y recibo de sim_busca_7",
+      "previsto_s": 60,
+      "real_s": 8
+    }
   ],
-  "recibos": []
+  "recibos": [
+    {
+      "veh_id": "sim_busca_7",
+      "minutos_reales": 0.6,
+      "debitado": 0.08,
+      "fuente": "evidencias/s2_recibo-ensayo.png"
+    }
+  ]
 }

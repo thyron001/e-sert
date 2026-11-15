@@ -852,6 +852,13 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
   - el guion con ±30 s;
   - las latencias por modo desde el CSV.
 
+**Corrida 4 (23:50, `--ritmo 5 --hasta 900`), leída del video del teléfono:**
+- `sim_busca_7`: Guiado en 56 s (toma 4, previsto 60 s), Estacionado y recibo solo a los 8 s. Pasó directo de Estacionado a Cerrada, sin A pie.
+- Recibo: 0,6 min → 10 min → **$0,08**. Cuadra con `tarifa.json` (diferencia $0,00). Evidencia en `evidencias/s2_recibo-ensayo.png`.
+- Segunda caída provocada: "Reconectando" a los 5 s y "En vivo" 3 s después de volver la red (21 s en total).
+- A_PIE se vio en `sim_busca_4`: el puesto quedó a 59–260 m mientras el auto seguía ocupándolo.
+- Las tomas 3–6 suman 158 s frente a 225 s previstos (−67 s): el guion sigue sin cumplir ±30 s, porque el cierre de `sim_busca_7` es muy corto. Para la demo: seguir a `sim_busca_7` hasta el recibo y luego a `sim_busca_4` para mostrar A pie.
+
 **Pendientes para la próxima sesión:**
 - Exportar el CSV con una corrida corta.
 - Pasar el video del teléfono y combinarlo (S4-3).
