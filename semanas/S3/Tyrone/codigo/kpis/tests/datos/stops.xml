@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Sintético con formato de la opción stop-output de SUMO. -->
-<stops>
-    <stopinfo id="v1" type="DEFAULT_VEHTYPE" lane="eObj_0" pos="50.00" parking="1" parkingArea="pa1" started="15.00" ended="55.00" delay="0.00" initialPersons="0" loadedPersons="0" unloadedPersons="0" initialContainers="0" loadedContainers="0" unloadedContainers="0"/>
-    <stopinfo id="v2" type="DEFAULT_VEHTYPE" lane="e1_0" pos="50.00" parking="1" parkingArea="pa2" started="135.00" ended="-1" delay="0.00" initialPersons="0" loadedPersons="0" unloadedPersons="0" initialContainers="0" loadedContainers="0" unloadedContainers="0"/>
-    <!-- Parada sin parkingArea (p. ej. un bus): leer_stops debe descartarla. -->
-    <stopinfo id="bus1" type="bus" lane="e2_0" pos="20.00" parking="0" started="40.00" ended="70.00" delay="0.00" initialPersons="0" loadedPersons="0" unloadedPersons="0" initialContainers="0" loadedContainers="0" unloadedContainers="0"/>
-</stops>

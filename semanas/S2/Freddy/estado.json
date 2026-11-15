@@ -38,17 +38,11 @@
         "total": 5
       },
       "pendientes": [
-        "Criterio del 95 % en 30 min: inalcanzable con estadías de 10–120 min; propuesta a Tyrone de medir el 95 % sobre los peatones cuya diligencia terminó antes del corte, o un horizonte de 150 min",
-        "Falsas liberaciones: dependen del modelo RF de Pablo (rf_v1.joblib no está en el repo)"
-      ],
-      "reverificacion": {
-        "fecha": "2026-11-14",
-        "codigo": "semanas/S4/Freddy/codigo (commit de S4)",
-        "resultado": "Sigue parcial (4/5). Con el código actual (destinos corregidos) vuelven 10 de 357 peatones en 30 min; ninguno se pierde (liberados_sin_aparecer = 0). El criterio no es alcanzable con la demanda de Tyrone: las estadías duran 10–120 min, así que en 30 min casi nadie puede haber terminado su diligencia. Requiere cambiar la planificación (pedido @Tyrone [Plan]).",
-        "arreglos": [
-          "traci/correr_sesiones.py encuentra demanda/ con los escenarios de sumo/escenarios/"
-        ]
-      }
+        "Más del 95 % de los peatones vuelve en 30 min: los caminos a pie son de más de 1 km; hace falta una corrida más larga o destinos más cercanos (decisión de Tyrone/Freddy, ver bitácora)",
+        "Falsas liberaciones: el clasificador de umbral (RF no está en el repo) confunde el ruido del GPS con movimiento",
+        "El controlador no publica aún los eventos al backend (POST /sim/paso, POST /sesiones/{id}/cerrar)",
+        "Medir la latencia de clasificar (pedido a Pablo) y el verificador independiente"
+      ]
     },
     "sesion-3": {
       "estado": "parcial",
@@ -62,22 +56,17 @@
       ],
       "explicacion": "explicaciones/s3_explicacion.pdf",
       "criterios": {
-        "cumplidos": 6,
+        "cumplidos": 4,
         "total": 7
       },
       "pendientes": [
-        "Búsqueda con app menor que sin app con el mapa del sistema: depende de que el clasificador deje de cerrar sesiones en falso (modelo RF de Pablo); con la ocupación real ya se cumple (10,0 frente a 10,7 min en S2)"
-      ],
-      "reverificacion": {
-        "fecha": "2026-11-14",
-        "codigo": "semanas/S4/Freddy/codigo (commit de S4)",
-        "resultado": "Pasa de 4/7 a 6/7. URL caída: 10,41× frente a 10,32× sin publicar (2 repeticiones; cortacircuitos en Publicador). Retención final 0 y libro cuadrado: las 141 sesiones abiertas al terminar se liquidan con motivo manual (liquidar_al_final). La búsqueda con app sigue sin ser menor: 10,73 frente a 10,67 min de media (mediana 10,02 frente a 10,17), por las falsas liberaciones del clasificador de reserva.",
-        "arreglos": [
-          "traci/puente_nucleo.py: cortacircuitos (listo(), sondas cada 5 s)",
-          "traci/correr_guiado.py: liquidar_al_final, libro_cuadra y --sin-liquidar",
-          "traci/tests/test_reverificacion_s2.py"
-        ]
-      }
+        "La búsqueda con app no es menor que sin app con la ocupación del sistema: el mapa no ve autos sin app ni reservas de autos guiados",
+        "Publicar a una URL caída baja la velocidad de la simulación un 3 % (medido, no es cero)",
+        "Retención final 0: 132 sesiones siguen abiertas al cierre (explicado; el libro cuadra)",
+        "Falsas liberaciones del 65 % con el clasificador de umbral (falta rf_v0.joblib): sesiones de ~35 s que pagan el mínimo de 10 min",
+        "Medir de nuevo los peatones de S2-2 con la codificación de destinos corregida",
+        "Entrega de origin/tyrone/s2 (--porc-app): hoy se usa un mock al 50 %"
+      ]
     }
   }
 }

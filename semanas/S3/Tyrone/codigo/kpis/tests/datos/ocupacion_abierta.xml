@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Estancia que no terminó antes del fin de la simulación (ended=-1) y otra cerrada [0,60). -->
-<stops>
-    <stopinfo id="a" type="DEFAULT_VEHTYPE" lane="e1_0" pos="10.00" parking="1" parkingArea="pa1" started="60.00" ended="-1"/>
-    <stopinfo id="b" type="DEFAULT_VEHTYPE" lane="e1_0" pos="20.00" parking="1" parkingArea="pa2" started="0.00" ended="60.00"/>
-</stops>
