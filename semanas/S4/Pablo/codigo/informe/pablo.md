@@ -120,7 +120,7 @@ Con la máquina de Freddy el RF casi no libera en falso, pero en parte porque no
 
 **Latencia.** En 9 900 llamadas de `clasificar` (tras 100 de calentamiento), la latencia es de 1,35 ms de mediana y 2,12 ms en el percentil 99, por debajo de la meta de 5 ms. El servicio limpia la ventana (duplicados, NaN, precisión peor que `50 m`, saltos de más de `50 m/s`, huecos de hasta `5 s`) y, si faltan datos o el modelo, cae al umbral con un aviso. <!-- fuente: ia/reportes/metricas_rf_final.json -->
 
-**Impacto en el sistema.** Las falsas liberaciones por 100 sesiones y el retardo de cierre de la corrida final con la app (penetraciones de `20, 50 y 80 %`) son de Tyrone: [PENDIENTE: cifra de Tyrone S4-2].
+**Impacto en el sistema.** Las falsas liberaciones por 100 sesiones y el retardo de cierre de la corrida final con la app (penetraciones de `20, 50 y 80 %`) son de Tyrone. Con el umbral hay 88,9, 87,2 y 86,6 falsas liberaciones por 100 sesiones; con `rf_final` hubo 0 en las tres, con cotas de Wilson superiores de 1,31, 0,52 y 0,34. El retardo mediano de cierre con `rf_final` es de 22,7, 18,8 y 18,4 s. <!-- fuente: kpis/resultados/final/resumen.csv -->
 
 ![](figuras/pablo/f08_falsas-por-penetracion.png)
 *Falsas liberaciones por 100 sesiones según la penetración de la app (corrida final).*
