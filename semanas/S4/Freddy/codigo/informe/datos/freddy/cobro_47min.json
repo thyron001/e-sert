@@ -1,0 +1,24 @@
+{
+  "minutos_reales": 47.0,
+  "tarifa": {
+    "valor_hora_usd": 0.5,
+    "bloque_minimo_min": 30,
+    "fraccion_min": 5,
+    "cobro_minimo_min": 10,
+    "saldo_negativo_max_usd": 0.5,
+    "aviso_saldo_min": 10,
+    "tiempo_maximo_min": 120,
+    "aviso_tiempo_min": 10,
+    "recarga_minima_usd": 5.0,
+    "tarjeta_bloque_min": 30
+  },
+  "retencion_usd": 0.25,
+  "minutos_cobrados": 50,
+  "fracciones": 10,
+  "debito_usd": 0.42,
+  "costo_tiempo_exacto_usd": 0.39,
+  "tarjeta_sert_usd": 0.5,
+  "ahorro_usd": 0.08,
+  "saldo_tras_recarga_5_usd": 4.58,
+  "disponible_durante_sesion_usd": 4.75
+}

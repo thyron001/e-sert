@@ -1,0 +1,23 @@
+%% El mismo flujo por dos caminos: el auto simulado usa el núcleo directo; la app usa HTTP
+sequenceDiagram
+  autonumber
+  participant SU as SUMO
+  participant CT as Controlador TraCI
+  participant PN as PuenteNucleo (núcleo en memoria)
+  participant AP as App
+  participant API as API /api/v1
+  participant NB as Núcleo del backend (SQLite)
+  rect rgba(120,120,120,0.08)
+  Note over SU,PN: Auto simulado sim_<veh>: sin HTTP (decisión "núcleo sin HTTP")
+  SU-->>CT: getParkingStartingVehiclesIDList()
+  CT->>PN: registrar(sim_veh) → recarga U(5, 20) USD
+  CT->>PN: iniciar(sim_veh, puesto, t_sim)
+  CT->>PN: transicion / cerrar (MaquinaSesion)
+  CT->>API: POST /interno/snapshot 🔒 (1 Hz, solo para mostrar)
+  end
+  rect rgba(120,120,120,0.08)
+  Note over AP,NB: Usuario de la app app_<uuid>: todo por HTTP
+  AP->>API: POST /billetera/{id}/recarga o Payphone
+  AP->>API: GET /guia → POST /sesiones
+  API->>NB: mismas clases: Billetera, ServicioSesiones, MapaOcupacion
+  end

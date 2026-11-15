@@ -1,0 +1,14 @@
+[
+  {
+    "id": "sim_veh42",
+    "destino_nombre": "Parque Calderón",
+    "estado": "BUSCANDO",
+    "t_sim": 1234.0
+  },
+  {
+    "id": "sim_veh57",
+    "destino_nombre": "Mercado 10 de Agosto",
+    "estado": null,
+    "t_sim": 1234.0
+  }
+]

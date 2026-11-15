@@ -1,0 +1,8 @@
+[    2.60]  Retrying in 1 seconds
+[    2.62] ***Starting server on port 53303 ***
+[    3.92] Loading net-file from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.net.xml' ... done (319ms).
+[    4.12] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.poly.xml' ... done (142ms).
+[    4.13] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../parqueos/parqueos.add.xml' ... done (7ms).
+[    4.40] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../demanda/rerouters.add.xml' ... done (274ms).
+[    4.77] Loading done.
+[    4.81] Simulation version 1.12.0 started with time: 0.00

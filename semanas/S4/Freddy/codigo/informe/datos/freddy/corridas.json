@@ -1,0 +1,261 @@
+{
+  "semilla": 1,
+  "hasta_s": 1800,
+  "fecha": "2026-11-13 17:55",
+  "corridas": [
+    {
+      "id": "p00_rf_s1",
+      "penetracion": 0,
+      "hasta_s": 1800,
+      "ms_por_paso": 56.097,
+      "pasos": 1800,
+      "tiempo_real_s": 100.97,
+      "pared_s": 104.1,
+      "clasificador_usado": "umbral",
+      "sesiones_maquina": {
+        "coords_invalidas": 0,
+        "sesiones": 0,
+        "cerradas": 0,
+        "abiertas_al_final": 0,
+        "falsas_liberaciones": 0,
+        "falsas_por_100_sesiones": null,
+        "falsas_con_datos_pobres": 0,
+        "ventanas_retenidas": 0,
+        "telefonos_apagados": 0,
+        "apagados_efectivos": 0,
+        "marcadas_sin_senal": 0,
+        "esperando_tope_al_final": 0,
+        "cierres_timeout_sin_senal": 0,
+        "clasificador": "/home/vanet/results/e-sert/proyecto",
+        "ventanas_por_fuente": {}
+      },
+      "kpis": {
+        "falsas_lib_100": null,
+        "n_sesiones": 0,
+        "n_falsas": 0,
+        "sin_cierre": 0,
+        "retardo_cierre_mediana_s": null,
+        "retardo_cierre_p90_s": null,
+        "error_fact_medio_usd": null,
+        "error_fact_abs_max_usd": null,
+        "ahorro_vs_tarjeta_medio_usd": null,
+        "precision_mapa": 0.7453551912568306,
+        "precision_mapa_app": 1.0,
+        "libres_fantasma_medio": 155.33333333333334,
+        "retardo_cierre_max_s": null,
+        "error_fact_abs_medio_usd": null,
+        "n_cierre_manual": 0,
+        "n_sin_estadia_real": 0,
+        "mae_mapa": 7.978797814207651,
+        "mae_mapa_app": 0.0,
+        "libres_fantasma_app_medio": 0.0,
+        "n_muestras_mapa": 30
+      },
+      "costo_kpis": {
+        "s_en_kpis": 1.534,
+        "s_resto": 99.441,
+        "sobrecosto_pct": 1.54
+      },
+      "derivados": {
+        "cierres_correctos": 0,
+        "sesiones_con_estadia_real": 0,
+        "abiertas_al_final": 0,
+        "ventanas_retenidas_datos_pobres": 0,
+        "puestos": 610,
+        "pct_fantasma_total": 25.5
+      }
+    },
+    {
+      "id": "p20_rf_s1",
+      "penetracion": 20,
+      "hasta_s": 1800,
+      "ms_por_paso": 60.077,
+      "pasos": 1800,
+      "tiempo_real_s": 108.14,
+      "pared_s": 109.7,
+      "clasificador_usado": "umbral",
+      "sesiones_maquina": {
+        "coords_invalidas": 0,
+        "sesiones": 56,
+        "cerradas": 35,
+        "abiertas_al_final": 21,
+        "falsas_liberaciones": 35,
+        "falsas_por_100_sesiones": 62.5,
+        "falsas_con_datos_pobres": 0,
+        "ventanas_retenidas": 0,
+        "telefonos_apagados": 0,
+        "apagados_efectivos": 0,
+        "marcadas_sin_senal": 0,
+        "esperando_tope_al_final": 0,
+        "cierres_timeout_sin_senal": 0,
+        "clasificador": "/home/vanet/results/e-sert/proyecto",
+        "ventanas_por_fuente": {
+          "umbral": 2235
+        }
+      },
+      "kpis": {
+        "falsas_lib_100": 100.0,
+        "n_sesiones": 35,
+        "n_falsas": 35,
+        "sin_cierre": 21,
+        "retardo_cierre_mediana_s": null,
+        "retardo_cierre_p90_s": null,
+        "error_fact_medio_usd": -0.05,
+        "error_fact_abs_max_usd": 0.05,
+        "ahorro_vs_tarjeta_medio_usd": 0.17,
+        "precision_mapa": 0.7431147540983607,
+        "precision_mapa_app": 1.0,
+        "libres_fantasma_medio": 156.7,
+        "retardo_cierre_max_s": null,
+        "error_fact_abs_medio_usd": 0.05,
+        "n_cierre_manual": 0,
+        "n_sin_estadia_real": 34,
+        "mae_mapa": 7.966393442622951,
+        "mae_mapa_app": 0.022349726775956282,
+        "libres_fantasma_app_medio": 0.0,
+        "n_muestras_mapa": 30
+      },
+      "costo_kpis": {
+        "s_en_kpis": 1.586,
+        "s_resto": 106.553,
+        "sobrecosto_pct": 1.49
+      },
+      "derivados": {
+        "cierres_correctos": 0,
+        "sesiones_con_estadia_real": 1,
+        "abiertas_al_final": 21,
+        "ventanas_retenidas_datos_pobres": 0,
+        "puestos": 610,
+        "pct_fantasma_total": 25.7
+      }
+    },
+    {
+      "id": "p50_rf_s1",
+      "penetracion": 50,
+      "hasta_s": 1800,
+      "ms_por_paso": 74.177,
+      "pasos": 1800,
+      "tiempo_real_s": 133.52,
+      "pared_s": 135.9,
+      "clasificador_usado": "umbral",
+      "sesiones_maquina": {
+        "coords_invalidas": 0,
+        "sesiones": 172,
+        "cerradas": 120,
+        "abiertas_al_final": 52,
+        "falsas_liberaciones": 119,
+        "falsas_por_100_sesiones": 69.19,
+        "falsas_con_datos_pobres": 0,
+        "ventanas_retenidas": 0,
+        "telefonos_apagados": 0,
+        "apagados_efectivos": 0,
+        "marcadas_sin_senal": 0,
+        "esperando_tope_al_final": 0,
+        "cierres_timeout_sin_senal": 0,
+        "clasificador": "/home/vanet/results/e-sert/proyecto",
+        "ventanas_por_fuente": {
+          "umbral": 7425
+        }
+      },
+      "kpis": {
+        "falsas_lib_100": 99.17,
+        "n_sesiones": 120,
+        "n_falsas": 119,
+        "sin_cierre": 52,
+        "retardo_cierre_mediana_s": 12.0,
+        "retardo_cierre_p90_s": 12.0,
+        "error_fact_medio_usd": -0.072,
+        "error_fact_abs_max_usd": 0.13,
+        "ahorro_vs_tarjeta_medio_usd": 0.16,
+        "precision_mapa": 0.7463934426229508,
+        "precision_mapa_app": 1.0,
+        "libres_fantasma_medio": 154.7,
+        "retardo_cierre_max_s": 12.0,
+        "error_fact_abs_medio_usd": 0.072,
+        "n_cierre_manual": 0,
+        "n_sin_estadia_real": 115,
+        "mae_mapa": 7.9361202185792346,
+        "mae_mapa_app": 0.07338797814207651,
+        "libres_fantasma_app_medio": 0.0,
+        "n_muestras_mapa": 30
+      },
+      "costo_kpis": {
+        "s_en_kpis": 1.754,
+        "s_resto": 131.765,
+        "sobrecosto_pct": 1.33
+      },
+      "derivados": {
+        "cierres_correctos": 1,
+        "sesiones_con_estadia_real": 5,
+        "abiertas_al_final": 52,
+        "ventanas_retenidas_datos_pobres": 0,
+        "puestos": 610,
+        "pct_fantasma_total": 25.4
+      }
+    },
+    {
+      "id": "p80_rf_s1",
+      "penetracion": 80,
+      "hasta_s": 1800,
+      "ms_por_paso": 70.268,
+      "pasos": 1800,
+      "tiempo_real_s": 126.48,
+      "pared_s": 127.9,
+      "clasificador_usado": "umbral",
+      "sesiones_maquina": {
+        "coords_invalidas": 0,
+        "sesiones": 270,
+        "cerradas": 172,
+        "abiertas_al_final": 98,
+        "falsas_liberaciones": 171,
+        "falsas_por_100_sesiones": 63.33,
+        "falsas_con_datos_pobres": 0,
+        "ventanas_retenidas": 0,
+        "telefonos_apagados": 0,
+        "apagados_efectivos": 0,
+        "marcadas_sin_senal": 0,
+        "esperando_tope_al_final": 0,
+        "cierres_timeout_sin_senal": 0,
+        "clasificador": "/home/vanet/results/e-sert/proyecto",
+        "ventanas_por_fuente": {
+          "umbral": 12377
+        }
+      },
+      "kpis": {
+        "falsas_lib_100": 99.42,
+        "n_sesiones": 172,
+        "n_falsas": 171,
+        "sin_cierre": 98,
+        "retardo_cierre_mediana_s": 15.0,
+        "retardo_cierre_p90_s": 15.0,
+        "error_fact_medio_usd": -0.06166666666666667,
+        "error_fact_abs_max_usd": 0.09,
+        "ahorro_vs_tarjeta_medio_usd": 0.14833333333333334,
+        "precision_mapa": 0.7454098360655739,
+        "precision_mapa_app": 0.9997814207650273,
+        "libres_fantasma_medio": 155.3,
+        "retardo_cierre_max_s": 15.0,
+        "error_fact_abs_medio_usd": 0.06166666666666667,
+        "n_cierre_manual": 0,
+        "n_sin_estadia_real": 166,
+        "mae_mapa": 7.912568306010929,
+        "mae_mapa_app": 0.10841530054644809,
+        "libres_fantasma_app_medio": 0.13333333333333333,
+        "n_muestras_mapa": 30
+      },
+      "costo_kpis": {
+        "s_en_kpis": 1.658,
+        "s_resto": 124.824,
+        "sobrecosto_pct": 1.33
+      },
+      "derivados": {
+        "cierres_correctos": 1,
+        "sesiones_con_estadia_real": 6,
+        "abiertas_al_final": 98,
+        "ventanas_retenidas_datos_pobres": 0,
+        "puestos": 610,
+        "pct_fantasma_total": 25.5
+      }
+    }
+  ]
+}

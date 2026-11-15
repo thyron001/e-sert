@@ -48,3 +48,17 @@ Los autos con app se guían al puesto libre más cercano a su destino (`rerouteP
 ![Cobros simulados por sesión](evidencias/s3_cobros-simulados.png)
 
 Explicación: [explicaciones/s3_explicacion.pdf](explicaciones/s3_explicacion.pdf) · PDF semanal: [evidencias/resumen_S2_Freddy.pdf](evidencias/resumen_S2_Freddy.pdf)
+
+## Reverificación de las sesiones 2 y 3 · 2026-11-14 (desde S4)
+
+Se volvieron a medir los criterios pendientes con el código actual (`semanas/S4/Freddy/codigo`).
+
+| Sesión | Criterio | Antes | Ahora | Estado |
+|---|---|---|---|---|
+| 2 | > 95 % de peatones vuelve en 30 min | 4 de 343 | 10 de 357 (ninguno perdido) | ❌ inalcanzable con estadías de 10–120 min: pedido a Tyrone |
+| 3 | Con una URL caída, misma velocidad | 3 % más lenta | 10,41× frente a 10,32× sin publicar | ✅ cortacircuitos en el publicador |
+| 3 | Retención final 0 y libro cuadrado | 33,00 USD retenidos | 0; 141 sesiones liquidadas con motivo `manual` | ✅ liquidación al final de la corrida |
+| 3 | Búsqueda media con app menor que sin app | 11,3 frente a 10,8 min | 10,73 frente a 10,67 min | ❌ depende del clasificador (modelo RF) |
+
+La sesión 2 sigue en **parcial (4/5)** y la sesión 3 pasa a **parcial (6/7)**. Detalle en la bitácora (entrada «S2 · Reverificación»).
+
