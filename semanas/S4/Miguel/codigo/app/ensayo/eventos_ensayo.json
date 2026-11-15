@@ -1,0 +1,11 @@
+{
+  "fuente": "contador rojo de la grabación de pantalla del teléfono (WhatsApp Video 2026-11-14 at 23.42.08), leído cuadro a cuadro a 1 fps; horas relativas al inicio de la grabación (≈ 23:35:14)",
+  "reconexiones": [
+    {"modo": "local", "veh_id": "sim_busca_4", "corte": "00:00:52", "detectado": "00:00:57", "red_vuelve": "00:01:14", "recuperado": "00:01:18", "reintentos": 2}
+  ],
+  "tomas": [
+    {"toma": 3, "nombre": "Elegir el auto (Sesión → Modo espejo → sim_busca_4 en vivo)", "previsto_s": 45, "real_s": 32},
+    {"toma": 4, "nombre": "GUIADO (sim_busca_4 hasta el fin de la corrida, sin estacionar)", "previsto_s": 60, "real_s": 220}
+  ],
+  "recibos": []
+}

@@ -800,7 +800,7 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s1_app-pantallas.png) · ![](../semanas/S4/Miguel/evidencias/s1_ios-simulador.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s1_explicacion.pdf)
 
 ## S4 · Sesión 2 · 2026-11-14 · Ensayo general de la demo con el teléfono espejo y video de respaldo
-**Estado:** parcial (3/6)
+**Estado:** parcial (4/6)
 
 **Qué hice:**
 - **Guion y checklist:** `ensayo/guion_demo.md` (7 tomas, 6 min 45 s, con las fallas y qué hacer) y `ensayo/checklist_previa.md`. Revisé que los estados y avisos del guion existan en el contrato (§3, §6, `espejos` §6).
@@ -843,13 +843,13 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 
 **Bucle y verificación:**
 - Hubo 3 vueltas, una por corrida. No hubo verificador independiente por falta de tiempo antes del plazo.
-- Criterios cumplidos (3/6):
+- Criterios cumplidos (4/6):
+  - la caída provocada se recupera sola, medida cuadro a cuadro con el contador de la grabación del teléfono: corte a 00:52, "Reconectando" a 00:57, la red vuelve a 01:14 y "En vivo" a 01:18 (26 s en total, 4 s tras volver la red). Está en `resultados_ensayo.json` y `eventos_ensayo.json`;
   - el ensayo del VPS queda documentado junto con el local;
   - el video crudo está fuera de git con su `LEEME.md`;
   - las dos evidencias PNG existen. La de latencias no tiene datos del CSV; las cifras del ensayo están en `resultados_ensayo.json`.
 - Criterios no cumplidos:
   - el guion con ±30 s;
-  - el tiempo de recuperación medido (la recuperación fue automática, pero sin horas exactas);
   - las latencias por modo desde el CSV.
 
 **Pendientes para la próxima sesión:**

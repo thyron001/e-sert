@@ -25,7 +25,7 @@
     "sesion-2": {
       "estado": "parcial",
       "fecha": "2026-11-14",
-      "resumen": "Guion cronometrado (6:45), checklist previa y ensayo local con sumo-gui, visor y teléfono espejo siguiendo a sim_busca_4 (latencia en pantalla p50 161 ms, p95 237 ms; reconexión automática tras modo avión). Video laptop+teléfono combinado fuera de git. Ensayo contra el VPS bloqueado sin ESERT_TOKEN_SIM; CSV no exportable (Expo Go se reinicia).",
+      "resumen": "Guion cronometrado (6:45), checklist previa y ensayo local con sumo-gui, visor y teléfono espejo siguiendo a sim_busca_4 (latencia en pantalla p50 161 ms, p95 237 ms; reconexión automática tras modo avión). Video laptop+teléfono combinado fuera de git. Ensayo contra el VPS bloqueado sin ESERT_TOKEN_SIM; CSV no exportable (Expo Go se reinicia). Reconexión medida en el video: detecta el corte en 5 s y vuelve a En vivo 4 s después de recuperar la red (26 s en total, sin reiniciar la app).",
       "evidencias": [
         "evidencias/s2_ensayo-montaje.png",
         "evidencias/s2_latencias-ensayo.png",
@@ -33,7 +33,7 @@
       ],
       "explicacion": "explicaciones/s2_explicacion.pdf",
       "criterios": {
-        "cumplidos": 3,
+        "cumplidos": 4,
         "total": 6
       },
       "pendientes": [

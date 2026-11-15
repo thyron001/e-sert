@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-14T23:40:00",
+  "generado": "2026-11-14T23:47:55",
   "tarifa": {
     "valor_hora_usd": 0.5,
     "fraccion_min": 5,
@@ -20,27 +20,45 @@
     }
   },
   "reconexiones": {
-    "numero": null,
-    "detalle": [],
-    "max_recuperacion_s": null,
-    "nota": "Sin datos de reconexiones."
+    "numero": 1,
+    "detalle": [
+      {
+        "modo": "local",
+        "corte": "00:00:52",
+        "recuperado": "00:01:18",
+        "recuperacion_s": 26.0
+      }
+    ],
+    "max_recuperacion_s": 26.0
   },
   "tomas": {
-    "detalle": [],
-    "total_previsto_s": null,
-    "total_real_s": null,
-    "diferencia_s": null,
-    "dentro_de_30s": null,
-    "nota": "Sin datos de tomas."
+    "detalle": [
+      {
+        "toma": 3,
+        "nombre": "Elegir el auto (Sesión → Modo espejo → sim_busca_4 en vivo)",
+        "previsto_s": 45,
+        "real_s": 32,
+        "diferencia_s": -13
+      },
+      {
+        "toma": 4,
+        "nombre": "GUIADO (sim_busca_4 hasta el fin de la corrida, sin estacionar)",
+        "previsto_s": 60,
+        "real_s": 220,
+        "diferencia_s": 160
+      }
+    ],
+    "total_previsto_s": 105,
+    "total_real_s": 252,
+    "diferencia_s": 147,
+    "dentro_de_30s": false
   },
   "recibos": {
     "detalle": [],
-    "todos_cuadran": null,
-    "nota": "Sin datos de recibos."
+    "todos_cuadran": null
   },
   "notas": [
-    "No hay CSV de latencias en latencias/.",
-    "No existe eventos_ensayo.json."
+    "No hay CSV de latencias en latencias/."
   ],
   "latencia_en_pantalla": {
     "fuente": "resumen que muestra el teléfono en el espejo (no se pudo exportar el CSV: Expo Go se reinicia al compartir)",
@@ -53,20 +71,24 @@
     "hora": "23:37",
     "captura": "evidencias/s2_ensayo-montaje.png"
   },
-  "reconexion": {
-    "modo": "local",
-    "veh_id": "sim_busca_4",
-    "evidencia": "log del backend: WebSocket /ws/espejo/sim_busca_4 aceptado de nuevo tras el modo avión en las 3 corridas",
-    "recuperacion_s": null,
-    "nota": "recuperación automática sin reiniciar la app; sin horas exactas de corte/recuperación"
+  "vps": {
+    "estado": "no ensayado",
+    "motivo": "demo.py --remoto requiere ESERT_TOKEN_SIM (solo Tyrone); /salud ok a las 22:49:53"
   },
   "guion": {
     "previsto_total_s": 405,
     "dentro_de_30s": false,
     "nota": "tomas 5–6 no cupieron: sim_busca_4 no cerró dentro del ensayo"
   },
-  "vps": {
-    "estado": "no ensayado",
-    "motivo": "demo.py --remoto requiere ESERT_TOKEN_SIM (solo Tyrone); /salud ok a las 22:49:53"
+  "reconexion": {
+    "modo": "local",
+    "veh_id": "sim_busca_4",
+    "corte_s": 52,
+    "deteccion_s": 5,
+    "red_caida_s": 22,
+    "recuperacion_tras_volver_la_red_s": 4,
+    "desconexion_visible_s": 21,
+    "reinicio_de_app": false,
+    "fuente": "eventos_ensayo.json"
   }
 }

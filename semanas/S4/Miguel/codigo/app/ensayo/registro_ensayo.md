@@ -30,3 +30,16 @@
 - Las tomas 5 y 6 (A_PIE con el puesto rojo y el recibo) no cupieron en el ensayo: el auto elegido tarda más que las tomas 4–6.
 - Para la demo: elegir un auto que ya esté en Estacionado o A pie en el selector, o usar `demo.py` con la semilla 2 y ritmo 2, donde Tyrone midió el primer cierre en t = 1014 s.
 - El total del guion **no se cumplió con ±30 s**.
+
+## Corrida 3, leída del video del teléfono (contador rojo, 1 fps)
+
+| Contador | Reloj | Evento |
+|---|---|---|
+| 00:46 | 23:36 | Espejo de `sim_busca_4` en vivo (toma 3: 32 s, previsto 45 s) |
+| 00:52 | 23:36 | Modo avión activado |
+| 00:57 | 23:36 | "Reconectando (1)": corte detectado en 5 s |
+| 01:10 | 23:36 | "Reconectando (2)" |
+| 01:14 | 23:36 | Modo avión desactivado |
+| 01:18 | 23:36 | "En vivo": 4 s tras volver la red, sin reiniciar la app |
+| 04:26 | 23:39 | Finalizado (fin de la corrida; toma 4: 220 s, previsto 60 s) |
+| 04:30 | 23:39 | Exportar CSV: Expo Go sale al gestor de archivos y la app se reinicia; no queda archivo |
