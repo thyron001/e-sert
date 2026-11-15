@@ -6,10 +6,13 @@ import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View, useThemeColor } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
-import { mensajeUsuario } from '@/src/api/cliente';
+import { getBilletera } from '@/src/api/cliente';
 import { consultarPago, esperarConfirmacion, leerMonto, MONTOS_RAPIDOS, prepararPago } from '@/src/api/pagos';
 import { TARIFA } from '@/src/api/tarifa';
+import { useSesion } from '@/src/estado/sesion';
+import { programarAvisos } from '@/src/servicios/avisos';
 import { COLORES } from '@/src/ui/colores';
+import { AvisoError } from '@/src/ui/AvisoError';
 import { Boton, usd } from '@/src/ui/comunes';
 
 type Resultado = { tipo: 'exito' | 'error' | 'info'; texto: string };
@@ -19,12 +22,25 @@ type Resultado = { tipo: 'exito' | 'error' | 'info'; texto: string };
 // El backend decide si es Payphone en pruebas o su página mock (PAYPHONE_MODO).
 export default function Recarga() {
   const { api, usuarioId, urlApi, modoMock } = useAjustes();
+  const { flujo } = useSesion();
+
+  // Tras recargar con una sesión abierta, el aviso de saldo bajo se mueve: cancelar y reprogramar.
+  async function reprogramarSiHaySesion() {
+    if (!flujo.sesion || flujo.cierre) return;
+    try {
+      const b = await getBilletera(usuarioId, api);
+      await programarAvisos({ sesion_id: flujo.sesion.sesion_id, inicio: flujo.sesion.inicio }, b);
+    } catch (e) {
+      console.warn('[avisos] no se pudieron reprogramar', e);
+    }
+  }
   const colorTexto = useThemeColor({}, 'text');
   const [elegido, setElegido] = useState<number>(MONTOS_RAPIDOS[0]);
   const [libre, setLibre] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [paso, setPaso] = useState<string | null>(null);
   const [resultado, setResultado] = useState<Resultado | null>(null);
+  const [fallo, setFallo] = useState<unknown>(null);
 
   const lectura = libre ? leerMonto(libre) : { monto: elegido };
   const monto = 'monto' in lectura ? lectura.monto : null;
@@ -48,11 +64,13 @@ export default function Recarga() {
     if (monto === null) return;
     setOcupado(true);
     setResultado(null);
+    setFallo(null);
     try {
       if (modoMock) {
         // Sin backend (cliente mock de la app): se acredita en la billetera en memoria.
         const r = await api.recargar(usuarioId, { monto, referencia_payphone: 'mock-local' });
         setResultado({ tipo: 'exito', texto: `Recarga de ${usd(monto)} acreditada. Saldo: ${usd(r.saldo)}` });
+        await reprogramarSiHaySesion();
         return;
       }
       setPaso('Preparando el pago…');
@@ -67,6 +85,7 @@ export default function Recarga() {
       const intencion = await esperarConfirmacion(() => consultarPago(urlApi, pago.client_transaction_id));
       if (intencion.estado === 'aprobado') {
         setResultado({ tipo: 'exito', texto: `Recarga de ${usd(intencion.monto)} confirmada.` });
+        await reprogramarSiHaySesion();
       } else if (intencion.estado === 'rechazado') {
         setResultado({ tipo: 'error', texto: 'El pago fue rechazado o cancelado. No se cobró nada.' });
       } else {
@@ -76,7 +95,7 @@ export default function Recarga() {
         });
       }
     } catch (e) {
-      setResultado({ tipo: 'error', texto: mensajeUsuario(e) });
+      setFallo(e); // traducido por AvisoError, con su botón (p. ej. Revisar conexión)
     } finally {
       setPaso(null);
       setOcupado(false);
@@ -115,7 +134,7 @@ export default function Recarga() {
         style={[estilos.entrada, { color: colorTexto }]}
         value={libre}
         onChangeText={setLibre}
-        placeholder={`${TARIFA.recarga_minima_usd.toFixed(2)} o más`}
+        placeholder={`${TARIFA.recarga_minima_usd.toFixed(2).replace('.', ',')} o más`}
         placeholderTextColor={COLORES.gris}
         keyboardType="decimal-pad"
         maxLength={7}
@@ -133,6 +152,7 @@ export default function Recarga() {
       {resultado && (
         <Text style={[estilos.resultado, estilos[resultado.tipo]]}>{resultado.texto}</Text>
       )}
+      <AvisoError error={fallo} alReintentar={pagar} />
       {resultado?.tipo === 'exito' && <Boton texto="Volver" onPress={() => router.back()} />}
     </ScrollView>
   );

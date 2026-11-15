@@ -34,7 +34,7 @@ export function leerMonto(texto: string): { monto: number } | { error: string } 
   if (!/^\d+(\.\d{1,2})?$/.test(limpio)) return { error: 'Escribe un monto como 7.50' };
   const monto = Number(limpio);
   if (monto < TARIFA.recarga_minima_usd) {
-    return { error: `La recarga mínima es $${TARIFA.recarga_minima_usd.toFixed(2)}` };
+    return { error: `La recarga mínima es $${TARIFA.recarga_minima_usd.toFixed(2).replace('.', ',')}` };
   }
   if (monto > 1000) return { error: 'El monto máximo por recarga es $1000' };
   return { monto };

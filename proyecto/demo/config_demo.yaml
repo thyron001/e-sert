@@ -1,0 +1,17 @@
+# Configuración de la demo en un comando (S4-1). Rutas relativas a la raíz del repo (la carpeta
+# con CLAUDE.md): funciona igual desde semanas/S4/Tyrone/codigo/demo/ y desde proyecto/demo/.
+# Durante la semana: --ruta kpis=semanas/S4/Tyrone/codigo/kpis --ruta visor=semanas/S4/Tyrone/codigo/visor
+rutas:
+  backend: proyecto/backend     # FastAPI de Freddy (backend.api.main:app)
+  traci: proyecto/traci         # controlador de Freddy (lo importa kpis/correr_una.py)
+  sumo: proyecto/sumo           # red, puestos y escenarios (el controlador usa el sumo/ hermano de kpis/)
+  visor: proyecto/visor         # visor Leaflet (S3-3)
+  kpis: proyecto/kpis           # lanzador del controlador: kpis/correr_una.py (--publicar, --gui)
+sumocfg: sumo/centro_base.sumocfg
+puertos: {backend: 8000, visor: 8088, traci: 8813}   # 8080 no: lo publica el contenedor
+escenario: {penetracion: 0.5, clasificador: rf, semilla: 2, hasta_s: 3600, delay_ms: 100, ritmo: 2}   # s2: primera sesión cerrada en t = 1014 s (S4-2)
+db: demo/demo.db          # se borra y recrea en cada arranque (relativa a la carpeta padre de demo/)
+contenedor: van3twin
+remoto:
+  url: https://demo.e-sert.tesisucuenca.com   # backend + visor en el VPS (docs/DESPLIEGUE.md)
+  salud_s: 5                                   # si /salud no responde en 5 s, se pasa a --local

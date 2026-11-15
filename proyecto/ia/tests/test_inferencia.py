@@ -18,7 +18,7 @@ from ia.validacion import limpiar
 MODOS = {"a_pie", "quieto", "vehiculo"}
 FUENTES = {"rf", "umbral"}
 M = 1.0 / 111_320.0
-REFERENCIA = Path(__file__).parent / "datos" / "referencia_s2.json"
+REFERENCIA = Path(__file__).parent / "datos" / "referencia_sklearn_final.json"
 
 
 def ventana(vel=5.0, n=30, t0=1_000_000.0, prec=5.0, paso=1.0):
@@ -303,7 +303,7 @@ class TestLote:
 
 
 class TestEquivalenciaS2:
-    @pytest.mark.skipif(not REFERENCIA.exists(), reason="falta referencia_s2.json")
+    @pytest.mark.skipif(not REFERENCIA.exists(), reason="falta referencia_sklearn_final.json")
     def test_ventanas_limpias_coinciden_al_100_por_ciento(self):
         ref = json.loads(REFERENCIA.read_text())
         assert len(ref) >= 100
@@ -316,7 +316,7 @@ class TestEquivalenciaS2:
     def test_bosque_plano_igual_a_sklearn(self):
         import joblib
 
-        ruta = Path(inferencia.DIR_MODELOS) / "rf_v1.joblib"
+        ruta = Path(inferencia.DIR_MODELOS) / "rf_final.joblib"
         sk = joblib.load(ruta)
         plano = inferencia._cargar_modelo()
         rng = np.random.default_rng(0)
@@ -328,14 +328,14 @@ class TestEquivalenciaS2:
 
 
 class TestMeta:
-    def test_meta_json_completo_y_hash_correcto(self):
+    def test_json_del_modelo_y_hash_correcto(self):
         import hashlib
 
-        meta = json.loads((Path(inferencia.DIR_MODELOS) / "rf_v1.meta.json").read_text())
-        for k in ("features", "sklearn_version", "joblib_sha256", "fecha", "hiperparametros", "metricas_cv"):
+        meta = json.loads((Path(inferencia.DIR_MODELOS) / "rf_final.json").read_text())
+        for k in ("features", "sklearn_version", "sha256_modelo", "fecha", "hiperparametros", "suavizado", "fallback"):
             assert k in meta
-        h = hashlib.sha256((Path(inferencia.DIR_MODELOS) / "rf_v1.joblib").read_bytes()).hexdigest()
-        assert h == meta["joblib_sha256"]
+        h = hashlib.sha256((Path(inferencia.DIR_MODELOS) / "rf_final.joblib").read_bytes()).hexdigest()
+        assert h == meta["sha256_modelo"]
         assert meta["features"] == inferencia.NOMBRES_FEATURES
 
 

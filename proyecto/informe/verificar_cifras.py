@@ -82,12 +82,19 @@ def coincide(v: float, dec: int, fuentes: list[float]) -> bool:
     tol = 1e-9 if dec == 0 else 0.5 * 10 ** (-dec) + 1e-9
     for t in fuentes:
         for escala in (1.0, 100.0, 0.01):
-            if abs(t * escala - v) <= tol:
+            if abs(t * escala - v) <= tol or abs(abs(t) * escala - v) <= tol:
                 return True
     return False
 
 
+def _es_pie(bloque: str) -> bool:
+    """Pie de tabla: una sola linea en cursiva (`*Pie.*`) o `**Tabla N.**` (estilo del borrador de S3)."""
+    b = bloque.strip()
+    return "\n" not in b and (b.startswith("**Tabla") or (b.startswith("*") and not b.startswith("**")))
+
+
 def resolver(ruta: str) -> Path | None:
+    ruta = ruta.split(":", 1)[0]  # `ruta:clave` apunta a una metrica concreta del archivo
     for base in (CODIGO, RAIZ):
         p = base / ruta
         if p.is_file():
@@ -120,7 +127,7 @@ def main():
         if bloque.lstrip().startswith("```"):
             continue
         rutas = [r.strip() for c in RE_COMENTARIO.findall(bloque) for r in c.split(";") if r.strip()]
-        if not rutas and bloque.lstrip().startswith("|") and previo[0].lstrip().startswith("**Tabla"):
+        if not rutas and bloque.lstrip().startswith("|") and _es_pie(previo[0]):
             rutas = previo[1]
         previo = (bloque, rutas)
         nums = cifras(bloque)
@@ -150,7 +157,9 @@ def main():
             imagenes_rotas.append(m.group(1))
 
     claves_faltan = []
-    bib = md.parent / "referencias_ia.bib"
+    bib = md.parent / "referencias.bib"
+    if not bib.is_file():
+        bib = md.parent / "referencias_ia.bib"
     claves_bib = set(re.findall(r"@\w+\{([^,\s]+),", bib.read_text(encoding="utf-8"))) if bib.is_file() else set()
     for m in re.finditer(r"\[(@[^\]]+)\]", texto):
         for k in re.findall(r"@([\w:.\-]+)", m.group(1)):

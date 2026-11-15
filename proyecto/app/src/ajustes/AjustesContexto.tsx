@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { MOCK_POR_DEFECTO, URL_POR_DEFECTO, crearClienteHttp } from '@/src/api/cliente';
 import { crearClienteMock } from '@/src/api/mock';
+import { guardarUrlDemo, leerUrlDemo } from '@/src/config/demo';
 import type { ApiESert, UsuarioId } from '@/src/api/tipos';
 
 const CLAVE_URL = 'esert_api_url';
@@ -52,12 +53,15 @@ export function AjustesProveedor({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const [url, mock, usuario] = await Promise.all([
+      const [urlDemo, url, mock, usuario] = await Promise.all([
+        leerUrlDemo(),
         leer(CLAVE_URL),
         leer(CLAVE_MOCK),
         leer(CLAVE_USUARIO),
       ]);
-      if (url) setUrlApi(url);
+      // La URL de "Ajustes de demo" (AsyncStorage) manda sobre la de Ajustes y sobre .env.
+      if (urlDemo) setUrlApi(urlDemo);
+      else if (url) setUrlApi(url);
       if (mock !== null) setModoMock(mock === '1');
       let id = usuario;
       if (!id) {
@@ -72,7 +76,7 @@ export function AjustesProveedor({ children }: { children: ReactNode }) {
   const cambiarUrl = useCallback(async (url: string) => {
     const limpia = url.trim().replace(/\/+$/, '');
     setUrlApi(limpia);
-    await guardar(CLAVE_URL, limpia);
+    await Promise.all([guardar(CLAVE_URL, limpia), guardarUrlDemo(limpia)]);
   }, []);
 
   const cambiarModoMock = useCallback(async (activo: boolean) => {

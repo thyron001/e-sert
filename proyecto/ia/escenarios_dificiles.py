@@ -253,7 +253,7 @@ def correr_semilla(semilla: int, cfg_path: Path, duracion: float = 1800,
                     "modo_real": modo,
                 }
 
-                if tipo == "peaton_rapido" and modo == "a_pie":
+                if tipo.startswith("peaton_rapido") and modo == "a_pie":
                     fila["escenario"] = "peaton_rapido"
                     filas_peaton_rapido.append(fila)
                 else:

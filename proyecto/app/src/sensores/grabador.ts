@@ -25,6 +25,7 @@ import {
   type Persona,
   type Telefono,
 } from './exportar';
+import { ErrorParaUsuario } from '@/src/errores';
 
 const VOLCADO_MS = 30_000;
 const ACEL_INTERVALO_MS = 100;
@@ -82,7 +83,7 @@ export class Grabador {
 
     const permiso = await Location.requestForegroundPermissionsAsync();
     if (permiso.status !== 'granted') {
-      throw new Error('Sin permiso de ubicación: actívalo en los ajustes del teléfono');
+      throw new ErrorParaUsuario('Sin permiso de ubicación: actívalo en los ajustes del teléfono y vuelve a intentarlo.');
     }
 
     const ahora = new Date();

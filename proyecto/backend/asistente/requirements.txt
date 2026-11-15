@@ -1,0 +1,4 @@
+# Dependencias de backend/asistente (además de las de backend/requirements-servidor.txt).
+anthropic>=1,<2
+python-dotenv>=1.0
+rapidfuzz>=3.0

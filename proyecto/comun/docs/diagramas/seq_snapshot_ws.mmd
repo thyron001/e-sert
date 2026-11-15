@@ -1,0 +1,24 @@
+%% Snapshot del controlador al visor y a la app (contrato §4.4 y §6)
+sequenceDiagram
+  autonumber
+  participant CT as PublicadorSnapshots (controlador)
+  participant PU as Publicador (hilo, cola de 1)
+  participant API as POST /interno/snapshot 🔒
+  participant MU as Mundo (límite 1 por s simulado)
+  participant G as GestorConexiones
+  participant V as Visor (rol=visor)
+  participant A as Cliente público (rol=publico)
+  CT->>PU: cuerpo PasoSimulacion (cuando cambia int(t))
+  Note over PU: si la red se atrasa, descarta el viejo: SUMO nunca espera
+  PU->>API: POST con X-Sim-Token
+  API->>MU: aplicar_paso(paso)
+  alt t_sim < último + 1 s
+    MU-->>API: None (no se difunde)
+  else
+    MU-->>API: Difusion(snapshot del mapa, verdad de SUMO)
+    API->>G: publicar(snapshot) y publicar(verdad)
+    G->>V: snapshot
+    G->>V: verdad
+    G->>A: snapshot (nunca verdad, la app usa /ws/espejo)
+  end
+  API-->>PU: 202 {aceptado, espejos}

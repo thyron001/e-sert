@@ -7,7 +7,9 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 function icono(nombre: SymbolViewProps['name']) {
-  return ({ color }: { color: ColorValue }) => <SymbolView name={nombre} tintColor={color} size={26} />;
+  const Icono = ({ color }: { color: ColorValue }) => <SymbolView name={nombre} tintColor={color} size={26} />;
+  Icono.displayName = `Icono(${String(nombre)})`;
+  return Icono;
 }
 
 export default function TabLayout() {

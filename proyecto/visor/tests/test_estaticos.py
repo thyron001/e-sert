@@ -38,8 +38,8 @@ def test_index_rutas_relativas():
     propias = [r for r in refs if not r.startswith("https://") and not r.startswith(("#", "data:"))]
     for ref in propias:
         assert ref.startswith("./"), f"archivo propio sin './': {ref}"
-    assert "./visor.js" in refs, "index.html no carga ./visor.js"
-    assert "./estilos.css" in refs, "index.html no carga ./estilos.css"
+    assert "./js/principal.js" in refs, "index.html no carga ./js/principal.js"
+    assert "./css/visor.css" in refs, "index.html no carga ./css/visor.css"
 
 
 @requiere_index

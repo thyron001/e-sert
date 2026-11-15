@@ -145,13 +145,18 @@ class Publicador:
 
     Si el envío no termina, el snapshot pendiente se reemplaza por el más nuevo: el hilo de la
     simulación nunca espera a la red. Los fallos se reintentan con *backoff* y no paran la corrida.
+
+    Cortacircuitos (S4, criterio de S2-3 «con una URL caída la simulación sigue a la misma
+    velocidad»): si un envío agota sus reintentos, el backend se da por caído y `listo()` devuelve
+    False, así quien arma los cuerpos deja de hacerlo, salvo una sonda cada `pausa_caido_s`. Con la
+    primera respuesta buena se reanuda.
     """
 
     RUTA = "/api/v1/interno/snapshot"
 
     def __init__(self, url: str, token: Optional[str] = None, timeout_s: float = 2.0,
                  reintentos: int = 3, backoff_s: float = 0.5, ruta: Optional[str] = None,
-                 al_responder: Optional[Callable[[dict], None]] = None):
+                 al_responder: Optional[Callable[[dict], None]] = None, pausa_caido_s: float = 5.0):
         self.ruta = ruta or self.RUTA
         # S3-3: la respuesta trae `{"espejos": [...]}`; quien la necesite (PublicadorSnapshots) la recibe aquí.
         self.al_responder = al_responder
@@ -163,8 +168,23 @@ class Publicador:
         self.enviados = 0
         self.descartados = 0
         self.fallidos = 0
+        self.pausa_caido_s = pausa_caido_s
+        self.caido = False
+        self._proxima_sonda = 0.0
+        self.sondas = 0
         self._hilo = threading.Thread(target=self._bucle, name="publicador", daemon=True)
         self._hilo.start()
+
+    def listo(self) -> bool:
+        """True si vale la pena armar y mandar un cuerpo ahora (backend vivo, o toca una sonda)."""
+        if not self.caido:
+            return True
+        ahora = time.monotonic()
+        if ahora >= self._proxima_sonda:
+            self._proxima_sonda = ahora + self.pausa_caido_s
+            self.sondas += 1
+            return True
+        return False
 
     def publicar(self, cuerpo: dict) -> None:
         """No bloquea: si hay un snapshot pendiente, lo reemplaza por este."""
@@ -183,6 +203,7 @@ class Publicador:
                     r = self._cliente.post(self.ruta, json=cuerpo)
                     if r.status_code < 300:
                         self.enviados += 1
+                        self.caido = False
                         if self.al_responder is not None:
                             try:
                                 self.al_responder(r.json())
@@ -194,6 +215,9 @@ class Publicador:
                 time.sleep(self._backoff_s * (2 ** intento))
             else:
                 self.fallidos += 1
+                if not self.caido:
+                    self._proxima_sonda = time.monotonic() + self.pausa_caido_s
+                self.caido = True
 
     def cerrar(self, espera_s: float = 3.0) -> None:
         """Espera (hasta `espera_s`) a que se vacíe la cola y cierra la conexión."""
@@ -203,4 +227,5 @@ class Publicador:
         self._cliente.close()
 
     def resumen(self) -> dict:
-        return {"enviados": self.enviados, "descartados": self.descartados, "fallidos": self.fallidos}
+        return {"enviados": self.enviados, "descartados": self.descartados, "fallidos": self.fallidos,
+                "caido_al_final": self.caido, "sondas": self.sondas}

@@ -125,7 +125,7 @@ describe('cliente HTTP', () => {
   it('SALDO_INSUFICIENTE se muestra con el mensaje acordado', async () => {
     responder(402, { error: { codigo: 'SALDO_INSUFICIENTE', mensaje: 'x', detalle: null } });
     const e = await error(crearClienteHttp(BASE).crearSesion({ usuario_id: 'u', placa: 'ABC123', puesto_id: 'p' }));
-    expect(mensajeUsuario(e)).toBe('Recarga al menos $5 para buscar puesto');
+    expect(mensajeUsuario(e)).toBe('Te falta saldo: recarga al menos $5 para buscar puesto.');
   });
 
   it('una respuesta que no es JSON da HTTP_<estado>', async () => {
@@ -159,6 +159,6 @@ describe('cliente HTTP', () => {
     );
     const e = await error(crearClienteHttp(BASE, 50).listarPuestos());
     expect(e.codigo).toBe('TIEMPO_AGOTADO');
-    expect(mensajeUsuario(e)).toMatch(/a tiempo/);
+    expect(mensajeUsuario(e)).toMatch(/tardó demasiado/);
   });
 });

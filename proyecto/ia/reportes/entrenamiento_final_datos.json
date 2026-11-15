@@ -1,0 +1,98 @@
+{
+  "semilla": 42,
+  "semillas_sumo_entrenamiento": [
+    201,
+    202
+  ],
+  "n_ventanas": 445607,
+  "por_origen_y_clase": [
+    {
+      "origen": "geolife",
+      "modo_real": "a_pie",
+      "n": 100340
+    },
+    {
+      "origen": "geolife",
+      "modo_real": "quieto",
+      "n": 100119
+    },
+    {
+      "origen": "geolife",
+      "modo_real": "vehiculo",
+      "n": 99677
+    },
+    {
+      "origen": "sumo",
+      "modo_real": "a_pie",
+      "n": 50255
+    },
+    {
+      "origen": "sumo",
+      "modo_real": "quieto",
+      "n": 49873
+    },
+    {
+      "origen": "sumo",
+      "modo_real": "vehiculo",
+      "n": 45343
+    }
+  ],
+  "ventanas_disponibles_geolife": {
+    "a_pie": 347456,
+    "quieto": 106728,
+    "vehiculo": 645870
+  },
+  "ventanas_disponibles_sumo": {
+    "a_pie": 434747,
+    "quieto": 340009,
+    "vehiculo": 45343
+  },
+  "usuarios_geolife_entrenamiento": 38,
+  "usuarios_geolife": [
+    "geolife_020",
+    "geolife_021",
+    "geolife_056",
+    "geolife_058",
+    "geolife_064",
+    "geolife_065",
+    "geolife_067",
+    "geolife_068",
+    "geolife_069",
+    "geolife_075",
+    "geolife_078",
+    "geolife_080",
+    "geolife_084",
+    "geolife_085",
+    "geolife_086",
+    "geolife_091",
+    "geolife_092",
+    "geolife_096",
+    "geolife_101",
+    "geolife_104",
+    "geolife_105",
+    "geolife_106",
+    "geolife_110",
+    "geolife_111",
+    "geolife_115",
+    "geolife_117",
+    "geolife_125",
+    "geolife_126",
+    "geolife_128",
+    "geolife_129",
+    "geolife_141",
+    "geolife_144",
+    "geolife_153",
+    "geolife_154",
+    "geolife_163",
+    "geolife_167",
+    "geolife_170",
+    "geolife_174"
+  ],
+  "sha256_entradas": {
+    "S2/Pablo/codigo/ia/datos/procesados/geolife_etiquetado.parquet": "6a825a11fa48b1bd27e9ff5d1246a175956f7ed19f295e2f042466be4a5afa17",
+    "S4/Pablo/codigo/ia/sumo/salidas/episodios_s201.csv": "3b06ebeb8afffb431149ffc69da892e8d4547095f4bd83ac0e6ac77f464eec82",
+    "S4/Pablo/codigo/ia/sumo/salidas/episodios_s202.csv": "8dd63000b004015ad86b09cd828a7fbbdb9ba2a28c30baccb6f0f7e8016cdaf4",
+    "S4/Pablo/codigo/ia/particion_usuarios.json": "9e98cf42061251a398672860ed7282728bf2824851d8141d59964436f6f69ede"
+  },
+  "segundos": 104
+}

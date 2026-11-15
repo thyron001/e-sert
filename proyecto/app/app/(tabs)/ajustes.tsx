@@ -3,8 +3,10 @@ import { ScrollView, StyleSheet, Switch, TextInput } from 'react-native';
 
 import { Text, View, useThemeColor } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
+import { LogoESert } from '@/src/componentes/LogoESert';
 import { COLORES } from '@/src/ui/colores';
 import { Boton } from '@/src/ui/comunes';
+import { mensajeDeError } from '@/src/errores';
 
 export default function AjustesScreen() {
   const { urlApi, modoMock, usuarioId, api, cambiarUrl, cambiarModoMock } = useAjustes();
@@ -23,7 +25,7 @@ export default function AjustesScreen() {
       const puestos = await api.listarPuestos();
       setResultado(`OK: ${puestos.length} puestos en ${Date.now() - inicio} ms`);
     } catch (e) {
-      setResultado(`Error: ${(e as Error).message}`);
+      setResultado(mensajeDeError(e));
     } finally {
       setProbando(false);
     }
@@ -31,6 +33,7 @@ export default function AjustesScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contenedor}>
+      <LogoESert />
       <Text style={styles.etiqueta}>URL del backend</Text>
       <TextInput
         style={[styles.entrada, { color: colorTexto }]}

@@ -1,0 +1,99 @@
+{
+ "id": "p80_umbral_s5",
+ "hash_config": "5e4399faa790231ce0437086b67405abd5396c044985142235eb0731c42d1681",
+ "cfg": {
+  "id": "p80_umbral_s5",
+  "penetracion": 80,
+  "clasificador": "umbral",
+  "semilla": 5,
+  "duracion_s": 4500.0,
+  "warmup_s": 900.0,
+  "modelo_rf": "kpis/externo/rf_final.plano.npz",
+  "dir_resultados": "kpis/resultados/final",
+  "subdir_salidas": "final",
+  "libsumo": true
+ },
+ "fila": {
+  "id": "p80_umbral_s5",
+  "penetracion": 80,
+  "clasificador": "umbral",
+  "semilla": 5,
+  "n_veh": 7206,
+  "n_busca": 955,
+  "busqueda_media_s": 481.3434554973822,
+  "busqueda_p90_s": 947.6,
+  "distancia_busqueda_media_m": 1411.8552879581152,
+  "co2_busqueda_kg": 916.8961323,
+  "ocupacion_media": 0.8793563663760628,
+  "falsas_lib_100": 86.8,
+  "retardo_cierre_mediana_s": 13.0,
+  "error_fact_medio_usd": -0.14925311203319502,
+  "precision_mapa": 0.543912568306011,
+  "teleports": 10,
+  "duracion_real_s": 1660.3
+ },
+ "extra": {
+  "escenario": "app80_s5",
+  "duracion_s": 4500.0,
+  "warmup_s": 900.0,
+  "guia_fuente": "mapa",
+  "kpis_sistema": {
+   "falsas_lib_100": 86.8,
+   "n_sesiones": 621,
+   "n_falsas": 539,
+   "sin_cierre": 217,
+   "retardo_cierre_mediana_s": 13.0,
+   "retardo_cierre_p90_s": 278.1,
+   "error_fact_medio_usd": -0.14925311203319502,
+   "error_fact_abs_max_usd": 0.5,
+   "ahorro_vs_tarjeta_medio_usd": 0.2553941908713693,
+   "precision_mapa": 0.543912568306011,
+   "precision_mapa_app": 1.0,
+   "libres_fantasma_medio": 278.2133333333333,
+   "retardo_cierre_max_s": 864.0,
+   "error_fact_abs_medio_usd": 0.1579668049792531,
+   "n_cierre_manual": 13,
+   "n_sin_estadia_real": 380,
+   "mae_mapa": 8.457857923497267,
+   "mae_mapa_app": 0.318775956284153,
+   "libres_fantasma_app_medio": 0.0,
+   "n_muestras_mapa": 75
+  },
+  "ventanas_por_fuente": {
+   "umbral": 104071,
+   "sin_datos": 199
+  },
+  "sesiones_maquina": {
+   "coords_invalidas": 1274,
+   "sesiones": 838,
+   "cerradas": 608,
+   "abiertas_al_final": 217,
+   "falsas_liberaciones": 539,
+   "falsas_por_100_sesiones": 64.32,
+   "falsas_con_datos_pobres": 0,
+   "ventanas_retenidas": 246,
+   "telefonos_apagados": 0,
+   "apagados_efectivos": 0,
+   "marcadas_sin_senal": 2,
+   "esperando_tope_al_final": 0,
+   "cierres_timeout_sin_senal": 0,
+   "clasificador": "/home/vanet/results/e-sert/semanas/S4/Tyrone/codigo/kpis/externo",
+   "ventanas_por_fuente": {
+    "umbral": 104071,
+    "sin_datos": 199
+   }
+  },
+  "modelo": null,
+  "info_busqueda": {
+   "buscadores": 1365,
+   "buscadores_con_kpi": 1081,
+   "buscadores_sin_estacionar": 187,
+   "buscadores_sin_inicio": 0,
+   "busqueda_censurada_media_s": 457.4812834224599
+  },
+  "con_app_en_kpi": 748,
+  "ms_por_paso": 366.226
+ },
+ "fin_utc": "2026-11-14T01:04:37+00:00",
+ "origen": "S4-2"
+}

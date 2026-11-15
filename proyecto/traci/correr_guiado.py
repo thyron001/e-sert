@@ -34,12 +34,40 @@ from .gps import EmuladorGPS
 from .guiado import Guia, RegistroBusqueda
 from .peatones import GestorPeatones, leer_destinos
 from .ruta_geo import RutaGeo
-from .puente_nucleo import Publicador, PuenteNucleo
+from .puente_nucleo import MotivoCierre, Publicador, PuenteNucleo
 from .sumo import cargar_sumolib
 
 AQUI = Path(__file__).resolve().parent
 SUMO = AQUI / "escenario" / "tyrone" / "sumo"
 SALIDAS = AQUI / "salidas"
+
+
+def liquidar_al_final(puente: PuenteNucleo, t: float) -> int:
+    """Cierra con motivo `manual` las sesiones que siguen abiertas al terminar la corrida (S4).
+
+    Es lo que hace el operador al terminar la demo: el contrato §3 acepta `manual` desde cualquier
+    estado abierto. Se debita el tiempo hasta `t` y se libera la retención, así el libro queda
+    saldado (retención final 0, criterio de S2-3). Se informa aparte (`liquidadas_fin_corrida`) y
+    `--sin-liquidar` lo desactiva.
+    """
+    abiertas = list(puente.abiertas)
+    for sesion_id in abiertas:
+        puente.cerrar(sesion_id, t, motivo=MotivoCierre.manual)
+    return len(abiertas)
+
+
+def libro_cuadra(puente: PuenteNucleo) -> bool:
+    """Por usuario: recargas = las que se dieron, débitos = Σ cobrado en sus sesiones cerradas y
+    saldo = recargas − débitos (comparación independiente del cálculo del libro)."""
+    debitos: dict = {}
+    for fila in puente.cerradas:
+        debitos[fila["usuario_id"]] = debitos.get(fila["usuario_id"], 0) + round(fila["debitado"] * 100)
+    for usuario, f in puente.libro().items():
+        if f["recarga_centavos"] != round(puente.recargas[usuario] * 100) or f["debito_centavos"] != debitos.get(usuario, 0):
+            return False
+        if puente.billetera.estado_centavos(usuario)["saldo"] != f["recarga_centavos"] - f["debito_centavos"]:
+            return False
+    return True
 
 
 class PublicadorSnapshots:
@@ -67,11 +95,16 @@ class PublicadorSnapshots:
         self.registro = registro
         self.peatones = peatones
         self._ultimo_s = -1
+        self.omitidos_backend_caido = 0
 
     def on_paso(self, ctrl, t: float) -> None:
         if int(t) == self._ultimo_s:
             return
         self._ultimo_s = int(t)
+        listo = getattr(self.publicador, "listo", None)
+        if listo is not None and not listo():
+            self.omitidos_backend_caido += 1  # backend caído: no se arma el cuerpo (cortacircuitos)
+            return
         tc = ctrl.traci.constants
         vehiculos = []
         for veh, es_app in self.registro.con_app.items():
@@ -193,6 +226,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
     ap.add_argument("--ritmo", type=float, default=None,
                     help="Veces el tiempo real (1 = en vivo para la demo del espejo); sin esto, lo más rápido posible")
     ap.add_argument("--sin-espejo", action="store_true", help="No mandar el bloque interno espejo")
+    ap.add_argument("--sin-liquidar", action="store_true",
+                    help="No cerrar al final las sesiones abiertas (por defecto se liquidan con motivo manual)")
     args, extra = ap.parse_known_args(argv)
 
     cfg = SUMO / f"{args.escenario}.sumocfg"
@@ -249,6 +284,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
             ctrl.agregar_hook(_progreso)
             ctrl.correr(args.hasta)
             t_final = ctrl.t
+            abiertas_al_terminar = len(puente.abiertas)
+            liquidadas = 0 if args.sin_liquidar else liquidar_al_final(puente, t_final)
     finally:
         sesiones.cerrar()
         if publicador is not None:
@@ -269,6 +306,11 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
         "guia": guia.resumen() if guia else None,
         "sesiones_maquina": sesiones.resumen(),
         "nucleo": puente.resumen(),
+        "abiertas_al_terminar_la_simulacion": abiertas_al_terminar,
+        "liquidadas_fin_corrida": liquidadas,
+        "retencion_final_centavos": sum(f["retencion_neta_centavos"] for f in puente.libro().values()),
+        "libro_cuadra": libro_cuadra(puente),
+        "snapshots_omitidos_backend_caido": None if snapshots is None else snapshots.omitidos_backend_caido,
         "publicador": publicador.resumen() if publicador else None,
         "espejo": None if espejo is None else {
             "detalles_armados": espejo.detalles_armados, "recibos": len(espejo.recibos),

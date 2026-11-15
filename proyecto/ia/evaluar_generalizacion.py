@@ -53,12 +53,16 @@ def preparar_geolife_prueba() -> pd.DataFrame:
     return df
 
 
-def preparar_sumo_escenarios(sigma: int = 0) -> pd.DataFrame | None:
+def preparar_sumo_escenarios(sigma: int = 0,
+                             semillas: list[int] | None = None) -> pd.DataFrame | None:
     """Carga escenarios SUMO para un σ dado. Retorna None si no existen."""
     from .ventanas import remuestrear, ventanear
 
+    if semillas is None:
+        semillas = [101, 102, 103, 104, 105]
+
     dfs = []
-    for semilla in [101, 102, 103, 104, 105]:
+    for semilla in semillas:
         dir_sem = DIR_ESCENARIOS / f"semilla_{semilla}"
         archivo = dir_sem / f"trazas_sigma{sigma}.csv"
         if not archivo.exists():
@@ -291,10 +295,13 @@ def evaluar_fuente(pipe, df: pd.DataFrame, fuente: str, meta: dict) -> dict:
 
 
 def evaluar_curvas_sigma(pipe, meta: dict) -> list[dict]:
-    """F1 y tasa vehiculo→a_pie por σ para los 3 sistemas."""
+    """F1 y tasa vehiculo→a_pie por σ para los 3 sistemas.
+    Usa 2 semillas para mantener el tiempo razonable."""
+    semillas_sigma = [101, 103]
     resultados = []
     for sigma in SIGMAS:
-        df_sumo = preparar_sumo_escenarios(sigma)
+        print(f"  σ={sigma}...", flush=True)
+        df_sumo = preparar_sumo_escenarios(sigma, semillas=semillas_sigma)
         if df_sumo is None:
             print(f"  σ={sigma}: sin datos SUMO, saltando")
             continue
@@ -327,7 +334,7 @@ def evaluar_curvas_sigma(pipe, meta: dict) -> list[dict]:
                 np.sum((y_t == "vehiculo") & (y_p == "a_pie")) / n_veh
                 if n_veh > 0 else 0.0
             )
-            boot = bootstrap_agrupado(y_t, y_p, grupos, n_boot=500, semilla=2026)
+            boot = bootstrap_agrupado(y_t, y_p, grupos, n_boot=200, semilla=2026)
             resultados.append({
                 "sigma": sigma,
                 "sistema": sistema,
@@ -346,9 +353,11 @@ def evaluar_curvas_sigma(pipe, meta: dict) -> list[dict]:
     return resultados
 
 
-def analizar_trafico_lento(pipe, meta: dict) -> dict | None:
+def analizar_trafico_lento(pipe, meta: dict,
+                           df_sumo: pd.DataFrame | None = None) -> dict | None:
     """Analiza ventanas de vehículo con vel_media < 8 km/h (tráfico lento)."""
-    df_sumo = preparar_sumo_escenarios(sigma=5)
+    if df_sumo is None:
+        df_sumo = preparar_sumo_escenarios(sigma=5)
     if df_sumo is None:
         return None
 
@@ -397,7 +406,7 @@ def analizar_trafico_lento(pipe, meta: dict) -> dict | None:
             },
         }
 
-    del df_sumo, df_lento
+    del df_lento
     gc.collect()
     return resultado
 
@@ -425,28 +434,28 @@ def ejecutar():
     del df_geo
     gc.collect()
 
-    # 2. SUMO escenarios (σ=5 como referencia)
+    # 2. SUMO escenarios (σ=5 como referencia) — carga única
     hay_sumo = False
-    for escenario_tipo in ["normal", "trafico_lento", "peaton_rapido"]:
-        print(f"\n=== SUMO {escenario_tipo} ===")
-        df_sumo = preparar_sumo_escenarios(sigma=5)
-        if df_sumo is None:
-            print("  Sin datos SUMO (contenedor no corrió)")
-            break
+    print("\n=== Cargando SUMO σ=5 (5 semillas) ===")
+    df_sumo = preparar_sumo_escenarios(sigma=5)
+    if df_sumo is None:
+        print("  Sin datos SUMO (contenedor no corrió)")
+    else:
         hay_sumo = True
-        df_esc = df_sumo[df_sumo["escenario"] == escenario_tipo]
-        if len(df_esc) == 0:
-            print(f"  Sin ventanas para {escenario_tipo}")
-            continue
+        for escenario_tipo in ["normal", "trafico_lento", "peaton_rapido"]:
+            print(f"\n=== SUMO {escenario_tipo} ===")
+            df_esc = df_sumo[df_sumo["escenario"] == escenario_tipo]
+            if len(df_esc) == 0:
+                print(f"  Sin ventanas para {escenario_tipo}")
+                continue
 
-        fuente = f"sumo_{escenario_tipo}"
-        res = evaluar_fuente(pipe, df_esc.copy(), fuente, meta)
-        resultados["fuentes"][fuente] = res
-        print(f"  {res['n_ventanas']} ventanas, RF macro-F1: {res['rf']['macro_f1']:.4f}")
-        del df_esc
-    if df_sumo is not None:
+            fuente = f"sumo_{escenario_tipo}"
+            res = evaluar_fuente(pipe, df_esc.copy(), fuente, meta)
+            resultados["fuentes"][fuente] = res
+            print(f"  {res['n_ventanas']} ventanas, RF macro-F1: {res['rf']['macro_f1']:.4f}")
+            del df_esc
         del df_sumo
-    gc.collect()
+        gc.collect()
 
     # 3. Grabaciones caseras
     caseras_dir = Path(__file__).resolve().parent.parent.parent.parent.parent / "proyecto" / "datos"
@@ -469,10 +478,13 @@ def ejecutar():
         df_curvas.to_csv(DIR_REPORTES / "curvas_sigma.csv", index=False)
         print(f"  {len(curvas)} puntos guardados en curvas_sigma.csv")
 
-    # 5. Tráfico lento
+    # 5. Tráfico lento (recarga σ=5 con 2 semillas para no duplicar la carga grande)
     if hay_sumo:
         print("\n=== Tráfico lento ===")
-        tl = analizar_trafico_lento(pipe, meta)
+        df_sumo_tl = preparar_sumo_escenarios(sigma=5, semillas=[101, 103])
+        tl = analizar_trafico_lento(pipe, meta, df_sumo=df_sumo_tl)
+        del df_sumo_tl
+        gc.collect()
         resultados["trafico_lento"] = tl
         if tl:
             print(f"  {tl['n_ventanas']} ventanas, {tl['minutos']} min")

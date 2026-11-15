@@ -4,10 +4,11 @@ import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
-import { getBilletera, mensajeUsuario } from '@/src/api/cliente';
+import { getBilletera } from '@/src/api/cliente';
 import type { Billetera, Movimiento, TipoMovimiento } from '@/src/api/tipos';
 import { COLORES } from '@/src/ui/colores';
 import { Boton, fechaLocal, usd } from '@/src/ui/comunes';
+import { AvisoError } from '@/src/ui/AvisoError';
 
 const NOMBRES: Record<TipoMovimiento, string> = {
   recarga: 'Recarga',
@@ -23,7 +24,7 @@ export default function BilleteraScreen() {
   const { api, usuarioId, cargado } = useAjustes();
   const [billetera, setBilletera] = useState<Billetera | null>(null);
   const [refrescando, setRefrescando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const cargar = useCallback(async () => {
     if (!cargado) return;
@@ -31,7 +32,7 @@ export default function BilleteraScreen() {
     try {
       setBilletera(await getBilletera(usuarioId, api));
     } catch (e) {
-      setError(mensajeUsuario(e));
+      setError(e);
     }
   }, [api, usuarioId, cargado]);
 
@@ -69,7 +70,7 @@ export default function BilleteraScreen() {
             )}
           </View>
           <Boton texto="Recargar con Payphone" onPress={() => router.push('/recarga')} />
-          {error && <Text style={styles.error}>{error}</Text>}
+          <AvisoError error={error} alReintentar={cargar} />
           <Text style={styles.subtitulo}>Movimientos</Text>
         </View>
       }

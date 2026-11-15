@@ -1,0 +1,59 @@
+1
+00:00:00,000 --> 00:00:20,000
+Con la tarjeta SERT pagas bloques de 30 min aunque te quedes 10.
+e-sert te guía a un puesto libre y cobra solo el tiempo real.
+
+2
+00:00:20,000 --> 00:00:35,000
+La laptop simula el centro de Cuenca con SUMO (izquierda)
+y el visor muestra puestos y autos en vivo (centro).
+
+3
+00:00:35,000 --> 00:00:50,000
+A la derecha, el teléfono espejo: abre el modo espejo
+y elige un conductor simulado con la app.
+
+4
+00:00:50,000 --> 00:01:10,000
+sim_busca_7, en Guiado: la app le asignó un puesto
+cerca de la Catedral Nueva y lo lleva por la ruta azul.
+
+5
+00:01:10,000 --> 00:01:30,000
+Prueba de red: modo avión. El espejo pasa a "Reconectando"
+y vuelve solo a "En vivo" al recuperar la señal.
+
+6
+00:01:30,000 --> 00:01:54,000
+sim_busca_7 llega a su puesto: Estacionado.
+El teléfono no se mueve; todo lo hace la simulación.
+
+7
+00:01:54,000 --> 00:02:30,000
+Otro conductor, sim_busca_4, ya estacionó y camina (A pie):
+el puesto sigue siendo suyo y el costo corre en vivo.
+
+8
+00:02:30,000 --> 00:02:45,000
+Cuando la simulación detecta que sim_busca_7 se fue,
+cierra la sesión y abre el recibo solo.
+
+9
+00:02:45,000 --> 00:02:56,000
+0,6 min se cobran como 10 min: $0,08.
+Con la tarjeta SERT habría pagado $0,25.
+
+10
+00:02:56,000 --> 00:03:10,000
+De vuelta al selector: se puede seguir
+a otro conductor simulado.
+
+11
+00:03:10,000 --> 00:03:30,000
+sim_busca_4 sigue a pie hasta el fin de la corrida:
+el espejo marca "Finalizado".
+
+12
+00:03:30,000 --> 00:03:40,000
+Los KPIs completos (guiado frente a búsqueda a ciegas)
+están en la sección de Tyrone del informe.

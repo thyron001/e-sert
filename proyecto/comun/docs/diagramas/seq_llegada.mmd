@@ -1,0 +1,30 @@
+%% Llegada: guía → confirmación → retención (contrato §3 y §4.3)
+sequenceDiagram
+  autonumber
+  participant U as Conductor (app)
+  participant A as API /api/v1
+  participant M as MapaOcupacion
+  participant S as ServicioSesiones
+  participant B as Billetera (libro)
+  U->>A: GET /guia?lat&lon&destino_lat&destino_lon
+  A->>M: guiar(ConsultaGuia)
+  M-->>A: puesto libre más cercano al destino
+  A-->>U: 200 {puesto_id, lat, lon, distancia_m}
+  Note over U: conduce hasta el puesto
+  U->>A: POST /sesiones {usuario_id, placa, puesto_id, ts}
+  A->>S: iniciar(usuario, placa, puesto)
+  S->>B: estado(usuario)
+  alt saldo < 0
+    S-->>A: SESIONES_BLOQUEADAS
+    A-->>U: 403 {error}
+  else disponible < bloque mínimo ($0,25)
+    S-->>A: SALDO_INSUFICIENTE
+    A-->>U: 402 {error}
+  else puesto lleno
+    S-->>A: PUESTO_LLENO
+    A-->>U: 409 {error}
+  else todo bien
+    S->>B: retener(25 centavos, sesion_id)
+    S->>M: fijar(puesto, ocupados + 1)
+    A-->>U: 201 {sesion_id, estado: ESTACIONADO, retenido: 0.25}
+  end

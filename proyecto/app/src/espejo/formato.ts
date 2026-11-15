@@ -6,7 +6,7 @@ export function mmss(segundos: number): string {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
-export const usd = (v: number) => `$${v.toFixed(2)}`;
+export const usd = (v: number) => `$${v.toFixed(2).replace('.', ',')}`; // formato de Ecuador: $0,50
 
 export const NOMBRE_ESTADO: Record<EstadoSesion, string> = {
   BUSCANDO: 'Buscando',

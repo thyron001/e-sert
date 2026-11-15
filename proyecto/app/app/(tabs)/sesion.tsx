@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
 import { rutaDelFlujo, useSesion } from '@/src/estado/sesion';
+import { Bloqueo, useBloqueo } from '@/src/pantallas/Bloqueo';
+import { LogoESert } from '@/src/componentes/LogoESert';
 import { COLORES } from '@/src/ui/colores';
 import { Boton, usd } from '@/src/ui/comunes';
 
@@ -13,9 +15,12 @@ export default function SesionScreen() {
   const { modoMock } = useAjustes();
   const { flujo } = useSesion();
   const ruta = rutaDelFlujo(flujo);
+  const { billetera, bloqueo } = useBloqueo();
+  const bloqueado = !ruta && !!bloqueo?.bloqueado;
 
   return (
     <ScrollView contentContainerStyle={styles.contenedor}>
+      <LogoESert />
       <Text style={styles.titulo}>Parquear en el Centro</Text>
       <Text style={styles.ayuda}>
         Elige un destino y la app te asigna un puesto SERT libre cerca. El recorrido es simulado: el teléfono no se
@@ -33,7 +38,10 @@ export default function SesionScreen() {
       {ruta ? (
         <Boton texto={ruta === '/sesion/guiar' ? 'Continuar el guiado' : 'Ver sesión activa'} onPress={() => router.push(ruta)} />
       ) : (
-        <Boton texto="Buscar puesto" onPress={() => router.push('/buscar')} />
+        <>
+          <Boton texto="Buscar puesto" onPress={() => router.push('/buscar')} deshabilitado={bloqueado} />
+          {bloqueado && billetera && bloqueo && <Bloqueo bloqueo={bloqueo} billetera={billetera} />}
+        </>
       )}
       <Text style={styles.fuente}>{modoMock ? 'Datos: mock (sin backend)' : 'Datos: backend real'}</Text>
       <Boton

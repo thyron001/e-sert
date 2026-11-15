@@ -21,7 +21,10 @@ export function Boton({
     <Pressable
       style={[estilos.boton, inactivo && estilos.inactivo, style]}
       onPress={onPress}
-      disabled={inactivo}>
+      disabled={inactivo}
+      accessibilityRole="button"
+      accessibilityLabel={texto}
+      accessibilityState={{ disabled: inactivo, busy: ocupado }}>
       {ocupado ? <ActivityIndicator color="#fff" /> : <Text style={estilos.texto}>{texto}</Text>}
     </Pressable>
   );
@@ -29,12 +32,14 @@ export function Boton({
 
 /** Fecha y hora locales del teléfono, p. ej. "27/10 10:42". */
 export function fechaLocal(iso: string): string {
-  const d = new Date(iso);
+  // Hora de Ecuador (UTC−5, sin horario de verano), aunque el teléfono esté en otra zona.
+  const d = new Date(Date.parse(iso) - 5 * 3600_000);
   const dos = (n: number) => String(n).padStart(2, '0');
-  return `${dos(d.getDate())}/${dos(d.getMonth() + 1)} ${dos(d.getHours())}:${dos(d.getMinutes())}`;
+  return `${dos(d.getUTCDate())}/${dos(d.getUTCMonth() + 1)} ${dos(d.getUTCHours())}:${dos(d.getUTCMinutes())}`;
 }
 
-export const usd = (v: number) => `${v < 0 ? '−' : ''}$${Math.abs(v).toFixed(2)}`;
+/** Moneda en el formato de Ecuador: $0,50 (coma decimal). */
+export const usd = (v: number) => `${v < 0 ? '−' : ''}$${Math.abs(v).toFixed(2).replace('.', ',')}`;
 
 const estilos = StyleSheet.create({
   boton: {
@@ -42,6 +47,8 @@ const estilos = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
+    minHeight: 44, // objetivo táctil de al menos 44 pt
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
   },

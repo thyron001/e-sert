@@ -1,0 +1,102 @@
+{
+ "vuelta": 1,
+ "fecha": "2026-11-13T20:57:28-0500",
+ "ritmo": 10,
+ "fases_s": {
+  "arranque": 11.3,
+  "demo_guiada": 280.2,
+  "apagado": 1.8
+ },
+ "presupuesto_s": {
+  "arranque": 60,
+  "demo_guiada": 300,
+  "apagado": 15
+ },
+ "arranque_componentes_s": {
+  "backend": 3.3,
+  "controlador": 7.1,
+  "visor": 0.3,
+  "total": 11.1,
+  "apagado": 1.8
+ },
+ "eventos": [
+  {
+   "t": 11.3,
+   "evento": "demo lista (tabla de arranque)"
+  },
+  {
+   "t": 14.4,
+   "evento": "el teléfono espejo sigue a sim_busca_0 (destino San Sebastián, GUIADO)"
+  },
+  {
+   "t": 21.7,
+   "evento": "visor: halo del espejo visible, ruta 20 puntos, puesto pa_49222376_0"
+  },
+  {
+   "t": 33.7,
+   "evento": "el teléfono espejo sigue a sim_busca_18 (vuelve a su auto, t_sim = 204.0)"
+  },
+  {
+   "t": 59.3,
+   "evento": "el teléfono espejo sigue a sim_busca_30 (vuelve a su auto, t_sim = 455.0)"
+  },
+  {
+   "t": 63.4,
+   "evento": "el teléfono espejo sigue a sim_busca_77 (vuelve a su auto, t_sim = 494.0)"
+  },
+  {
+   "t": 70.0,
+   "evento": "el teléfono espejo sigue a sim_busca_85 (vuelve a su auto, t_sim = 547.0)"
+  },
+  {
+   "t": 70.1,
+   "evento": "el teléfono espejo sigue a sim_busca_37 (vuelve a su auto, t_sim = 548.0)"
+  },
+  {
+   "t": 163.9,
+   "evento": "sesión de sim_busca_18 CERRADA con recibo: cobrado $0.13 (tarjeta SERT $0.25)"
+  },
+  {
+   "t": 291.4,
+   "evento": "grabación del plan B: 3159 mensajes en snapshots_demo.jsonl"
+  }
+ ],
+ "recibo": {
+  "veh": "sim_busca_18",
+  "minutos_reales": 14.23,
+  "minutos_cobrados": 15,
+  "cobrado_usd": 0.13,
+  "tarjeta_sert_usd": 0.25,
+  "ahorro_usd": 0.12,
+  "billetera": {
+   "saldo": 13.97,
+   "disponible": 13.97
+  }
+ },
+ "visor": {
+  "halo": true,
+  "ruta": 20,
+  "puesto": "pa_49222376_0"
+ },
+ "seguidos": [
+  "sim_busca_0",
+  "sim_busca_3",
+  "sim_busca_18",
+  "sim_busca_4",
+  "sim_busca_5",
+  "sim_busca_6",
+  "sim_busca_7",
+  "sim_busca_30",
+  "sim_busca_22",
+  "sim_busca_77",
+  "sim_busca_85",
+  "sim_busca_37"
+ ],
+ "grabados_plan_b": 3159,
+ "limpieza": {
+  "puertos_libres": true,
+  "sumo_gui": []
+ },
+ "tropiezos": [],
+ "logs": "semanas/S4/Tyrone/codigo/demo/logs/20261113-205234"
+}

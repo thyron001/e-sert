@@ -1,5 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { ErrorParaUsuario } from '@/src/errores';
 
 export * from './formato';
 
@@ -36,7 +37,7 @@ export function listarGrabaciones(): File[] {
 /** Abre la hoja de compartir del sistema (correo, Drive, WhatsApp...) con el CSV. */
 export async function compartir(archivo: File): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) {
-    throw new Error('Compartir no está disponible en este dispositivo');
+    throw new ErrorParaUsuario('Compartir no está disponible en este dispositivo.');
   }
   await Sharing.shareAsync(archivo.uri, {
     mimeType: 'text/csv',

@@ -1,0 +1,40 @@
+{
+ "teletransportes": {
+  "descripcion": "menos del 1 % de vehículos con teletransporte en cada corrida",
+  "max_pct": 0.166,
+  "corridas": 40,
+  "cumple": true
+ },
+ "linea_base_vs_s3": {
+  "descripcion": "línea base (0 %) a ±10 % de la de S3-1",
+  "final_s": 432.7,
+  "s3_s": 436.1,
+  "diferencia_pct": -0.79,
+  "cumple": true,
+  "nota": "S3-1 usó las semillas 1–3; la final, 1–5 (las 1–3 son las mismas corridas)."
+ },
+ "rf_final_vs_umbral": {
+  "descripcion": "rf_final no tiene más falsas liberaciones que el umbral",
+  "por_penetracion": [
+   {
+    "penetracion": 20,
+    "umbral": 88.89,
+    "rf_final": 0.0,
+    "cumple": true
+   },
+   {
+    "penetracion": 50,
+    "umbral": 87.16,
+    "rf_final": 0.0,
+    "cumple": true
+   },
+   {
+    "penetracion": 80,
+    "umbral": 86.64,
+    "rf_final": 0.0,
+    "cumple": true
+   }
+  ],
+  "cumple": true
+ }
+}

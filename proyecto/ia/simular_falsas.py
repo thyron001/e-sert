@@ -230,10 +230,10 @@ class MaquinaContrato(MaquinaSesion):
 MAQUINAS = {"freddy": lambda uid: MaquinaSesion(uid), "contrato": lambda uid: MaquinaContrato(uid)}
 
 
-def simular_sesion(ep: Episodio, w: VentanasEp, sistema: str, metodo: str, k: int,
-                   maquina: str = "freddy") -> tuple[int, float]:
-    """Devuelve (resultado, retardo_s): resultado 1 = falsa liberación, 0 = cierre correcto,
-    -1 = sin cierre. El retardo solo es válido con resultado 0."""
+def _simular(ep: Episodio, w: VentanasEp, sistema: str, metodo: str, k: int,
+             maquina: str = "freddy") -> tuple[int, float, float]:
+    """(resultado, retardo_s, adelanto_s): resultado 1 = falsa liberacion, 0 = cierre correcto, -1 = sin cierre.
+    `adelanto_s` = instante del cierre menos la salida real (negativo si se cerro antes de que el auto arranque)."""
     maq = MAQUINAS[maquina](ep.uid)
     sv = Suavizador(k=k, metodo=metodo)
     probas = w.probas[sistema]
@@ -242,10 +242,19 @@ def simular_sesion(ep: Episodio, w: VentanasEp, sistema: str, metodo: str, k: in
         modo = sv.actualizar(res, probas[j])["modo"]
         for tr in maq.actualizar(modo, float(w.dist_m[j]), float(w.t_fin[j])):
             if tr.hacia == "CERRADA":
+                dt = float(w.t_fin[j]) - ep.t_salida
                 if CLASES[w.modo_real[j]] != "vehiculo":
-                    return 1, np.nan
-                return 0, float(w.t_fin[j]) - ep.t_salida
-    return -1, np.nan
+                    return 1, np.nan, dt
+                return 0, dt, dt
+    return -1, np.nan, np.nan
+
+
+def simular_sesion(ep: Episodio, w: VentanasEp, sistema: str, metodo: str, k: int,
+                   maquina: str = "freddy") -> tuple[int, float]:
+    """Devuelve (resultado, retardo_s): resultado 1 = falsa liberación, 0 = cierre correcto,
+    -1 = sin cierre. El retardo solo es válido con resultado 0."""
+    r, ret, _ = _simular(ep, w, sistema, metodo, k, maquina)
+    return r, ret
 
 
 _DATOS: dict = {}
@@ -256,10 +265,11 @@ def _tarea(args):
     eps, por_sigma = _DATOS["eps"], _DATOS["ventanas"]
     res = np.full((len(SIGMAS), len(eps)), -1, dtype=np.int8)
     ret = np.full((len(SIGMAS), len(eps)), np.nan)
+    ade = np.full((len(SIGMAS), len(eps)), np.nan)
     for a, sg in enumerate(SIGMAS):
         for i, ep in enumerate(eps):
-            res[a, i], ret[a, i] = simular_sesion(ep, por_sigma[sg][i], sistema, metodo, k, maquina)
-    return (sistema, metodo, k, maquina), res, ret
+            res[a, i], ret[a, i], ade[a, i] = _simular(ep, por_sigma[sg][i], sistema, metodo, k, maquina)
+    return (sistema, metodo, k, maquina), res, ret, ade
 
 
 def _ic(estad, n: int, semilla: int = 7) -> tuple[float, float]:
@@ -272,7 +282,7 @@ def _ic(estad, n: int, semilla: int = 7) -> tuple[float, float]:
     return float(r.confidence_interval.low), float(r.confidence_interval.high)
 
 
-def resumir(clave, res: np.ndarray, ret: np.ndarray) -> dict:
+def resumir(clave, res: np.ndarray, ret: np.ndarray, ade: np.ndarray | None = None) -> dict:
     sistema, metodo, k, maquina = clave
     n = res.shape[1]
     falsa_ses = (res == 1).mean(axis=0)  # por sesión: fracción de σ con falsa liberación
@@ -296,6 +306,12 @@ def resumir(clave, res: np.ndarray, ret: np.ndarray) -> dict:
         fila[f"falsas_100_s{sg}"] = 100.0 * float((res[a] == 1).mean())
         v = ret[a][~np.isnan(ret[a])]
         fila[f"retardo_mediano_s{sg}"] = float(np.median(v)) if v.size else np.nan
+    if ade is not None:
+        falsas = ade[res == 1]
+        fila["falsas_adelanto_mediano_s"] = float(np.median(falsas)) if falsas.size else np.nan
+        fila["falsas_cierre_hasta_30s_antes_pct"] = float(100 * np.mean(falsas >= -30)) if falsas.size else np.nan
+        fila["falsas_cierre_mas_de_30s_antes_100"] = 100.0 * float(np.sum(falsas < -30)) / res.size \
+            if falsas.size else 0.0
     fila["cumple_retardo"] = bool(fila["retardo_mediano_s"] <= RETARDO_MAX_S)
     return fila
 
@@ -332,7 +348,7 @@ def ejecutar(semillas=(101, 102, 103, 104, 105), max_sesiones=None, workers=3, s
             resultados = list(ex.map(_tarea, combos))
     else:
         resultados = [_tarea(c) for c in combos]
-    todas = pd.DataFrame([resumir(c, r, t) for c, r, t in resultados])
+    todas = pd.DataFrame([resumir(c, r, t, d) for c, r, t, d in resultados])
     REPORTES.mkdir(exist_ok=True)
     destino = Path(salida) if salida else REPORTES / "suavizado_k.csv"
     contrato = destino.with_name(destino.stem + "_contrato.csv")
@@ -357,7 +373,12 @@ def main():
     ap.add_argument("--max-sesiones", type=int, default=None)
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--salida", type=str, default=None)
+    ap.add_argument("--episodios", type=Path, default=None,
+                    help="carpeta con episodios_s<semilla>.csv (por defecto ia/sumo/salidas)")
     a = ap.parse_args()
+    if a.episodios is not None:
+        global SALIDAS
+        SALIDAS = a.episodios
     ejecutar(tuple(a.semillas), a.max_sesiones, a.workers, a.salida)
 
 
