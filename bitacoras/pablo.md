@@ -528,3 +528,26 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Qué NO se subió y por qué:**
 - `semanas/S1/Pablo/codigo/ia/modelos/rf_v0.joblib` (188 MB): GitHub rechaza archivos de más de 100 MB. Se regenera con `python -m ia.entrenar` (metadatos en `rf_v0_info.json`); ya no hace falta porque `rf_final.joblib` (48 MB) sí está versionado.
 - `semanas/S2/Pablo/codigo/ia/datos/escenarios/` (1,2 GB, 40 archivos de las semillas 101-105): son datos generados que inflarían el repositorio compartido. Se regeneran con los scripts de `ia/datos/` desde las salidas de SUMO; quedan en la computadora de Pablo.
+
+## Cierre · 2026-11-17 · Pendientes, problemas y pedidos de VPS (para la sesión integrada)
+**Estado:** todo el trabajo de Pablo está en GitHub (`main`, `pablo/s1`–`s4`, `pablo/s4-cierre`). Un solo Claude Code va a ejecutar el trabajo de todos desde un clon del repo, así que esto es lo que ese clon debe saber.
+
+**Lo que no se completó (S4-3 y alrededores):**
+- S4-3 queda `parcial` (5/6): el armado con `--fuentes proyecto` ya se hizo y `verificar_informe.py` da OK, pero el criterio de "pruebas pasan" global no se verificó con SUMO.
+- Las 15 preguntas del anexo de Freddy, Tyrone y Miguel quedan «a confirmar» por cada uno (`proyecto/informe/anexos/preguntas_profesor.md`).
+- Sin etiqueta `v1.0`: falta verificar SUMO, e2e, demo y VPS.
+- La etiqueta de "falsa liberación" de GeoLife tiene sesgo y el RF de SUMO se evalúa en el mismo simulador que lo entrenó (circularidad); está declarado en la sección de IA del informe.
+
+**Datos que no están en GitHub (pesan demasiado) y cómo regenerarlos:**
+- `semanas/S1/Pablo/codigo/ia/modelos/rf_v0.joblib` (188 MB, >100 MB): ya no se usa; `python -m ia.entrenar` lo regenera.
+- `semanas/S2/Pablo/codigo/ia/datos/escenarios/` (1,2 GB, semillas 101–105): se regenera en el contenedor con `docker exec -w /home/vanet/results/e-sert/semanas/S2/Pablo/codigo van3twin bash -lc "python3 -m ia.escenarios_dificiles --semillas 101 102 103 104 105"`. Lo necesitan `ia/evaluar_final.py` y `ia/tests` de escenarios difíciles; sin él esas pruebas se omiten.
+- `ia/datos/procesados/*.parquet` (`ventanas_final.parquet`, `ventanas_prueba_geolife.parquet`) no están versionados: se generan con `python3 -m ia.datos.construir_entrenamiento_final` (necesita GeoLife y SUMO). El modelo congelado `rf_final.joblib` (48 MB) sí está versionado y no hace falta reentrenar.
+
+**@Tyrone [VPS] — pedidos:**
+1. **`proyecto/backend/Dockerfile` (línea 17) copia solo `inferencia.py ventanas.py caracteristicas.py umbral.py`.** Desde S3 `inferencia.py` también importa `validacion.py` (y el modelo usa `bosque_plano.py`), así que en la imagen del VPS `import ia.inferencia` falla con ImportError y el backend cae sin RF. Añadir `validacion.py bosque_plano.py` a esa lista. No lo cambié yo: el Dockerfile y el despliegue son tuyos.
+2. **`proyecto/backend/requirements-servidor.txt` no trae `numpy`, `pandas` ni `scikit-learn==1.9.1` ni `joblib`.** Sin ellos el RF no carga en el VPS (usa el umbral, con aviso en el log). Añadirlos si la demo en línea debe usar `rf_final`. La imagen sube ~150 MB por scikit-learn.
+3. `ia/inferencia.py` verifica el SHA-256 de `rf_final.joblib` contra `rf_final.json` antes de cargarlo. Si el despliegue cambia el modelo, el hash debe coincidir con `kpis/resultados/final/manifiesto.json` (`1bdac0d7…fd013e2`). Comprobar en el VPS que `proyecto/ia/modelos/rf_final.joblib` llegó completo (48 020 756 bytes): `.dockerignore` no debe excluir `proyecto/ia/modelos/`.
+4. Variable `ESERT_TOKEN_SIM` en Dokploy y redespliegue (pedido de Freddy y Miguel, sigue sin hacerse).
+5. Tras redesplegar, comprobar `/salud` y que el log no diga «sin modelo, usando umbral»: eso indica que el RF no cargó.
+
+**@Freddy:** confirmar `REGRESANDO → A_PIE` (con k=5 si se corrige) y las rutas `/pagos/*` en el contrato; son pedidos abiertos de S3-2 y S4-1.
