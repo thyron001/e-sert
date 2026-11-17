@@ -695,7 +695,7 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
    - Los integré con los 5 commits que Freddy había subido desde otra máquina y resolví dos conflictos:
      - `puente_nucleo.Publicador`: combiné el cortacircuitos con el cierre limpio;
      - `correr_kpis.py`: `--libsumo` junto a `--gui` y `--captura`.
-   - Con eso, en `semanas/S4/Freddy/codigo`: traci unitarias 80 pasan y 12 se saltan, **traci e2e 21/21**, **backend e2e 11/11** (con `p50_rf_s2` y `--libsumo`). Las 4 fallas de `main` desaparecen.
+   - Con eso, en `semanas/S4/Freddy/codigo`: traci unitarias 80 pasan y 12 se saltan, **traci e2e 21/21**, **backend e2e 11/11** (con `p50_rf_s2` y `--libsumo`). Los 2 fallos de `main` desaparecen.
 5. **VPS:**
    - `GET /salud` responde 200 (`contrato: 1`) y `/visor/` responde 200.
    - `pytest -m vps` cumple **6/6**: `/sim/paso` e `/interno/snapshot` sin token dan 401, así que `ESERT_TOKEN_SIM` está configurado en Dokploy (pedido VPS-1 de Freddy).
