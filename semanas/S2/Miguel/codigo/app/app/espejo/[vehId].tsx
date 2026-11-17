@@ -1,49 +1,34 @@
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import type { EstadoSesion, MensajeEspejo } from '@/src/api/tipos';
 import { BannerAvisos } from '@/src/espejo/componentes/BannerAvisos';
 import { CostoVivo } from '@/src/espejo/componentes/CostoVivo';
 import { LineaTiempo } from '@/src/espejo/componentes/LineaTiempo';
 import { MapaEspejo } from '@/src/espejo/componentes/MapaEspejo';
 import { ReciboEspejo } from '@/src/espejo/componentes/ReciboEspejo';
 import { NOMBRE_ESTADO, mmss } from '@/src/espejo/formato';
-import { suscribirMock } from '@/src/espejo/recorridoMock';
-import { esFinEspejo, esMensajeEspejo } from '@/src/espejo/validar';
+import { IndicadorConexion } from '@/src/espejo/componentes/IndicadorConexion';
+import { exportarCSV } from '@/src/espejo/latencia';
+import { usarEspejo } from '@/src/espejo/usarEspejo';
 import { COLORES } from '@/src/ui/colores';
 import { Boton } from '@/src/ui/comunes';
 
 export default function PantallaEspejo() {
   const { vehId } = useLocalSearchParams<{ vehId: string }>();
-  const [mensaje, setMensaje] = useState<MensajeEspejo | null>(null);
-  const [inicios, setInicios] = useState<Partial<Record<EstadoSesion, number>>>({});
-  const [fin, setFin] = useState(false);
+  const { mensaje, inicios, fin, conexion, modo, resumen, registro, reiniciar } = usarEspejo(vehId);
   const [verRecibo, setVerRecibo] = useState(false);
-  const [ronda, setRonda] = useState(0);
+  const reciboMostrado = useRef(false);
 
-  // MOCK: suscribirMock tiene la misma firma que tendrá el cliente de WS /ws/espejo/{veh_id}.
+  // El recibo se abre solo la primera vez que llega en la sesión.
   useEffect(() => {
-    setMensaje(null);
-    setInicios({});
-    setFin(false);
-    setVerRecibo(false);
-    let reciboMostrado = false;
-    return suscribirMock(vehId, (m) => {
-      if (esFinEspejo(m)) return setFin(true);
-      if (!esMensajeEspejo(m)) return; // se descartan mensajes malformados
-      setMensaje(m);
-      if (m.estado) {
-        const estado = m.estado;
-        setInicios((prev) => (estado in prev ? prev : { ...prev, [estado]: m.t_sim }));
-      }
-      if (m.recibo && !reciboMostrado) {
-        reciboMostrado = true;
-        setVerRecibo(true);
-      }
-    });
-  }, [vehId, ronda]);
+    if (!mensaje) reciboMostrado.current = false;
+    if (mensaje?.recibo && !reciboMostrado.current) {
+      reciboMostrado.current = true;
+      setVerRecibo(true);
+    }
+  }, [mensaje]);
 
   // El Modal se dibuja por encima de toda la app: se cierra si la pantalla pierde el foco.
   useFocusEffect(useCallback(() => () => setVerRecibo(false), []));
@@ -53,7 +38,9 @@ export default function PantallaEspejo() {
 
   return (
     <View style={estilos.contenedor}>
-      <Stack.Screen options={{ title: `Espejo · ${vehId}` }} />
+      <Stack.Screen
+        options={{ title: `Espejo · ${vehId}`, headerRight: () => <IndicadorConexion conexion={conexion} /> }}
+      />
       <View style={estilos.mapa}>
         <MapaEspejo mensaje={mensaje} />
       </View>
@@ -71,12 +58,25 @@ export default function PantallaEspejo() {
         <View style={estilos.linea}>
           <LineaTiempo actual={estado} inicios={inicios} />
         </View>
-        {fin && <Text style={estilos.fin}>El vehículo salió de la simulación.</Text>}
+        {fin && (
+          <Text style={estilos.fin}>
+            {fin.motivo === 'no_existe' ? 'Ese vehículo ya no está en la simulación.' : 'El vehículo salió de la simulación.'}
+          </Text>
+        )}
+        {resumen.n > 0 && (
+          <Text style={estilos.latencia}>
+            Latencia ({modo}, n={resumen.n}): p50 {resumen.total_p50} ms · p95 {resumen.total_p95} ms · en el teléfono p50{' '}
+            {resumen.cliente_p50} ms
+          </Text>
+        )}
         <View style={estilos.botones}>
           {mensaje?.recibo && (
             <Boton texto="Ver recibo" onPress={() => setVerRecibo(true)} style={[estilos.boton, estilos.secundario]} />
           )}
-          <Boton texto="Reiniciar recorrido" onPress={() => setRonda((r) => r + 1)} style={estilos.boton} />
+          {fin && resumen.n > 0 && (
+            <Boton texto="Exportar CSV" onPress={() => exportarCSV(registro, modo).catch((e) => Alert.alert('No se pudo exportar', String(e)))} style={[estilos.boton, estilos.secundario]} />
+          )}
+          <Boton texto={modo === 'mock_interno' ? 'Reiniciar recorrido' : 'Reconectar'} onPress={reiniciar} style={estilos.boton} />
         </View>
       </View>
       <ReciboEspejo recibo={mensaje?.recibo ?? null} visible={verRecibo} alCerrar={() => setVerRecibo(false)} />
@@ -94,6 +94,7 @@ const estilos = StyleSheet.create({
   detalle: { color: COLORES.gris, marginBottom: 8 },
   linea: { marginTop: 12, backgroundColor: 'transparent' },
   fin: { marginTop: 8, color: COLORES.gris, textAlign: 'center' },
+  latencia: { marginTop: 6, color: COLORES.gris, fontSize: 12, textAlign: 'center', fontVariant: ['tabular-nums'] },
   botones: { flexDirection: 'row', gap: 8, backgroundColor: 'transparent' },
   boton: { flex: 1 },
   secundario: { backgroundColor: COLORES.libre },
