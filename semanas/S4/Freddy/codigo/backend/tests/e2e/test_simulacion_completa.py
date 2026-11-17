@@ -1,6 +1,6 @@
 """Controlador TraCI sin GUI (SUMO en `van3twin`) contra el backend vivo de esta computadora.
 
-1 800 s simulados (el prompt dice 300; ver `HASTA_S`), penetración 20 %, semilla 1 (`traci.correr_kpis --id p20_rf_s1`). Mientras
+1 800 s simulados (el prompt dice 300; ver `HASTA_S`), penetración 50 %, semilla 2 (`traci.correr_kpis --id p50_rf_s2 --libsumo`; S4-3, antes p20_rf_s1). Mientras
 corre, un cliente toma vehículos de `GET /espejo/candidatos`, los sigue por `/ws/espejo/{veh}` y
 mira el `snapshot` público. Al final se comprueba:
 
@@ -34,7 +34,9 @@ from .conftest import CODIGO, CONTENEDOR, CONTRATO, docker, host_desde_contenedo
 
 pytestmark = pytest.mark.e2e
 
-ID_CORRIDA = "p20_rf_s1"
+# S4-3: con rf_final (0 falsas liberaciones) al 20 % solo se cierra 1 sesión real en 1 800 s. Se usa el
+# escenario de la demo (50 %, semilla 2, primer cierre en t = 1 014 s), cambiable con ESERT_E2E_ID.
+ID_CORRIDA = os.environ.get("ESERT_E2E_ID", "p50_rf_s2")
 # El prompt pide 300 s, pero con las estadías de la demanda (10-120 min) en 300 s no se abre
 # ninguna sesión y todas las comprobaciones quedarían vacías. 1 800 s (~90 s reales) sí abre y
 # cierra sesiones. Se puede cambiar con ESERT_E2E_HASTA.
@@ -45,6 +47,10 @@ HASTA_S = int(os.environ.get("ESERT_E2E_HASTA", "1800"))
 PRECISION_S3_APP = 1.00
 MARGEN = 0.05
 MAX_SEGUIDOS = 6
+# S4-3: además de los candidatos (BUSCANDO/GUIADO), se siguen autos cuyo conductor ya vuelve: son los
+# que llegan a CERRADA dentro de la corrida. Con el umbral las sesiones se cerraban (en falso) enseguida.
+MAX_POR_CERRAR = 4
+ESTADOS_POR_CERRAR = {e.EstadoSesion.REGRESANDO, e.EstadoSesion.SALIENDO}
 TIMEOUT_CORRIDA_S = 240
 
 
@@ -132,7 +138,7 @@ def test_simulacion_completa_contra_backend_vivo(requiere_sumo, arrancar_servido
     sufijo = "_e2e"
     log = tmp_path / "controlador.log"
     cmd = (f"python3 -m traci.correr_kpis --id {ID_CORRIDA} --hasta {HASTA_S} --publicar {url_cont} "
-           f"--sufijo {sufijo} --volcar {volcado_rel}")
+           f"--sufijo {sufijo} --volcar {volcado_rel} --libsumo")  # S4-3: sin socket TraCI, ~35 % menos
     snaps = Snapshots(servidor.ws)
     snaps.start()
     seguidores: dict = {}
@@ -147,6 +153,13 @@ def test_simulacion_completa_contra_backend_vivo(requiere_sumo, arrancar_servido
                         if cand["id"] not in seguidores and len(seguidores) < MAX_SEGUIDOS:
                             seguidores[cand["id"]] = Seguidor(servidor.ws, cand["id"])
                             seguidores[cand["id"]].start()
+                if len(seguidores) < MAX_SEGUIDOS + MAX_POR_CERRAR:
+                    ultimo = next((m for _, m in reversed(snaps.recibidos) if isinstance(m, e.MensajeSnapshot)), None)
+                    for v in (ultimo.vehiculos if ultimo else []):
+                        if (v.con_app and v.estado in ESTADOS_POR_CERRAR and v.id not in seguidores
+                                and len(seguidores) < MAX_SEGUIDOS + MAX_POR_CERRAR):
+                            seguidores[v.id] = Seguidor(servidor.ws, v.id)
+                            seguidores[v.id].start()
                 time.sleep(0.2)
         if proc.poll() is None:
             proc.kill()
