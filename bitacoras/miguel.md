@@ -925,3 +925,85 @@ No hubo medición en modo VPS, porque el VPS aún no tiene el espejo.
 - Arreglar Exportar CSV en Android.
 
 **Evidencias:** ![](../semanas/S4/Miguel/evidencias/s3_plan-b-fotogramas.png) · [Explicación (PDF)](../semanas/S4/Miguel/explicaciones/s3_explicacion.pdf) · [Resumen de S4 (PDF)](../semanas/S4/Miguel/evidencias/resumen_S4_Miguel.pdf)
+
+## Estado final de Miguel · 2026-11-17 · Traspaso para ejecutar todo en una sola computadora
+**Estado:** informe de traspaso (no es una sesión del plan)
+
+**Dónde está el trabajo (todo en GitHub):**
+- **Ramas:** `miguel/s1` … `miguel/s4` están subidas y sin commits pendientes; la última es `miguel/s4` (`5f1542b`).
+- **La versión final y completa de mis módulos está en `semanas/S4/Miguel/codigo/`:**
+  - `app/`: Expo SDK 58, con S2-3, S3 y S4;
+  - `backend/asistente/` y `backend/pagos/`;
+  - `datos/`;
+  - `informe/miguel.md` con sus figuras.
+- **Lo que falta en `main`:**
+  - la unificación del 15-11 no fusionó mi trabajo: `proyecto/app` en `main` no tiene S2-3, S3 ni S4 (faltan `src/servicios`, `src/pantallas`, `src/config`, `src/errores.ts` y `app/demo.tsx`);
+  - para unificar basta copiar `semanas/S4/Miguel/codigo/app` a `proyecto/app`, porque ya incluye lo de `miguel/s3`;
+  - `backend/asistente` también hay que copiarlo a `proyecto/backend/asistente`.
+
+**Lo que no está en git, a propósito, y cómo reconstruirlo:**
+- **`node_modules`:** `cd proyecto/app && npm install`. Se probó con Node 26 y Expo SDK 58; Expo Go tiene que ser de SDK 58.
+- **`app/.env`** (los nombres están en `.env.example`):
+  - `EXPO_PUBLIC_API_URL=http://<ip-laptop>:8000/api/v1`, o `https://demo.e-sert.tesisucuenca.com/api/v1` para el VPS;
+  - `EXPO_PUBLIC_USE_MOCK=0`;
+  - `EXPO_PUBLIC_ESCALA_TIEMPO=60`, para que los avisos lleguen en segundos durante la demo;
+  - `EXPO_PUBLIC_ASISTENTE_URL`, vacío si el asistente está montado en el backend.
+  - La URL también se cambia desde **Ajustes de demo** (pulsación larga de 3 s en el logo), sin reinstalar.
+- **`backend/asistente/.env` y `backend/pagos/.env`:** `ANTHROPIC_API_KEY` y `PAYPHONE_TOKEN`/`PAYPHONE_STORE_ID`. Nunca van en el repo; sin ellos, el asistente usa reglas y Payphone corre en `mock`.
+- **Video del plan B (3:40):**
+  - enlace: https://drive.google.com/file/d/1ufErqkQ4MXsW4aW3cylTH1iSYx_nXHb8/view?usp=sharing;
+  - SHA-256 en `semanas/S4/Miguel/codigo/app/plan_b/ENLACE_VIDEO.md`.
+
+**Cómo levantar la app en local** (lo que se usó en la QA de S4):
+1. **Backend:** `cd proyecto && uvicorn backend.api.main:app --host 0.0.0.0 --port 8000`, con `PAYPHONE_MODO=mock` y `ESERT_TOKEN_SIM=<token-local>`.
+2. **Simulación:**
+   ```
+   docker exec -w /home/vanet/results/e-sert/proyecto -e ESERT_TOKEN_SIM=<token-local> -e DISPLAY=:99 van3twin bash -lc "python3 -m traci.correr_guiado --escenario app50_s1 --gui --publicar http://host.docker.internal:8000 --ritmo 5 --hasta 900"
+   ```
+   Con `--ritmo 1 --hasta 180` se ve "El auto salió de la simulación".
+3. **App:** `REACT_NATIVE_PACKAGER_HOSTNAME=<ip> npx expo start --lan` y escanear el QR con Expo Go.
+
+**Lo que quedó incompleto o con problemas:**
+- **S1-2 (parcial)** y la columna iPhone del checklist de S4-1:
+  - nunca hubo un iPhone físico; iOS solo se probó en el simulador de Xcode, que no permite tocar;
+  - con Expo Go en iPhone no se graba ni se mantiene el WebSocket en segundo plano.
+- **S2-1 (parcial 4/5):** iOS sin probar en un equipo real.
+- **Regreso de Payphone a la app en Android:** con Expo Go, Chrome y Brave no siempre vuelven por el enlace profundo. Falta una APK propia (`esert://`). La app consulta igual el estado del pago, así que la recarga se acredita.
+- **S4-1 (5/6):**
+  - el aviso de saldo bajo no se repitió en la batería;
+  - en un recibo del espejo, "Llegada" salió "—" (`sim_busca_4`).
+- **S4-2 (4/6):**
+  - no hubo ensayo contra el VPS: falta `ESERT_TOKEN_SIM`;
+  - el guion no cuadra con ±30 s;
+  - **"Exportar CSV" reinicia Expo Go en Android** (falla de `expo-sharing`), así que no hay CSV de latencias; las cifras salen del resumen en pantalla (p50 161 ms, p95 237 ms).
+- **S4-3 (4/5):**
+  - se entregó después de las 23:59 del sábado;
+  - en el video se ve la terminal de la laptop en las tomas 2 y 3.
+- **Visor:** en el ensayo local (`proyecto/visor` con `correr_guiado`) siempre marcó "Puestos llenos 0/610" y KPIs "—", incluso con autos estacionados. No se ve el puesto en rojo durante A_PIE. Puede ser que `ws/estado` no envíe la ocupación con `correr_guiado`, o que solo `demo.py` la active.
+- **`demo.py` de Tyrone** no arrancó desde una copia de `git archive`: busca `CLAUDE.md` y `kpis/correr_una.py`, que no estaban en `proyecto/kpis`. Hay que correrlo desde la raíz del repo, después de unificar.
+
+**Lo que hace falta en el VPS** (para el chat de Claude Code integrado con el VPS; comprobado el 2026-11-17 a las 11:10):
+1. **`ESERT_TOKEN_SIM`:**
+   - `demo.py --remoto` lo necesita para publicar la simulación en el VPS;
+   - hoy `GET /api/v1/espejo/candidatos` devuelve `[]` porque no hay corrida;
+   - hay que definir el token en Dokploy y en el `.env` de la laptop de la demo, nunca en el repo.
+2. **Montar el asistente** (S3-3):
+   - `POST /api/v1/asistente/interpretar` responde **404** en el VPS;
+   - añadir `backend.asistente.router` en `backend/api/main.py` con el prefijo `/api/v1`, y `anthropic`, `python-dotenv` y `rapidfuzz` al requirements del servidor;
+   - si se quiere usar el LLM, definir `ANTHROPIC_API_KEY` en Dokploy; sin la clave funciona con reglas.
+3. **Payphone:**
+   - las rutas `/api/v1/pagos/preparar` y `/api/v1/pagos/{id}` ya existen en el VPS;
+   - confirmar que `PAYPHONE_MODO=pruebas`, con las credenciales de prueba en Dokploy (las tiene Tyrone) y la URL de respuesta `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno`.
+4. **WebSocket del espejo:** confirmar que `wss://demo.e-sert.tesisucuenca.com/ws/espejo/{veh_id}` pasa por el proxy (Traefik/Dokploy) con *upgrade*. La app lo arma en el mismo origen que la API.
+5. **Visor del VPS** (`/visor/`, que responde 200): comprobar con una corrida remota que marca los puestos llenos y los KPIs (ver el problema del visor arriba).
+
+**Pedidos a otros:**
+- **@Tyrone [Plan]:** unificar `semanas/S4/Miguel/codigo/app` y `backend/asistente` en `proyecto/`.
+- **@Tyrone [VPS]:** los puntos 1–5 de arriba.
+- **@Freddy:**
+  - montar el router del asistente (punto 2);
+  - revisar `ts_llegada` en el recibo del espejo;
+  - revisar la ocupación en `ws/estado` con `correr_guiado`.
+- **@Pablo:** mi sección del informe está en `semanas/S4/Miguel/codigo/informe/miguel.md`.
+
+**Evidencias:** sin evidencia nueva. Ver las de S4: ![](../semanas/S4/Miguel/evidencias/s1_app-pantallas.png)
