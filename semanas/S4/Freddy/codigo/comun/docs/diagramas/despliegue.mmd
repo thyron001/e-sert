@@ -1,0 +1,28 @@
+%% Despliegue de la demo (docs/DESPLIEGUE.md)
+flowchart LR
+  subgraph LAP["Laptop de la demo"]
+    subgraph VT["Contenedor van3twin"]
+      S["sumo / sumo-gui (:99, VNC 5901)"]
+      C["traci.correr_kpis --publicar URL<br/>ESERT_TOKEN_SIM"]
+    end
+    L["Plan B --local:<br/>uvicorn backend.api.main:app<br/>--host 0.0.0.0 --port 8000"]
+  end
+
+  subgraph VPS["VPS · Dokploy"]
+    T["Traefik<br/>HTTPS demo.e-sert.tesisucuenca.com"]
+    B["esert-demo<br/>backend FastAPI + /visor<br/>SQLite en /data"]
+  end
+
+  P["Proyector<br/>navegador en /visor"]
+  M["Teléfono con Expo Go<br/>EXPO_PUBLIC_API_URL"]
+  PP["Payphone (pruebas)"]
+
+  S <-->|TraCI| C
+  C -->|"HTTPS POST /api/v1/interno/snapshot 🔒"| T
+  T --> B
+  P -->|"wss /ws/estado?rol=visor"| T
+  M -->|"HTTPS /api/v1/* · wss /ws/espejo/{veh_id}"| T
+  B <-->|"responseUrl /api/v1/pagos/retorno"| PP
+  C -.->|"plan B: http://host:8000"| L
+  P -.->|"plan B: misma red Wi-Fi"| L
+  M -.->|"plan B"| L

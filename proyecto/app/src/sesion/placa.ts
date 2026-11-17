@@ -9,3 +9,10 @@ export function normalizarPlaca(texto: string): string {
 export function esPlacaValida(placa: string): boolean {
   return PATRON_PLACA.test(placa);
 }
+
+// Puesto del contrato (§4.3): `pa_<calle>_<n>`, igual que el patrón que valida el backend.
+export const PATRON_PUESTO = /^pa_.+_\d+$/;
+
+export function esPuestoValido(puesto: string): boolean {
+  return PATRON_PUESTO.test(puesto.trim());
+}

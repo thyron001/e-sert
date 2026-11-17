@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { esPlacaValida, normalizarPlaca } from '@/src/sesion/placa';
+import { esPlacaValida, esPuestoValido, normalizarPlaca } from '@/src/sesion/placa';
 
 describe('placa ecuatoriana (CONTRATO §4.3)', () => {
   it.each(['ABC-1234', 'ABC123', 'ABC-123', 'ABC1234', 'SIM-0042'])('acepta %s', (placa) => {
@@ -23,5 +23,14 @@ describe('placa ecuatoriana (CONTRATO §4.3)', () => {
   it('normalizar no arregla una placa mal formada', () => {
     expect(normalizarPlaca('abc1234x')).toBe('ABC1234X');
     expect(esPlacaValida(normalizarPlaca('abc1234x'))).toBe(false);
+  });
+});
+
+describe('esPuestoValido', () => {
+  it('acepta el formato del contrato y rechaza lo demás', () => {
+    expect(esPuestoValido('pa_bolivar_3')).toBe(true);
+    expect(esPuestoValido('pa_no_existe_999')).toBe(true);
+    expect(esPuestoValido('pa_no_existe')).toBe(false);
+    expect(esPuestoValido('')).toBe(false);
   });
 });

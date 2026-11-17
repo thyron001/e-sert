@@ -14,6 +14,7 @@ from __future__ import annotations
 import functools
 import hashlib
 import json
+import logging
 import os
 import warnings
 from pathlib import Path
@@ -34,7 +35,8 @@ from .umbral import UMBRAL_VEHICULO_MPS, UMBRAL_QUIETO_MPS
 from .validacion import limpiar, Calidad
 
 DIR_MODELOS = Path(__file__).resolve().parent / "modelos"
-META_PATH = DIR_MODELOS / "rf_v1.meta.json"
+MODELO_DEFECTO = DIR_MODELOS / "rf_final.joblib"
+log = logging.getLogger("ia.inferencia")
 
 _warn_modelo_emitido = False
 
@@ -55,62 +57,90 @@ class ResultadoModo(TypedDict):
 # ── Carga perezosa del modelo ──────────────────────────────────────────────
 
 
+def _ruta_modelo() -> Path:
+    env = os.environ.get("ESERT_MODELO", "")
+    return Path(env) if env else MODELO_DEFECTO
+
+
+def _sha_esperado(meta: dict | None) -> str:
+    return (meta or {}).get("sha256_modelo") or (meta or {}).get("joblib_sha256") or ""
+
+
 @functools.lru_cache(maxsize=1)
 def _cargar_meta() -> dict | None:
-    ruta = META_PATH
-    alt = DIR_MODELOS / "rf_v1.json"
-    for r in (ruta, alt):
+    """Metadatos junto al modelo: `<nombre>.json` o `<nombre>.meta.json` (el que traiga el SHA-256)."""
+    base = _ruta_modelo().with_suffix("")
+    encontrados = []
+    for suf in (".json", ".meta.json"):
+        r = base.parent / (base.name + suf)
         if r.exists():
             with open(r) as f:
-                return json.load(f)
+                encontrados.append(json.load(f))
+    for m in encontrados:
+        if _sha_esperado(m):
+            return m
+    return encontrados[0] if encontrados else None
+
+
+def _sha256(ruta: Path) -> str:
+    h = hashlib.sha256()
+    with open(ruta, "rb") as f:
+        for bloque in iter(lambda: f.read(1 << 20), b""):
+            h.update(bloque)
+    return h.hexdigest()
+
+
+def _sin_modelo(motivo: str):
+    log.warning("Modelo RF no usado (%s): se clasifica con el umbral", motivo)
     return None
 
 
 @functools.lru_cache(maxsize=1)
 def _cargar_modelo():
+    """Carga el RF (por defecto `rf_final`) tras verificar su SHA-256 contra el JSON; si falta, no
+    coincide o no carga, devuelve None y el servicio cae al umbral (con un aviso en el log)."""
     forzar = os.environ.get("ESERT_CLASIFICADOR", "").lower()
     if forzar == "umbral":
         return None
 
-    ruta_env = os.environ.get("ESERT_MODELO", "")
-    ruta = Path(ruta_env) if ruta_env else DIR_MODELOS / "rf_v1.joblib"
-
+    ruta = _ruta_modelo()
     if not ruta.exists():
-        return None
+        return _sin_modelo(f"no existe {ruta.name}")
+
+    meta = _cargar_meta()
+    esperado = _sha_esperado(meta)
+    if not esperado:
+        return _sin_modelo(f"{ruta.name} no tiene SHA-256 de referencia en su JSON")
+    if _sha256(ruta) != esperado:
+        return _sin_modelo(f"el SHA-256 de {ruta.name} no coincide con su JSON")
+
+    sk_esperada = (meta or {}).get("sklearn_version", "")
+    try:
+        import sklearn
+        if sk_esperada and sklearn.__version__ != sk_esperada:
+            warnings.warn(f"sklearn {sklearn.__version__} != modelo entrenado con {sk_esperada}", stacklevel=2)
+    except ImportError:
+        pass
 
     try:
         from joblib import load as jl_load
         modelo = jl_load(ruta)
-    except Exception:
-        return None
-
-    meta = _cargar_meta()
-    if meta:
-        sk_esperada = meta.get("sklearn_version", "")
-        try:
-            import sklearn
-            if sk_esperada and sklearn.__version__ != sk_esperada:
-                warnings.warn(
-                    f"sklearn {sklearn.__version__} != modelo entrenado con {sk_esperada}",
-                    stacklevel=2,
-                )
-        except ImportError:
-            pass
-
-        sha_esperado = meta.get("joblib_sha256", "")
-        if sha_esperado:
-            h = hashlib.sha256()
-            with open(ruta, "rb") as f:
-                for bloque in iter(lambda: f.read(1 << 20), b""):
-                    h.update(bloque)
-            if h.hexdigest() != sha_esperado:
-                warnings.warn("SHA-256 del modelo no coincide con rf_v1.meta.json", stacklevel=2)
+    except Exception as e:
+        return _sin_modelo(f"no se pudo cargar {ruta.name}: {e}")
 
     try:
         from .bosque_plano import BosquePlano
         return BosquePlano(modelo)
     except Exception:
         return modelo
+
+
+@functools.lru_cache(maxsize=1)
+def _fallback() -> tuple[float, float, int]:
+    """(cobertura minima, hueco maximo en s, puntos minimos), de `fallback` en el JSON del modelo."""
+    fb = (_cargar_meta() or {}).get("fallback", {})
+    return (float(fb.get("cobertura_min", COBERTURA_MIN_RF)), float(fb.get("hueco_max_s", HUECO_MAX_RF_S)),
+            int(fb.get("puntos_min", PUNTOS_MIN_UMBRAL)))
 
 
 def _orden_features() -> list[str]:
@@ -123,6 +153,7 @@ def _orden_features() -> list[str]:
 def _reset_cache():
     _cargar_modelo.cache_clear()
     _cargar_meta.cache_clear()
+    _fallback.cache_clear()
     global _warn_modelo_emitido
     _warn_modelo_emitido = False
 
@@ -288,7 +319,8 @@ def clasificar(
 
     arr, cal = limpiar(ventana)
 
-    if cal.n_validos < PUNTOS_MIN_UMBRAL:
+    cob_min, hueco_max, puntos_min = _fallback()
+    if cal.n_validos < puntos_min:
         if previo is not None:
             return ResultadoModo(
                 modo=previo["modo"],
@@ -298,7 +330,7 @@ def clasificar(
         vel = _vel_media_arr(arr)
         return ResultadoModo(modo=_umbral_desde_vel(vel), confianza=0.0, fuente="umbral")
 
-    usar_rf = cal.cobertura >= COBERTURA_MIN_RF and cal.hueco_max_s <= HUECO_MAX_RF_S
+    usar_rf = cal.cobertura >= cob_min and cal.hueco_max_s <= hueco_max
 
     if usar_rf:
         feats = _extraer_features_np(arr)
@@ -348,9 +380,10 @@ def clasificar_lote(
     probas_out: list[np.ndarray | None] = [None] * len(ventanas)
 
     modelo = _intentar_modelo()
+    cob_min, hueco_max, puntos_min = _fallback()
 
     for i, (arr, cal, prev) in enumerate(zip(limpias, calidades, previos)):
-        if cal.n_validos < PUNTOS_MIN_UMBRAL:
+        if cal.n_validos < puntos_min:
             if prev is not None:
                 resultados[i] = ResultadoModo(
                     modo=prev["modo"],
@@ -364,7 +397,7 @@ def clasificar_lote(
                 )
             continue
 
-        usar_rf = cal.cobertura >= COBERTURA_MIN_RF and cal.hueco_max_s <= HUECO_MAX_RF_S
+        usar_rf = cal.cobertura >= cob_min and cal.hueco_max_s <= hueco_max
         if usar_rf and modelo is not None and arr.shape[0] >= 3:
             rf_indices.append(i)
             continue

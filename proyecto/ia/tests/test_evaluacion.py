@@ -34,6 +34,11 @@ def df_entrenamiento():
     )
 
 
+pytestmark = pytest.mark.skipif(
+    not (DIR_DATOS / "ventanas_prueba_geolife.parquet").exists(),
+    reason="datos procesados no versionados: se generan con ia/datos/ (ver README)")
+
+
 class TestParticion:
     def test_usuarios_prueba_son_exactos(self, particion, df_prueba):
         usuarios_en_datos = set(df_prueba["usuario_id"].unique())

@@ -1,0 +1,19 @@
+{
+  "usuario_id": "casa_miguel_2",
+  "persona": "Miguel",
+  "telefono": "ios",
+  "base": "2026-10-22T21-27-10_miguel_ios",
+  "inicio": 1792722430.72,
+  "fin": 1792722731.985,
+  "cambios": [
+    {
+      "t": 1792722430.72,
+      "etiqueta": "a_pie"
+    },
+    {
+      "t": 1792722611.418,
+      "etiqueta": "quieto"
+    }
+  ],
+  "acelerometro": false
+}

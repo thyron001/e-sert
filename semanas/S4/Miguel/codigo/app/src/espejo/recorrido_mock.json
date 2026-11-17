@@ -1,0 +1,2283 @@
+[
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1180,
+    "ts": "2026-11-05T15:00:00.000Z",
+    "estado": "BUSCANDO",
+    "lat": -2.8935,
+    "lon": -79.0085,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": null,
+    "ruta": [],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1192,
+    "ts": "2026-11-05T15:00:01.000Z",
+    "estado": "BUSCANDO",
+    "lat": -2.8935,
+    "lon": -79.0079763,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": null,
+    "ruta": [],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1204,
+    "ts": "2026-11-05T15:00:02.000Z",
+    "estado": "BUSCANDO",
+    "lat": -2.8935,
+    "lon": -79.0074525,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": null,
+    "ruta": [],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1216,
+    "ts": "2026-11-05T15:00:03.000Z",
+    "estado": "BUSCANDO",
+    "lat": -2.8935,
+    "lon": -79.0069288,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": null,
+    "ruta": [],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1228,
+    "ts": "2026-11-05T15:00:04.000Z",
+    "estado": "BUSCANDO",
+    "lat": -2.8935,
+    "lon": -79.0064051,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": null,
+    "ruta": [],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1240,
+    "ts": "2026-11-05T15:00:05.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8935,
+    "lon": -79.0058814,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 514
+    },
+    "ruta": [
+      [
+        -2.8935,
+        -79.0058814
+      ],
+      [
+        -2.8935,
+        -79.0053576
+      ],
+      [
+        -2.8935,
+        -79.0048339
+      ],
+      [
+        -2.8937398,
+        -79.0045503
+      ],
+      [
+        -2.8942629,
+        -79.0045503
+      ],
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1250,
+    "ts": "2026-11-05T15:00:06.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8935,
+    "lon": -79.0053576,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 500
+    },
+    "ruta": [
+      [
+        -2.8935,
+        -79.0053576
+      ],
+      [
+        -2.8935,
+        -79.0048339
+      ],
+      [
+        -2.8937398,
+        -79.0045503
+      ],
+      [
+        -2.8942629,
+        -79.0045503
+      ],
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1260,
+    "ts": "2026-11-05T15:00:07.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8935,
+    "lon": -79.0048339,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 493
+    },
+    "ruta": [
+      [
+        -2.8935,
+        -79.0048339
+      ],
+      [
+        -2.8937398,
+        -79.0045503
+      ],
+      [
+        -2.8942629,
+        -79.0045503
+      ],
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1270,
+    "ts": "2026-11-05T15:00:08.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8937398,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 465
+    },
+    "ruta": [
+      [
+        -2.8937398,
+        -79.0045503
+      ],
+      [
+        -2.8942629,
+        -79.0045503
+      ],
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1280,
+    "ts": "2026-11-05T15:00:09.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8942629,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 407
+    },
+    "ruta": [
+      [
+        -2.8942629,
+        -79.0045503
+      ],
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1290,
+    "ts": "2026-11-05T15:00:10.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8947859,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 349
+    },
+    "ruta": [
+      [
+        -2.8947859,
+        -79.0045503
+      ],
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1300,
+    "ts": "2026-11-05T15:00:11.000Z",
+    "estado": "GUIADO",
+    "lat": -2.895309,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 291
+    },
+    "ruta": [
+      [
+        -2.895309,
+        -79.0045503
+      ],
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1310,
+    "ts": "2026-11-05T15:00:12.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8958321,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 233
+    },
+    "ruta": [
+      [
+        -2.8958321,
+        -79.0045503
+      ],
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1320,
+    "ts": "2026-11-05T15:00:13.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8963551,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 174
+    },
+    "ruta": [
+      [
+        -2.8963551,
+        -79.0045503
+      ],
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1330,
+    "ts": "2026-11-05T15:00:14.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8968782,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 116
+    },
+    "ruta": [
+      [
+        -2.8968782,
+        -79.0045503
+      ],
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1340,
+    "ts": "2026-11-05T15:00:15.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8974012,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 58
+    },
+    "ruta": [
+      [
+        -2.8974012,
+        -79.0045503
+      ],
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1350,
+    "ts": "2026-11-05T15:00:16.000Z",
+    "estado": "GUIADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [
+      [
+        -2.8979243,
+        -79.0045503
+      ]
+    ],
+    "sesion": null,
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.32
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1360,
+    "ts": "2026-11-05T15:00:17.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 0,
+      "costo_usd": 0,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1390,
+    "ts": "2026-11-05T15:00:18.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 0.5,
+      "costo_usd": 0,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1420,
+    "ts": "2026-11-05T15:00:19.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 1,
+      "costo_usd": 0.01,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1450,
+    "ts": "2026-11-05T15:00:20.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 1.5,
+      "costo_usd": 0.01,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1480,
+    "ts": "2026-11-05T15:00:21.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 2,
+      "costo_usd": 0.02,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1510,
+    "ts": "2026-11-05T15:00:22.000Z",
+    "estado": "ESTACIONADO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 2.5,
+      "costo_usd": 0.02,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 0.32,
+      "disponible": 0.07
+    },
+    "avisos": [
+      "saldo_bajo"
+    ],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1540,
+    "ts": "2026-11-05T15:00:23.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 3,
+      "costo_usd": 0.03,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1680,
+    "ts": "2026-11-05T15:00:24.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8978182,
+    "lon": -79.0045377,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 12
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 5.33,
+      "costo_usd": 0.04,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1820,
+    "ts": "2026-11-05T15:00:25.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8977122,
+    "lon": -79.0045252,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 24
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 7.67,
+      "costo_usd": 0.06,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 1960,
+    "ts": "2026-11-05T15:00:26.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8976061,
+    "lon": -79.0045126,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 36
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 10,
+      "costo_usd": 0.08,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2100,
+    "ts": "2026-11-05T15:00:27.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 12.33,
+      "costo_usd": 0.1,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2240,
+    "ts": "2026-11-05T15:00:28.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 14.67,
+      "costo_usd": 0.12,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2380,
+    "ts": "2026-11-05T15:00:29.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 17,
+      "costo_usd": 0.14,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2520,
+    "ts": "2026-11-05T15:00:30.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 19.33,
+      "costo_usd": 0.16,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2660,
+    "ts": "2026-11-05T15:00:31.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 21.67,
+      "costo_usd": 0.18,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2800,
+    "ts": "2026-11-05T15:00:32.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 24,
+      "costo_usd": 0.2,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 2940,
+    "ts": "2026-11-05T15:00:33.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 26.33,
+      "costo_usd": 0.22,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3080,
+    "ts": "2026-11-05T15:00:34.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 28.67,
+      "costo_usd": 0.24,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3220,
+    "ts": "2026-11-05T15:00:35.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 31,
+      "costo_usd": 0.26,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3360,
+    "ts": "2026-11-05T15:00:36.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 33.33,
+      "costo_usd": 0.28,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3500,
+    "ts": "2026-11-05T15:00:37.000Z",
+    "estado": "A_PIE",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "quieto",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 35.67,
+      "costo_usd": 0.3,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3640,
+    "ts": "2026-11-05T15:00:38.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8975,
+    "lon": -79.0045,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 48
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 38,
+      "costo_usd": 0.32,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3685,
+    "ts": "2026-11-05T15:00:39.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8975606,
+    "lon": -79.0045072,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 41
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 38.75,
+      "costo_usd": 0.32,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3730,
+    "ts": "2026-11-05T15:00:40.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8976212,
+    "lon": -79.0045144,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 34
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 39.5,
+      "costo_usd": 0.33,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3775,
+    "ts": "2026-11-05T15:00:41.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8976818,
+    "lon": -79.0045216,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 27
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 40.25,
+      "costo_usd": 0.34,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3820,
+    "ts": "2026-11-05T15:00:42.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8977425,
+    "lon": -79.0045287,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 20
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 41,
+      "costo_usd": 0.34,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3865,
+    "ts": "2026-11-05T15:00:43.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8978031,
+    "lon": -79.0045359,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 14
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 41.75,
+      "costo_usd": 0.35,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3910,
+    "ts": "2026-11-05T15:00:44.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8978637,
+    "lon": -79.0045431,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 7
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 42.5,
+      "costo_usd": 0.35,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 3955,
+    "ts": "2026-11-05T15:00:45.000Z",
+    "estado": "REGRESANDO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "a_pie",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 43.25,
+      "costo_usd": 0.36,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4000,
+    "ts": "2026-11-05T15:00:46.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0045503,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 0
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 44,
+      "costo_usd": 0.37,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4030,
+    "ts": "2026-11-05T15:00:47.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0042426,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 34
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 44.5,
+      "costo_usd": 0.37,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4060,
+    "ts": "2026-11-05T15:00:48.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0039349,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 68
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 45,
+      "costo_usd": 0.38,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4090,
+    "ts": "2026-11-05T15:00:49.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0036272,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 103
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 45.5,
+      "costo_usd": 0.38,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4120,
+    "ts": "2026-11-05T15:00:50.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0033195,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 137
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 46,
+      "costo_usd": 0.38,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4150,
+    "ts": "2026-11-05T15:00:51.000Z",
+    "estado": "SALIENDO",
+    "lat": -2.8979243,
+    "lon": -79.0030118,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 171
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 46.5,
+      "costo_usd": 0.39,
+      "retenido_usd": 0.25
+    },
+    "billetera": {
+      "saldo": 5.32,
+      "disponible": 5.07
+    },
+    "avisos": [],
+    "recibo": null
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4180,
+    "ts": "2026-11-05T15:00:52.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0027041,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 205
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4184.3,
+    "ts": "2026-11-05T15:00:53.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0023965,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 239
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4188.6,
+    "ts": "2026-11-05T15:00:54.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0020888,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 273
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4192.9,
+    "ts": "2026-11-05T15:00:55.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0017811,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 308
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4197.1,
+    "ts": "2026-11-05T15:00:56.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0014734,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 342
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4201.4,
+    "ts": "2026-11-05T15:00:57.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.0011657,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 376
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo",
+    "veh_id": "sim_veh42",
+    "t_sim": 4205.7,
+    "ts": "2026-11-05T15:00:58.000Z",
+    "estado": "CERRADA",
+    "lat": -2.8979243,
+    "lon": -79.000858,
+    "modo": "vehiculo",
+    "destino": {
+      "nombre": "Parque Calderón",
+      "lat": -2.8975,
+      "lon": -79.0045
+    },
+    "puesto": {
+      "puesto_id": "pa_337277973#1_0",
+      "lat": -2.8979243,
+      "lon": -79.0045503,
+      "distancia_m": 410
+    },
+    "ruta": [],
+    "sesion": {
+      "sesion_id": "ses_0000002a-0000-4000-8000-000000000047",
+      "minutos": 47,
+      "costo_usd": 0.42,
+      "retenido_usd": 0
+    },
+    "billetera": {
+      "saldo": 4.9,
+      "disponible": 4.9
+    },
+    "avisos": [],
+    "recibo": {
+      "minutos_reales": 47,
+      "minutos_cobrados": 50,
+      "cobrado_usd": 0.42,
+      "tarjeta_sert_usd": 0.5,
+      "ahorro_usd": 0.08
+    }
+  },
+  {
+    "tipo": "espejo_fin",
+    "veh_id": "sim_veh42",
+    "t_sim": 4210,
+    "ts": "2026-11-05T15:00:59.000Z",
+    "motivo": "salio_simulacion"
+  }
+]

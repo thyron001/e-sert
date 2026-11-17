@@ -1,5 +1,6 @@
+import { mensajeDeError } from '@/src/errores';
+
 import { crearClienteMock } from './mock';
-import { TARIFA } from './tarifa';
 import {
   CONTRATO_VERSION,
   ErrorApi,
@@ -23,7 +24,8 @@ export const URL_POR_DEFECTO =
   process.env.EXPO_PUBLIC_API_URL ?? 'https://demo.e-sert.tesisucuenca.com/api/v1';
 
 /** Solo EXPO_PUBLIC_USE_MOCK=1 arranca con el cliente mock; sin variable, backend real (se cambia en Ajustes). */
-export const MOCK_POR_DEFECTO = process.env.EXPO_PUBLIC_USE_MOCK === '1';
+// EXPO_PUBLIC_MOCK=1 (nombre de S3-1) equivale a EXPO_PUBLIC_USE_MOCK=1.
+export const MOCK_POR_DEFECTO = process.env.EXPO_PUBLIC_USE_MOCK === '1' || process.env.EXPO_PUBLIC_MOCK === '1';
 
 export const TIEMPO_ESPERA_MS = 8_000;
 
@@ -38,37 +40,12 @@ function esCuerpoError(cuerpo: unknown): cuerpo is CuerpoError {
   return typeof e?.codigo === 'string' && typeof e?.mensaje === 'string';
 }
 
-const recarga = `$${TARIFA.recarga_minima_usd.toFixed(0)}`;
-
-// Lo que ve el usuario para cada código (CONTRATO §4.2 y los dos códigos propios del cliente).
-const MENSAJES: Record<string, string> = {
-  SALDO_INSUFICIENTE: `Recarga al menos ${recarga} para buscar puesto`,
-  SESIONES_BLOQUEADAS: `Tu saldo es negativo: recarga al menos ${recarga} para volver a parquear`,
-  SIN_PUESTOS_LIBRES: 'No hay puestos libres cerca de ese destino. Prueba con otro.',
-  PUESTO_LLENO: 'Ese puesto acaba de ocuparse. Busca otro.',
-  PUESTO_NO_EXISTE: 'Ese puesto no existe. Revisa el código del puesto.',
-  SESION_ACTIVA: 'Ya tienes una sesión abierta. Termínala antes de iniciar otra.',
-  SESION_NO_EXISTE: 'No se encontró la sesión.',
-  VEHICULO_NO_EXISTE: 'Ese vehículo simulado ya no está en la simulación.',
-  SESION_YA_CERRADA: 'Esta sesión ya estaba cerrada.',
-  TRANSICION_INVALIDA: 'La sesión no puede pasar a ese estado ahora.',
-  RECARGA_MINIMA: `La recarga mínima es ${recarga}.`,
-  VALIDACION: 'Algún dato no es válido. Revisa la placa y el puesto.',
-  CONTRATO_INCOMPATIBLE: 'La app y el servidor usan versiones distintas del contrato. Actualiza la app.',
-  TOKEN_SIM_INVALIDO: 'Operación reservada al simulador.',
-  ERROR_INTERNO: 'El servidor tuvo un problema. Inténtalo de nuevo.',
-  SIN_CONEXION: 'No hay conexión con el servidor. Revisa la red o la URL en Ajustes.',
-  TIEMPO_AGOTADO: 'El servidor no respondió a tiempo. Inténtalo de nuevo.',
-};
-
-/** Mensaje en español para el usuario; si el código no se conoce, el mensaje del servidor. */
+/**
+ * Mensaje en español para el usuario (S4-1: la tabla vive en src/errores.ts, con su acción).
+ * Nunca devuelve el texto crudo del servidor ni de una excepción.
+ */
 export function mensajeUsuario(error: unknown): string {
-  if (error instanceof ErrorApi) {
-    // Errores sin cuerpo del contrato (p. ej. un 502 del proxy): no se muestra el HTML crudo.
-    if (error.codigo.startsWith('HTTP_')) return `El servidor respondió con un error (${error.estado}). Inténtalo de nuevo.`;
-    return MENSAJES[error.codigo] ?? error.message;
-  }
-  return (error as Error)?.message ?? String(error);
+  return mensajeDeError(error);
 }
 
 /** Cliente HTTP real contra el backend FastAPI de Freddy. */

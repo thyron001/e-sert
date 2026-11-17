@@ -17,6 +17,7 @@ import {
 import { Grabador, type EstadoGrabacion } from '@/src/sensores/grabador';
 import { COLORES } from '@/src/ui/colores';
 import { Boton } from '@/src/ui/comunes';
+import { mensajeDeError } from '@/src/errores';
 
 const NOMBRE_ETIQUETA: Record<Etiqueta, string> = {
   a_pie: 'A pie',
@@ -115,7 +116,7 @@ export default function GrabadorScreen() {
         await grabador.current!.iniciar(p, tel, et);
         setAhora(Date.now() / 1000);
       } catch (e) {
-        setError((e as Error).message);
+        setError(mensajeDeError(e));
       } finally {
         setOcupado(false);
       }
@@ -129,7 +130,7 @@ export default function GrabadorScreen() {
       await grabador.current!.detener();
       refrescarLista();
     } catch (e) {
-      setError((e as Error).message);
+      setError(mensajeDeError(e));
     } finally {
       setOcupado(false);
     }
@@ -167,7 +168,7 @@ export default function GrabadorScreen() {
     try {
       await compartir(new File(uri));
     } catch (e) {
-      setError((e as Error).message);
+      setError(mensajeDeError(e));
     }
   }
 

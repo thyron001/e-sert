@@ -1,7 +1,7 @@
 """Configuración común de los tests del visor.
 
 Añade a `sys.path` (con rutas relativas a este archivo):
-- `semanas/S2/Tyrone/codigo`, para importar `visor`;
+- `semanas/S3/Tyrone/codigo`, para importar `visor`;
 - `proyecto` en la raíz del repo, para importar `comun` (el contrato).
 """
 import sys
@@ -12,7 +12,7 @@ import pytest
 DIR_TESTS = Path(__file__).resolve().parent
 DIR_VISOR = DIR_TESTS.parent
 DIR_CODIGO = DIR_VISOR.parent
-# codigo -> Tyrone -> S2 -> semanas -> raíz del repo
+# codigo -> Tyrone -> S3 -> semanas -> raíz del repo
 DIR_RAIZ = DIR_CODIGO.parents[3]
 DIR_PROYECTO = DIR_RAIZ / "proyecto"
 
@@ -37,10 +37,10 @@ def ruta_muestra():
 
 @pytest.fixture(scope="session")
 def app(ruta_muestra):
-    """App del servidor de prueba sobre la muestra, a 1000 mensajes/s para que el test sea rápido."""
+    """App del servidor de prueba sobre la muestra, a 1000 mensajes/s y un kpi cada 10 ms (rápido)."""
     from visor.servidor_prueba import crear_app
 
-    return crear_app(ruta_muestra, velocidad=1000)
+    return crear_app(ruta_muestra, velocidad=1000, kpi_cada_s=0.01)  # en vivo: 5 s
 
 
 @pytest.fixture()

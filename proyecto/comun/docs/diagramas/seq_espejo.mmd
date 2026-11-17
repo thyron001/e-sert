@@ -1,0 +1,24 @@
+%% Modo espejo: el teléfono sigue a un conductor simulado (contrato §7)
+sequenceDiagram
+  autonumber
+  participant T as Teléfono (app)
+  participant API as API /api/v1
+  participant R as RegistroEspejo
+  participant W as /ws/espejo/{veh_id}
+  participant CT as Controlador (EspejoPublicador)
+  CT->>API: POST /interno/snapshot 🔒 con bloque interno espejo {candidatos, detalle, fin}
+  API->>R: aplicar(bloque) y quitarlo del snapshot público
+  T->>API: GET /espejo/candidatos
+  API-->>T: [{id, destino_nombre, estado, t_sim}]
+  T->>W: conectar(sim_veh42)
+  W->>R: suscribir(sim_veh42)
+  API-->>CT: 202 {aceptado, espejos: [sim_veh42]}
+  Note over CT: arma el detalle solo de los vehículos seguidos
+  loop cada paso (≤ 1 Hz al teléfono, latido cada 2 s)
+    CT->>API: snapshot con detalle[sim_veh42]
+    W-->>T: espejo {estado, ruta, sesion, billetera, avisos}
+  end
+  CT->>API: detalle con recibo al cerrar la sesión
+  W-->>T: espejo {estado: CERRADA, recibo} (una sola vez)
+  CT->>API: fin: sim_veh42 salió de la simulación
+  W-->>T: espejo_fin {motivo: salio_simulacion} y cierre 1000

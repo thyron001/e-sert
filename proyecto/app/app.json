@@ -41,7 +41,9 @@
         {
           "locationWhenInUsePermission": "e-sert usa tu ubicación para grabar trazas etiquetadas (a pie, quieto, vehículo) mientras la pantalla está abierta."
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

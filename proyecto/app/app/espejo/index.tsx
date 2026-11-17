@@ -1,17 +1,46 @@
-import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { useAjustes } from '@/src/ajustes/AjustesContexto';
+import { baseEspejo, getCandidatos } from '@/src/api/espejo';
+import type { CandidatoEspejo } from '@/src/api/tipos';
 import { candidatosMock } from '@/src/espejo/recorridoMock';
 import { NOMBRE_ESTADO, mmss } from '@/src/espejo/formato';
 import { COLORES } from '@/src/ui/colores';
+import { AvisoError } from '@/src/ui/AvisoError';
 
-// MOCK: reemplazar candidatosMock() por GET /api/v1/espejo/candidatos cuando exista el backend (S2-3).
+// Candidatos de GET /api/v1/espejo/candidatos; con el modo mock de la app, los del recorrido interno.
 export default function SelectorEspejo() {
-  const candidatos = candidatosMock();
+  const { urlApi, modoMock } = useAjustes();
+  const [candidatos, setCandidatos] = useState<CandidatoEspejo[]>(() => (modoMock ? candidatosMock() : []));
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  const cargar = useCallback(async () => {
+    if (modoMock) return setCandidatos(candidatosMock());
+    setCargando(true);
+    setError(null);
+    try {
+      setCandidatos(await getCandidatos(baseEspejo(urlApi)));
+    } catch (e) {
+      setError(e);
+    } finally {
+      setCargando(false);
+    }
+  }, [urlApi, modoMock]);
+
+  useFocusEffect(
+    useCallback(() => {
+      cargar();
+    }, [cargar]),
+  );
+
   return (
     <FlatList
       data={candidatos}
+      refreshControl={<RefreshControl refreshing={cargando} onRefresh={cargar} tintColor={COLORES.miguel} />}
       keyExtractor={(c) => c.id}
       contentContainerStyle={estilos.lista}
       contentInsetAdjustmentBehavior="automatic"
@@ -19,7 +48,14 @@ export default function SelectorEspejo() {
         <Text style={estilos.ayuda}>
           Elige un conductor simulado de SUMO. El teléfono mostrará lo que ve su conductor: guiado al puesto, sesión,
           costo en vivo y recibo. El teléfono no se mueve.
+          {'\n'}Fuente: {modoMock ? 'recorrido interno (mock de la app)' : baseEspejo(urlApi)}
         </Text>
+      }
+      ListFooterComponent={<AvisoError error={error} alReintentar={cargar} />}
+      ListEmptyComponent={
+        cargando ? undefined : (
+          <Text style={estilos.ayuda}>No hay autos con app en la simulación ahora. Desliza para actualizar.</Text>
+        )
       }
       renderItem={({ item }) => (
         <Pressable

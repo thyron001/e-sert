@@ -1,0 +1,218 @@
+[  267.62]  Retrying in 1 seconds
+[  267.65] ***Starting server on port 39995 ***
+[  268.95] Loading net-file from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.net.xml' ... done (323ms).
+[  269.14] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../red/centro.poly.xml' ... done (136ms).
+[  269.15] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../parqueos/parqueos.add.xml' ... done (11ms).
+[  269.43] Loading additional-files from '/home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/../demanda/rerouters.add.xml' ... done (275ms).
+[  269.76] Loading done.
+[  269.79] Simulation version 1.12.0 started with time: 0.00
+[  274.03] /home/vanet/results/e-sert/proyecto/ia/inferencia.py:350: UserWarning: Modelo RF no disponible, usando fallback por umbral
+[  274.03]   modelo = _intentar_modelo()
+[  274.52] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[  274.82] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[  274.82] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[  275.16] progreso t=300 s, autos en red=103
+[  275.17] Warning: No connection between edge '893253783' and edge '1296513963' found.
+[  275.45] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[  275.45] Warning: No connection between edge '337277970#1' and edge '1296513963' found.
+[  277.13] Warning: No connection between edge '337277973#1' and edge '1296513963' found.
+[  277.67] Warning: No connection between edge '337277957#0' and edge '1296513963' found.
+[  277.94] Warning: No connection between edge '337277957#0' and edge '1296513963' found.
+[  279.42] Warning: No connection between edge '337277981#1' and edge '1296513963' found.
+[  279.42] Warning: No connection between edge '337277981#1' and edge '1296513963' found.
+[  281.20] Warning: No connection between edge '1053072563' and edge '1296513963' found.
+[  281.27] Warning: No connection between edge '337277957#2' and edge '1296513963' found.
+[  281.33] Warning: No connection between edge '567060339#3' and edge '1296513963' found.
+[  281.97] Warning: No connection between edge '337277977#0' and edge '1296513963' found.
+[  282.63] progreso t=600 s, autos en red=182
+[  282.63] Simulation ended at time: 600.00
+[  282.63] Reason: TraCI requested termination.
+[  282.73] Performance: 
+[  282.73]  Duration: 11.32s
+[  282.73]  TraCI-Duration: 6.34s
+[  282.73]  Real time factor: 52.9989
+[  282.73]  UPS: 260090.009716
+[  282.73]  UPS-Persons: 720.431057
+[  282.73] Vehicles: 
+[  282.73]  Inserted: 5222 (Loaded: 5480)
+[  282.73]  Running: 5177
+[  282.73]  Waiting: 0
+[  282.73] Persons: 
+[  282.73]  Inserted: 54
+[  282.73]  Running: 0
+[  282.73] Statistics (avg):
+[  282.73]  RouteLength: 1485.59
+[  282.73]  Speed: 7.32
+[  282.73]  Duration: 217.13
+[  282.73]  WaitingTime: 44.89
+[  282.73]  TimeLoss: 76.10
+[  282.73]  DepartDelay: 0.59
+[  282.73] Pedestrian Statistics (avg of 104 walks):
+[  282.73]  RouteLength: 715.10
+[  282.73]  Duration: -144.65
+[  282.73]  TimeLoss: 0.32
+[  282.73] 
+[  282.76] DijkstraRouter answered 252 queries and explored 690.04 edges on average.
+[  282.76] DijkstraRouter spent 0.12s answering queries (0.48ms on average).
+[  282.77] DijkstraRouter answered 2 queries and explored 362.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 600 queries and explored 398.46 edges on average.
+[  282.77] DijkstraRouter spent 0.06s answering queries (0.10ms on average).
+[  282.77] DijkstraRouter answered 16 queries and explored 535.25 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.38ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 596.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.40ms on average).
+[  282.77] DijkstraRouter answered 2 queries and explored 539.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.00ms on average).
+[  282.77] DijkstraRouter answered 190 queries and explored 516.20 edges on average.
+[  282.77] DijkstraRouter spent 0.04s answering queries (0.19ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 592.20 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 16 queries and explored 532.62 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.44ms on average).
+[  282.77] DijkstraRouter answered 12 queries and explored 548.08 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.42ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 627.40 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 2 queries and explored 611.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 16 queries and explored 537.81 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.38ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 642.30 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.30ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 452.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.30ms on average).
+[  282.77] DijkstraRouter answered 6 queries and explored 455.50 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.33ms on average).
+[  282.77] DijkstraRouter answered 6 queries and explored 608.67 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 202 queries and explored 527.65 edges on average.
+[  282.77] DijkstraRouter spent 0.14s answering queries (0.67ms on average).
+[  282.77] DijkstraRouter answered 850 queries and explored 323.77 edges on average.
+[  282.77] DijkstraRouter spent 0.08s answering queries (0.10ms on average).
+[  282.77] DijkstraRouter answered 396 queries and explored 460.64 edges on average.
+[  282.77] DijkstraRouter spent 0.05s answering queries (0.13ms on average).
+[  282.77] DijkstraRouter answered 396 queries and explored 462.85 edges on average.
+[  282.77] DijkstraRouter spent -1.43s answering queries (-3.61ms on average).
+[  282.77] DijkstraRouter answered 12 queries and explored 569.08 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 228 queries and explored 279.53 edges on average.
+[  282.77] DijkstraRouter spent 0.02s answering queries (0.10ms on average).
+[  282.77] DijkstraRouter answered 194 queries and explored 371.11 edges on average.
+[  282.77] DijkstraRouter spent 0.02s answering queries (0.11ms on average).
+[  282.77] DijkstraRouter answered 4 queries and explored 589.75 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 594 queries and explored 465.17 edges on average.
+[  282.77] DijkstraRouter spent 0.08s answering queries (0.14ms on average).
+[  282.77] DijkstraRouter answered 14 queries and explored 710.07 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.43ms on average).
+[  282.77] DijkstraRouter answered 4 queries and explored 552.25 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 12 queries and explored 628.75 edges on average.
+[  282.77] DijkstraRouter spent 0.01s answering queries (0.42ms on average).
+[  282.77] DijkstraRouter answered 720 queries and explored 305.68 edges on average.
+[  282.77] DijkstraRouter spent 0.06s answering queries (0.09ms on average).
+[  282.77] DijkstraRouter answered 2068 queries and explored 378.48 edges on average.
+[  282.77] DijkstraRouter spent 0.22s answering queries (0.11ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 525.00 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.30ms on average).
+[  282.77] DijkstraRouter answered 10 queries and explored 563.30 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.40ms on average).
+[  282.77] DijkstraRouter answered 12 queries and explored 584.17 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.33ms on average).
+[  282.77] DijkstraRouter answered 770 queries and explored 332.71 edges on average.
+[  282.77] DijkstraRouter spent 0.09s answering queries (0.12ms on average).
+[  282.77] DijkstraRouter answered 184 queries and explored 484.15 edges on average.
+[  282.77] DijkstraRouter spent 0.03s answering queries (0.14ms on average).
+[  282.77] DijkstraRouter answered 6 queries and explored 453.83 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.33ms on average).
+[  282.77] DijkstraRouter answered 4 queries and explored 637.50 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 880 queries and explored 412.40 edges on average.
+[  282.77] DijkstraRouter spent 0.12s answering queries (0.13ms on average).
+[  282.77] DijkstraRouter answered 1600 queries and explored 367.57 edges on average.
+[  282.77] DijkstraRouter spent 0.16s answering queries (0.10ms on average).
+[  282.77] DijkstraRouter answered 8 queries and explored 582.25 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.50ms on average).
+[  282.77] DijkstraRouter answered 12 queries and explored 558.25 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.33ms on average).
+[  282.77] DijkstraRouter answered 595 queries and explored 6.97 edges on average.
+[  282.77] DijkstraRouter spent 0.00s answering queries (0.01ms on average).
+[  282.81] DijkstraRouter answered 481 queries and explored 575.71 edges on average.
+[  282.81] DijkstraRouter spent 0.16s answering queries (0.33ms on average).
+[  283.06] {
+[  283.06]   "id": "p80_rf_s1",
+[  283.06]   "porc_app": 80,
+[  283.06]   "clasificador_pedido": "rf",
+[  283.06]   "clasificador_usado": "umbral",
+[  283.06]   "ventanas_por_fuente": {
+[  283.06]     "umbral": 341
+[  283.06]   },
+[  283.06]   "t_sim_final": 600.0,
+[  283.06]   "pasos": 600,
+[  283.06]   "tiempo_real_s": 15.34,
+[  283.06]   "ms_por_paso": 25.564,
+[  283.06]   "sesiones_maquina": {
+[  283.06]     "coords_invalidas": 0,
+[  283.06]     "sesiones": 41,
+[  283.06]     "cerradas": 25,
+[  283.06]     "abiertas_al_final": 16,
+[  283.06]     "falsas_liberaciones": 25,
+[  283.06]     "falsas_por_100_sesiones": 60.98,
+[  283.06]     "falsas_con_datos_pobres": 0,
+[  283.06]     "ventanas_retenidas": 0,
+[  283.06]     "telefonos_apagados": 0,
+[  283.06]     "apagados_efectivos": 0,
+[  283.06]     "marcadas_sin_senal": 0,
+[  283.06]     "esperando_tope_al_final": 0,
+[  283.06]     "cierres_timeout_sin_senal": 0,
+[  283.06]     "clasificador": "/home/vanet/results/e-sert/proyecto",
+[  283.06]     "ventanas_por_fuente": {
+[  283.06]       "umbral": 341
+[  283.06]     }
+[  283.06]   },
+[  283.06]   "espejo": null,
+[  283.06]   "publicador": null,
+[  283.06]   "opciones": {
+[  283.06]     "sigma_m": 5.0,
+[  283.06]     "p_perdida": 0.02,
+[  283.06]     "rafaga_s": null,
+[  283.06]     "frac_rafaga": 0.3,
+[  283.06]     "frac_apagado": 0.0,
+[  283.06]     "libsumo": false,
+[  283.06]     "en_lote": true,
+[  283.06]     "solo_busca": true,
+[  283.06]     "cache_parametros": true,
+[  283.06]     "contar_eventos": true,
+[  283.06]     "args_sumo": [],
+[  283.06]     "geo_local": true,
+[  283.06]     "politica_datos_pobres": true
+[  283.06]   },
+[  283.06]   "costo_kpis": {
+[  283.06]     "s_en_kpis": 0.92,
+[  283.06]     "s_resto": 14.419,
+[  283.06]     "sobrecosto_pct": 6.38
+[  283.06]   },
+[  283.06]   "kpis": {
+[  283.06]     "falsas_lib_100": 100.0,
+[  283.06]     "n_sesiones": 25,
+[  283.06]     "n_falsas": 25,
+[  283.06]     "sin_cierre": 16,
+[  283.06]     "retardo_cierre_mediana_s": null,
+[  283.06]     "retardo_cierre_p90_s": null,
+[  283.06]     "error_fact_medio_usd": null,
+[  283.06]     "error_fact_abs_max_usd": null,
+[  283.06]     "ahorro_vs_tarjeta_medio_usd": null,
+[  283.06]     "precision_mapa": 0.8375409836065574,
+[  283.06]     "precision_mapa_app": 1.0,
+[  283.06]     "libres_fantasma_medio": 99.1,
+[  283.06]     "retardo_cierre_max_s": null,
+[  283.06]     "error_fact_abs_medio_usd": null,
+[  283.06]     "n_cierre_manual": 0,
+[  283.06]     "n_sin_estadia_real": 25,
+[  283.06]     "mae_mapa": 7.142459016393443,
+[  283.06]     "mae_mapa_app": 0.007704918032786885,
+[  283.06]     "libres_fantasma_app_medio": 0.0,
+[  283.06]     "n_muestras_mapa": 10
+[  283.06]   }
+[  283.06] }

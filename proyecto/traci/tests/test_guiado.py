@@ -43,12 +43,23 @@ class _TraciFalso:
             edges=[] if hasta.replace("_edge", "") in self.inalcanzables else [desde, hasta])
 
 
+def _datos_sumo() -> Path:
+    """Puestos y destinos: la copia del escenario si existe; si no (fuera del contenedor, antes
+    de la primera corrida), los de `proyecto/sumo`, que son los mismos (S4-1)."""
+    if (ESCENARIO / "parqueos" / "puestos.csv").exists():
+        return ESCENARIO
+    from traci.clasificacion import buscar_proyecto
+
+    return buscar_proyecto() / "sumo"
+
+
 def _entorno(fuente="mapa"):
     from traci.guiado import Guia
     from traci.puente_nucleo import PuenteNucleo
 
-    puente = PuenteNucleo(ESCENARIO / "parqueos" / "puestos.csv", semilla=1)
-    guia = Guia(puente, ESCENARIO / "demanda" / "destinos.csv", fuente, max_reasignaciones=3,
+    datos = _datos_sumo()
+    puente = PuenteNucleo(datos / "parqueos" / "puestos.csv", semilla=1)
+    guia = Guia(puente, datos / "demanda" / "destinos.csv", fuente, max_reasignaciones=3,
                 periodo_revision_s=10.0)
     tr = _TraciFalso()
     ctrl = SimpleNamespace(traci=tr)

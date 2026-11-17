@@ -1,0 +1,29 @@
+%% Cómo sabe el sistema que el auto se fue (y por qué alejarse a pie no libera el puesto)
+sequenceDiagram
+  autonumber
+  participant G as Emulador GPS (teléfono)
+  participant C as ClasificadorUsuario
+  participant IA as IA (Pablo)
+  participant Q as MaquinaSesion (controlador)
+  participant A as API /api/v1
+  participant N as Núcleo (sesión + billetera)
+  Note over Q: ESTACIONADO, puesto ocupado
+  loop cada 5 s, ventana de 30 s
+    G->>C: muestras {t, lat, lon, precision_m}
+    C->>IA: clasificar_lote(ventanas)
+    IA-->>C: {modo, confianza, fuente}
+    C->>Q: actualizar(modo, distancia al puesto)
+  end
+  Q->>Q: a_pie y 22 m > 15 m
+  Q->>A: POST /sesiones/{id}/transicion 🔒 {estado: A_PIE}
+  A->>N: ESTACIONADO → A_PIE (el puesto sigue ocupado)
+  Note over G,Q: diligencias: una ventana "vehiculo" aislada (bus) no basta
+  Q->>Q: a_pie y 12 m < 30 m
+  Q->>A: transicion 🔒 {estado: REGRESANDO}
+  Q->>Q: ventana 1: vehiculo a 25 m
+  Q->>Q: ventana 2: vehiculo a 70 m (2 seguidas, > 20 m)
+  Q->>A: transicion 🔒 {estado: SALIENDO}
+  Q->>A: POST /sesiones/{id}/cerrar {motivo: deteccion}
+  A->>N: debitar(tiempo real), liberar(retención), puesto − 1
+  A-->>Q: 200 {minutos_reales, minutos_cobrados, debitado, saldo}
+  Note over Q,N: En la simulación se comprueba isStoppedParking(veh) == False al cerrar. Si no, es falsa liberación (verdad)

@@ -1,0 +1,60 @@
+{
+  "fecha": "2026-11-14 02:11",
+  "unit_backend": {
+    "args": "backend/tests",
+    "pasan": 118,
+    "fallan": 0,
+    "omitidos": 1,
+    "segundos": 37.3,
+    "resumen": "118 passed, 1 skipped, 17 deselected, 1 warning in 35.90s",
+    "fallos": [],
+    "motivos": []
+  },
+  "unit_traci": {
+    "args": "traci/tests",
+    "pasan": 72,
+    "fallan": 0,
+    "omitidos": 12,
+    "segundos": 8.5,
+    "resumen": "72 passed, 12 skipped, 21 deselected in 7.97s",
+    "fallos": [],
+    "motivos": []
+  },
+  "unit_comun": {
+    "args": "comun/tests",
+    "pasan": 169,
+    "fallan": 0,
+    "omitidos": 0,
+    "segundos": 0.6,
+    "resumen": "169 passed in 0.29s",
+    "fallos": [],
+    "motivos": []
+  },
+  "e2e": {
+    "args": "-c backend/pytest.ini backend/tests traci/tests -m e2e",
+    "pasan": 30,
+    "fallan": 2,
+    "omitidos": 0,
+    "segundos": 216.3,
+    "resumen": "2 failed, 30 passed, 209 deselected, 1 warning in 214.40s (0:03:34)",
+    "fallos": [
+      "FAILED backend/tests/e2e/test_simulacion_completa.py::test_simulacion_completa_contra_backend_vivo",
+      "FAILED backend/e2e/test_cierre_automatico.py::test_diligencias_no_cierran_y_la_salida_cierra_rapido_con_sumo"
+    ],
+    "motivos": [
+      "E       AssertionError: 35 cerradas, 35 falsas, 93 billeteras, precision_mapa_app=1.0, seguidos=6 (cerrados 3), recibos=3",
+      "E       AssertionError: falsas liberaciones: 4/5 cierres con el auto estacionado (['busca_0', 'busca_3', 'busca_4', 'busca_2']); clasificador {'umbral': 130}"
+    ]
+  },
+  "cobertura_nucleo": {
+    "lineas": 547,
+    "sin_cubrir": 4,
+    "porcentaje": 99
+  },
+  "total_unitarios": {
+    "pasan": 359,
+    "omitidos": 13,
+    "fallan": 0,
+    "segundos": 46.4
+  }
+}

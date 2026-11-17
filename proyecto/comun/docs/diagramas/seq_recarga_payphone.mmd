@@ -1,0 +1,24 @@
+%% Recarga con Payphone (backend/pagos de Miguel; validar con Miguel)
+sequenceDiagram
+  autonumber
+  participant U as App
+  participant P as /api/v1/pagos (Miguel)
+  participant PP as Payphone (pruebas o mock)
+  participant B as Billetera
+  U->>P: POST /pagos/preparar {usuario_id, monto ≥ 5}
+  P->>P: intención rec_<uuid> pendiente
+  P->>PP: Prepare(monto, clientTransactionId)
+  PP-->>P: {paymentId, payWithCard url}
+  P-->>U: 201 {client_transaction_id, payment_id, pay_url, modo}
+  U->>P: GET /pagos/ir/{id} (página puente, Referer del dominio)
+  P-->>U: redirige al formulario
+  U->>PP: paga (o "Aprobar" en /pagos/mock)
+  PP->>P: GET /pagos/retorno?id&clientTransactionId (responseUrl)
+  P->>PP: Confirm(id, clientTransactionId)
+  PP-->>P: aprobado
+  P->>B: recargar(usuario, monto, referencia_payphone=id) una sola vez
+  P-->>U: página "Pago confirmado" → deep link a la app
+  loop hasta aprobado o rechazado
+    U->>P: GET /pagos/{client_transaction_id}
+    P-->>U: {estado}
+  end

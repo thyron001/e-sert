@@ -1,0 +1,70 @@
+{
+  "arranque_backend_s": 1.41,
+  "arranque_frio": {
+    "prueba": "arranque_frio",
+    "ok": true,
+    "s_hasta_primer_snapshot": 3.89
+  },
+  "captura_visor": true,
+  "espejo": {
+    "prueba": "espejo_reconexion",
+    "veh": "sim_busca_0",
+    "mensajes": 223,
+    "mensajes_tras_reconexion": 151,
+    "sesion_antes": "ses_32e2e1cc-d1a6-44da-a2b9-aae02a8effb7",
+    "sesion_despues": "ses_32e2e1cc-d1a6-44da-a2b9-aae02a8effb7",
+    "recibos": 1,
+    "ultimo_estado": "CERRADA",
+    "mismo_vehiculo": true,
+    "fin": "tiempo",
+    "ok": true
+  },
+  "reinicio_backend": {
+    "prueba": "reinicio_backend",
+    "detener_s": 0.17,
+    "arranque_s": 1.32,
+    "controlador_vivo_tras_corte": true,
+    "s_sin_snapshots": 7.17,
+    "snapshots_vuelven": true,
+    "ok": true
+  },
+  "ctrl_c": {
+    "prueba": "ctrl_c",
+    "procesos_tras_sigint_docker_exec": [],
+    "backend_detener_s": 0.33,
+    "backend_codigo_salida": 0,
+    "puerto_libre": true,
+    "ok": true,
+    "ok_sin_tty": true
+  },
+  "snapshots_recibidos": 1260,
+  "p80_gui": {
+    "prueba": "p80_gui",
+    "hasta_s": 600,
+    "sin_gui": {
+      "ms_por_paso": 25.564,
+      "codigo_salida": 0
+    },
+    "con_gui": {
+      "ms_por_paso": 35.88,
+      "codigo_salida": 0
+    },
+    "fluido_a_ritmo_1": true,
+    "captura": true,
+    "ok": true
+  },
+  "fecha": "2026-11-14 02:17",
+  "ctrl_c_primer_ensayo": {
+    "prueba": "ctrl_c",
+    "procesos_tras_sigint_docker_exec": [
+      "1211 python3 -m traci.correr_kpis --id p50_rf_s1 --hasta 1500 --ritmo 5 --sufijo _ensayo --publicar http://192.168.65.254:53319",
+      "1227 sumo -c /home/vanet/results/e-sert/semanas/S4/Freddy/codigo/traci/escenario/tyrone/sumo/escenarios/app50_s1.sumocfg --no-step-log true --seed 1 --remote-port 40185"
+    ],
+    "procesos_tras_sigint_en_contenedor": [],
+    "s_para_salir_con_sigint_interno": 1.07,
+    "backend_detener_s": 0.37,
+    "puerto_libre": false,
+    "ok": false,
+    "ok_sin_tty": false
+  }
+}

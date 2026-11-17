@@ -33,7 +33,7 @@ export type EstadoSesion =
   | 'SALIENDO'
   | 'CERRADA';
 export type OrigenUbicacion = 'sumo' | 'app';
-export type MotivoCierre = 'deteccion' | 'manual';
+export type MotivoCierre = 'deteccion' | 'manual' | 'timeout_sin_senal';
 export type TipoMovimiento = 'recarga' | 'retencion' | 'debito' | 'liberacion';
 export type Aviso =
   | 'saldo_bajo'
@@ -92,6 +92,7 @@ export interface Salud {
   ok: boolean;
   contrato: number;
   t_sim?: number | null;
+  ts?: FechaISO | null;
 }
 
 export interface Tarifa {
@@ -285,6 +286,12 @@ export interface PasoSimulacion {
   vehiculos: VehiculoSim[];
   peatones: Peaton[];
   verdad: DatosVerdad;
+  espejo?: BloqueEspejo | null;
+}
+
+export interface RespuestaSnapshot {
+  aceptado: true;
+  espejos?: VehiculoId[];
 }
 
 export interface PuestoEspejo {
@@ -312,6 +319,33 @@ export interface Recibo {
   cobrado_usd: number;
   tarjeta_sert_usd: number;
   ahorro_usd: number;
+}
+
+// Bloque interno `espejo` de POST /interno/snapshot (v1.2): nunca sale por /ws/estado.
+export interface ReciboEspejo extends Recibo {
+  sesion_id: SesionId;
+}
+
+export interface DetalleEspejo {
+  t_sim: number;
+  estado?: EstadoSesion | null;
+  lat: number;
+  lon: number;
+  modo?: Modo | null;
+  confianza?: number | null;
+  destino?: Destino | null;
+  puesto?: PuestoEspejo | null;
+  ruta?: Coordenada[];
+  sesion?: SesionEspejo | null;
+  billetera?: BilleteraEspejo | null;
+  avisos?: Aviso[];
+  recibo?: ReciboEspejo | null;
+}
+
+export interface BloqueEspejo {
+  candidatos?: CandidatoEspejo[];
+  detalle?: Record<string, DetalleEspejo>;
+  fin?: boolean;
 }
 
 // --- Mensajes WebSocket (§6, §7): unión discriminada por `tipo` ---

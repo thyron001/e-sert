@@ -50,10 +50,15 @@ function RootLayoutNav() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Inicio' }} />
             <Stack.Screen name="buscar" options={{ title: 'Buscar puesto' }} />
+            <Stack.Screen name="demo" options={{ title: 'Ajustes de demo' }} />
             <Stack.Screen name="recarga" options={{ title: 'Recarga', presentation: 'modal' }} />
             <Stack.Screen name="sesion/guiar" options={{ title: 'Guiado', gestureEnabled: false }} />
             <Stack.Screen name="sesion/confirmar" options={{ title: 'Confirmar llegada' }} />
             <Stack.Screen name="sesion/activa" options={{ title: 'Sesión', gestureEnabled: false }} />
+            <Stack.Screen
+              name="recibo"
+              options={{ title: 'Recibo', gestureEnabled: false, headerBackVisible: false, headerLeft: () => null }}
+            />
             <Stack.Screen name="espejo/index" options={{ title: 'Modo espejo' }} />
             <Stack.Screen name="espejo/[vehId]" options={{ title: 'Espejo' }} />
           </Stack>

@@ -30,6 +30,8 @@ export interface EstadoFlujo {
   estado: EstadoSesion | null;
   partida: Punto | null;
   destino: Destino | null;
+  /** Duración que el conductor dijo que quiere parquear (entrada natural, S3-3); solo informativa. */
+  duracionPlanMin?: number | null;
   guia: Guia | null;
   posicion: Punto | null;
   sesion: SesionAbierta | null;
@@ -50,7 +52,7 @@ export const FLUJO_INICIAL: EstadoFlujo = {
 
 export type Accion =
   | { tipo: 'RESTAURAR'; estado: EstadoFlujo }
-  | { tipo: 'BUSCAR'; partida: Punto; destino: Destino }
+  | { tipo: 'BUSCAR'; partida: Punto; destino: Destino; duracionPlanMin?: number | null }
   | { tipo: 'GUIA_RECIBIDA'; guia: Guia }
   | { tipo: 'AVANZAR'; posicion: Punto }
   | { tipo: 'SESION_CREADA'; sesion: SesionAbierta }
@@ -69,7 +71,14 @@ export function reductor(e: EstadoFlujo, a: Accion): EstadoFlujo {
       return { ...FLUJO_INICIAL, ...a.estado };
     case 'BUSCAR':
       if (sesionAbierta(e)) return e; // con una sesión abierta no se busca otro puesto
-      return { ...FLUJO_INICIAL, ultimaPlaca: e.ultimaPlaca, estado: 'BUSCANDO', partida: a.partida, destino: a.destino };
+      return {
+        ...FLUJO_INICIAL,
+        ultimaPlaca: e.ultimaPlaca,
+        estado: 'BUSCANDO',
+        partida: a.partida,
+        destino: a.destino,
+        duracionPlanMin: a.duracionPlanMin ?? null,
+      };
     case 'GUIA_RECIBIDA':
       if (e.estado !== 'BUSCANDO') return e;
       return { ...e, estado: 'GUIADO', guia: a.guia, posicion: e.partida };

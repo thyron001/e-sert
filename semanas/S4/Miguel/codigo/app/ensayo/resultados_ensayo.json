@@ -1,0 +1,124 @@
+{
+  "generado": "2026-11-14T23:56:10",
+  "tarifa": {
+    "valor_hora_usd": 0.5,
+    "fraccion_min": 5,
+    "cobro_minimo_min": 10
+  },
+  "latencias": {
+    "local": {
+      "n": 0,
+      "lat_total_ms": null,
+      "lat_cliente_ms": null,
+      "nota": "Sin datos del modo local."
+    },
+    "vps": {
+      "n": 0,
+      "lat_total_ms": null,
+      "lat_cliente_ms": null,
+      "nota": "Sin datos del modo vps."
+    }
+  },
+  "reconexiones": {
+    "numero": 2,
+    "detalle": [
+      {
+        "modo": "local",
+        "corte": "00:00:52",
+        "recuperado": "00:01:18",
+        "recuperacion_s": 26.0
+      },
+      {
+        "modo": "local",
+        "corte": "00:00:49",
+        "recuperado": "00:01:10",
+        "recuperacion_s": 21.0
+      }
+    ],
+    "max_recuperacion_s": 26.0
+  },
+  "tomas": {
+    "detalle": [
+      {
+        "toma": 3,
+        "nombre": "Corrida 4: elegir sim_busca_7",
+        "previsto_s": 45,
+        "real_s": 34,
+        "diferencia_s": -11
+      },
+      {
+        "toma": 4,
+        "nombre": "Corrida 4: GUIADO de sim_busca_7 hasta el puesto",
+        "previsto_s": 60,
+        "real_s": 56,
+        "diferencia_s": -4
+      },
+      {
+        "toma": 5,
+        "nombre": "Corrida 4: ESTACIONADO (sim_busca_7 no pasó por A_PIE; A_PIE se vio en sim_busca_4, 02:30–03:22)",
+        "previsto_s": 60,
+        "real_s": 60,
+        "diferencia_s": 0
+      },
+      {
+        "toma": 6,
+        "nombre": "Corrida 4: cierre y recibo de sim_busca_7",
+        "previsto_s": 60,
+        "real_s": 8,
+        "diferencia_s": -52
+      }
+    ],
+    "total_previsto_s": 225,
+    "total_real_s": 158,
+    "diferencia_s": -67,
+    "dentro_de_30s": false
+  },
+  "recibos": {
+    "detalle": [
+      {
+        "veh_id": "sim_busca_7",
+        "minutos_reales": 0.6,
+        "minutos_cobrados": 10,
+        "esperado_usd": 0.08,
+        "debitado_usd": 0.08,
+        "diferencia_usd": 0.0,
+        "cuadra": true
+      }
+    ],
+    "todos_cuadran": true
+  },
+  "notas": [
+    "No hay CSV de latencias en latencias/."
+  ],
+  "latencia_en_pantalla": {
+    "fuente": "resumen que muestra el teléfono en el espejo (no se pudo exportar el CSV: Expo Go se reinicia al compartir)",
+    "modo": "local",
+    "veh_id": "sim_busca_4",
+    "n": 55,
+    "total_p50_ms": 161,
+    "total_p95_ms": 237,
+    "cliente_p50_ms": 110,
+    "hora": "23:37",
+    "captura": "evidencias/s2_ensayo-montaje.png"
+  },
+  "vps": {
+    "estado": "no ensayado",
+    "motivo": "demo.py --remoto requiere ESERT_TOKEN_SIM (solo Tyrone); /salud ok a las 22:49:53"
+  },
+  "guion": {
+    "previsto_total_s": 405,
+    "dentro_de_30s": false,
+    "nota": "tomas 5–6 no cupieron: sim_busca_4 no cerró dentro del ensayo"
+  },
+  "reconexion": {
+    "modo": "local",
+    "veh_id": "sim_busca_4",
+    "corte_s": 52,
+    "deteccion_s": 5,
+    "red_caida_s": 22,
+    "recuperacion_tras_volver_la_red_s": 4,
+    "desconexion_visible_s": 21,
+    "reinicio_de_app": false,
+    "fuente": "eventos_ensayo.json"
+  }
+}

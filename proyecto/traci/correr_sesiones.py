@@ -40,6 +40,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
     cfg = args.cfg.resolve()
     escenario = cfg.stem
     carpeta = cfg.parent
+    if not (carpeta / "demanda").is_dir():  # S3: los escenarios de Tyrone viven en `sumo/escenarios/`
+        carpeta = carpeta.parent
     gps = EmuladorGPS(semilla=args.gps_semilla)
     peatones = GestorPeatones(carpeta / "demanda" / "destinos.csv", semilla=args.semilla,
                               p_regreso_corto=args.p_regreso_corto,

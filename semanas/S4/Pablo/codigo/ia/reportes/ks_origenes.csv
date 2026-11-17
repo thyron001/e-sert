@@ -1,0 +1,13 @@
+clase,feature,ks_stat,p_value
+a_pie,vel_media,0.152,3.41e-39
+a_pie,vel_std,0.6049,0.00e+00
+a_pie,acc_media_abs,0.5014,0.00e+00
+a_pie,tasa_rumbo_media,0.4034,1.10e-282
+quieto,vel_media,0.9589,0.00e+00
+quieto,vel_std,0.9523,0.00e+00
+quieto,acc_media_abs,0.9844,0.00e+00
+quieto,tasa_rumbo_media,0.9953,0.00e+00
+vehiculo,vel_media,0.3164,0.00e+00
+vehiculo,vel_std,0.5545,0.00e+00
+vehiculo,acc_media_abs,0.7718,0.00e+00
+vehiculo,tasa_rumbo_media,0.5081,0.00e+00

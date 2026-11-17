@@ -1,0 +1,4 @@
+# Los videos del plan B nunca van en git (S4-2). Solo se versiona LEEME.md.
+*
+!.gitignore
+!LEEME.md

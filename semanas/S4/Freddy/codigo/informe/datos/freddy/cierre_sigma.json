@@ -1,0 +1,38 @@
+{
+  "escenario": "traci/tests/e2e/escenario_cierre.py (5 autos de búsqueda, estadías 4-8 min)",
+  "fecha": "2026-11-13 18:34",
+  "por_sigma": {
+    "5": {
+      "sesiones": 5,
+      "falsas": 4,
+      "retardos_s": [
+        12.0
+      ],
+      "retardo_mediana_s": 12.0,
+      "ventanas_por_fuente": {
+        "umbral": 130
+      },
+      "ventanas_a_pie": 70,
+      "a_pie_como_vehiculo": 59,
+      "frac_a_pie_como_vehiculo": 0.843
+    },
+    "2": {
+      "sesiones": 5,
+      "falsas": 0,
+      "retardos_s": [
+        12.0,
+        12.0,
+        12.0,
+        13.0,
+        13.0
+      ],
+      "retardo_mediana_s": 12.0,
+      "ventanas_por_fuente": {
+        "umbral": 1376
+      },
+      "ventanas_a_pie": 1185,
+      "a_pie_como_vehiculo": 0,
+      "frac_a_pie_como_vehiculo": 0.0
+    }
+  }
+}

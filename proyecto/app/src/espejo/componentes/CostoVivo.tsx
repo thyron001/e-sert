@@ -18,7 +18,7 @@ function Dato({ etiqueta, valor, grande = false }: { etiqueta: string; valor: st
 export function CostoVivo({ sesion, billetera }: { sesion: SesionEspejo | null; billetera: BilleteraEspejo | null }) {
   return (
     <View style={estilos.fila}>
-      <Dato etiqueta="minutos" valor={sesion ? sesion.minutos.toFixed(1) : '—'} grande />
+      <Dato etiqueta="minutos" valor={sesion ? sesion.minutos.toFixed(1).replace('.', ',') : '—'} grande />
       <Dato etiqueta="costo" valor={sesion ? usd(sesion.costo_usd) : '—'} grande />
       <Dato etiqueta="retenido" valor={sesion ? usd(sesion.retenido_usd) : '—'} />
       <Dato etiqueta="disponible" valor={billetera ? usd(billetera.disponible) : '—'} />

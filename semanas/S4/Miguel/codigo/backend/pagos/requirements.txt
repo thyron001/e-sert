@@ -1,0 +1,2 @@
+# Dependencias propias de backend/pagos (además de las de backend/requirements-servidor.txt).
+httpx>=0.27,<1

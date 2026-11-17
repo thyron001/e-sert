@@ -1,0 +1,39 @@
+{"t": 1.23, "fuente": "backend", "evento": "INFO:     Application startup complete.", "incidente": false}
+{"t": 1.41, "fuente": "backend", "evento": "responde /salud (1.41 s)", "incidente": false, "arranque_s": 1.41}
+{"t": 1.43, "fuente": "visor", "evento": "WS /ws/estado conectado", "incidente": false}
+{"t": 1.56, "fuente": "controlador", "evento": "lanzado: correr_kpis --id p50_rf_s1 --hasta 1500 --ritmo 5 --sufijo _ensayo", "incidente": false}
+{"t": 5.45, "fuente": "visor", "evento": "primer snapshot (t_sim=1.0)", "incidente": false}
+{"t": 13.99, "fuente": "visor", "evento": "captura del visor", "incidente": false}
+{"t": 14.04, "fuente": "espejo", "evento": "sigue a sim_busca_0", "incidente": false}
+{"t": 65.23, "fuente": "controlador", "evento": "progreso t=300 s, autos en red=103", "incidente": false}
+{"t": 85.23, "fuente": "espejo", "evento": "WS del teléfono cortado a propósito (con_sesion; sesión True)", "incidente": false}
+{"t": 88.25, "fuente": "espejo", "evento": "reconectado a sim_busca_0", "incidente": false}
+{"t": 125.23, "fuente": "controlador", "evento": "progreso t=600 s, autos en red=182", "incidente": false}
+{"t": 185.23, "fuente": "controlador", "evento": "progreso t=900 s, autos en red=284", "incidente": false}
+{"t": 238.66, "fuente": "espejo", "evento": "fin seguimiento (tiempo): recibos=1, misma sesión=True", "incidente": false}
+{"t": 238.66, "fuente": "ensayo", "evento": "reinicio del backend (SIGTERM)", "incidente": true}
+{"t": 238.68, "fuente": "backend", "evento": "INFO:     Shutting down", "incidente": false}
+{"t": 238.69, "fuente": "visor", "evento": "WS cortado: ConnectionClosedError", "incidente": false}
+{"t": 245.07, "fuente": "backend", "evento": "INFO:     Application startup complete.", "incidente": false}
+{"t": 245.17, "fuente": "backend", "evento": "responde /salud (1.32 s)", "incidente": false, "arranque_s": 1.32}
+{"t": 245.24, "fuente": "controlador", "evento": "progreso t=1200 s, autos en red=355", "incidente": false}
+{"t": 245.24, "fuente": "visor", "evento": "WS /ws/estado conectado", "incidente": false}
+{"t": 245.89, "fuente": "visor", "evento": "snapshots de nuevo tras 7.17 s", "incidente": false}
+{"t": 260.89, "fuente": "ensayo", "evento": "Ctrl+C (SIGINT) al `docker exec` del controlador", "incidente": true}
+{"t": 264.05, "fuente": "contenedor", "evento": "siguen vivos 2 procesos tras Ctrl+C", "incidente": true}
+{"t": 265.12, "fuente": "contenedor", "evento": "SIGINT dentro del contenedor: quedan 0", "incidente": false}
+{"t": 265.12, "fuente": "ensayo", "evento": "Ctrl+C (SIGINT) al backend", "incidente": false}
+{"t": 265.2, "fuente": "backend", "evento": "INFO:     Shutting down", "incidente": false}
+{"t": 265.2, "fuente": "visor", "evento": "WS cortado: ConnectionClosedError", "incidente": false}
+{"t": 266.5, "fuente": "backend", "evento": "puerto 53319 OCUPADO", "incidente": true}
+{"t": 266.51, "fuente": "controlador", "evento": "lanzado: correr_kpis --id p80_rf_s1 --hasta 600 --sufijo _ensayo_sin_gui", "incidente": false}
+{"t": 275.16, "fuente": "controlador", "evento": "progreso t=300 s, autos en red=103", "incidente": false}
+{"t": 282.63, "fuente": "controlador", "evento": "progreso t=600 s, autos en red=182", "incidente": false}
+{"t": 283.06, "fuente": "controlador", "evento": "\"ms_por_paso\": 25.564,", "incidente": false}
+{"t": 283.26, "fuente": "controlador", "evento": "p80 sin_gui: 25.564 ms/paso", "incidente": false}
+{"t": 283.26, "fuente": "controlador", "evento": "lanzado: correr_kpis --id p80_rf_s1 --hasta 600 --sufijo _ensayo_con_gui --gui --captura /home/vanet/results/e-sert/semanas/S4/Freddy/codigo/comun/docs/ensayo/captura_sumo_gui.png@450", "incidente": false}
+{"t": 294.28, "fuente": "controlador", "evento": "progreso t=300 s, autos en red=103", "incidente": false}
+{"t": 298.53, "fuente": "controlador", "evento": "captura sumo-gui en t=450 s → /home/vanet/results/e-sert/semanas/S4/Freddy/codigo/comun/docs/ensayo/captura_sumo_gui.png", "incidente": false}
+{"t": 305.2, "fuente": "controlador", "evento": "progreso t=600 s, autos en red=182", "incidente": false}
+{"t": 305.77, "fuente": "controlador", "evento": "\"ms_por_paso\": 35.88,", "incidente": false}
+{"t": 305.99, "fuente": "controlador", "evento": "p80 con_gui: 35.88 ms/paso", "incidente": false}

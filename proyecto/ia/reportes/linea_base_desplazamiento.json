@@ -1,0 +1,24 @@
+{
+  "descripcion": "arbol de decision de profundidad 3 sobre desplazamiento_neto, entrenado con las ventanas de rf_final",
+  "umbrales_desplazamiento_m": [
+    8.7,
+    18.1,
+    28.4,
+    67.3,
+    75.7,
+    83.6,
+    109.2
+  ],
+  "geolife_prueba": {
+    "f1_macro": 0.7498494736542552,
+    "n_ventanas": 294579
+  },
+  "sumo_normal_sigma5_semillas_101_105": {
+    "f1_macro": 0.7748115409698269,
+    "n_ventanas": 58005
+  },
+  "rf_final": {
+    "geolife_prueba": 0.8724349918818485,
+    "sumo_normal": 0.7375863880808775
+  }
+}

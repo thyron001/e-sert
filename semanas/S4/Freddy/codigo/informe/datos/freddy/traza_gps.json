@@ -1,0 +1,20 @@
+{
+  "peaton": "ped_p13",
+  "muestras_verdaderas": 300,
+  "umbral_kmh": 8.0,
+  "velocidad_real_media_kmh": 3.95,
+  "por_sigma": {
+    "5": {
+      "muestras_emitidas": 284,
+      "perdidas": 16,
+      "velocidad_telefono_media_kmh": 14.74,
+      "frac_sobre_umbral": 0.77
+    },
+    "10": {
+      "muestras_emitidas": 284,
+      "perdidas": 16,
+      "velocidad_telefono_media_kmh": 28.74,
+      "frac_sobre_umbral": 0.933
+    }
+  }
+}

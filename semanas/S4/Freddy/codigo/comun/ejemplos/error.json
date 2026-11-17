@@ -1,0 +1,10 @@
+{
+  "error": {
+    "codigo": "SALDO_INSUFICIENTE",
+    "mensaje": "El disponible ($0.10) no cubre la retención del bloque mínimo ($0.25).",
+    "detalle": {
+      "disponible": 0.1,
+      "retencion": 0.25
+    }
+  }
+}

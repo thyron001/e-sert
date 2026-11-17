@@ -6,6 +6,7 @@ import { Text, View } from '@/components/Themed';
 import { useAjustes } from '@/src/ajustes/AjustesContexto';
 import type { Puesto } from '@/src/api/tipos';
 import { COLORES } from '@/src/ui/colores';
+import { AvisoError } from '@/src/ui/AvisoError';
 
 const REGION_INICIAL = {
   latitude: -2.8975, // Parque Calderón
@@ -18,7 +19,7 @@ export default function MapaScreen() {
   const { api, modoMock, cargado } = useAjustes();
   const [puestos, setPuestos] = useState<Puesto[]>([]);
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -27,7 +28,7 @@ export default function MapaScreen() {
       setPuestos(await api.listarPuestos());
     } catch (e) {
       setPuestos([]);
-      setError((e as Error).message);
+      setError(e);
     } finally {
       setCargando(false);
     }
@@ -69,7 +70,7 @@ export default function MapaScreen() {
           <Text>lleno</Text>
           <Text style={styles.modo}>{modoMock ? 'MOCK' : 'API'}</Text>
         </View>
-        {error && <Text style={styles.error}>{error}</Text>}
+        <AvisoError error={error} alReintentar={cargar} />
         <Pressable style={styles.boton} onPress={cargar} disabled={cargando}>
           {cargando ? <ActivityIndicator color="#fff" /> : <Text style={styles.textoBoton}>Actualizar</Text>}
         </Pressable>
