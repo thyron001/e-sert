@@ -1,0 +1,4 @@
+markdown>=3.5
+fpdf2>=2.7
+pillow>=10
+pymupdf>=1.23  # solo miniaturas_pdf.py (opcional)

@@ -1,6 +1,6 @@
 # Demo en un comando (S4-1): lo que corre en la computadora (Python 3.11+).
 # El backend de Freddy:
--r ../../../../../proyecto/backend/requirements.txt
+-r ../backend/requirements.txt
 pyyaml>=6
 websockets>=12
 # verificar_demo.py valida los snapshots con el contrato:

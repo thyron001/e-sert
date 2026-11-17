@@ -10,3 +10,6 @@ httpx>=0.27
 pytest>=7
 pytest-cov>=4
 matplotlib>=3.7
+anthropic>=0.30
+python-dotenv>=1.0
+rapidfuzz>=3.0
