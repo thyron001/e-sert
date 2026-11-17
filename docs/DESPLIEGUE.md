@@ -5,25 +5,15 @@ El grupo tiene un VPS con Dokploy, el mismo de `tesisucuenca.com`. Hay dos aplic
 | App en Dokploy | Dominio | Qué sirve | Dockerfile | Dueño |
 |---|---|---|---|---|
 | `esert-roadmap` | `e-sert.tesisucuenca.com` | Roadmap del equipo (ya funciona) | `Dockerfile` (raíz) | Tyrone |
-| `esert-demo` | `demo.e-sert.tesisucuenca.com` | Backend FastAPI (`/api/v1`, `/ws/estado`) + visor (`/visor`) | `proyecto/backend/Dockerfile` | Freddy (backend) y Tyrone (visor) |
+| `esert-demo` | `demo.e-sert.tesisucuenca.com` | Backend FastAPI (`/api/v1`, `/ws/estado`) + visor (`/visor`) | `proyecto/backend/Dockerfile` | Tyrone |
 
-## Accesos: solo Tyrone
+## Accesos
 
-**Solo Tyrone tiene acceso** al VPS, al panel de Dokploy, al DNS y a la cuenta de Payphone
-(modo de pruebas). Ninguna otra persona ni sus sesiones de Claude intentan entrar ahí ni
-piden esas credenciales. Si una sesión necesita algo de esto (crear la app, una variable de
-entorno, un volumen, un redeploy, credenciales de Payphone o ver logs del contenedor):
-
-1. **Deja todo listo** del lado del repo: Dockerfile, código y `.env.ejemplo` con los
-   *nombres* de las variables, sin valores.
-2. **Escribe el pedido** en "Pedidos a otros" de la bitácora, con el formato
-   `@Tyrone [VPS]` o `@Tyrone [Payphone]`, y exactamente qué hacer: campo, valor o comando.
-3. **Sigue con un mock o en local**, y marca el criterio afectado como `parcial` si depende
-   de eso.
-
-Tyrone revisa estos pedidos en las bitácoras o en el resultado de la unificación del domingo.
-Las credenciales de Payphone nunca se comparten por el repo: si alguien necesita probar en
-local, Tyrone las pasa por privado y van en su `.env`.
+Tyrone es la única persona del proyecto y tiene acceso al VPS, al panel de Dokploy, al DNS y a
+la cuenta de Payphone (modo de pruebas). En Dokploy la app de la demo se llama `api`
+(`esert-api-ya3sai`) y la del roadmap `Frontend` (`esert-frontend-klfae6`); las dos siguen
+`main` con Autodeploy On Push. Las credenciales van en Dokploy → Environment o en un `.env`
+local, nunca en el repo.
 
 ## Por qué el backend va en el VPS
 
@@ -68,13 +58,11 @@ snapshots al backend en línea. El VPS solo sirve la API, el WebSocket y el viso
   - la billetera es **solo de prueba**: nada de dinero real;
   - no se guardan datos personales más allá de un `usuario_id` aleatorio y la placa ficticia.
 - **Healthcheck:** `GET /salud` → `{"ok": true, "version": "...", "contrato": 1}`.
-- **Autodeploy On Push** a `main`: cada unificación del domingo actualiza la demo. Mientras
-  `proyecto/backend/Dockerfile` no exista (antes de la unificación de S2), la app
-  `esert-demo` no se crea.
+- **Autodeploy On Push** a `main`: cada push a `main` actualiza la demo y el roadmap.
 - **Plan B:** todo debe funcionar también en local (`uvicorn` + visor en `localhost`), por si
   falla la red en la exposición.
 
-## Configuración de `esert-demo` en Dokploy (la hace Tyrone tras la unificación de S2)
+## Configuración de `esert-demo` (app `api` en Dokploy)
 
 | Campo | Valor |
 |---|---|

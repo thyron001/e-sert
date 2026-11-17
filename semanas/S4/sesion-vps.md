@@ -12,7 +12,7 @@
   `ANTHROPIC_API_KEY`. Para saber si una variable existe, mira su *nombre* en Dokploy o comprueba
   su efecto (por ejemplo, un 401). Si hace falta compararlo, compara su SHA-256, no el valor.
 - No cambies código de la app ni del backend en el VPS. Si algo falla por código, arréglalo en el
-  repo (rama `tyrone/vps`), con pruebas, y redespliega desde `main`.
+  repo, directamente en `main`, con pruebas; el push redespliega.
 - Todo lo que se pruebe con dinero va en **modo de pruebas** de Payphone: nada de dinero real.
 - Al terminar, aplica el protocolo de cierre de `CLAUDE.md`: bitácora, commit y push. En vez de
   `estado.json` de una sesión del plan, añade una entrada en `bitacoras/tyrone.md`.
@@ -96,7 +96,7 @@ curl -s -o /dev/null -w '%{http_code}\n' https://demo.e-sert.tesisucuenca.com/ap
 
 ### 6. Persistencia del libro (pedido VPS-2 de Freddy)
 
-- Usa un usuario de prueba, por ejemplo `vps_prueba_<fecha>`.
+- Usa un usuario de prueba, por ejemplo `sim_vps_prueba_<fecha>` (el contrato exige el prefijo `sim_` o `app_<uuid>`).
   - Con `POST /api/v1/billetera/vps_prueba_<fecha>/recarga {"monto": 5}`, el saldo sube a 5.
 - Reinicia el contenedor desde Dokploy (no redespliegues) y consulta
   `GET /api/v1/billetera/vps_prueba_<fecha>`.
@@ -175,7 +175,7 @@ curl -s -o /dev/null -w '%{http_code}\n' https://demo.e-sert.tesisucuenca.com/ap
   - el commit desplegado;
   - las latencias y el consumo de CPU y RAM;
   - lo que quedó pendiente.
-- Commit y push en `tyrone/vps`; luego fusiona en `main`.
+- Commit y push directamente en `main`.
 - **Tag `v1.0`:** si los pasos 3, 4, 6, 7 y 8 cumplen, pide confirmación a Tyrone y luego:
 
   ```bash
