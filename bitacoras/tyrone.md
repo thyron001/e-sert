@@ -773,3 +773,49 @@ Sin verificador independiente: no es una sesión del plan.
 6. Recién entonces el tag `v1.0` en `main`, con confirmación de Tyrone.
 
 **Evidencias:** sin PNG nuevo (verificación). Salidas: `verificar_demo.py` → `{"ok": true}` 7/7; `pytest -m vps` 6/6; traci e2e 21/21 y backend e2e 11/11 en `freddy/s4`.
+
+## S4 · Cierre · 2026-11-17 · Unificación final, pendientes resueltos y sesión del VPS
+**Estado:** hecha en lo que no depende del VPS. Lo del VPS queda en `semanas/S4/sesion-vps.md` para la sesión de Claude Code conectada a Dokploy.
+
+**Qué hice:**
+- **Unificación final** (`unificacion/final` → `main`): fusioné `freddy/s4`, `miguel/s4`, `pablo/s4` y `tyrone/s4`, y traje el código de `miguel/s2` y `miguel/s3` a sus carpetas de semana. Detalle en `semanas/S4/unificacion-resultado.md`, sección «Unificación final».
+- **Código de Freddy en `proyecto/`:**
+  - RF exportado a `.npz` (`modelo_plano.py`) y cierre limpio del publicador;
+  - `--libsumo` y e2e con `p50_rf_s2`.
+- **RF sin `scikit-learn` en el contenedor:**
+  - versioné `proyecto/ia/modelos/rf_final.plano.npz` (SHA-256 `e0db6d5e…`, igual al del manifiesto);
+  - `traci`, `kpis.correr_una` y `demo.py` lo usan, y la demo ya corre `p50_rf_s2` con el RF.
+- **Visor en 0/610 (causa y arreglo):**
+  - causa: las sesiones de los autos simulados viven en el núcleo en memoria del controlador (`PuenteNucleo`), y el backend armaba `snapshot.puestos` solo con sus sesiones HTTP, así que siempre daba 0;
+  - arreglo: campo opcional `puestos` en `/sim/paso` (contrato v1.4 §4.4), que el backend suma a su mapa. En la demo local los ocupados suben de 0 a 132 en 1 500 s simulados;
+  - «puestos llenos» sigue cerca de 0 porque el mapa estimado solo ve autos con app. Se explica como el KPI de precisión del mapa.
+- **Asistente montado** en `backend/api/main.py`: la imagen copia `destinos.csv` e instala `anthropic`, `python-dotenv` y `rapidfuzz`. Prueba nueva: `test_asistente_montado.py`.
+- **`demo.py`:** ya no deja `escenarios.json` modificado y toma la ruta del contenedor del nombre real del repo. Los helpers e2e tampoco exigen ya que la carpeta se llame `e-sert`.
+- **Planificación** (decisiones mías):
+  - `docs/CONTRATO.md` v1.4: `/pagos/*` y `/asistente/interpretar` en §4.3, y `puestos` en §4.4; `verificar_contrato_api.py` sin diferencias;
+  - reverificación de S2 de Freddy aceptada solo para S2-2 y S2-3.
+- **Anexo:** las 15 respuestas «a confirmar» de Freddy, Tyrone y Miguel quedaron verificadas contra el código, y corregí las referencias a un §6b inexistente. Informe reconstruido con `--fuentes proyecto` y `verificar_informe.py` OK.
+- **`semanas/S4/sesion-vps.md`:** el prompt para la sesión del VPS.
+
+**Decisiones y por qué:**
+- Pedidos 1 y 2 de Pablo al VPS (`scikit-learn` y `validacion.py` en la imagen): **no aplican**. El backend no importa `ia/` y la clasificación ocurre en el controlador, en la laptop.
+- Límite de tasa de recargas: queda como opcional (Traefik) o trabajo futuro, porque la billetera es solo de prueba.
+- El video del plan B **no** se versiona (17 MB, está en Drive). En la laptop de Tyrone está fuera de git, con el SHA-256 verificado.
+
+**Problemas encontrados:**
+- Matar `demo.py` con `timeout`/SIGTERM dejó una vez el controlador vivo en el contenedor. Con Ctrl+C se apaga limpio (`verificar_demo` lo comprueba). Está anotado en `sesion-vps.md`.
+- `pytest` en esta computadora necesita `env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, por ROS Jazzy.
+
+**Pedidos a otros:**
+- @Tyrone [VPS]: ejecutar `semanas/S4/sesion-vps.md`.
+- @Miguel: copiar el video del plan B a la memoria USB y comprobar su SHA-256 (`b5229bcd…283122`).
+
+**Bucle y verificación:**
+- `verificar_demo.py`: 7/7.
+- Pruebas unitarias: 326 passed.
+- e2e: 32/32 (backend 11 + traci 21, con SUMO en `van3twin`).
+- Contrato y API: sin diferencias.
+- Informe: OK.
+- Mapa del visor medido antes (0) y después (hasta 132) del arreglo.
+
+**Pendientes:** sesión del VPS (redespliegue, token en la laptop, persistencia, demo remota, prueba de 10 min) y luego el tag `v1.0`.

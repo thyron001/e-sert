@@ -147,3 +147,41 @@ Freddy no las propuso.
 8. Descargar el video del plan B a la laptop y a un USB, y comprobar el SHA-256 de `ENLACE_VIDEO.md`.
 9. Ensayar `demo.ps1` en la laptop Windows de la exposición, con el proyector y el cronómetro.
 10. Revisar que la ocupación del mapa no quede en 0/610 durante la demo guiada; si queda, ir directo al video.
+
+## Unificación final · 2026-11-17 (rama `unificacion/final`, pedida por Tyrone)
+
+**Ramas fusionadas en `main`:**
+- `freddy/s4`, `miguel/s4`, `pablo/s4` y `tyrone/s4`. Los conflictos fueron solo de bitácoras que se añadían al final; se conservaron ambos lados.
+- De `miguel/s2` y `miguel/s3` se trajo solo `semanas/S2|S3/Miguel/codigo/`, porque sus resultados ya estaban publicados.
+- `freddy/s2` ya estaba en `main`.
+- Ninguna rama ajena tocó archivos de planificación, así que no hubo descartes.
+
+**Reverificación de S2 de Freddy:** aceptada para S2-2 (sigue 4/5) y S2-3 (pasa a 6/7). S2-1 se mantiene `hecha` (6/6), porque la versión de la rama era anterior al cierre Docker del 2026-11-05.
+
+**Cambios en `proyecto/`:**
+
+| Cambio | Archivos | Por qué |
+|---|---|---|
+| RF en el contenedor sin `scikit-learn` | `traci/modelo_plano.py`, `traci/clasificacion.py`, `ia/modelos/rf_final.plano.npz` (versionado), `kpis/correr_una.py`, `demo/demo.py` | `scikit-learn==1.9.1` no existe para Python 3.10: sin el `.npz` todo caía al umbral (2 fallos e2e, falsas liberaciones en la demo) |
+| Cierre limpio del publicador | `traci/puente_nucleo.py` (cortacircuitos + `_cerrado`) | El último POST fallaba con «client has been closed» |
+| `--libsumo` en `correr_kpis` y e2e con `p50_rf_s2` | `traci/correr_kpis.py`, `backend/tests/e2e/test_simulacion_completa.py` | La corrida de 1 800 s no terminaba en 240 s |
+| Visor en 0/610 | `comun/esquemas.py` (`PasoSimulacion.puestos`), `backend/nucleo/mundo.py`, `traci/correr_guiado.py` | Las sesiones simuladas viven en el núcleo del controlador; el backend solo veía las suyas |
+| Asistente montado | `backend/api/main.py`, `requirements-servidor.txt`, `Dockerfile` (`destinos.csv`) | `POST /asistente/interpretar` daba 404 en el VPS |
+| `demo.py` | restaura `escenarios.json` y toma `RAIZ_CONTENEDOR` del nombre real del repo | Reescribía un archivo versionado; exigía la carpeta `e-sert` |
+| Contrato v1.4 | `docs/CONTRATO.md` §4.3 (`/pagos/*`, `/asistente/interpretar`) y §4.4 (`puestos`) | Pedidos de Miguel; `verificar_contrato_api.py` sin diferencias |
+| Anexo e informe | `informe/anexos/preguntas_profesor.md`, `informe/salida/` | Las 15 «a confirmar» se verificaron contra el código; `verificar_informe.py` OK |
+
+**Verificación (en esta computadora, contenedor `van3twin` con SUMO 1.12):**
+- `sumo -c proyecto/sumo/centro_base.sumocfg --end 60`: OK, creando antes `proyecto/sumo/salidas/base_1/`, que está ignorada por git.
+- `verificar_demo.py`: 7/7, escenario `p50_rf_s2` con el RF, sin caer al umbral.
+- Pruebas unitarias de backend, traci, asistente y pagos: 326 passed.
+- e2e: 32/32 (backend 11 + traci 21, con SUMO en `van3twin`).
+- Mapa del visor en la demo local: de 0 a 132 ocupados entre los segundos simulados 300 y 1 500. Antes estaba siempre en 0.
+- VPS (antes de redesplegar): `pytest -m vps` 6/6.
+
+**Lo que queda para la sesión del VPS:** `semanas/S4/sesion-vps.md`. Incluye redesplegar, el token en la laptop, la persistencia, la demo remota, la prueba de 10 min y el tag `v1.0`.
+
+**Fuera del alcance de una sesión de Claude Code:**
+- copiar el video del plan B a un USB (la copia en la laptop ya tiene el SHA-256 correcto);
+- el iPhone físico (Miguel);
+- ensayar con el proyector.
