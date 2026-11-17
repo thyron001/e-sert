@@ -229,6 +229,7 @@ def f08_penetracion():
         col_pen = next(c for c in df.columns if "penetr" in c.lower())
         col_val = next(c for c in df.columns if "falsa" in c.lower())
         col_sis = next((c for c in df.columns if c.lower() in ("clasificador", "sistema", "modo")), None)
+        df = df[df[col_sis].isin(["umbral", "rf_final"])] if col_sis else df
         for nombre, d in (df.groupby(col_sis) if col_sis else [("", df)]):
             ax.plot(d[col_pen], d[col_val], marker="o", lw=2, color=VERDE if "rf" in str(nombre).lower() else GRIS, label=str(nombre))
         ax.set_xlabel("Penetración de la app")

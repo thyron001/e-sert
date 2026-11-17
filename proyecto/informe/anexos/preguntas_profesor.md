@@ -1,6 +1,6 @@
 ## Preguntas probables del profesor
 
-Banco de preguntas para la exposición, agrupadas por tema. Cada una indica quién responde y la evidencia en el repositorio. Las respuestas de Freddy, Tyrone y Miguel son **provisionales**, escritas solo con hechos comprobables en `docs/`, bitácoras y resúmenes; están marcadas «a confirmar» y quedan como pedido. Donde no hay un hecho comprobable se deja `[PENDIENTE: a responder por <Nombre>]`.
+Banco de preguntas para la exposición, agrupadas por tema. Cada una indica quién responde y la evidencia en el repositorio. Las respuestas de Freddy, Tyrone y Miguel son **provisionales**, escritas solo con hechos comprobables en `docs/`, bitácoras y resúmenes; están marcadas «a confirmar» y quedan como pedido. Donde no hay un hecho comprobable se deja «a confirmar por <Nombre>».
 
 ### Inteligencia artificial (Pablo)
 
@@ -129,7 +129,7 @@ Porque todo el proyecto es simulado: el teléfono no envía su GPS, sino que sig
 #### P25. ¿El guiado reduce el tiempo de búsqueda?
 **Responde:** Freddy y Tyrone (a confirmar). **Evidencia:** `bitacoras/freddy.md`.
 
-En la corrida de S2 con 50 % de app, con el mapa de ocupación del sistema la búsqueda con app fue de 11,3 min frente a 10,8 min sin app, es decir, no mejoró; con la ocupación real sí (10,0 frente a 10,7 min). Freddy propuso contar en el mapa las reservas de los autos en GUIADO. La cifra de la corrida final es [PENDIENTE: cifra de Tyrone S4-2]. <!-- fuente: bitacoras/freddy.md -->
+En la corrida de S2 con 50 % de app, con el mapa de ocupación del sistema la búsqueda con app fue de 11,3 min frente a 10,8 min sin app, es decir, no mejoró; con la ocupación real sí (10,0 frente a 10,7 min). Freddy propuso contar en el mapa las reservas de los autos en GUIADO. En la corrida final la búsqueda con la app no mejoró: 432,7 s a ciegas frente a 434,3, 438,2 y 450,7 s con 20, 50 y 80 % de app (el IC de Tyrone incluye la línea base en 20 y 50 %). <!-- fuente: kpis/resultados/final/resumen.csv --> <!-- fuente: bitacoras/freddy.md -->
 
 ### Escenario y KPIs (Tyrone)
 
@@ -146,17 +146,17 @@ La búsqueda empieza al entrar al primer tramo a 300 m o menos del destino y ter
 #### P28. ¿Qué penetración de la app se simula?
 **Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/tyrone.md`.
 
-El alcance fija la búsqueda a ciegas (línea base, `con_app = 0`) frente a la app con `20`, `50` y `80 %` de usuarios y al menos 2 semillas. Los resultados de la corrida final, falsas liberaciones por 100 sesiones y retardo de cierre por penetración, son [PENDIENTE: cifra de Tyrone S4-2].
+El alcance fija la búsqueda a ciegas (línea base, `con_app = 0`) frente a la app con `20`, `50` y `80 %` de usuarios y al menos 2 semillas. Los resultados de la corrida final, falsas liberaciones por 100 sesiones y retardo de cierre por penetración, con umbral fueron 88,9, 87,2 y 86,6 por 100 sesiones y con `rf_final` 0 en las tres penetraciones; el retardo mediano de cierre con `rf_final` fue 22,7, 18,8 y 18,4 s <!-- fuente: kpis/resultados/final/resumen.csv -->.
 
 #### P29. ¿Por qué hay `6 194` puestos si las fuentes oficiales dan unas `2 500`?
 **Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/miguel.md`, `bitacoras/tyrone.md`.
 
-Miguel lo advirtió al revisar la red: el script genera `6 194` plazas en 103 calles, y las fuentes oficiales dan unas `2 500` en toda la ciudad (`1 424` en el Centro Histórico en 2020). Para llegar a una ocupación realista, Tyrone añadió un `80 %` de autos de fondo ya estacionados. Qué inventario se adopta es [PENDIENTE: a responder por Tyrone]. <!-- fuente: bitacoras/miguel.md -->
+Miguel lo advirtió al revisar la red: el script genera `6 194` plazas en 103 calles, y las fuentes oficiales dan unas `2 500` en toda la ciudad (`1 424` en el Centro Histórico en 2020). Para llegar a una ocupación realista, Tyrone añadió un `80 %` de autos de fondo ya estacionados. El escenario final adopta ese `80 %` de puestos ocupados al inicio (sección de Tyrone; a confirmar por él). <!-- fuente: bitacoras/miguel.md -->
 
 #### P30. ¿Qué se hace con los buscadores que no alcanzan a estacionar?
 **Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/tyrone.md`.
 
-Se excluyen de las estadísticas de búsqueda y se reportan aparte, porque su búsqueda está censurada al final de la simulación: en las dos semillas de la línea base fueron 201 y 248 buscadores. [PENDIENTE: a responder por Tyrone] si en la corrida final se mantiene ese criterio. <!-- fuente: bitacoras/tyrone.md -->
+Se excluyen de las estadísticas de búsqueda y se reportan aparte, porque su búsqueda está censurada al final de la simulación: en las dos semillas de la línea base fueron 201 y 248 buscadores. (a confirmar por Tyrone) si en la corrida final se mantiene ese criterio. <!-- fuente: bitacoras/tyrone.md -->
 
 ### App y cobro (Miguel)
 
@@ -178,12 +178,12 @@ La intención de pago es la fuente de verdad y acredita una sola vez: tres retor
 #### P34. ¿Qué datos de ubicación recoge la app y cómo se protege la privacidad?
 **Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
 
-En este proyecto el teléfono no envía su ubicación: sigue a un auto simulado. Las grabaciones caseras, si se hacen, son opcionales, anonimizadas y quedan en `datos/grabaciones/` según un protocolo, y las credenciales de Payphone viven solo en un `.env` fuera del repositorio. La política para un despliegue real (retención, consentimiento) es [PENDIENTE: a responder por Miguel].
+En este proyecto el teléfono no envía su ubicación: sigue a un auto simulado. Las grabaciones caseras, si se hacen, son opcionales, anonimizadas y quedan en `datos/grabaciones/` según un protocolo, y las credenciales de Payphone viven solo en un `.env` fuera del repositorio. La política para un despliegue real (retención, consentimiento) no está definida en el proyecto y queda como trabajo futuro (a confirmar por Miguel).
 
 #### P35. ¿La app funciona en segundo plano y en un iPhone?
 **Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
 
-En iPhone el segundo plano es limitado, así que la app debe estar abierta durante la demostración. La recarga de punta a punta se probó en Android con Expo Go (de 4,92 a 14,92 USD tras aprobar 10 USD). La prueba en un iPhone físico es [PENDIENTE: a responder por Miguel]. <!-- fuente: bitacoras/miguel.md -->
+En iPhone el segundo plano es limitado, así que la app debe estar abierta durante la demostración. La recarga de punta a punta se probó en Android con Expo Go (de 4,92 a 14,92 USD tras aprobar 10 USD). No hubo un iPhone físico: en iOS solo se probaron pantallas en el simulador de Xcode (sección de Miguel). <!-- fuente: bitacoras/miguel.md -->
 
 ### Preguntas añadidas tras la revisión externa (IA, Pablo)
 
@@ -208,4 +208,4 @@ En parte sí. Las semillas de prueba (101 a 105) son distintas de las de entrena
 | P26 a P30: hora pico, KPIs, penetración, puestos, buscadores censurados | Tyrone | `bitacoras/tyrone.md`, `proyecto/kpis/kpis.py` |
 | P31 a P35: cobro, tarjeta SERT, Payphone, privacidad, iPhone | Miguel | `docs/CONTRATO.md`, `bitacoras/miguel.md` |
 
-Recuento: 22 de Pablo (P1 a P20, P36 y P37), 5 de Freddy, 5 de Tyrone y 5 de Miguel, 37 en total. Quedan como pedido las 15 preguntas de Freddy, Tyrone y Miguel, que deben revisar y responder antes del sábado 14 a las 18:00; en seis de ellas falta un dato propio marcado `[PENDIENTE]`.
+Recuento: 22 de Pablo (P1 a P20, P36 y P37), 5 de Freddy, 5 de Tyrone y 5 de Miguel, 37 en total. Quedan como pedido las 15 preguntas de Freddy, Tyrone y Miguel, que deben revisar y responder antes del sábado 14 a las 18:00; en seis de ellas el dato propio queda «a confirmar».
