@@ -2896,6 +2896,20 @@
                 "type": "null"
               }
             ]
+          },
+          "puestos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OcupacionPuesto"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puestos"
           }
         },
         "additionalProperties": false,

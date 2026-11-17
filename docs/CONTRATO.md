@@ -1,6 +1,6 @@
 # Contrato de interfaces (v1.4 final, 2026-11-17, cierre del proyecto)
 
-> **v1.4 (2026-11-17, cierre):** añade a §4.3 las rutas que ya existían en el backend y no estaban
+> **v1.4 (2026-11-17, cierre):** añade a §4.4 el mapa estimado del controlador (`puestos`) y a §4.3 las rutas que ya existían en el backend y no estaban
 > en el contrato: `/pagos/*` (Miguel, pedido de S2-2) y `POST /asistente/interpretar` (Miguel, S3-3),
 > que desde esta versión queda montada en la app principal (ver "Cambios en v1.4" al final). Es
 > aditivo: `X-Contrato-Version` y `Salud.contrato` siguen valiendo `1`.
@@ -271,6 +271,13 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
 - **v1.2 (S3-3), respuesta `202`:** `{"aceptado": true, "espejos": ["sim_veh42"]}` (`RespuestaSnapshot`):
   los autos que algún teléfono sigue. El controlador arma `espejo.detalle` solo para esos, en el
   snapshot siguiente.
+- **v1.4, `puestos` (opcional):** el mapa **estimado** del controlador, `[{puesto_id, ocupados,
+  capacidad}]` solo con los puestos que tienen `ocupados > 0`. Las sesiones de los autos simulados
+  viven en el núcleo del controlador (`PuenteNucleo`), no en el backend. Sin este campo,
+  `snapshot.puestos` solo contaba las sesiones creadas por HTTP y el visor marcaba 0/610 durante
+  toda la demo. El backend suma este mapa al suyo, sin pasar la capacidad. Sigue sin usar
+  `verdad`: el mapa estimado solo ve los autos con app, y la diferencia con `verdad` es el KPI de
+  precisión del mapa.
 
 ## 5. Tarifa (`proyecto/comun/tarifa.json`)
 
@@ -526,3 +533,7 @@ Aditivo; no cambia el header (`X-Contrato-Version` y `Salud.contrato` siguen en 
 2. **Backend:** `backend/api/main.py` monta el router del asistente (`_montar_asistente`); antes
    la ruta daba 404 en el VPS. La imagen copia `destinos.csv` (`ESERT_DESTINOS_CSV`) e instala
    `anthropic`, `python-dotenv` y `rapidfuzz`.
+3. **§4.4:** campo opcional `puestos` en `PasoSimulacion` con el mapa estimado del controlador.
+   El backend lo suma a su mapa para `snapshot.puestos`. Corrige el visor en 0/610: en la demo
+   local de `p50_rf_s2`, los ocupados del mapa pasan de 0 a 132 en 1 500 s simulados, con 99–219
+   puestos llenos en la verdad de SUMO.

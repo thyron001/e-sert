@@ -128,6 +128,12 @@ class PublicadorSnapshots:
             "peatones": peatones,
             "verdad": self._verdad(ctrl),
         }
+        # v1.4: el mapa estimado vive en el núcleo del controlador (PuenteNucleo); sin esto el backend
+        # solo ve sus propias sesiones HTTP y el visor queda en 0/610.
+        puente = getattr(self.sesiones, "puente", None)
+        if puente is not None:
+            cuerpo["puestos"] = [{"puesto_id": o.puesto_id, "ocupados": o.ocupados, "capacidad": o.capacidad}
+                                 for o in puente.mapa.ocupacion() if o.ocupados > 0]
         if self.espejo is not None:
             cuerpo["espejo"] = self.espejo.bloque(ctrl, t, self.espejos)
         self._ultimo_cuerpo = cuerpo

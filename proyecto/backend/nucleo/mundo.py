@@ -82,6 +82,16 @@ class EstadoMundo:
         """`t_sim` del último paso recibido (None si todavía no hay simulación)."""
         return None if self.ultimo_paso is None else self.ultimo_paso.t_sim
 
+    def _ocupacion_con(self, del_controlador: Optional[List[e.OcupacionPuesto]]) -> List[e.OcupacionPuesto]:
+        """Mapa del backend más el mapa estimado que manda el controlador (v1.4), sin pasar la capacidad."""
+        propio = self.mapa.ocupacion()
+        if not del_controlador:
+            return propio
+        extra = {p.puesto_id: p.ocupados for p in del_controlador}
+        return [e.OcupacionPuesto(puesto_id=p.puesto_id, capacidad=p.capacidad,
+                                  ocupados=min(p.capacidad, p.ocupados + extra.get(p.puesto_id, 0)))
+                for p in propio]
+
     def aplicar_paso(self, paso: e.PasoSimulacion) -> Optional[Difusion]:
         """Registra el paso. Devuelve qué difundir, o None si viola el límite de 1 por segundo.
 
@@ -100,7 +110,7 @@ class EstadoMundo:
             vehiculos=[e.VehiculoSnapshot(id=v.id, lat=v.lat, lon=v.lon, estado=v.estado, con_app=v.con_app)
                        for v in paso.vehiculos],
             peatones=paso.peatones,
-            puestos=self.mapa.ocupacion(),
+            puestos=self._ocupacion_con(paso.puestos),
             espejos=espejos,
         )
         verdad = e.MensajeVerdad(t_sim=paso.t_sim, ts=paso.ts, puestos=paso.verdad.puestos,

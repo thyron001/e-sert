@@ -178,6 +178,7 @@ Cuerpo: `PasoSimulacion`
 | `peatones` | [Peaton] | sí |
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
+| `puestos` | [OcupacionPuesto] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
@@ -238,6 +239,7 @@ Cuerpo: `PasoSimulacion`
 | `peatones` | [Peaton] | sí |
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
+| `puestos` | [OcupacionPuesto] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
