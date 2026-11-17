@@ -674,3 +674,102 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 - Que la unificación lleve el visor y la demo a `proyecto/`.
 
 **Evidencias:** ![](../semanas/S4/Tyrone/evidencias/s3_diapositiva-resultados.png) ![](../semanas/S4/Tyrone/evidencias/s3_ensayo-cronometro.png) · [Explicación (PDF)](../semanas/S4/Tyrone/explicaciones/s3_explicacion.pdf) · [Resumen semanal (PDF)](../semanas/S4/Tyrone/evidencias/resumen_S4_Tyrone.pdf)
+
+## S4 · Verificación previa a v1.0 · 2026-11-17 · Lista de cierre pedida por Pablo y subida de todo a GitHub
+**Estado:** parcial. No se pone el tag `v1.0`: hay criterios sin verificar (ver «Pendientes»).
+**Lector:** también la sesión única de Claude Code que ejecutará el trabajo de todo el equipo en una sola computadora, y la sesión integrada con el VPS (sección «Pedidos para el VPS»).
+
+**Qué hice** (sobre una copia limpia de `origin/main` `3e38df6`, en `results/e-sert-v1check`, sin tocar ramas ajenas):
+1. **Contenedor:** `van3twin` estaba detenido (código 255). Lo arranqué y reinstalé las dependencias de `backend`, `traci`, `demo`, `kpis`, `sumo` y `comun`, más `pandas` y `scipy`.
+2. **SUMO y demo:**
+   - `sumo -c proyecto/sumo/centro_base.sumocfg --end 60` termina bien, pero solo después de crear `proyecto/sumo/salidas/base_1/`; en un clon limpio falla con «Could not build output file».
+   - `verificar_demo.py` en modo local cumple **7/7** criterios.
+     - **No se corre dentro del contenedor**, como decía el pedido de Pablo: es un orquestador de la computadora que llama a `docker` y exige Python ≥ 3.11 (`demo/.venv`).
+     - Funcionó tras ajustar en la copia temporal `RAIZ_CONTENEDOR`; ver «Problemas».
+3. **Pruebas e2e con `main` tal cual:**
+   - backend 10/11: falla `test_simulacion_completa_contra_backend_vivo`, porque el controlador no termina 1 800 s en 240 s;
+   - traci 20/21: falla `test_cierre_automatico`, con 4/5 falsas liberaciones y el clasificador en `umbral`.
+4. **Causa de los dos fallos:**
+   - En el contenedor (Python 3.10) no existe `scikit-learn==1.9.1`: `rf_final.joblib` no carga y la inferencia cae al umbral.
+   - La corrección ya estaba hecha por Freddy (`traci/modelo_plano.py`, el RF exportado a `.npz`), pero **solo en esta computadora**: había un commit local sin subir y dos archivos sin commitear en `freddy/s4`.
+   - Los integré con los 5 commits que Freddy había subido desde otra máquina y resolví dos conflictos:
+     - `puente_nucleo.Publicador`: combiné el cortacircuitos con el cierre limpio;
+     - `correr_kpis.py`: `--libsumo` junto a `--gui` y `--captura`.
+   - Con eso, en `semanas/S4/Freddy/codigo`: traci unitarias 80 pasan y 12 se saltan, **traci e2e 21/21**, **backend e2e 11/11** (con `p50_rf_s2` y `--libsumo`). Los 2 fallos de `main` desaparecen.
+5. **VPS:**
+   - `GET /salud` responde 200 (`contrato: 1`) y `/visor/` responde 200.
+   - `pytest -m vps` cumple **6/6**: `/sim/paso` e `/interno/snapshot` sin token dan 401, así que `ESERT_TOKEN_SIM` está configurado en Dokploy (pedido VPS-1 de Freddy).
+   - Falta probar la publicación con el token verdadero (punto 5).
+6. **Video del plan B:** SHA-256 `b5229bcd…283122` y 17 102 744 bytes, iguales a `ENLACE_VIDEO.md`, en la laptop de Tyrone.
+7. **Modelo:** el SHA-256 de `proyecto/ia/modelos/rf_final.joblib` (`1bdac0d7…fd013e2`) coincide con `kpis/resultados/final/manifiesto.json` y con `rf_final.json`.
+8. **GitHub:** revisé todas las ramas locales.
+   - `tyrone/s1`…`s4` ya estaban sincronizadas. Los archivos de `semanas/S3|S4/Tyrone` que aparecían sin seguimiento son salidas ignoradas en sus ramas o idénticas a lo ya subido: los comparé archivo por archivo sobre `origin/tyrone/s3` y `s4`, sin diferencias.
+   - Lo único pendiente era lo de Freddy (punto 4), que quedó subido a `freddy/s4`.
+
+**Archivos creados o modificados:**
+- `semanas/S4/Freddy/codigo/traci/{modelo_plano.py,puente_nucleo.py,clasificacion.py,correr_kpis.py,tests/test_modelo_plano.py,tests/test_publicador_cierre.py}`;
+- `semanas/S4/Freddy/codigo/backend/tests/e2e/test_simulacion_completa.py`;
+- esta bitácora.
+
+**Decisiones y por qué:**
+- No se pone `v1.0`: la corrección del RF no está en `main` y faltan los puntos de abajo.
+- No se aplicó a ciegas la reverificación de S2 de Freddy (`git checkout origin/freddy/s4 -- semanas/S2/Freddy/{RESUMEN.md,estado.json}`): trae bien S2-2 y S2-3, pero **baja S2-1 de «hecha» a «parcial»** y borra el cierre del 2026-11-05 (imagen Docker, `s1_docker-backend.png`), que en `main` es más reciente. Propuesta: aceptar solo S2-2 y S2-3.
+- No se cambió `docs/CONTRATO.md` todavía (decisión de Tyrone pendiente, ver «Pendientes»).
+
+**Problemas encontrados:**
+- **El RF no corre en el contenedor con `main`:** falta en `main` la exportación `.npz` de Freddy. Hasta fusionar `freddy/s4`, la demo y las corridas clasifican con el umbral, lo que da falsas liberaciones.
+- **`demo/demo.py` reescribe `proyecto/sumo/escenarios/escenarios.json`**, un archivo versionado: al generar la demanda de la semilla 2 deja solo ese escenario y borra los demás. Pasó en esta sesión y lo restauré con `git checkout`.
+- **`demo/demo.py` exige que el repo esté en `results/e-sert`** (`RAIZ_CONTENEDOR` fijo). El día de la demo esa carpeta tiene que estar en `main`; hoy estaba en `freddy/s4`. Lo mismo exigen los helpers de las pruebas e2e.
+- **`/api/v1/asistente/interpretar` da 404 en producción:** `backend/asistente/router.py` (Miguel) existe, pero `backend/api/main.py` no lo monta; solo se monta `pagos`. La app lo llama (`app/src/api/asistente.ts`) y cae al formulario.
+- `demo/demo.py`: sin `kpis/externo/rf_final.plano.npz` intenta exportarlo y falla en silencio si la computadora no tiene `scikit-learn==1.9.1`; la demo sigue con el umbral (solo un aviso).
+- En esta computadora, el `PYTHONPATH` de ROS Jazzy rompe `pytest` (plugin `launch_testing`): hay que correrlo con `env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`.
+- El video del plan B quedó suelto en la raíz del repo (`e-sert_demo_plan_b.mp4`) y git **no** lo ignora: no hacer `git add -A`. Moverlo fuera del repo.
+
+**Pedidos a otros:**
+- @Freddy:
+  - montar `backend.asistente.router` en `api/main.py` (como `_montar_pagos`) y añadir su prueba;
+  - confirmar que la combinación de `Publicador` en el rebase es la que querías (`caido`/sondas con `_cerrado`/`_enviando`);
+  - confirmar tus respuestas «a confirmar» P21–P25 de `proyecto/informe/anexos/preguntas_profesor.md`.
+- @Miguel: confirmar tus respuestas «a confirmar» P31–P35 del anexo; copiar el video del plan B a la memoria USB y comprobar su SHA-256.
+- @Pablo: corregir la instrucción de la lista: `verificar_demo.py` corre en la computadora (Python ≥ 3.11), no en el contenedor.
+- @Tyrone [Plan]:
+  - `docs/CONTRATO.md` §4.3: añadir `POST /pagos/preparar`, `GET /pagos/{client_transaction_id}` y `GET /pagos/retorno` (pedido de Miguel, rutas ya montadas en producción) y `POST /asistente/interpretar` con la nota «montaje pendiente» hasta que Freddy lo monte;
+  - decidir la reverificación de S2 de Freddy (propuesta arriba);
+  - confirmar P26–P30 del anexo y reconstruir el informe si cambia algo: `python3 proyecto/informe/construir_informe.py --fuentes proyecto` y `verificar_informe.py`.
+- @Tyrone (`demo/`, módulo propio): no reescribir `escenarios.json` versionado (escribir la demanda de la demo en `salidas/` o en un archivo aparte), crear `sumo/salidas/<esc>/` antes de lanzar SUMO y tomar `RAIZ_CONTENEDOR` del nombre real de la carpeta.
+
+**Pedidos para el VPS** (los ejecuta la sesión de Claude Code integrada con el VPS/Dokploy; solo Tyrone tiene acceso):
+- **[VPS-A] Token de simulación en la máquina de la demo.**
+  - Ya está exigido en el VPS (`pytest -m vps` 6/6).
+  - Falta poner el **mismo** valor de `ESERT_TOKEN_SIM` de Dokploy en la computadora de la demo, fuera del repo:
+    `read -rsp "ESERT_TOKEN_SIM: " T && printf 'export ESERT_TOKEN_SIM=%s\n' "$T" > ~/.esert_token && chmod 600 ~/.esert_token && unset T`
+  - Uso: `source ~/.esert_token` antes de `./demo/demo.sh`.
+- **[VPS-B] Redesplegar tras fusionar `freddy/s4` en `main`.** Comprobar en Dokploy que el servicio `esert-demo` sigue `main` (On Push) y que el despliegue termina `healthy`. Luego:
+  - `ESERT_URL_PUBLICA=https://demo.e-sert.tesisucuenca.com python -m pytest -c backend/pytest.ini backend/tests -m vps` (desde `proyecto/`, con `env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` en esta computadora): 6/6;
+  - `wss://demo.e-sert.tesisucuenca.com/ws/espejo/x` debe responder `espejo_fin` `no_existe` y cerrar con 4404.
+- **[VPS-C] Asistente.** Cuando Freddy monte el router, redesplegar y comprobar:
+  - `curl -X POST -H 'content-type: application/json' -d '{"texto":"cerca de la Catedral Nueva una hora"}' https://demo.e-sert.tesisucuenca.com/api/v1/asistente/interpretar` → 200 (hoy da 404);
+  - para usar el LLM, `ANTHROPIC_API_KEY` en Dokploy → Environment (nunca en el repo); sin ella responde por reglas.
+- **[VPS-D] Persistencia** (pedido VPS-2 de Freddy, sin verificar): `ESERT_DB_URL=sqlite:////data/esert.db` con el volumen `/data` montado; si no, saldos y libro se pierden en cada redeploy.
+- **[VPS-E] Demo guiada en línea y mapa en 0/610** (punto 5 de la lista, sin verificar). Hoy, sin simulación publicando, `GET /api/v1/puestos` da 0 ocupados de 610 puestos (capacidad 6 194) y `t_sim: null`. Con el token cargado y `results/e-sert` en `main`:
+  - correr `./demo/demo.sh` (modo remoto);
+  - abrir `https://demo.e-sert.tesisucuenca.com/visor/` y vigilar `GET /api/v1/puestos` cada 30 s durante la demo guiada;
+  - los ocupados deben subir de 0 en el primer minuto. Si se quedan en 0/610, anotarlo como @Freddy (publicación de `/sim/paso`) y presentar con el plan B (video).
+- **[VPS-F] Prueba en línea de 10 min** (VPS-4 de Freddy, criterio S3-3) y **límite de tasa de recargas** (VPS-5): siguen abiertos, con las instrucciones de la entrada de traspaso de Freddy (`bitacoras/freddy.md`, «S4 · Traspaso · 2026-11-17»).
+
+**Bucle y verificación:** 3 vueltas.
+1. `main` tal cual: 2 fallos e2e.
+2. Diagnóstico: sklearn 1.9.1 no existe para Python 3.10.
+3. Rebase de `freddy/s4` y nuevas e2e.
+
+Sin verificador independiente: no es una sesión del plan.
+
+**Pendientes (lo que falta para `v1.0`):**
+1. Fusionar `freddy/s4` en `main` (RF `.npz`) y repetir las e2e desde `proyecto/`.
+2. Decidir y aplicar el contrato §4.3 y la reverificación de S2.
+3. Confirmar las 15 respuestas «a confirmar» del anexo (Freddy, Tyrone, Miguel) y reconstruir el informe.
+4. VPS-A, VPS-E (0/610) y VPS-B.
+5. La copia del video en la memoria USB con su SHA-256.
+6. Recién entonces el tag `v1.0` en `main`, con confirmación de Tyrone.
+
+**Evidencias:** sin PNG nuevo (verificación). Salidas: `verificar_demo.py` → `{"ok": true}` 7/7; `pytest -m vps` 6/6; traci e2e 21/21 y backend e2e 11/11 en `freddy/s4`.
