@@ -819,3 +819,37 @@ Sin verificador independiente: no es una sesión del plan.
 - Mapa del visor medido antes (0) y después (hasta 132) del arreglo.
 
 **Pendientes:** sesión del VPS (redespliegue, token en la laptop, persistencia, demo remota, prueba de 10 min) y luego el tag `v1.0`.
+
+## S4 · Sesión VPS · 2026-11-17 · Redespliegue de `main` final en `esert-demo` y comprobaciones en línea
+**Estado:** parcial. Lo que se hace desde el VPS cumple (pasos 1–6); los pasos 7–9 necesitan la laptop de la demo (`van3twin`, Expo Go) y quedan pendientes. Sin tag `v1.0` todavía.
+
+**Commit desplegado:** `4dd748d [S4-U][final] Versión final de entrega` (= `origin/main`). El autodeploy de Dokploy lo tomó solo (deploy `done` 2026-11-17 16:59 UTC).
+
+**Resultado por paso:**
+1. **Estado de partida** — cumple. En Dokploy la app de `demo.e-sert.tesisucuenca.com` se llama `api` (`esert-api-ya3sai`, no `esert-demo`): rama `main`, Autodeploy On Push activo, Dockerfile `proyecto/backend/Dockerfile`, contexto `.`, Build Path `/`, dominio con HTTPS (Let's Encrypt, puerto 8000). Contenedor `healthy`.
+2. **Variables y volumen** — cumple.
+   - Existen `ESERT_TOKEN_SIM` (64 caracteres), `PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`, `PAYPHONE_MODO=pruebas`, `PAYPHONE_RESPONSE_URL` (= `https://demo.e-sert.tesisucuenca.com/api/v1/pagos/retorno`) y `ESERT_URL_PUBLICA` (= el dominio).
+   - `ESERT_DB_URL` no está en Dokploy, pero la imagen la fija en `sqlite:////data/esert.db` (`ENV` del Dockerfile). Volumen `esert-demo-datos` montado en `/data`.
+   - `ANTHROPIC_API_KEY` no existe → el asistente usa reglas. `ESERT_CORS_ORIGENES` no existe → `*` por defecto.
+   - La URL de respuesta y el Dominio Web en el panel de Payphone no se revisaron desde aquí (solo la variable del contenedor).
+3. **Redespliegue** — cumple. La imagen trae `anthropic 1.17.0`, `rapidfuzz 3.14.6` y `python-dotenv 1.2.4`; `destinos.csv` copiado (el asistente responde). Contenedor `healthy`.
+4. **Comprobaciones desde fuera** — cumple.
+   - `/salud` → `{"ok":true,"contrato":1,...}`; `/visor` → 200.
+   - `pytest -m vps` → `6 passed, 134 deselected`.
+   - `/asistente/interpretar` «cerca de la Catedral Nueva una hora» → 200, `Catedral Nueva`, `duracion_min: 60`, `fuente: reglas`.
+   - `/pagos/no-existe` → 404; `/sim/paso` sin token → 401.
+   - `wss://.../ws/espejo/x` → `espejo_fin` con `motivo: no_existe` y cierre **4404** a través de Traefik.
+5. **Asistente con LLM** — `fuente: reglas` (sin `ANTHROPIC_API_KEY`). Válido para la demo.
+6. **Persistencia del libro** — cumple. `sim_vps_prueba_20261117` recargó 5; tras `docker service update --force` (contenedor nuevo) el saldo siguió en 5.
+   - El ID `vps_prueba_<fecha>` del prompt da 422: el contrato exige `sim_…` o `app_<uuid>`. Usé `sim_vps_prueba_20261117`.
+7. **Token en la laptop** — pendiente (se hace en la laptop). Comprobado del lado del VPS: sin token → 401.
+8. **Demo guiada en línea y mapa** — pendiente (necesita `van3twin` y Expo Go en la laptop).
+9. **Prueba de 10 min** — pendiente. Consumo base del contenedor en reposo: CPU 0,17 %, RAM 64,7 MiB de 3,8 GiB.
+10. **Límite de tasa** — no implementado; queda como trabajo futuro (billetera solo de prueba).
+11. **Tag `v1.0`** — no puesto: faltan los pasos 7 y 8.
+
+**Problemas encontrados:**
+- El VPS no tiene credenciales de push a GitHub (repo privado, sin `gh`). Esta entrada se preparó en la rama local `tyrone/vps` y se sube desde la laptop.
+- `semanas/S4/sesion-vps.md` usa un ID de prueba que no cumple el patrón del contrato (ver paso 6).
+
+**Pendientes:** pasos 7, 8 y 9 en la laptop; con 7 y 8 en cumple, tag `v1.0`.
