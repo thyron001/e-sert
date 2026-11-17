@@ -313,7 +313,10 @@ def main(argv=None) -> None:
     ap.add_argument("--id", required=True)
     ap.add_argument("--duracion", type=float, default=4500)
     ap.add_argument("--warmup", type=float, default=900)
-    ap.add_argument("--modelo", default="kpis/externo/rf_final.plano.npz")
+    # S4-U final: el .npz está versionado en ia/modelos/; kpis/externo/ queda para la copia de semana.
+    modelo_def = next((m for m in ("kpis/externo/rf_final.plano.npz", "ia/modelos/rf_final.plano.npz")
+                       if Path(m).exists()), "ia/modelos/rf_final.plano.npz")
+    ap.add_argument("--modelo", default=modelo_def)
     ap.add_argument("--publicar", default=None, help="URL del backend: publica snapshots, kpi y espejo")
     ap.add_argument("--ritmo", type=float, default=None, help="veces el tiempo real (1 = demo en vivo)")
     ap.add_argument("--gui", action="store_true", help="sumo-gui (pantalla :99 del contenedor, VNC 5901)")

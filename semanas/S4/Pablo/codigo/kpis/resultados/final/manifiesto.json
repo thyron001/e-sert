@@ -1,0 +1,392 @@
+{
+ "fecha_utc": "2026-11-14T01:35:52+00:00",
+ "git_head": "91691cbba5b3b403f52e7a4648327a172f21f461",
+ "proyecto_usado": {
+  "traci": "proyecto/traci (controlador de Freddy, unificado en S3)",
+  "ia": "origin/pablo/s4:semanas/S4/Pablo/codigo/ia (rf_final congelado)",
+  "git_rev_proyecto": "91691cbba5b3b403f52e7a4648327a172f21f461"
+ },
+ "modelo": {
+  "nombre": "rf_final",
+  "sha256_joblib": "1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2",
+  "sha256_esperado_json": "1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2",
+  "coincide": true,
+  "sha256_npz": "e0db6d5e84de4036a22631d6c6786953cd59e5dcd85522aeaf37e4ca7ed0dabf"
+ },
+ "sumo": "Eclipse SUMO sumo Version 1.12.0",
+ "python_contenedor": "3.10.12",
+ "sistema": "Linux-7.0.0-38-generic-x86_64-with-glibc2.35",
+ "cpu": {
+  "nucleos": 4,
+  "modelo": "Intel(R) Core(TM) i5-3340M CPU @ 2.70GHz"
+ },
+ "sumocfg": "sumo/escenarios/<base|app20|app50|app80>_s<N>.sumocfg (generar_escenarios.py)",
+ "veh_hora": 1800,
+ "semillas": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "matriz": {
+  "escenario": "centro_base",
+  "penetracion": [
+   0,
+   20,
+   50,
+   80
+  ],
+  "clasificador": [
+   "umbral",
+   "rf"
+  ],
+  "semillas": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "duracion_s": 4500,
+  "warmup_s": 900,
+  "modelo_rf": "kpis/externo/rf_final.plano.npz",
+  "modelo_rf_joblib": "kpis/externo/ia/modelos/rf_final.joblib",
+  "libsumo": true,
+  "timeout_corrida_s": 3600,
+  "veh_hora": 1800
+ },
+ "oraculo": {
+  "penetracion": 50,
+  "clasificador": "rf",
+  "semillas": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "guia_fuente": "verdad",
+  "ids": [
+   "p50_rf_s1_oraculo",
+   "p50_rf_s2_oraculo",
+   "p50_rf_s3_oraculo",
+   "p50_rf_s4_oraculo",
+   "p50_rf_s5_oraculo"
+  ]
+ },
+ "hashes_entradas": {
+  "red": "99a50fe61f13504d39f6a08457dcddf1cc4022960b32ce10794fde1627c03c2d",
+  "parqueos": "0b0ca6f41ba202686d38dbec07c8c67e1e73b5a948b19e3099178aa0bb7a31b9",
+  "modelo_rf": "e0db6d5e84de4036a22631d6c6786953cd59e5dcd85522aeaf37e4ca7ed0dabf",
+  "modelo_rf_joblib": "1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2"
+ },
+ "demandas_sha256": {
+  "s1": {
+   "0": "b6e3333760d2183873cdbc8308730cef2d4a4dc879eee7fc980ef8fb57837c23",
+   "20": "753a78edfeda56aeacd3df6e412491d2b60c1316fb71689a2842ed745c06ca20",
+   "50": "01bb7e367050ee4e2d141768c8bd7eefa417aca546e67fec3fa3d51071b880f1",
+   "80": "d82eeaf91dc732508dd558d19e6a8ff6e0c139c5b4ff79ca1fb6fd62d5a44d56"
+  },
+  "s2": {
+   "0": "0f8d242832527b01ead6088ed8516b7ae7f76eb36ba05a13312b8e71bbfc3667",
+   "20": "f3c0a807ade98208a0e0b883b466e9a5b2f39aafa91bd6d4d4d81bb54047e7ab",
+   "50": "af7f487ae151e7acb1fa102e94e6c5ed4176db10e4573ec0632742794dca1cd1",
+   "80": "e25cb82cef2840d1434700a0342f69709dce5b98bdc2845502b769e3ba6954e0"
+  },
+  "s3": {
+   "0": "684096f829003380d3452a041e5813c5b04787639e429bd421dead15b08ed762",
+   "20": "10da0bc1f58d842abcf2f049d361cac8c78d29002941144771c6a39b196274d3",
+   "50": "ab8f0b042eeab9b104bec484819d863f58e479b326c5f00be8415cd70f797ea7",
+   "80": "68be9bd411fb761413c9a4b9c56e4bdc4de95dbd8c2bd52e4137502da2696c19"
+  },
+  "s4": {
+   "0": "d093fb7f7ef659b394bad3c38b6483b06394acd8c6fad6d3778b875903c8ba2e",
+   "20": "928ba3ccdb08cc70f25bb0c4d03ec44b1fe62294dc1f71dbe01fef8215d016c8",
+   "50": "076b1de470cf0892c819d162abe043c643ffe491dbeddbcee96ea60b93fa0835",
+   "80": "50b5d5d2e339583c6acafb0418da10717f877c22d3016e175c16cc90f4a04d52"
+  },
+  "s5": {
+   "0": "9678d21cf4ab671cf6855c5fd3390e06e21d4bc5c923666f903f95a25bd121d2",
+   "20": "87ab909759a14d08282af1191f2a16266dc8d5b243825b811dbf6e45912b00d0",
+   "50": "710612d355e6ffb596a31222b4e46be1b4f92662eb8d572c885c0a74898ecc96",
+   "80": "df4f306d06185919623250ddc1a1b6a971cc2350d787396f736941fb71a5ddcd"
+  }
+ },
+ "repetir": [
+  "docker exec -w /home/vanet/results/e-sert/<codigo> van3twin bash -lc \"python3 sumo/escenarios/generar_escenarios.py --semillas 1 2 3 4 5\" (desde sumo/escenarios)",
+  "python -m kpis.modelo_plano exportar --joblib kpis/externo/ia/modelos/rf_final.joblib --salida kpis/externo/rf_final.plano.npz (en la computadora, con sklearn 1.9.1)",
+  "python3 -m kpis.corrida_final --procesos 4 (en el contenedor)"
+ ],
+ "corridas": {
+  "p00_umbral_s1": {
+   "hash_config": "e47e46a3b1ef9ce7d046c8a2e354ed3c952dd3b14840e3ef8bc823fcc845ff22",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T20:52:44+00:00",
+   "duracion_real_s": 1572.6
+  },
+  "p20_umbral_s1": {
+   "hash_config": "96ce32b229ad421719ba94ceeb0e1ba161225740f9cda76f96c824997956c24e",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T20:56:42+00:00",
+   "duracion_real_s": 1810.8
+  },
+  "p20_rf_s1": {
+   "hash_config": "3ebc9d385aa0b0cbe5d4f9b9b1a6d2c28258608ea4c7e85abbef765cc15d1940",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T20:57:22+00:00",
+   "duracion_real_s": 1850.8
+  },
+  "p50_umbral_s1": {
+   "hash_config": "f06e3a094f15f4854785f1e64993c40a17f79f316a562680204396905f03c88d",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:18:36+00:00",
+   "duracion_real_s": 1555.9
+  },
+  "p50_rf_s1": {
+   "hash_config": "515108ef0366f97658cfd26768e41b2d10a92bbf2dbb1a114b9655ed45e88c3b",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:21:37+00:00",
+   "duracion_real_s": 1732.9
+  },
+  "p80_umbral_s1": {
+   "hash_config": "6d2fdd14976d1134282e2be8594edf7d05b6ebeb6276bd3da230bbd707bd96b7",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:22:46+00:00",
+   "duracion_real_s": 1562.5
+  },
+  "p80_rf_s1": {
+   "hash_config": "1f98bd8b8c9d6774dfa8ce95ccb18322793fe9e499d093c466378150364ea118",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:27:21+00:00",
+   "duracion_real_s": 1797.6
+  },
+  "p00_umbral_s2": {
+   "hash_config": "08fb4c3c0c8fa128a4b88e27bf9587b2e19da8983255ee786bcc23d4d78fec7f",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:43:02+00:00",
+   "duracion_real_s": 1465.6
+  },
+  "p20_umbral_s2": {
+   "hash_config": "831de5a07558e4cdae434fcb628f7915c891606c7597b001e58f3f5569dfaaaf",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:47:20+00:00",
+   "duracion_real_s": 1474.2
+  },
+  "p20_rf_s2": {
+   "hash_config": "f85fc5e1b8957fa0fb98ad37db8ad4df0147c3139821b3c0374e31627b37bbff",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T21:53:01+00:00",
+   "duracion_real_s": 1540.1
+  },
+  "p50_umbral_s2": {
+   "hash_config": "ef403e772605e34e5f9dca2354bf990890fd2729d3b414b73ddd6c94892e5fb8",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:11:39+00:00",
+   "duracion_real_s": 1717.0
+  },
+  "p50_rf_s2": {
+   "hash_config": "10035eda51a62589ad93b371109c8b19c4f54ea6a0259d9a70d60694d3f9b277",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:19:16+00:00",
+   "duracion_real_s": 1989.0
+  },
+  "p80_umbral_s2": {
+   "hash_config": "79ebb99aca3c6dcf44e9875f47daaafe5efc894763887b4bb77e3edd6ef46566",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:17:45+00:00",
+   "duracion_real_s": 1824.6
+  },
+  "p80_rf_s2": {
+   "hash_config": "7975bfb1b9f27a5b8b5b28d4beb7f10c27d9333b06a7e2496fa0fe185654c8d3",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:29:17+00:00",
+   "duracion_real_s": 2175.3
+  },
+  "p00_umbral_s3": {
+   "hash_config": "dbb8e39510b8e55f19839b2a771e6da15c6c0038db842005cce4cd64462c5fc3",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:41:43+00:00",
+   "duracion_real_s": 1803.2
+  },
+  "p20_umbral_s3": {
+   "hash_config": "d9db2edc95449bfc47d59003f1a113a6bfe3dbd4a93f4894a0f4d3822f84d385",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:47:35+00:00",
+   "duracion_real_s": 1697.7
+  },
+  "p20_rf_s3": {
+   "hash_config": "3e2fbb519e5e8fea956a0ee9f051207c487ade3fbfa6cc92470ff45c3f5a1915",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T22:56:07+00:00",
+   "duracion_real_s": 1610.1
+  },
+  "p50_umbral_s3": {
+   "hash_config": "7b0afab5dfdb62424657b121af541d2bcdd3ff56747436d227fdacac6b87bfda",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T23:09:07+00:00",
+   "duracion_real_s": 1643.5
+  },
+  "p50_rf_s3": {
+   "hash_config": "5e7685f1af99b8ba736747f82020d56f2a72519ccb4f088f02b8104d6c9d026c",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T23:13:41+00:00",
+   "duracion_real_s": 1673.5
+  },
+  "p80_umbral_s3": {
+   "hash_config": "27536cc1a0a02867b228d03a4526f6ebbe56671241086cf3d1a3fe94d3b12489",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T23:13:25+00:00",
+   "duracion_real_s": 1549.9
+  },
+  "p80_rf_s3": {
+   "hash_config": "d274d5f8cc8d4977df44e67980074ac4d7a2d8ae5371222083d24b7ac617856e",
+   "origen": "S3-1 (mismo hash)",
+   "fin_utc": "2026-11-13T23:18:09+00:00",
+   "duracion_real_s": 1320.6
+  },
+  "p00_umbral_s4": {
+   "hash_config": "92ea0a7d76ac3b23720cfdeb14c4bdf1a9d895c77573539f7162e4fdc57d7e46",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-13T23:46:55+00:00",
+   "duracion_real_s": 1676.3
+  },
+  "p20_umbral_s4": {
+   "hash_config": "11574dfa868c1787fdc80f41e35ce49027cf77a54df2dccac99485ed7e77f307",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-13T23:45:25+00:00",
+   "duracion_real_s": 1585.8
+  },
+  "p20_rf_s4": {
+   "hash_config": "0610d531e4d3f720cc0904ef329c6add2df1d1249f327033965980604e5fe5eb",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-13T23:46:43+00:00",
+   "duracion_real_s": 1663.7
+  },
+  "p50_umbral_s4": {
+   "hash_config": "c139ccc9740269e6ff2ccf1ee59b9d644a65d5d1173f53c881e77a87f4d0a6ae",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-13T23:48:03+00:00",
+   "duracion_real_s": 1744.3
+  },
+  "p50_rf_s4": {
+   "hash_config": "77a52a1c0a7ef9d41497deb06f8feb8a10adfd310ee6f891b873d94363536716",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:13:28+00:00",
+   "duracion_real_s": 1682.2
+  },
+  "p80_umbral_s4": {
+   "hash_config": "1cf550ca15a03b90019cbfd9c4d39ac93675895d7d75db4e5e00c4f93bf42c06",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:12:32+00:00",
+   "duracion_real_s": 1548.4
+  },
+  "p80_rf_s4": {
+   "hash_config": "54b9506925329c5f7d9e2d4118b1c33918c4c192a1929922378e9ec2b1904b66",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:16:22+00:00",
+   "duracion_real_s": 1765.9
+  },
+  "p00_umbral_s5": {
+   "hash_config": "68bb69cc79adc0d25aa6910c8e26648d86cd7accdd605b16050c6572805758e3",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:11:47+00:00",
+   "duracion_real_s": 1422.8
+  },
+  "p20_umbral_s5": {
+   "hash_config": "0797864c8d84db72e065921e9c3c83faa026379aae9617997577103404e046b2",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:36:57+00:00",
+   "duracion_real_s": 1509.5
+  },
+  "p20_rf_s5": {
+   "hash_config": "b676ba2059ad702450d7f27c19858b56fe0f870f156a9e237b6c94835af439e1",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:39:14+00:00",
+   "duracion_real_s": 1601.7
+  },
+  "p50_umbral_s5": {
+   "hash_config": "a3797d96586087ddd827b3209ada54cf8a421112b576d66c0d2be994e253a201",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:41:15+00:00",
+   "duracion_real_s": 1666.5
+  },
+  "p50_rf_s5": {
+   "hash_config": "68c365280a8fd4a76072609afe7a5a559a2453af06c1d21385579be67a36321d",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T00:47:17+00:00",
+   "duracion_real_s": 1854.7
+  },
+  "p80_umbral_s5": {
+   "hash_config": "5e4399faa790231ce0437086b67405abd5396c044985142235eb0731c42d1681",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:04:37+00:00",
+   "duracion_real_s": 1660.3
+  },
+  "p80_rf_s5": {
+   "hash_config": "5ca964bd550e9051f77a17d92545ef0e4573ed148ddea7021bb16ceaa203d551",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:10:25+00:00",
+   "duracion_real_s": 1870.1
+  },
+  "p50_rf_s1_oraculo": {
+   "hash_config": "9fbe0bf3c99a518c0e2bc59ef9d3858dab41322c971e19ab7fd48c8b865d2ae6",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:04:47+00:00",
+   "duracion_real_s": 1411.6
+  },
+  "p50_rf_s2_oraculo": {
+   "hash_config": "39a393a965e1761a8d6f07498b3464f6aeb456df4f3ae5a89d2c344e13210ea7",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:35:51+00:00",
+   "duracion_real_s": 638.5
+  },
+  "p50_rf_s3_oraculo": {
+   "hash_config": "00f1b2b31fd8fa5687a585b75f58d1b76903c73554ef024b9621472dc3f4157f",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:20:34+00:00",
+   "duracion_real_s": 1532.8
+  },
+  "p50_rf_s4_oraculo": {
+   "hash_config": "effb4cc9580a05b4f2ccce2fdd37f5414797cc0fa5d2e8ec3e0c55d58efcf38a",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:24:43+00:00",
+   "duracion_real_s": 1205.3
+  },
+  "p50_rf_s5_oraculo": {
+   "hash_config": "05ae97e07c37d3d849653b9ca4fcd6ed6c39e9f0303d85fc2aef9ada9007e994",
+   "origen": "S4-2",
+   "fin_utc": "2026-11-14T01:25:12+00:00",
+   "duracion_real_s": 1225.0
+  }
+ },
+ "n_corridas": 40,
+ "ejecucion": {
+  "duracion_s": 8212.7,
+  "fallidas": [],
+  "reutilizadas": [
+   "p00_umbral_s1",
+   "p20_umbral_s1",
+   "p20_rf_s1",
+   "p50_umbral_s1",
+   "p50_rf_s1",
+   "p80_umbral_s1",
+   "p80_rf_s1",
+   "p00_umbral_s2",
+   "p20_umbral_s2",
+   "p20_rf_s2",
+   "p50_umbral_s2",
+   "p50_rf_s2",
+   "p80_umbral_s2",
+   "p80_rf_s2",
+   "p00_umbral_s3",
+   "p20_umbral_s3",
+   "p20_rf_s3",
+   "p50_umbral_s3",
+   "p50_rf_s3",
+   "p80_umbral_s3",
+   "p80_rf_s3"
+  ],
+  "procesos": 4
+ }
+}

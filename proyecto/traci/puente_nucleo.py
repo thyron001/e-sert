@@ -172,6 +172,10 @@ class Publicador:
         self.caido = False
         self._proxima_sonda = 0.0
         self.sondas = 0
+        # S4-3: `cerrar` espera también al envío en curso y el hilo no usa el cliente ya cerrado
+        # (en la prueba del VPS el último POST caía con "client has been closed").
+        self._enviando = False
+        self._cerrado = threading.Event()
         self._hilo = threading.Thread(target=self._bucle, name="publicador", daemon=True)
         self._hilo.start()
 
@@ -196,34 +200,48 @@ class Publicador:
         self._cola.put_nowait(cuerpo)
 
     def _bucle(self) -> None:
-        while True:
-            cuerpo = self._cola.get()
-            for intento in range(self._reintentos):
-                try:
-                    r = self._cliente.post(self.ruta, json=cuerpo)
-                    if r.status_code < 300:
-                        self.enviados += 1
-                        self.caido = False
-                        if self.al_responder is not None:
-                            try:
-                                self.al_responder(r.json())
-                            except ValueError:
-                                pass
-                        break
-                except httpx.HTTPError:
-                    pass
-                time.sleep(self._backoff_s * (2 ** intento))
-            else:
+        while not self._cerrado.is_set():
+            try:
+                cuerpo = self._cola.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            self._enviando = True
+            try:
+                self._enviar(cuerpo)
+            finally:
+                self._enviando = False
+
+    def _enviar(self, cuerpo: dict) -> None:
+        for intento in range(self._reintentos):
+            if self._cerrado.is_set():
                 self.fallidos += 1
-                if not self.caido:
-                    self._proxima_sonda = time.monotonic() + self.pausa_caido_s
-                self.caido = True
+                return
+            try:
+                r = self._cliente.post(self.ruta, json=cuerpo)
+                if r.status_code < 300:
+                    self.enviados += 1
+                    self.caido = False
+                    if self.al_responder is not None:
+                        try:
+                            self.al_responder(r.json())
+                        except ValueError:
+                            pass
+                    return
+            except (httpx.HTTPError, RuntimeError):  # RuntimeError: cliente cerrado a mitad de envío
+                pass
+            time.sleep(self._backoff_s * (2 ** intento))
+        self.fallidos += 1
+        if not self.caido:
+            self._proxima_sonda = time.monotonic() + self.pausa_caido_s
+        self.caido = True
 
     def cerrar(self, espera_s: float = 3.0) -> None:
         """Espera (hasta `espera_s`) a que se vacíe la cola y cierra la conexión."""
         limite = time.monotonic() + espera_s
-        while not self._cola.empty() and time.monotonic() < limite:
+        while (not self._cola.empty() or self._enviando) and time.monotonic() < limite:
             time.sleep(0.05)
+        self._cerrado.set()
+        self._hilo.join(timeout=1.0)
         self._cliente.close()
 
     def resumen(self) -> dict:

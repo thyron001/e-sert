@@ -1,4 +1,9 @@
-# Contrato de interfaces (v1.3 final, 2026-11-15, unificación de S4)
+# Contrato de interfaces (v1.4 final, 2026-11-17, cierre del proyecto)
+
+> **v1.4 (2026-11-17, cierre):** añade a §4.4 el mapa estimado del controlador (`puestos`) y a §4.3 las rutas que ya existían en el backend y no estaban
+> en el contrato: `/pagos/*` (Miguel, pedido de S2-2) y `POST /asistente/interpretar` (Miguel, S3-3),
+> que desde esta versión queda montada en la app principal (ver "Cambios en v1.4" al final). Es
+> aditivo: `X-Contrato-Version` y `Salud.contrato` siguen valiendo `1`.
 
 > **v1.3 (2026-11-15, versión final):** aplica la propuesta editorial de Freddy de S4 (ver "Cambios
 > en v1.3" al final). La tabla §4.3 se alinea con lo ya aprobado en v1.2 (`Salud.ts`). No cambia el
@@ -196,9 +201,23 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 | `GET /billetera/{usuario_id}` | — | `{saldo, retenido, disponible, bloqueada, movimientos: [...]}` | `Billetera` |
 | `POST /billetera/{usuario_id}/recarga` | `{monto, referencia_payphone?}` | `201 {movimiento_id, saldo}` | `Recarga` → `RecargaHecha` |
 | `GET /espejo/candidatos` | — | `[{id, destino_nombre, estado, t_sim}]` | `CandidatoEspejo` |
+| `POST /pagos/preparar` | `{usuario_id, monto, url_app?}` | `201 {client_transaction_id, payment_id, pay_url, modo}` o `422 RECARGA_MINIMA` | `PedidoPago` → `PagoPreparado` |
+| `GET /pagos/{client_transaction_id}` | — | `{client_transaction_id, usuario_id, monto, estado, referencia_payphone, creada, actualizada}` | `Intencion` |
+| `POST /asistente/interpretar` | `{texto}` | `{destino, duracion_min, fuente, confianza, avisos}` | `PedidoInterpretar` → `RespuestaInterpretar` |
 
 Detalles:
 
+- **Pagos (`/pagos/*`, v1.4):** `preparar` crea una intención de recarga y devuelve `pay_url`
+  (Payphone en modo `pruebas`, o una página `mock` sin credenciales). Al aprobarse, el backend
+  acredita la recarga en la billetera con `referencia_payphone`; la app consulta
+  `GET /pagos/{client_transaction_id}` hasta que `estado` deje de ser `pendiente`.
+  `GET /pagos/retorno?id=&clientTransactionId=` es la URL de respuesta configurada en Payphone:
+  página HTML que confirma el pago y vuelve a la app. Ella, `/pagos/ir/*` y `/pagos/mock*` son
+  páginas auxiliares fuera del esquema público (`include_in_schema=False`).
+- **Asistente (`POST /asistente/interpretar`, v1.4):** `destino` es `{nombre, lat, lon}` o `null`;
+  `duracion_min` es entero o `null`; `fuente` es `"llm"` o `"reglas"`. Con `ANTHROPIC_API_KEY` usa el LLM y, si no
+  hay clave o falla, reglas (`fuente` lo dice). Los destinos salen de `destinos.csv`; si falta algo,
+  la app usa el formulario.
 - **`POST /sesiones`:** `ts` (opcional; si falta, la hora del servidor) y `t_sim` (opcional)
   marcan el inicio. **Si la sesión tiene `t_sim` al inicio y al cierre, la duración se calcula
   con `t_sim`**; si no, con `ts`. Así el cobro de los autos simulados sigue el reloj de SUMO.
@@ -252,6 +271,13 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
 - **v1.2 (S3-3), respuesta `202`:** `{"aceptado": true, "espejos": ["sim_veh42"]}` (`RespuestaSnapshot`):
   los autos que algún teléfono sigue. El controlador arma `espejo.detalle` solo para esos, en el
   snapshot siguiente.
+- **v1.4, `puestos` (opcional):** el mapa **estimado** del controlador, `[{puesto_id, ocupados,
+  capacidad}]` solo con los puestos que tienen `ocupados > 0`. Las sesiones de los autos simulados
+  viven en el núcleo del controlador (`PuenteNucleo`), no en el backend. Sin este campo,
+  `snapshot.puestos` solo contaba las sesiones creadas por HTTP y el visor marcaba 0/610 durante
+  toda la demo. El backend suma este mapa al suyo, sin pasar la capacidad. Sigue sin usar
+  `verdad`: el mapa estimado solo ve los autos con app, y la diferencia con `verdad` es el KPI de
+  precisión del mapa.
 
 ## 5. Tarifa (`proyecto/comun/tarifa.json`)
 
@@ -497,3 +523,17 @@ Editorial; no cambia el código ni el header (`X-Contrato-Version` y `Salud.cont
    🔒, código de éxito, modelos y campos de cada fila de §4.3 con `app.openapi()`. Con esta
    propuesta aplicada sale con código 0. Se sugiere correrlo en cada unificación.
 
+## Cambios en v1.4 (cierre del proyecto, 2026-11-17)
+
+Aditivo; no cambia el header (`X-Contrato-Version` y `Salud.contrato` siguen en `1`).
+
+1. **§4.3:** filas de `POST /pagos/preparar`, `GET /pagos/{client_transaction_id}` y
+   `GET /pagos/retorno` (esta última en "Detalles", fuera del esquema) (Miguel, montadas en producción desde S2) y de
+   `POST /asistente/interpretar` (Miguel, S3-3).
+2. **Backend:** `backend/api/main.py` monta el router del asistente (`_montar_asistente`); antes
+   la ruta daba 404 en el VPS. La imagen copia `destinos.csv` (`ESERT_DESTINOS_CSV`) e instala
+   `anthropic`, `python-dotenv` y `rapidfuzz`.
+3. **§4.4:** campo opcional `puestos` en `PasoSimulacion` con el mapa estimado del controlador.
+   El backend lo suma a su mapa para `snapshot.puestos`. Corrige el visor en 0/610: en la demo
+   local de `p50_rf_s2`, los ocupados del mapa pasan de 0 a 132 en 1 500 s simulados, con 99–219
+   puestos llenos en la verdad de SUMO.

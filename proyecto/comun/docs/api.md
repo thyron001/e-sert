@@ -7,7 +7,7 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 - Errores: `{"error": {"codigo", "mensaje", "detalle?"}}` (contrato §4.2).
 - Esquema completo: [`openapi.json`](openapi.json). WebSockets: al final.
 
-**Verificación contra `docs/CONTRATO.md` §4.3:** 1 diferencias (ver la salida del script).
+**Verificación contra `docs/CONTRATO.md` §4.3:** sin diferencias.
 
 | Método | Ruta | Éxito | Cuerpo | Respuesta |
 |---|---|---|---|---|
@@ -27,6 +27,9 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 | GET | `/billetera/{usuario_id}` | 200 | — | Billetera |
 | POST | `/billetera/{usuario_id}/recarga` | 201 | Recarga | RecargaHecha |
 | GET | `/espejo/candidatos` | 200 | — | CandidatoEspejo |
+| POST | `/pagos/preparar` | 201 | PedidoPago | PagoPreparado |
+| GET | `/pagos/{client_transaction_id}` | 200 | — | Intencion |
+| POST | `/asistente/interpretar` | 200 | PedidoInterpretar | RespuestaInterpretar |
 
 ## `GET /api/v1/salud`
 
@@ -175,6 +178,7 @@ Cuerpo: `PasoSimulacion`
 | `peatones` | [Peaton] | sí |
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
+| `puestos` | [OcupacionPuesto] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
@@ -235,6 +239,7 @@ Cuerpo: `PasoSimulacion`
 | `peatones` | [Peaton] | sí |
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
+| `puestos` | [OcupacionPuesto] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
@@ -744,6 +749,75 @@ Ejemplo (`comun/ejemplos/candidatos_espejo.json`):
   }
 ]
 ```
+
+## `POST /api/v1/pagos/preparar`
+
+**Preparar una recarga con Payphone.** 
+
+Cuerpo: `PedidoPago`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `usuario_id` | texto | sí |
+| `monto` | número | sí |
+| `url_app` | texto \| null | no |
+
+Respuesta `201`: `PagoPreparado`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `client_transaction_id` | texto | sí |
+| `payment_id` | texto | sí |
+| `pay_url` | texto | sí |
+| `modo` | "mock" \| "pruebas" | sí |
+
+Otros códigos: `422`
+
+## `GET /api/v1/pagos/{client_transaction_id}`
+
+**Estado de una recarga.** 
+
+Parámetros:
+
+| Nombre | En | Tipo | Obligatorio |
+|---|---|---|---|
+| `client_transaction_id` | path | texto | sí |
+
+Respuesta `200`: `Intencion`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `client_transaction_id` | texto | sí |
+| `usuario_id` | texto | sí |
+| `monto` | número | sí |
+| `estado` | "pendiente" \| "aprobado" \| "rechazado" | sí |
+| `referencia_payphone` | texto \| null | no |
+| `creada` | texto | sí |
+| `actualizada` | texto | sí |
+
+Otros códigos: `422`
+
+## `POST /api/v1/asistente/interpretar`
+
+**Destino y duración a partir de una frase.** Con LLM si hay clave; si no (o si falla), por reglas. Si falta algo, la app usa el formulario.
+
+Cuerpo: `PedidoInterpretar`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `texto` | texto | sí |
+
+Respuesta `200`: `RespuestaInterpretar`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `destino` | DestinoSalida \| null | sí |
+| `duracion_min` | entero \| null | sí |
+| `fuente` | "llm" \| "reglas" | sí |
+| `confianza` | número | sí |
+| `avisos` | [texto] | no |
+
+Otros códigos: `422`
 
 ## WebSockets (fuera de OpenAPI)
 

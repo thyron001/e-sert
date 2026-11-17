@@ -1106,7 +1106,7 @@ Las cifras de esta tabla deben coincidir con las de las secciones de Tyrone y de
 
 ## 11 Preguntas probables del profesor
 
-Banco de preguntas para la exposición, agrupadas por tema. Cada una indica quién responde y la evidencia en el repositorio. Las respuestas de Freddy, Tyrone y Miguel son **provisionales**, escritas solo con hechos comprobables en `docs/`, bitácoras y resúmenes; están marcadas «a confirmar» y quedan como pedido. Donde no hay un hecho comprobable se deja «a confirmar por <Nombre>».
+Banco de preguntas para la exposición, agrupadas por tema. Cada una indica quién responde y la evidencia en el repositorio. Las respuestas de Freddy, Tyrone y Miguel se escribieron solo con hechos comprobables en `docs/`, bitácoras y resúmenes, y en el cierre (2026-11-17) se verificaron contra el código: umbrales de `traci/estados.py`, `traci/peatones.py`, `sumo/demanda/generar_demanda.py`, `comun/tarifa.json` y `kpis/kpis.py`.
 
 ### 11.1 Inteligencia artificial (Pablo)
 
@@ -1213,81 +1213,81 @@ El error de un GPS real no es independiente entre segundos: cambia lentamente, y
 ### 11.2 Sistema y simulación (Freddy)
 
 #### P21. ¿Cómo funciona la máquina de estados de la sesión?
-**Responde:** Freddy (a confirmar con Freddy). **Evidencia:** `docs/CONTRATO.md` §3, `proyecto/traci/estados.py`.
+**Responde:** Freddy (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTRATO.md` §3, `proyecto/traci/estados.py`.
 
 La sesión pasa por BUSCANDO, GUIADO, ESTACIONADO, A_PIE, REGRESANDO, SALIENDO y CERRADA. Pasa a A_PIE si el modo es `a_pie` y la distancia al puesto supera `15 m`, a REGRESANDO si baja de `30 m`, y a SALIENDO con dos ventanas de `vehiculo` a más de `20 m`. La clase `MaquinaSesion` es pura (sin TraCI), por lo que se prueba sin SUMO.
 
 #### P22. ¿Cómo se mide una falsa liberación en la simulación?
-**Responde:** Freddy (a confirmar con Freddy). **Evidencia:** `docs/CONTRATO.md` §3, `bitacoras/freddy.md`.
+**Responde:** Freddy (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTRATO.md` §3, `bitacoras/freddy.md`.
 
 Se cuenta como falsa liberación cerrar la sesión mientras el auto sigue estacionado, y se verifica con `traci.vehicle.isStoppedParking`; `ControlSesiones` la registra en un CSV. En su corrida de 30 minutos con el clasificador de umbral, Freddy midió 214 falsas liberaciones, 62,4 por 100 sesiones. <!-- fuente: bitacoras/freddy.md -->
 
 #### P23. ¿Por qué un modo espejo?
-**Responde:** Freddy (a confirmar con Freddy). **Evidencia:** `docs/CONTEXTO.md`, `docs/CONTRATO.md` §6b.
+**Responde:** Freddy (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTEXTO.md`, `docs/CONTRATO.md` §7.
 
 Porque todo el proyecto es simulado: el teléfono no envía su GPS, sino que sigue a un auto de SUMO elegido y muestra lo que vería su conductor (guiado al puesto, sesión, costo en vivo, avisos y recibo). El backend emite un mensaje por segundo por cada vehículo seguido en `/ws/espejo/{veh_id}`. No hay pruebas de campo en el Centro.
 
 #### P24. ¿Cómo se simula que el conductor se baja y vuelve?
-**Responde:** Freddy (a confirmar con Freddy). **Evidencia:** `proyecto/traci/peatones.py`, `bitacoras/freddy.md`.
+**Responde:** Freddy (verificada contra el repositorio el 2026-11-17). **Evidencia:** `proyecto/traci/peatones.py`, `bitacoras/freddy.md`.
 
 `GestorPeatones` crea un peatón por cada auto de búsqueda que estaciona: va a su destino, espera la diligencia y vuelve; mientras tanto la parada del auto se extiende y se reanuda cuando el peatón regresa. Incluye casos difíciles: regreso corto en el 15 % de los casos y espera dentro del auto en el 10 %. <!-- fuente: bitacoras/freddy.md -->
 
 #### P25. ¿El guiado reduce el tiempo de búsqueda?
-**Responde:** Freddy y Tyrone (a confirmar). **Evidencia:** `bitacoras/freddy.md`.
+**Responde:** Freddy y Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/freddy.md`.
 
 En la corrida de S2 con 50 % de app, con el mapa de ocupación del sistema la búsqueda con app fue de 11,3 min frente a 10,8 min sin app, es decir, no mejoró; con la ocupación real sí (10,0 frente a 10,7 min). Freddy propuso contar en el mapa las reservas de los autos en GUIADO. En la corrida final la búsqueda con la app no mejoró: 432,7 s a ciegas frente a 434,3, 438,2 y 450,7 s con 20, 50 y 80 % de app (el IC de Tyrone incluye la línea base en 20 y 50 %). <!-- fuente: kpis/resultados/final/resumen.csv --> <!-- fuente: bitacoras/freddy.md -->
 
 ### 11.3 Escenario y KPIs (Tyrone)
 
 #### P26. ¿Cómo se construye el escenario de hora pico?
-**Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/tyrone.md`, `proyecto/sumo/demanda/generar_demanda.py`.
+**Responde:** Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/tyrone.md`, `proyecto/sumo/demanda/generar_demanda.py`.
 
 Con la red OSM del Centro Histórico, los `parkingArea` generados por script y una demanda de 1 800 vehículos por hora, calibrada para llegar a una ocupación media de 87,0 % y 87,7 % en las dos semillas. Hay 80 % de ocupación de fondo (autos ya estacionados), 40 % de tráfico de paso, llegadas Poisson y estadía lognormal de media 45 min. <!-- fuente: bitacoras/tyrone.md -->
 
 #### P27. ¿Qué mide cada KPI?
-**Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/tyrone.md`, `proyecto/kpis/kpis.py`.
+**Responde:** Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/tyrone.md`, `proyecto/kpis/kpis.py`.
 
 La búsqueda empieza al entrar al primer tramo a 300 m o menos del destino y termina cuando el auto se detiene en un `parkingArea`; la distancia cuenta tramos completos, y el CO₂ integra las emisiones muestreadas cada 10 s (validado contra tripinfo con razón 0,988). También se miden ocupación, falsas liberaciones por 100 sesiones y retardo de cierre. En la línea base, la búsqueda media fue de 349 y 362 s. <!-- fuente: bitacoras/tyrone.md -->
 
 #### P28. ¿Qué penetración de la app se simula?
-**Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/tyrone.md`.
+**Responde:** Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/tyrone.md`.
 
 El alcance fija la búsqueda a ciegas (línea base, `con_app = 0`) frente a la app con `20`, `50` y `80 %` de usuarios y al menos 2 semillas. Los resultados de la corrida final, falsas liberaciones por 100 sesiones y retardo de cierre por penetración, con umbral fueron 88,9, 87,2 y 86,6 por 100 sesiones y con `rf_final` 0 en las tres penetraciones; el retardo mediano de cierre con `rf_final` fue 22,7, 18,8 y 18,4 s <!-- fuente: kpis/resultados/final/resumen.csv -->.
 
 #### P29. ¿Por qué hay `6 194` puestos si las fuentes oficiales dan unas `2 500`?
-**Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/miguel.md`, `bitacoras/tyrone.md`.
+**Responde:** Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/miguel.md`, `bitacoras/tyrone.md`.
 
-Miguel lo advirtió al revisar la red: el script genera `6 194` plazas en 103 calles, y las fuentes oficiales dan unas `2 500` en toda la ciudad (`1 424` en el Centro Histórico en 2020). Para llegar a una ocupación realista, Tyrone añadió un `80 %` de autos de fondo ya estacionados. El escenario final adopta ese `80 %` de puestos ocupados al inicio (sección de Tyrone; a confirmar por él). <!-- fuente: bitacoras/miguel.md -->
+Miguel lo advirtió al revisar la red: el script genera `6 194` plazas en 103 calles, y las fuentes oficiales dan unas `2 500` en toda la ciudad (`1 424` en el Centro Histórico en 2020). Para llegar a una ocupación realista, Tyrone añadió un `80 %` de autos de fondo ya estacionados. El escenario final adopta ese `80 %` de puestos ocupados al inicio (`generar_demanda.py --ocupacion-fondo 0.80`, valor por defecto). <!-- fuente: bitacoras/miguel.md -->
 
 #### P30. ¿Qué se hace con los buscadores que no alcanzan a estacionar?
-**Responde:** Tyrone (a confirmar con Tyrone). **Evidencia:** `bitacoras/tyrone.md`.
+**Responde:** Tyrone (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/tyrone.md`.
 
-Se excluyen de las estadísticas de búsqueda y se reportan aparte, porque su búsqueda está censurada al final de la simulación: en las dos semillas de la línea base fueron 201 y 248 buscadores. (a confirmar por Tyrone) si en la corrida final se mantiene ese criterio. <!-- fuente: bitacoras/tyrone.md -->
+Se excluyen de las estadísticas de búsqueda y se reportan aparte, porque su búsqueda está censurada al final de la simulación: en las dos semillas de la línea base fueron 201 y 248 buscadores. La corrida final mantiene ese criterio: `kpis/kpis.py` los reporta como `buscadores_sin_estacionar` y `busqueda_censurada_media_s`. <!-- fuente: bitacoras/tyrone.md -->
 
 ### 11.4 App y cobro (Miguel)
 
 #### P31. ¿Cómo se calcula el cobro por fracciones?
-**Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `docs/CONTEXTO.md`, `docs/CONTRATO.md` §5.
+**Responde:** Miguel (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTEXTO.md`, `docs/CONTRATO.md` §5.
 
 Se retiene el bloque mínimo al confirmar la llegada y, al detectar la salida real, se debita el tiempo real en fracciones de 5 min con un cobro mínimo de 10 min, y se libera la retención. La tarifa sale de la ordenanza SERT: USD 0,25 por media hora o fracción, que equivale a un valor de USD 0,50 por hora, con un máximo de 2 horas. <!-- fuente: docs/CONTRATO.md; bitacoras/miguel.md -->
 
 #### P32. ¿Qué diferencia hay con la tarjeta SERT?
-**Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `bitacoras/miguel.md`, `docs/CONTRATO.md` §6b.
+**Responde:** Miguel (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/miguel.md`, `docs/CONTRATO.md` §5.
 
 La tarjeta tiene 4 casilleros de 30 minutos, así que se paga por bloques; la app cobra el tiempo real por fracciones de 5 min y el recibo muestra el ahorro frente a la tarjeta. En el recorrido de ejemplo de la app, 50 min cobran 0,42 USD frente a 0,50 USD con tarjeta. <!-- fuente: bitacoras/miguel.md -->
 
 #### P33. ¿Qué pasa si falla Payphone o el pago queda pendiente?
-**Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `bitacoras/miguel.md`, `docs/CONTEXTO.md`.
+**Responde:** Miguel (verificada contra el repositorio el 2026-11-17). **Evidencia:** `bitacoras/miguel.md`, `docs/CONTEXTO.md`.
 
 La intención de pago es la fuente de verdad y acredita una sola vez: tres retornos repetidos acreditan una vez. Un pago pendiente que no se confirma lo reversa Payphone a los 5 minutos. El modo `pruebas` se probó en el VPS con un pago aprobado, y los autos simulados nunca llaman a Payphone. <!-- fuente: bitacoras/miguel.md -->
 
 #### P34. ¿Qué datos de ubicación recoge la app y cómo se protege la privacidad?
-**Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
+**Responde:** Miguel (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
 
-En este proyecto el teléfono no envía su ubicación: sigue a un auto simulado. Las grabaciones caseras, si se hacen, son opcionales, anonimizadas y quedan en `datos/grabaciones/` según un protocolo, y las credenciales de Payphone viven solo en un `.env` fuera del repositorio. La política para un despliegue real (retención, consentimiento) no está definida en el proyecto y queda como trabajo futuro (a confirmar por Miguel).
+En este proyecto el teléfono no envía su ubicación: sigue a un auto simulado. Las grabaciones caseras, si se hacen, son opcionales, anonimizadas y quedan en `datos/grabaciones/` según un protocolo, y las credenciales de Payphone viven solo en un `.env` fuera del repositorio. La política para un despliegue real (retención, consentimiento) no está definida en el proyecto y queda como trabajo futuro.
 
 #### P35. ¿La app funciona en segundo plano y en un iPhone?
-**Responde:** Miguel (a confirmar con Miguel). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
+**Responde:** Miguel (verificada contra el repositorio el 2026-11-17). **Evidencia:** `docs/CONTEXTO.md`, `bitacoras/miguel.md`.
 
 En iPhone el segundo plano es limitado, así que la app debe estar abierta durante la demostración. La recarga de punta a punta se probó en Android con Expo Go (de 4,92 a 14,92 USD tras aprobar 10 USD). No hubo un iPhone físico: en iOS solo se probaron pantallas en el simulador de Xcode (sección de Miguel). <!-- fuente: bitacoras/miguel.md -->
 
@@ -1314,6 +1314,6 @@ En parte sí. Las semillas de prueba (101 a 105) son distintas de las de entrena
 | P26 a P30: hora pico, KPIs, penetración, puestos, buscadores censurados | Tyrone | `bitacoras/tyrone.md`, `proyecto/kpis/kpis.py` |
 | P31 a P35: cobro, tarjeta SERT, Payphone, privacidad, iPhone | Miguel | `docs/CONTRATO.md`, `bitacoras/miguel.md` |
 
-Recuento: 22 de Pablo (P1 a P20, P36 y P37), 5 de Freddy, 5 de Tyrone y 5 de Miguel, 37 en total. Quedan como pedido las 15 preguntas de Freddy, Tyrone y Miguel, que deben revisar y responder antes del sábado 14 a las 18:00; en seis de ellas el dato propio queda «a confirmar».
+Recuento: 22 de Pablo (P1 a P20, P36 y P37), 5 de Freddy, 5 de Tyrone y 5 de Miguel, 37 en total. Las 15 preguntas de Freddy, Tyrone y Miguel quedaron verificadas contra el repositorio en el cierre del 2026-11-17.
 
 <!-- fin-seccion: anexos/preguntas_profesor.md -->

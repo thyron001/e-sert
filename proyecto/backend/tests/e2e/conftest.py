@@ -54,9 +54,9 @@ def puestos_csv_real() -> Optional[Path]:
 def ruta_en_contenedor(ruta: Path) -> Optional[str]:
     """Ruta equivalente dentro de `van3twin` (el repo está en `results/e-sert`, CLAUDE.md)."""
     raiz = raiz_repo()
-    if raiz is None or raiz.parent.name != "results" or raiz.name != "e-sert":
+    if raiz is None or raiz.parent.name != "results":
         return None
-    return "/home/vanet/results/e-sert/" + ruta.resolve().relative_to(raiz).as_posix()
+    return f"/home/vanet/results/{raiz.name}/" + ruta.resolve().relative_to(raiz).as_posix()
 
 
 # --------------------------------------------------------------------------- contenedor

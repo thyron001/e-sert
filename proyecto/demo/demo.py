@@ -32,7 +32,6 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent            # .../demo
 WINDOWS = platform.system() == "Windows"
-RAIZ_CONTENEDOR = "/home/vanet/results/e-sert"
 
 
 def raiz_repo(desde: Path = AQUI) -> Path:
@@ -43,6 +42,8 @@ def raiz_repo(desde: Path = AQUI) -> Path:
 
 
 RAIZ = raiz_repo()
+# El contenedor monta `results/` en /home/vanet/results; el repo puede llamarse distinto de `e-sert`.
+RAIZ_CONTENEDOR = f"/home/vanet/results/{RAIZ.name}"
 
 
 # ------------------------------------------------------------------ utilidades
@@ -277,12 +278,22 @@ class Demo:
             rou = rou.with_name(f"base_s{self.esc['semilla']}.rou.xml")
         if not rou.exists():
             self.info(f"genero la demanda de la semilla {self.esc['semilla']} (una sola vez)…")
+            # generar_escenarios.py reescribe escenarios.json (versionado) solo con esta semilla:
+            # se guarda y se restaura para no dejar el repo modificado.
+            indice = codigo / "sumo" / "escenarios" / "escenarios.json"
+            copia = indice.read_bytes() if indice.exists() else None
             r = docker("exec", "-w", ruta_contenedor(codigo / "sumo" / "escenarios"), self.contenedor, "bash", "-lc",
                        f"python3 generar_escenarios.py --semillas {self.esc['semilla']}", timeout=300)
+            if copia is not None:
+                indice.write_bytes(copia)
             if r.returncode != 0:
                 self.fallar("No pude generar la demanda.", r.stderr[-500:])
         if self.esc["clasificador"] == "rf":
             npz = self.rutas["kpis"] / "externo" / "rf_final.plano.npz"
+            versionado = RAIZ / "proyecto" / "ia" / "modelos" / "rf_final.plano.npz"
+            if not npz.exists() and versionado.exists():
+                npz = versionado  # S4-U final: el .npz está versionado; no hace falta sklearn
+            self.npz = npz
             if not npz.exists():
                 self.info("no está el RF exportado (kpis/externo/rf_final.plano.npz): intento exportarlo…")
                 ok = self.exportar_rf(npz)
@@ -353,6 +364,8 @@ class Demo:
         captura = os.path.relpath(self.dir_logs / "sumo_gui.png", codigo).replace(os.sep, "/")
         partes = [f"python3 -m kpis.correr_una --id {self.id} --duracion {self.esc['hasta_s']} --warmup 0",
                   f"--publicar {publicar}", f"--ritmo {self.esc['ritmo']}", f"--subdir demo_{self.sello}"]
+        if getattr(self, "npz", None) is not None and self.esc["clasificador"] == "rf":
+            partes.append(f"--modelo {os.path.relpath(self.npz, codigo).replace(os.sep, '/')}")
         if not self.args.sin_gui:
             partes += ["--gui", f"--delay-ms {self.esc.get('delay_ms', 0)}", f"--captura-gui {captura}"]
         else:

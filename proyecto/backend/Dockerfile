@@ -18,13 +18,15 @@ RUN set -eu; mkdir -p /srv/ia/modelos /srv/visor /srv/datos; \
       [ -f /repo/proyecto/ia/$f ] && cp /repo/proyecto/ia/$f /srv/ia/; done; \
     [ -d /repo/proyecto/ia/modelos ] && cp -r /repo/proyecto/ia/modelos/. /srv/ia/modelos/ || true; \
     [ -d /repo/proyecto/visor ] && cp -r /repo/proyecto/visor/. /srv/visor/ || true; \
-    cp /repo/proyecto/sumo/parqueos/puestos.csv /srv/datos/puestos.csv
+    cp /repo/proyecto/sumo/parqueos/puestos.csv /srv/datos/puestos.csv; \
+    cp /repo/proyecto/sumo/demanda/destinos.csv /srv/datos/destinos.csv
 
 # --- Etapa 2: imagen final
 FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     ESERT_DB_URL=sqlite:////data/esert.db \
     ESERT_PUESTOS_CSV=/srv/datos/puestos.csv \
+    ESERT_DESTINOS_CSV=/srv/datos/destinos.csv \
     ESERT_VISOR_DIR=/srv/visor
 WORKDIR /srv
 COPY --from=fuentes /srv/backend/requirements-servidor.txt /tmp/requirements.txt

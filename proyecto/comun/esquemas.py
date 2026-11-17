@@ -491,6 +491,10 @@ class PasoSimulacion(Modelo):
     peatones: List[Peaton]
     verdad: DatosVerdad
     espejo: Optional["BloqueEspejo"] = None
+    # v1.4: mapa **estimado** del controlador (sesiones de los autos simulados con app, que viven en
+    # su núcleo en memoria). Solo puestos con ocupados > 0. El backend lo suma a su propio mapa
+    # (sesiones creadas por HTTP) para `snapshot.puestos`; sin él, el visor marcaba 0/610.
+    puestos: Optional[List[OcupacionPuesto]] = None
 
 
 class RespuestaSnapshot(Modelo):

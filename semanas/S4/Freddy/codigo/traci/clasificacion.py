@@ -89,6 +89,10 @@ def cargar_inferencia() -> Tuple[Clasificador, ClasificadorLote, str]:
             import ia.inferencia as inf
         except ImportError:
             return _clasificar_mock, _lote_desde(_clasificar_mock), "mock"
+        # S4-3: en el contenedor (Python 3.10, sin sklearn 1.9.1) el joblib de rf_final no carga;
+        # si existe su exportación .npz, la inferencia la usa en vez de caer al umbral.
+        from traci.modelo_plano import instalar_si_falta
+        instalar_si_falta(inf)
         lote = getattr(inf, "clasificar_lote", None) or _lote_desde(inf.clasificar)
         return inf.clasificar, lote, str(Path(inf.__file__).resolve().parent.parent)
     return _clasificar_mock, _lote_desde(_clasificar_mock), "mock"
