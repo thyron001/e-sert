@@ -36,9 +36,9 @@ EN_CONTENEDOR = Path("/home/vanet/results").is_dir() and bool(os.environ.get("SU
 
 def _ruta_en_contenedor(ruta: Path):
     raiz = next((p for p in AQUI.parents if (p / ".git").exists()), None)
-    if raiz is None or raiz.parent.name != "results" or raiz.name != "e-sert":
+    if raiz is None or raiz.parent.name != "results":
         return None
-    return "/home/vanet/results/e-sert/" + ruta.resolve().relative_to(raiz).as_posix()
+    return f"/home/vanet/results/{raiz.name}/" + ruta.resolve().relative_to(raiz).as_posix()
 
 
 def _docker(*args, timeout=30):

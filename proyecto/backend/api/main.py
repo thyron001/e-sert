@@ -144,6 +144,23 @@ def _montar_pagos(app: FastAPI) -> bool:
     return True
 
 
+def _montar_asistente(app: FastAPI) -> bool:
+    """Monta el asistente de Miguel (`backend/asistente/router.py`): `POST /api/v1/asistente/interpretar`.
+
+    Sin `ANTHROPIC_API_KEY` (o sin el paquete `anthropic`) responde por reglas; si falta
+    `destinos.csv` no se monta (la app usa el formulario).
+    """
+    try:
+        from ..asistente.router import router as router_asistente  # type: ignore[import-not-found]
+        from ..asistente.destinos import ruta_destinos
+
+        ruta_destinos()
+    except (ImportError, FileNotFoundError):
+        return False
+    app.include_router(router_asistente, prefix=PREFIJO)
+    return True
+
+
 def crear_app(config: Optional[Config] = None) -> FastAPI:
     """Fábrica de la app. Los tests pasan `Config(db_url="sqlite:///:memory:")`."""
     config = config or Config()
@@ -173,6 +190,7 @@ def crear_app(config: Optional[Config] = None) -> FastAPI:
         return app.state.servicios.mundo.salud()
 
     app.state.pagos_montado = _montar_pagos(app)
+    app.state.asistente_montado = _montar_asistente(app)
     if config.visor_dir and Path(config.visor_dir).is_dir() and any(Path(config.visor_dir).iterdir()):
         app.mount("/visor", StaticFiles(directory=config.visor_dir, html=True), name="visor")
 

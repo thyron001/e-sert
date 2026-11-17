@@ -1,0 +1,7 @@
+{
+  "joblib": "rf_final.joblib",
+  "joblib_sha256": "1bdac0d7e277da328246ad45e68ad4eb3961ea91c66c5fe33a4bf0224fd013e2",
+  "npz_sha256": "e0db6d5e84de4036a22631d6c6786953cd59e5dcd85522aeaf37e4ca7ed0dabf",
+  "n_arboles": 100,
+  "profundidad": 20
+}

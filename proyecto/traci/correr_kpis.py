@@ -383,6 +383,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
                     help="termina al cerrarse stdin (lanzar con `docker exec -i`; Ctrl+C del lanzador)")
     ap.add_argument("--gui", action="store_true", help="abre sumo-gui (pantalla :99, VNC 5901)")
     ap.add_argument("--captura", default=None, help="ruta.png@T: captura de sumo-gui en el segundo simulado T")
+    ap.add_argument("--libsumo", action="store_true",
+                    help="SUMO en el mismo proceso, sin socket TraCI (sin GUI; S4-3: e2e más rápido)")
     ap.add_argument("--volcar", type=Path, default=None,
                     help="JSON con libro de billeteras y sesiones (pruebas e2e, S4-1)")
     ap.add_argument("--medir-costo", type=int, default=0, metavar="N",
@@ -406,7 +408,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
         return costo
 
     salida = correr(args.id, args.hasta, publicar=args.publicar, sufijo=args.sufijo, espejo=not args.sin_espejo,
-                    ritmo=args.ritmo, volcar=args.volcar, gui=args.gui, captura=args.captura)
+                    ritmo=args.ritmo, volcar=args.volcar, gui=args.gui, captura=args.captura,
+                    libsumo=args.libsumo)
     (SALIDAS_KPI / f"ejemplo_{args.id}{args.sufijo}.json").write_text(_json(salida), encoding="utf-8")
     print(_json(salida))
     return salida
