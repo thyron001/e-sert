@@ -43,7 +43,7 @@ import tempfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-RAIZ_REPO = AQUI.parents[4]
+RAIZ_REPO = next((p for p in AQUI.parents if (p / "herramientas" / "explicacion_pdf.py").is_file()), AQUI.parents[4])
 PERSONAS = {"tyrone": "Tyrone", "freddy": "Freddy", "pablo": "Pablo", "miguel": "Miguel"}
 RE_INCLUIR = re.compile(r"<!--\s*incluir:\s*(\S+)(?:\s+(sin-numero))?\s*-->")
 RE_COMENTARIO = re.compile(r"<!--.*?-->", re.S)

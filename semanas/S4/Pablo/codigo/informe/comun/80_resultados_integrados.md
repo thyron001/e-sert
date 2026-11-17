@@ -6,11 +6,11 @@ Esta sección reúne en una sola tabla los indicadores del sistema completo, med
 
 | Indicador | Línea base | App 20 % | App 50 % | App 80 % |
 |---|---:|---:|---:|---:|
-| Tiempo de búsqueda (s) | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] |
-| Distancia de búsqueda (m) | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] |
-| Falsas liberaciones por 100 sesiones, umbral | no aplica | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] |
-| Falsas liberaciones por 100 sesiones, Random Forest | no aplica | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] |
-| Retardo mediano de cierre (s) | no aplica | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] | [PENDIENTE: cifra de Tyrone S4-2] |
+| Tiempo de búsqueda (s) | 432,7 | 434,3 | 438,2 | 450,7 |
+| Distancia de búsqueda (m) | 1 456,2 | 1 445,5 | 1 467,7 | 1 449,7 |
+| Falsas liberaciones por 100 sesiones, umbral | no aplica | 88,9 | 87,2 | 86,6 |
+| Falsas liberaciones por 100 sesiones, Random Forest | no aplica | 0 | 0 | 0 |
+| Retardo mediano de cierre, Random Forest (s) | no aplica | 22,7 | 18,8 | 18,4 |
 
 <!-- fuente: kpis/resultados/final/resumen.csv -->
 
