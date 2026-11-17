@@ -855,7 +855,7 @@ Sin verificador independiente: no es una sesión del plan.
 **Pendientes:** pasos 7, 8 y 9 en la laptop; con 7 y 8 en cumple, tag `v1.0`.
 
 ## 2026-11-17 · Sesión en la computadora con Docker: demo remota y prueba de 10 min
-**Estado:** parcial. Los pasos 7, 8 y 9 de `semanas/S4/sesion-vps.md` cumplen. Falta la prueba del teléfono espejo con Expo Go (B2.5) y su captura.
+**Estado:** hecho. Los pasos 7, 8 y 9 de `semanas/S4/sesion-vps.md` cumplen, la prueba del teléfono espejo también y se puso el tag `v1.0`.
 **Qué hice:**
 - **A1:** `main` actualizada (`04c1329`) y borradas con `git branch -d` las 7 ramas locales viejas, todas ya fusionadas.
 - **Acceso al VPS:** clave `~/.ssh/esert_vps` y alias `esert-vps` en `~/.ssh/config` (root@72.60.123.25). El token se copió del contenedor `esert-api-ya3sai` a `~/.esert_token` (permisos 600, 64 caracteres) redirigiendo la salida al archivo, sin que pasara por la pantalla.
@@ -868,12 +868,12 @@ Sin verificador independiente: no es una sesión del plan.
   - Resultado en `proyecto/traci/salidas_kpi/espejo_vps.json`.
 - **CPU y RAM del contenedor `api` en el VPS** durante B3 (`docker stats` cada ~35 s por SSH): CPU entre 0,35 % y 8,8 %, con un pico aislado de 24,7 %; RAM estable entre 81 y 83 MiB de 3,8 GiB. En reposo eran 0,17 % y 65 MiB.
 - Apagado de B3 con SIGINT en 7,7 s; `pgrep` en `van3twin` vacío.
+- **Teléfono espejo (B2.5):** con otra corrida remota a ritmo 1 (apagada con SIGINT en 3,6 s, `pgrep` vacío), Tyrone probó el modo espejo en Expo Go contra el VPS: el guiado, la sesión, el costo y el recibo funcionaron. No hay captura.
 - Siguen en pie los pasos 3, 4 y 6 del VPS: `/salud` ok, asistente 200, visor 200, `pytest -m vps` 6/6.
 **Problemas encontrados:**
 - `sesion-laptop.md` (B2.4) mide los ocupados con `GET /api/v1/puestos`, que se quedó en 0 toda la corrida. Ese endpoint solo devuelve el mapa propio del backend (sesiones HTTP de teléfonos reales). El mapa estimado del controlador (v1.4) se suma solo en `snapshot.puestos` del WebSocket. La prueba correcta es leer `/ws/estado`.
 - `pytest -m vps` necesita el venv de la demo (`demo/.venv`); el de `backend/` no tiene `httpx`.
 - La salida de `demo.py` redirigida a un archivo llega tarde porque Python la guarda en búfer.
 **Pendientes:**
-- Prueba del teléfono espejo contra el VPS (guiado, sesión, costo y recibo) y captura `semanas/S4/Tyrone/evidencias/vps_espejo-telefono.png`.
-- Tag `v1.0`, con la confirmación de Tyrone.
+- Tag `v1.0` puesto en `main` con la confirmación de Tyrone.
 - Corregir el comando de B2.4 en `sesion-laptop.md` (`/ws/estado` en vez de `GET /puestos`) o hacer que `GET /puestos` también sume el mapa del controlador.
