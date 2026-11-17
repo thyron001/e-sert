@@ -879,3 +879,53 @@ La captura del visor es de la 4.ª prueba: los cambios posteriores no tocan el r
 **Pendientes para la próxima sesión:** que Tyrone decida el criterio de S2-2; repetir la búsqueda de S2-3 con el modelo RF.
 
 **Evidencias:** sin PNG nuevo; los datos están en `semanas/S4/Freddy/codigo/traci/salidas/reverif_*.log`, que está ignorado por git, y resumidos en `semanas/S2/Freddy/RESUMEN.md`.
+
+## S4 · Traspaso · 2026-11-17 · Estado del módulo de Freddy para la sesión unificada de Claude Code
+**Estado:** traspaso (no es una sesión del plan). **Lector:** la instancia de Claude Code que ejecutará el trabajo de todo el equipo en una sola computadora, y la instancia integrada con el VPS.
+
+**Estado del repositorio (comprobado el 2026-11-17):**
+- Ramas `freddy/s1`…`freddy/s4` sincronizadas con `origin` (0 commits por subir), sin *stash* ni cambios locales. `freddy/s4` (tope `832d58b`) ya es ancestro de `origin/main`: todo mi código está en `proyecto/{backend,comun,traci}`.
+- Solo quedan fuera de git, a propósito (`.gitignore`), las salidas regenerables: `semanas/S*/Freddy/codigo/traci/{escenario,salidas}/` y `traci/trazas/sumo_semilla*.csv`. No hace falta copiarlas; se regeneran (ver abajo).
+- Módulos míos: `backend/` (núcleo, API FastAPI, WS `/ws/estado` y `/ws/espejo/{veh_id}`), `traci/` (controlador, puente al núcleo, guiado, KPIs, e2e) y `comun/` (esquemas, contrato propuesto y docs/diagramas).
+
+**Cambio importante desde mis sesiones:** `main` ya trae `proyecto/ia/modelos/rf_final.joblib` y `ia/inferencia.py` lo usa por defecto (`MODELO_DEFECTO`, verificado por SHA-256 contra `rf_final.json`). Todas mis cifras de S2-S4 se midieron **sin modelo** (cayendo al umbral → ~100 % de falsas liberaciones). La mayoría de mis pendientes se resuelven repitiendo las corridas desde `proyecto/` con ese modelo. Verifica primero que se carga: en los resultados de ventanas, `fuente` debe ser `"rf"` y no `"umbral"`. Si sale `"umbral"`, falta `scikit-learn`/`joblib` en el contenedor (`docker exec van3twin pip3 install --user -r results/e-sert/proyecto/ia/requirements.txt`) o el SHA no coincide.
+
+**Criterios abiertos y cómo cerrarlos (en orden de prioridad):**
+1. **S4-1 (4/6): 2 pruebas e2e fallan por falsas liberaciones** (`test_cierre_automatico`, `test_simulacion_completa`).
+   - Causa: sin RF, el umbral con GPS σ = 5 m clasifica ~84 % de las ventanas a pie como `vehiculo` y cierra la sesión. `MaquinaSesion` está bien; no la toques.
+   - Solución: desde `proyecto/`, con el contenedor arriba: `python -m pytest -c backend/pytest.ini backend/tests traci/tests -m e2e`. Si con `rf_final` siguen fallando, depura con `docker exec -w /home/vanet/results/e-sert/proyecto van3twin python3 -m traci.tests.e2e.escenario_cierre --salida traci/salidas/c.json --guardar traci/salidas/dbg` y compara `modo_clasificado` con `modo_real` en `ventanas_e2e_cierre.csv`. No relajes la aserción de cero falsas liberaciones para que pase.
+   - `test_simulacion_completa` usa 1 800 s, no los 300 s del prompt (en 300 s no se abre ninguna sesión). Es una desviación deliberada pendiente de aprobación de Tyrone.
+2. **S2-3 (6/7): búsqueda media con app < sin app** (10,73 frente a 10,67 min con el umbral). Repetir `traci/correr_guiado.py` con `rf_final`; con ocupación real ya se cumplía (10,0 frente a 10,7). No cambies el guiado para "adivinar" ocupación (decisión D4).
+3. **S3-1 / S3-2 / S4-2 / informe:** repetir `traci.correr_kpis` (p. ej. `--id p50_rf_s1`), la rejilla de robustez de S3-2 y `medir_cifras.py` de S4-2 con el modelo, idealmente σ de 8 a 10 m y varias semillas. Si cambian las cifras, actualizar `proyecto/informe/freddy.md` y `informe/datos/freddy/`. Ojo: `precision_mapa_app` ≈ 1 por construcción; reporta también `mae_mapa_app`.
+4. **S2-2 (4/5): "> 95 % de peatones vuelve en 30 min".** Inalcanzable por diseño de la demanda (estadías de 10–120 min); el código no pierde peatones (`liberados_sin_aparecer` = 0). No se arregla con código: depende de que Tyrone cambie el criterio (pedido `[Plan]` ya hecho). Déjalo `parcial`.
+5. **S3-2: meta p95 < 100 ms por paso.** El límite es el `simulationStep` de SUMO 1.12 (p95 142 ms con 80 % de app). Solo baja reduciendo autos de fondo o *rerouters* del escenario (decisión de Tyrone). Usar `libsumo=True` ayuda ~1,3×.
+6. **S2-1:** `docker build` real del `Dockerfile` no se probó en WSL. El VPS lo construye (ver abajo), así que basta con confirmar allí que el despliegue funciona.
+7. **Ensayo de demo:** no se ensayó `proyecto/demo/demo.py` (llegó a `main` después de mi S4-3). Ensayarlo y comprobar que el teléfono espejo se reconecta tras reiniciar el backend: el registro de espejos vive en memoria, así que la app tiene que reabrir `/ws/espejo/{veh_id}`.
+
+**Trampas conocidas (para no perder tiempo):**
+- Lanzar el controlador con `docker exec -i … python3 -m traci.correr_kpis … --vigilar-stdin` (o `-it`). Sin eso, un Ctrl+C del lanzador deja `sumo` y el controlador vivos dentro del contenedor y siguen publicando. Comprobar con `docker exec van3twin pgrep -af "traci.correr_kpis|sumo"`.
+- SUMO 1.12: no existe `getParkingStartingVehicleIDList` ni la suscripción a `parkingArea`; `libsumo` está fuera del `sys.path` (ver la memoria del proyecto). El código ya está adaptado.
+- En los escenarios de Tyrone, `param destino` = `"lat,lon"` y el nombre va en `destino_nombre`. El guiado acepta los dos.
+- "Museo Pumapungo" en `sumo/demanda/destinos.csv` no tiene acera cercana.
+- `herramientas/explicacion_pdf.py` corta en silencio las imágenes más altas que la página: trocea las capturas largas.
+
+**Pedidos para la instancia con acceso al VPS (`esert-demo` en Dokploy):**
+- Estado observado hoy desde fuera: `GET https://demo.e-sert.tesisucuenca.com/salud` → 200 con `ts` (el código de S3 o posterior está desplegado); `GET /api/v1/espejo/candidatos` → 200.
+- **[VPS-1] `ESERT_TOKEN_SIM`.** En S4-1, `/interno/snapshot` y `/sim/paso` aceptaban pasos sin token, así que cualquiera podía publicar en el visor. Configura en Dokploy → Environment un token largo y aleatorio, redespliega y comprueba con `ESERT_URL_PUBLICA=https://demo.e-sert.tesisucuenca.com python -m pytest -c backend/pytest.ini backend/tests -m vps` (deben pasar las 2 pruebas que fallaban). Ese token va también en el `.env` local del controlador; nunca en el repo.
+- **[VPS-2] Persistencia.** Confirma `ESERT_DB_URL=sqlite:////data/esert.db` con el volumen `/data` montado. Si no, el libro y los saldos se pierden en cada redeploy.
+- **[VPS-3] Redeploy con `main` actual.** Confirma que el servicio sigue `main` (On Push) y que `wss://demo.e-sert.tesisucuenca.com/ws/espejo/x` responde con el mensaje `espejo_fin` `no_existe` y cierra con 4404 (antes daba 403).
+- **[VPS-4] Prueba en línea (criterio pendiente de S3-3).** Desde la máquina de la demo, con el token en `.env`, desde `proyecto/`:
+  - `ESERT_TOKEN_SIM=<token> python3 -m traci.correr_kpis --id p50_umbral_s1 --hasta 4500 --publicar https://demo.e-sert.tesisucuenca.com --ritmo 1` (dentro del contenedor);
+  - en paralelo: `python3 -m backend.espejo.seguir --url https://demo.e-sert.tesisucuenca.com --pantallas 1 --min-s 600 --max-s 900 --salida traci/salidas_kpi/espejo_vps.json`.
+  - Meta: 10 min sin cortes y latencia de punta a punta razonable (en local fue p50 76 ms, p95 178 ms). Anota los logs y la CPU/RAM del contenedor del VPS durante la prueba. Con eso, S3-3 pasa a 6/6.
+- **[VPS-5]** El límite de tasa de recargas de `DESPLIEGUE.md` no está implementado: necesita un código de error en el contrato. Si se decide hacerlo, que sea en Traefik o en el backend con un código nuevo aprobado por Tyrone.
+
+**Contrato:** las propuestas v1.2/v1.3 (`/sim/kpi`, `timeout_sin_senal`, `sin_senal`, bloque `espejo`, `RespuestaSnapshot`, cierres 4404/1000, `Salud.ts`) estaban en `comun/CONTRATO.propuesto.md`. Antes de cambiar código, verifica con `git diff origin/main -- docs/CONTRATO.md` si la unificación ya las aplicó.
+
+**Pendientes de otras personas que me afectan:**
+- @Miguel: validar `comun/docs/diagramas/seq_recarga_payphone.mmd`; mostrar el motivo `timeout_sin_senal` en el recibo; confirmar las tarjetas SERT de 30 min.
+- @Pablo: con `rf_final`, ¿qué umbral de `confianza` usar para mostrar "detectando…" en el espejo?
+
+**Bucle y verificación:** no se ejecutó código nuevo. Comprobé con `git` que no hay nada sin subir y que `freddy/s4` está en `main`, revisé en `origin/main` el modelo y `demo/`, y consulté `/salud` y `/espejo/candidatos` del VPS.
+
+**Evidencias:** sin PNG nuevo (es un traspaso); las de cada sesión están en `semanas/S*/Freddy/evidencias/`.
