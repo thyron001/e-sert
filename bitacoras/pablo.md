@@ -522,3 +522,9 @@ Cada sesión agrega una entrada al final (ver *Protocolo de cierre* en `CLAUDE.m
 **Qué hice:** rellené los `[PENDIENTE]` con `resumen.csv` de Tyrone (resumen, tabla integrada, conclusiones, `pablo.md`, anexo y f08 solo umbral vs `rf_final`); corregí `RAIZ_REPO` en `construir_informe.py` (buscaba una ruta fija y falló en la unificación); armé con `--fuentes ramas`: 0 marcadores, `verificar_informe.py` OK, 19 tests pasan.
 **Decisiones:** las respuestas de Tyrone y Miguel que no eran cifras quedan como «a confirmar por <Nombre>», sin `[PENDIENTE]`. `rf_final.joblib` reemplaza a `rf_v1`, cuyo faltante pedían Freddy y Tyrone.
 **Pedidos a otros:** @Tyrone: fusionar `unificacion/s4` y el PR de S2-3, y repetir el armado con `--fuentes proyecto`; Freddy, Tyrone y Miguel confirmar sus respuestas del anexo.
+
+## Cierre · 2026-11-17 · Estado de lo subido a GitHub
+**Qué se subió:** todo lo versionable de Pablo en las ramas `pablo/s1`, `pablo/s2`, `pablo/s3` y `pablo/s4` (sin commits pendientes), más `pablo/s4-cierre`; los PR #1 y #2 están fusionados en `main`. También `bitacoras/.obsidian/` (configuración del editor).
+**Qué NO se subió y por qué:**
+- `semanas/S1/Pablo/codigo/ia/modelos/rf_v0.joblib` (188 MB): GitHub rechaza archivos de más de 100 MB. Se regenera con `python -m ia.entrenar` (metadatos en `rf_v0_info.json`); ya no hace falta porque `rf_final.joblib` (48 MB) sí está versionado.
+- `semanas/S2/Pablo/codigo/ia/datos/escenarios/` (1,2 GB, 40 archivos de las semillas 101-105): son datos generados que inflarían el repositorio compartido. Se regeneran con los scripts de `ia/datos/` desde las salidas de SUMO; quedan en la computadora de Pablo.
