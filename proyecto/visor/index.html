@@ -7,10 +7,21 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="icon" href="data:,">
+  <script type="importmap">
+    {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                 "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+  </script>
   <link rel="stylesheet" href="./css/visor.css">
 </head>
 <body>
-  <div id="mapa"></div>
+  <div id="zona">
+    <div id="mapa"></div>
+    <div id="vista3d"></div>
+    <div class="cambio-vista" role="group" aria-label="Vista del mapa">
+      <button type="button" data-vista="3d">3D</button><button type="button" data-vista="2d">2D</button>
+      <button type="button" id="b-encuadrar" title="Volver a la vista de toda la zona">⌂</button>
+    </div>
+  </div>
   <aside id="panel">
     <header class="cabecera">
       <h1>e-sert <span class="sub">zona SERT · Cuenca</span></h1>

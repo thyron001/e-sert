@@ -15,6 +15,7 @@ import { Presentacion } from "./presentacion.js";
 import { ControlDemo } from "./control_demo.js";
 import { AppQR, urlApp } from "./app_qr.js";
 import { crearMapa, CapaCalle, COLORES } from "./mapa_esert.js";
+import { Vista3D } from "./vista3d.js";
 
 const params = new URLSearchParams(location.search);
 const WS_URL = params.get("ws") ||
@@ -37,6 +38,22 @@ const $ = (id) => document.getElementById(id);
 const lienzo = L.canvas({ padding: 0.3 });
 const mapa = crearMapa("mapa", { preferCanvas: true, renderer: lienzo });
 const calle = new CapaCalle({ datos: "./datos/puestos_geo.json" }).addTo(mapa);
+// Vista 3D (por defecto) encima del mapa 2D; ?vista=2d o el botón «2D» vuelven al mapa.
+let vista3d = null;
+try { vista3d = new Vista3D($("vista3d"), calle); } catch (e) { console.warn("Sin vista 3D (WebGL):", e); }
+function elegirVista(v) {
+  if (!vista3d) v = "2d";
+  vista3d && vista3d.mostrar(v === "3d");
+  for (const b of document.querySelectorAll(".cambio-vista [data-vista]")) b.classList.toggle("on", b.dataset.vista === v);
+  $("b-encuadrar").hidden = v !== "3d";
+  if (v === "2d") setTimeout(() => mapa.invalidateSize(), 50);
+  try { localStorage.setItem("esert.vista", v); } catch { /* sin almacenamiento */ }
+}
+for (const b of document.querySelectorAll(".cambio-vista [data-vista]")) b.onclick = () => elegirVista(b.dataset.vista);
+$("b-encuadrar").onclick = () => vista3d && vista3d.encuadrar();
+let vistaInicial = params.get("vista");
+try { vistaInicial = vistaInicial || localStorage.getItem("esert.vista"); } catch { /* */ }
+elegirVista(vistaInicial === "2d" ? "2d" : "3d");
 calle.cargar().then(() => pintarOcupacion());
 
 const puestos = new Map();
@@ -251,4 +268,4 @@ const appQR = new AppQR($("app-qr"), urlApp(ORIGEN));
 cargarPuestos();
 conectar();
 requestAnimationFrame(medir);
-window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion, controlDemo, appQR };
+window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion, controlDemo, appQR, vista3d, elegirVista };
