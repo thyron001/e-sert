@@ -11,7 +11,7 @@ export const COLORES = {
   estacionado: "#cbd5e1", app: "#111827",
   BUSCANDO: "#FF9F1C", GUIADO: "#a78bfa", ESTACIONADO: "#60a5fa", A_PIE: "#2dd4bf",
   REGRESANDO: "#f0abfc", SALIENDO: "#d6b48c", CERRADA: "#9ca3af", null: "#e5e7eb",
-  propio: "#FFD60A", peaton: "#fde68a",
+  propio: "#FFD60A", peaton: "#3b82f6",
 };
 
 /** Mapa Leaflet con fondo satelital. Los nombres de calles los dibuja `CapaCalle` (de la red de SUMO). */
@@ -187,11 +187,11 @@ export class CapaCalle extends L.Layer {
       }
     }
     // Peatones
-    ctx.fillStyle = COLORES.peaton;
+    ctx.fillStyle = COLORES.peaton; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
     for (const ped of this.peatones) {
       if (!limites.contains([ped.lat, ped.lon])) continue;
       const q = pt(ped.lat, ped.lon);
-      ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(2.2, 0.6 / mpp), 0, 2 * Math.PI); ctx.fill();
+      ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(4.5, 1.2 / mpp), 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
     }
     // Vehículos en movimiento (el propio/espejo al final, encima)
     const lista = [...this.vehiculos.values()].sort((a, b) => (a.halo ? 1 : 0) - (b.halo ? 1 : 0));

@@ -315,6 +315,8 @@ export interface RespuestaSnapshot {
   aceptado: true;
   espejos?: VehiculoId[];
   ordenes?: OrdenSim[];
+  /** Ritmo pedido desde el visor (veces el tiempo real); null = sin cambio. */
+  ritmo?: number | null;
 }
 
 export interface PuestoEspejo {

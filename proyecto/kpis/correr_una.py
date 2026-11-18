@@ -277,7 +277,8 @@ def correr(cfg: dict) -> dict:
         ck.Guia = guia_oraculo(ck.Guia)
     res = ck.correr(ident_ctrl, sufijo=ident[len(ident_ctrl):], hasta=duracion, con_kpis=True, gps_semilla=sem, args_sumo=args_sumo,
                     libsumo=bool(cfg.get("libsumo", False)) and not cfg.get("gui"), guardar_csv=True,
-                    publicar=cfg.get("publicar"), ritmo=cfg.get("ritmo"))
+                    publicar=cfg.get("publicar"), ritmo=cfg.get("ritmo"),
+                    peatones_solo_web=bool(cfg.get("peatones_solo_web")))
     sistema = res.get("kpis") or {}
     fuentes = res.get("ventanas_por_fuente", {})
     if clf == "rf" and pen > 0 and not fuentes.get("rf"):
@@ -345,13 +346,15 @@ def main(argv=None) -> None:
     ap.add_argument("--captura-gui", default=None, help="PNG de sumo-gui (relativo a codigo/) a los 60 s")
     ap.add_argument("--delay-ms", type=int, default=0, help="--delay de sumo-gui")
     ap.add_argument("--libsumo", action="store_true", help="SUMO en el proceso (sin GUI; ~2× más rápido)")
+    ap.add_argument("--peatones-solo-web", action="store_true",
+                    help="demo en línea: solo bajan del auto los conductores de la app web")
     args = ap.parse_args(argv)
     pen, clf, sem = interpretar_id(args.id)
     out = correr({"penetracion": pen, "clasificador": clf, "semilla": sem, "duracion_s": args.duracion,
                   "warmup_s": args.warmup, "modelo_rf": args.modelo, "publicar": args.publicar,
                   "ritmo": args.ritmo, "gui": args.gui, "subdir_salidas": args.subdir,
                   "captura_gui": args.captura_gui, "delay_ms": args.delay_ms, "libsumo": args.libsumo,
-                  "sigint_entre_pasos": True,
+                  "sigint_entre_pasos": True, "peatones_solo_web": args.peatones_solo_web,
                   "dir_resultados": f"kpis/resultados/{args.subdir}" if args.subdir else "kpis/resultados"})
     print(json.dumps(out, indent=1, ensure_ascii=False))
 

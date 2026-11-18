@@ -42,6 +42,10 @@ export class ControlDemo {
     this.$ = (id) => el.querySelector("#" + id);
     this.$("demo-clave").value = leerClave();
     this.$("demo-iniciar").addEventListener("click", () => this.accion("iniciar"));
+    // En plena corrida, el ritmo se cambia al momento (el controlador lo aplica en el siguiente segundo).
+    this.$("demo-ritmo").addEventListener("change", () => {
+      if (this.estado && this.estado.corriendo) this.accion("ritmo");
+    });
     this.$("demo-detener").addEventListener("click", () => this.accion("detener"));
     this.refrescar();
     setInterval(() => this.refrescar(), 4000);
@@ -72,6 +76,9 @@ export class ControlDemo {
     fase.className = "estado " + (est.corriendo ? "conectado" : est.disponible ? "conectando" : "desconectado");
     const e = est.escenario;
     this.$("demo-esc").textContent = e && est.corriendo ? `${e.id} · ${e.ritmo}× · hasta ${e.hasta_s} s` : "";
+    const sel = this.$("demo-ritmo");
+    if (e && est.corriendo && document.activeElement !== sel && !this.ocupado) sel.value = String(Number(e.ritmo));
+    this.$("demo-pen").disabled = est.corriendo;   // los usuarios con app no cambian en vivo
     iniciar.disabled = this.ocupado || est.corriendo || !est.disponible;
     detener.disabled = this.ocupado || !est.corriendo;
     if (!est.disponible && !est.corriendo) this.mensaje(est.motivo || "");
@@ -86,10 +93,12 @@ export class ControlDemo {
     if (!clave) { this.mensaje("Escribe la clave de la demo."); return; }
     this.ocupado = true;
     this.pintar(this.estado);
-    this.mensaje(cual === "iniciar" ? "Arrancando SUMO…" : "Deteniendo…");
+    const textos = { iniciar: "Arrancando SUMO…", detener: "Deteniendo…", ritmo: "Cambiando el ritmo…" };
+    this.mensaje(textos[cual]);
+    const ritmo = Number(this.$("demo-ritmo").value);
     const cuerpo = cual === "iniciar"
-      ? JSON.stringify({ penetracion: Number(this.$("demo-pen").value), ritmo: Number(this.$("demo-ritmo").value) })
-      : undefined;
+      ? JSON.stringify({ penetracion: Number(this.$("demo-pen").value), ritmo })
+      : cual === "ritmo" ? JSON.stringify({ ritmo }) : undefined;
     try {
       const r = await fetch(`${this.api}/${cual}`, {
         method: "POST",
@@ -99,7 +108,11 @@ export class ControlDemo {
       const d = await r.json().catch(() => ({}));
       if (r.ok) {
         guardarClave(clave);
-        this.mensaje(cual === "iniciar" ? "Simulación en marcha: los autos aparecen en unos segundos." : "Simulación detenida.");
+        this.mensaje({
+          iniciar: "Simulación en marcha: los autos aparecen en unos segundos.",
+          detener: "Simulación detenida.",
+          ritmo: `Ritmo cambiado a ${ritmo}×. Con sumo-gui en el servidor, 10× puede no alcanzarse del todo.`,
+        }[cual]);
         this.pintar(d);
       } else {
         if (r.status === 401) guardarClave("");

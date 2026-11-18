@@ -75,5 +75,16 @@ input.codigo { width: 100%; font: inherit; font-size: 28px; font-weight: 800; le
 .alerta-caja { background: var(--hoja); border: 2px solid var(--aviso); border-radius: 16px; padding: 18px; max-width: 420px; width: 100%; }
 .alerta-caja p { font-size: 17px; font-weight: 700; margin: 0 0 14px; line-height: 1.35; }
 
+/* Mi posición (el teléfono del conductor simulado): punto azul que late, como el GPS */
+.punto-yo { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff;
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, .6); animation: latido 1.6s ease-out infinite; }
+@keyframes latido { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, .55); }
+                    70% { box-shadow: 0 0 0 20px rgba(37, 99, 235, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
+/* Botón flotante: centrar en mi vehículo / mi posición */
+.capa-yo { position: absolute; left: 0; top: 0; z-index: 460; pointer-events: none; }
+.boton-mapa { position: absolute; right: 12px; top: calc(72px + env(safe-area-inset-top)); z-index: 1001; width: auto;
+              min-height: 0; padding: 10px 14px; border-radius: 999px; background: rgba(17, 26, 46, .92);
+              color: var(--texto); border: 1px solid var(--borde); box-shadow: 0 4px 14px rgba(0, 0, 0, .4); font-size: 14px; }
 .pin-ubicacion { width: 26px; height: 26px; border-radius: 50% 50% 50% 0; background: #38bdf8; transform: rotate(-45deg);
                  border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .5); }

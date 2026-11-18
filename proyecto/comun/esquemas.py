@@ -537,6 +537,8 @@ class RespuestaSnapshot(Modelo):
     aceptado: Literal[True] = True
     espejos: List[VehiculoId] = Field(default_factory=list)
     ordenes: List[OrdenSim] = Field(default_factory=list, description="Órdenes de la app web (2026-11-18)")
+    ritmo: Optional[float] = Field(None, gt=0, le=10,
+                                   description="Ritmo pedido desde el visor (veces el tiempo real); null = sin cambio")
 
 
 class PuestoEspejo(Modelo):

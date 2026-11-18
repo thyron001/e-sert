@@ -31,8 +31,33 @@ const pin = L.marker(CENTRO, {
   draggable: true, icon: L.divIcon({ className: "", html: '<div class="pin-ubicacion"></div>', iconSize: [26, 26], iconAnchor: [13, 26] }),
 }).addTo(mapa).bindTooltip("Tu ubicación simulada", { direction: "top", offset: [0, -24] });
 const ruta = L.polyline([], { color: COLORES.propio, weight: 5, opacity: 0.9 }).addTo(mapa);
-let seguirAuto = true;
-mapa.on("dragstart", () => { seguirAuto = false; });
+// Mi posición: el teléfono del conductor simulado (el peatón si camina, el auto si va dentro).
+// Va en su propia capa, encima del lienzo de autos y puestos (los marcadores de Leaflet quedan debajo).
+const yo = (() => {
+  const el = document.createElement("div");
+  el.className = "punto-yo capa-yo";
+  el.hidden = true;
+  mapa.getContainer().appendChild(el);
+  let pos = null;
+  const ubicar = () => {
+    if (!pos) return;
+    const q = mapa.latLngToContainerPoint(pos);
+    el.style.transform = `translate(${q.x - 9}px, ${q.y - 9}px)`;
+  };
+  mapa.on("move zoom resize", ubicar);
+  return {
+    fijar(latlon) { pos = latlon; el.hidden = !latlon; ubicar(); },
+  };
+})();
+let posAuto = null;            // mi vehículo según el último snapshot del WebSocket
+let enfoque = "vehiculo";      // a qué sigue el mapa: "vehiculo" | "posicion" | null (lo movió el usuario)
+let ultimoEnfoque = "vehiculo";
+mapa.on("dragstart", () => { enfoque = null; pintarBotonEnfoque(); });
+// La hoja inferior cambia de alto según el paso: el mapa se achica o crece y Leaflet tiene que
+// saberlo, si no centra mal (el auto o mi posición quedan debajo de la hoja).
+try {
+  new ResizeObserver(() => { mapa.invalidateSize({ pan: false }); centrar(); }).observe($("mapa"));
+} catch { window.addEventListener("resize", () => mapa.invalidateSize()); }
 
 // --- Estado ---------------------------------------------------------------------------------------
 let usuario = leer();
@@ -127,14 +152,17 @@ function pintar(forzar = false) {
   $("aviso-sim").textContent = "La simulación está detenida: pídele a quien presenta que la inicie en el visor.";
   const s = estado.sesion;
   const abierta = s && s.estado !== "cerrada";
-  pin.setOpacity(abierta ? 0.35 : 1);
+  // Sin sesión: el pin para elegir la ubicación simulada. Con sesión: el punto azul de mi posición.
+  pin.setOpacity(abierta ? 0 : 1);
   pin.dragging[abierta ? "disable" : "enable"]();
-  // ruta y auto propio
   const auto = abierta && s.auto;
+  yo.fijar(auto ? [auto.lat, auto.lon] : null);
+  if (!abierta) posAuto = null;
   ruta.setLatLngs(auto && ["yendo"].includes(s.estado) ? auto.ruta : []);
   calle.resaltado = abierta && s.puesto ? s.puesto.puesto_id : (vista === "codigo" ? calle.resaltado : null);
   calle.redibujar();
-  if (auto && seguirAuto) mapa.panTo([auto.lat, auto.lon], { animate: true, duration: 0.6 });
+  pintarBotonEnfoque();
+  centrar();
   alertar(s);
   // La hoja solo se reescribe cuando cambia su estructura; los relojes se actualizan en su texto
   // (si se reescribiera cada segundo, un toque en un botón podría perderse).
@@ -152,6 +180,36 @@ function dinamicos(s) {
   const el = $("d-eleccion");
   if (el && s) el.textContent = reloj(s.eleccion_restante_s);
 }
+
+function puntoEnfoque() {
+  const s = estado && estado.sesion;
+  if (!s || s.estado === "cerrada" || !s.auto) return null;
+  if (enfoque === "posicion") return [s.auto.lat, s.auto.lon];
+  if (enfoque === "vehiculo") return posAuto || [s.auto.lat, s.auto.lon];
+  return null;
+}
+
+function centrar() {
+  const p = puntoEnfoque();
+  if (p) mapa.panTo(p, { animate: true, duration: 0.6 });
+}
+
+function pintarBotonEnfoque() {
+  const b = $("b-enfoque");
+  const s = estado && estado.sesion;
+  b.hidden = !(s && s.estado !== "cerrada" && s.auto);
+  // el botón ofrece lo otro: si sigo al vehículo, «Mi posición», y al revés
+  const siguiente = enfoque === "vehiculo" ? "posicion" : enfoque === "posicion" ? "vehiculo" : ultimoEnfoque;
+  b.dataset.siguiente = siguiente;
+  b.textContent = siguiente === "vehiculo" ? "🚗 Mi vehículo" : "📍 Mi posición";
+}
+
+$("b-enfoque").onclick = () => {
+  enfoque = $("b-enfoque").dataset.siguiente || "vehiculo";
+  ultimoEnfoque = enfoque === "vehiculo" ? "posicion" : "vehiculo";
+  pintarBotonEnfoque();
+  centrar();
+};
 
 function contenido(s, abierta) {
   const err = error ? `<p class="error">${error}</p>` : "";
@@ -184,8 +242,7 @@ function contenido(s, abierta) {
   if (s.estado === "yendo") {
     return `<h2>Vas al ${puesto}</h2>
       <p>Tu auto (amarillo) sigue la ruta real de la simulación. El puesto queda reservado para ti.</p>
-      ${ia("La IA detectará cuando estaciones y te bajes del auto.")}
-      <button id="b-centrar" class="secundario" type="button">Seguir a mi auto</button>${err}`;
+      ${ia("La IA detectará cuando estaciones y te bajes del auto.")}${err}`;
   }
   if (s.estado === "llego") {
     const quedan = s.eleccion_restante_s != null ? `Si no eliges en <span id="d-eleccion"></span> min se cobran 30 min.` : "";
@@ -231,7 +288,7 @@ function enlazar(s) {
   const b = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
   b("b-buscar", () => {
     const { lat, lng } = pin.getLatLng();
-    seguirAuto = true;
+    enfoque = "vehiculo";
     accion("/buscar", { lat, lon: lng });
   });
   b("b-codigo", () => { vista = "codigo"; codigoElegido = ""; error = ""; pintar(true); });
@@ -239,10 +296,9 @@ function enlazar(s) {
   b("b-pagar", () => {
     const codigo = ($("codigo").value || "").trim();
     if (!/^\d{1,3}$/.test(codigo)) { error = "Escribe el número del puesto (1 a 3 cifras)."; pintar(true); return; }
-    seguirAuto = true;
+    enfoque = "vehiculo";
     accion("/estacionado", { codigo });
   });
-  b("b-centrar", () => { seguirAuto = true; pintar(true); });
   b("b-extender", () => accion("/extender", { minutos: 30 }));
   b("b-irme", () => accion("/me-voy"));
   for (const el of hoja.querySelectorAll("[data-min]")) {
@@ -288,7 +344,13 @@ function conectar() {
         color: v.id === propio ? COLORES.propio : (COLORES[v.estado] || COLORES.null),
         borde: v.id === propio ? "#0f172a" : null, halo: v.id === propio,
       })));
-      calle.fijarPeatones(m.peatones || []);
+      if (propio) {
+        const mio = m.vehiculos.find((v) => v.id === propio);
+        if (mio) posAuto = [mio.lat, mio.lon];
+      }
+      // peatones de la app (el propio va como punto azul que late, no se repite)
+      const miPeaton = propio ? "ped_" + propio.slice(4) : null;
+      calle.fijarPeatones((m.peatones || []).filter((p) => p.id !== miPeaton));
     } else if (m.tipo === "verdad") {
       calle.fijarOcupacion(m.puestos);
     }

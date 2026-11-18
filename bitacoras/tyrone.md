@@ -962,3 +962,14 @@ Sin verificador independiente: no es una sesión del plan.
 - Recorrido real con teléfono simulado (390×844) contra `api` + `sim` + `visor`: buscar → asignado en 3 s → la IA detectó la llegada en 60 s → pago de 30 min ($4,75).
 **Pendientes:** pruebas de unidad de `AutosWeb` con un controlador falso (hoy se cubre con el recorrido real).
 - **2026-11-18 · Ritmo 10×:** el selector del visor ofrece ahora 1×, 2×, 5× y 10× (el backend ya aceptaba hasta 10).
+
+## 2026-11-18 · Ritmo en vivo, peatones solo de la app y «mi posición»
+**Estado:** hecho.
+**Qué hice:**
+- **Ritmo en vivo** (1×, 2×, 5×, 10×) desde el selector del visor: `POST /api/v1/demo/ritmo` (clave). Viaja al controlador en `RespuestaSnapshot.ritmo`, y `Ritmo.fijar()` lo aplica en el siguiente paso con una nueva referencia; si la simulación se atrasa más de 2 s, no corre para recuperar. Medido con `sumo-gui`: 1→1,0×, 5→4,47×, 10→6,15×, 2→2,04× y 1→0,96×.
+- **Peatones solo de los autos de la app web** en la demo en línea (`--peatones-solo-web`, que pasa el lanzador de `sim`). Los demás conductores se quedan en el auto (la IA sigue con su teléfono ahí). Antes de usar la app, 0 peatones; con 3 usuarios, solo `ped_web_*`. Los experimentos no cambian.
+- **App:** «mi posición» como punto azul que late (capa propia, encima del lienzo) y botón flotante «🚗 Mi vehículo / 📍 Mi posición» que alterna el centro del mapa y lo sigue. Los peatones de la app se ven como puntos azules.
+**Problemas encontrados:**
+- El punto azul quedaba escondido bajo el lienzo de autos y puestos (z-index 450 frente a 400 de los marcadores de Leaflet). Ahora va en su propia capa.
+- El mapa centraba mal (el auto quedaba bajo la hoja) porque Leaflet no se enteraba de que la hoja inferior crece. Ahora un `ResizeObserver` llama a `invalidateSize()`.
+**Pruebas:** 270 passed (`traci`, backend y `comun` afectados) y visor 11. Recorrido real con teléfono simulado: el botón alterna y centra en el auto y en el peatón, sin errores JS.

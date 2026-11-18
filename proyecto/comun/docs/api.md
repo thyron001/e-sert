@@ -33,6 +33,7 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 | GET | `/demo/estado` | 200 | — | EstadoDemo |
 | POST | 🔒 `/demo/iniciar` | 202 | ParametrosDemo | EstadoDemo |
 | POST | 🔒 `/demo/detener` | 200 | — | EstadoDemo |
+| POST | 🔒 `/demo/ritmo` | 200 | CambioRitmo | EstadoDemo |
 
 ## `GET /api/v1/salud`
 
@@ -227,6 +228,7 @@ Respuesta `202`: `RespuestaSnapshot`
 | `aceptado` | bool | no |
 | `espejos` | [texto] | no |
 | `ordenes` | [OrdenSim] | no |
+| `ritmo` | número \| null | no |
 
 Otros códigos: `401`, `422`
 
@@ -290,6 +292,7 @@ Respuesta `202`: `RespuestaSnapshot`
 | `aceptado` | bool | no |
 | `espejos` | [texto] | no |
 | `ordenes` | [OrdenSim] | no |
+| `ritmo` | número \| null | no |
 
 Otros códigos: `401`, `422`
 
@@ -877,6 +880,32 @@ Otros códigos: `401`, `409`, `422`, `503`
 ## 🔒 `POST /api/v1/demo/detener`
 
 **Detiene la simulación (🔑).** 
+
+Respuesta `200`: `EstadoDemo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `disponible` | bool | sí |
+| `motivo` | texto \| null | no |
+| `corriendo` | bool | sí |
+| `fase` | "inactiva" \| "preparando" \| "corriendo" \| "deteniendo" | sí |
+| `escenario` | EscenarioDemo \| null | no |
+| `inicio` | texto \| null | no |
+| `fin` | texto \| null | no |
+| `codigo_salida` | entero \| null | no |
+| `ultimas_lineas` | [texto] | no |
+
+Otros códigos: `401`, `422`, `503`
+
+## 🔒 `POST /api/v1/demo/ritmo`
+
+**Cambia el ritmo de la simulación en vivo (🔑).** El controlador lo aplica en el siguiente segundo simulado: el pedido viaja en la respuesta de
+
+Cuerpo: `CambioRitmo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `ritmo` | "1" \| "2" \| "5" \| "10" | sí |
 
 Respuesta `200`: `EstadoDemo`
 

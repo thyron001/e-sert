@@ -178,3 +178,19 @@ def test_genera_la_demanda_si_falta_y_restaura_el_indice(tmp_path, monkeypatch):
     assert esperar(lambda: lanz.comandos and not g.corriendo())
     assert (esc / "app50_s2.rou.xml").exists()
     assert (esc / "escenarios.json").read_text() == '{"original": true}'
+
+
+# --------------------------------------------------------------------------- ritmo en vivo
+
+def test_ritmo_en_vivo_viaja_en_la_respuesta_del_paso(entorno):
+    g, _ = entorno
+    with cliente(g) as c:
+        assert c.post("/api/v1/demo/ritmo", json={"ritmo": 10}).status_code == 401
+        c.post("/api/v1/demo/iniciar", headers={"X-Clave-Demo": CLAVE}, json={"ritmo": 2})
+        paso = {"t_sim": 1, "ts": "2026-11-18T03:00:00Z", "vehiculos": [], "peatones": [],
+                "verdad": {"puestos": [], "estacionados": [], "falsas_liberaciones": []}}
+        assert c.post("/api/v1/sim/paso", json=paso).json()["ritmo"] == 2.0
+        r = c.post("/api/v1/demo/ritmo", headers={"X-Clave-Demo": CLAVE}, json={"ritmo": 10})
+        assert r.status_code == 200 and r.json()["escenario"]["ritmo"] == 10.0
+        assert c.post("/api/v1/sim/paso", json=dict(paso, t_sim=2)).json()["ritmo"] == 10.0
+        assert c.post("/api/v1/demo/ritmo", headers={"X-Clave-Demo": CLAVE}, json={"ritmo": 3}).status_code == 422

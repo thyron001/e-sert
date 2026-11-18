@@ -1949,6 +1949,143 @@
         }
       }
     },
+    "/api/v1/demo/ritmo": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Cambia el ritmo de la simulación en vivo (🔑)",
+        "description": "El controlador lo aplica en el siguiente segundo simulado: el pedido viaja en la respuesta de\n`/sim/paso` (`RespuestaSnapshot.ritmo`). Es el ritmo pedido: con sumo-gui en el VPS de 1 vCPU,\nla simulación puede no alcanzar 10×.",
+        "operationId": "cambiar_ritmo_api_v1_demo_ritmo_post",
+        "parameters": [
+          {
+            "name": "x-clave-demo",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clave de la demo (ESERT_CLAVE_DEMO)",
+              "title": "X-Clave-Demo"
+            },
+            "description": "Clave de la demo (ESERT_CLAVE_DEMO)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CambioRitmo"
+              },
+              "examples": {
+                "rapido": {
+                  "summary": "Diez veces el tiempo real",
+                  "value": {
+                    "ritmo": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": true,
+                  "fase": "corriendo",
+                  "escenario": {
+                    "id": "p50_rf_s2",
+                    "penetracion": 50,
+                    "semilla": 2,
+                    "ritmo": 2.0,
+                    "hasta_s": 3600,
+                    "clasificador": "rf"
+                  },
+                  "inicio": "2026-11-18T00:13:59Z",
+                  "ultimas_lineas": [
+                    "Simulation version 1.12.0 started with time: 0.00"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "CLAVE_DEMO_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "CLAVE_DEMO_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/web/usuarios": {
       "post": {
         "tags": [
@@ -3251,6 +3388,26 @@
         "type": "object",
         "title": "BloqueEspejo",
         "description": "Bloque interno `espejo` de `POST /interno/snapshot` (v1.2). Nunca sale por `/ws/estado`."
+      },
+      "CambioRitmo": {
+        "properties": {
+          "ritmo": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              5,
+              10
+            ],
+            "title": "Ritmo",
+            "description": "Veces el tiempo real"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ritmo"
+        ],
+        "title": "CambioRitmo"
       },
       "CandidatoEspejo": {
         "properties": {
@@ -4891,6 +5048,20 @@
             "type": "array",
             "title": "Ordenes",
             "description": "Órdenes de la app web (2026-11-18)"
+          },
+          "ritmo": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 10.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ritmo",
+            "description": "Ritmo pedido desde el visor (veces el tiempo real); null = sin cambio"
           }
         },
         "additionalProperties": false,

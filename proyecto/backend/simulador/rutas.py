@@ -88,13 +88,23 @@ def exigir_clave(request: Request,
         raise ErrorNucleo(e.CodigoError.CLAVE_DEMO_INVALIDA, "Falta la clave de la demo o no coincide.")
 
 
+class CambioRitmo(BaseModel):
+    ritmo: Literal[1, 2, 5, 10] = Field(..., description="Veces el tiempo real")
+
+
+def _ritmo_pedido(request: Request) -> Optional[float]:
+    return getattr(request.app.state.servicios, "ritmo_pedido", None)
+
+
 def _a_respuesta(request: Request, g: GestorSimulacion) -> EstadoDemo:
     est = g.estado()
     motivo = est.motivo or (None if _clave_configurada(request) else "falta ESERT_CLAVE_DEMO en el servidor")
     esc = est.escenario
+    # El ritmo vigente es el último que pidió el visor (puede cambiar en plena corrida).
+    ritmo = (_ritmo_pedido(request) or esc.ritmo) if esc else None
     return EstadoDemo(
         disponible=motivo is None, motivo=motivo, corriendo=est.corriendo, fase=est.fase,
-        escenario=EscenarioDemo(id=esc.id, penetracion=esc.penetracion, semilla=esc.semilla, ritmo=esc.ritmo,
+        escenario=EscenarioDemo(id=esc.id, penetracion=esc.penetracion, semilla=esc.semilla, ritmo=ritmo,
                                 hasta_s=esc.hasta_s, clasificador=esc.clasificador) if esc else None,
         inicio=est.inicio, fin=est.fin, codigo_salida=est.codigo_salida, ultimas_lineas=est.ultimas_lineas)
 
@@ -114,6 +124,8 @@ def iniciar(request: Request, params: Optional[ParametrosDemo] = Body(None, open
     try:
         g.iniciar(Escenario(penetracion=p.penetracion, semilla=p.semilla, ritmo=p.ritmo, hasta_s=p.hasta_s,
                             clasificador=p.clasificador))
+        # la corrida nueva arranca con su ritmo, no con el que se pidió para la anterior
+        request.app.state.servicios.ritmo_pedido = p.ritmo
     except LookupError as exc:
         raise ErrorNucleo(e.CodigoError.DEMO_NO_DISPONIBLE, str(exc)) from exc
     except RuntimeError as exc:
@@ -129,4 +141,17 @@ def detener(request: Request, g: GestorSimulacion = Depends(gestor)) -> EstadoDe
         g.detener()
     except LookupError as exc:
         raise ErrorNucleo(e.CodigoError.DEMO_NO_DISPONIBLE, str(exc)) from exc
+    return _a_respuesta(request, g)
+
+
+@router.post("/ritmo", response_model=EstadoDemo, summary="Cambia el ritmo de la simulación en vivo (🔑)",
+             dependencies=[Depends(exigir_clave)],
+             responses=_resp(200, _EJ_ESTADO, "CLAVE_DEMO_INVALIDA", "DEMO_NO_DISPONIBLE", "VALIDACION"))
+def cambiar_ritmo(request: Request, cuerpo: CambioRitmo = Body(..., openapi_examples={
+        "rapido": {"summary": "Diez veces el tiempo real", "value": {"ritmo": 10}}}),
+        g: GestorSimulacion = Depends(gestor)) -> EstadoDemo:
+    """El controlador lo aplica en el siguiente segundo simulado: el pedido viaja en la respuesta de
+    `/sim/paso` (`RespuestaSnapshot.ritmo`). Es el ritmo pedido: con sumo-gui en el VPS de 1 vCPU,
+    la simulación puede no alcanzar 10×."""
+    request.app.state.servicios.ritmo_pedido = float(cuerpo.ritmo)
     return _a_respuesta(request, g)

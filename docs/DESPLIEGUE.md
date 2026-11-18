@@ -45,6 +45,14 @@ visor muestra su QR; quien lo escanea la abre en el navegador del teléfono. Tod
   min del final, alerta; en 0, se renueva sola (+30 min, +$0,25) hasta 120 min; en el máximo, el
   conductor vuelve y se va. Si no elige en 5 min simulados, se cobran 30 min.
 - **El temporizador corre en tiempo simulado**: a ritmo 2, 30 min son 15 min reales.
+- **Ritmo en vivo:** el selector del visor (1×, 2×, 5×, 10×) cambia la velocidad en plena corrida
+  (`POST /api/v1/demo/ritmo`; viaja al controlador en `RespuestaSnapshot.ritmo`). Medido con
+  `sumo-gui`: 1× → 1,0×, 5× → 4,5×, **10× → 6,2× real** (tope de la CPU del VPS).
+- **Peatones solo de la app:** en la demo en línea (`--peatones-solo-web`) solo bajan del auto los
+  conductores de la app web; los demás se quedan dentro y se van al terminar su estadía (la IA
+  sigue con su teléfono en el auto). Los experimentos siguen con todos los peatones.
+- **Mi posición:** en la app, el teléfono del conductor es un punto azul que late; el botón
+  flotante alterna el centro del mapa entre «Mi vehículo» y «Mi posición».
 - La simulación tiene que estar corriendo (botón «Iniciar» del visor).
 - Código: `proyecto/visor/app/` (página), `proyecto/backend/web/` (API `/api/v1/web/*`),
   `proyecto/traci/autos_web.py` (autos en SUMO). Mapa compartido con el visor:

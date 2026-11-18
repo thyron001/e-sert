@@ -210,6 +210,7 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 | `GET /demo/estado` | — | `{disponible, motivo, corriendo, fase, escenario, inicio, fin, codigo_salida, ultimas_lineas}` | `EstadoDemo` |
 | 🔒 `POST /demo/iniciar` | `{penetracion?, semilla?, ritmo?, hasta_s?, clasificador?}` (todo opcional) | `202 EstadoDemo`; `409 DEMO_EN_CURSO`; `503 DEMO_NO_DISPONIBLE` | `ParametrosDemo` → `EstadoDemo` |
 | 🔒 `POST /demo/detener` | — | `EstadoDemo` | → `EstadoDemo` |
+| 🔒 `POST /demo/ritmo` | `{ritmo}` | `EstadoDemo` | `CambioRitmo` → `EstadoDemo` |
 
 **App web (`/web/*`, 2026-11-18, `backend/web/`).** La usa `https://demo.e-sert.tesisucuenca.com/app/`.
 Sin autenticación: el `usuario_id` (`app_<uuid>`) que guarda el navegador es la llave; la billetera
@@ -242,7 +243,9 @@ Detalles:
   `ESERT_CLAVE_DEMO` (si falta, `401 CLAVE_DEMO_INVALIDA`). `iniciar` lanza SUMO y el controlador
   (`kpis.correr_una`) dentro del contenedor del backend, que publican en el propio backend con
   `ESERT_TOKEN_SIM`. Una sola corrida a la vez; `detener` equivale a Ctrl+C. Por defecto,
-  `p50_rf_s2` a ritmo 2 hasta t = 3 600 s.
+  `p50_rf_s2` a ritmo 2 hasta t = 3 600 s. `ritmo` (1, 2, 5 o 10) cambia la velocidad en plena
+  corrida: el backend lo pone en `RespuestaSnapshot.ritmo` y el controlador lo aplica en el
+  siguiente segundo simulado.
 - **Pagos (`/pagos/*`, v1.4):** `preparar` crea una intención de recarga y devuelve `pay_url`
   (Payphone en modo `pruebas`, o una página `mock` sin credenciales). Al aprobarse, el backend
   acredita la recarga en la billetera con `referencia_payphone`; la app consulta

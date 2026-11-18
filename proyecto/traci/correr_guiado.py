@@ -82,6 +82,7 @@ class PublicadorSnapshots:
         self.espejo = espejo
         self.espejos: frozenset = frozenset()
         self.web = None  # AutosWeb (app web): eventos en el cuerpo, órdenes en la respuesta
+        self.ritmo = None  # Ritmo: el backend puede pedir otro factor en la respuesta (`ritmo`)
         self._ultimo_cuerpo: Optional[dict] = None
         self._ultima_pos: dict = {}
         self.posiciones_invalidas = 0
@@ -148,6 +149,9 @@ class PublicadorSnapshots:
         self.espejos = frozenset(respuesta.get("espejos") or ())
         if self.web is not None:
             self.web.recibir(respuesta.get("ordenes"))
+        pedido = respuesta.get("ritmo")
+        if self.ritmo is not None and isinstance(pedido, (int, float)) and pedido > 0:
+            self.ritmo.fijar(float(pedido))
 
     def fin_corrida(self) -> None:
         """Último snapshot con `espejo.fin`: los teléfonos reciben `espejo_fin` (`fin_simulacion`)."""
@@ -197,20 +201,37 @@ def _ahora_iso() -> str:
 
 
 class Ritmo:
-    """Hook: frena la simulación a `factor` veces el tiempo real (1 = demo en vivo)."""
+    """Hook: frena la simulación a `factor` veces el tiempo real (1 = demo en vivo).
+
+    2026-11-18: `fijar()` cambia el factor en plena corrida (el visor lo pide; llega en la
+    respuesta de `/sim/paso`). Al cambiar, y si la simulación se atrasa más de `MAX_ATRASO_S`
+    (no da abasto, p. ej. a 10× con sumo-gui), se toma el instante actual como nueva referencia:
+    así no "recupera" el atraso corriendo a toda velocidad cuando luego se baja el ritmo.
+    """
+
+    MAX_ATRASO_S = 2.0
 
     def __init__(self, factor: float):
         self.factor = factor
         self._inicio: Optional[tuple] = None
 
+    def fijar(self, factor: float) -> None:
+        """Nuevo factor desde el próximo paso (se puede llamar desde otro hilo)."""
+        if factor > 0 and factor != self.factor:
+            self.factor = factor
+            self._inicio = None
+
     def on_paso(self, ctrl, t: float) -> None:
-        if self._inicio is None:
+        inicio = self._inicio
+        if inicio is None:
             self._inicio = (time.perf_counter(), t)
             return
-        t0_real, t0_sim = self._inicio
+        t0_real, t0_sim = inicio
         espera = (t - t0_sim) / self.factor - (time.perf_counter() - t0_real)
         if espera > 0:
             time.sleep(espera)
+        elif espera < -self.MAX_ATRASO_S:
+            self._inicio = (time.perf_counter(), t)
 
 
 def _progreso(ctrl, t: float) -> None:

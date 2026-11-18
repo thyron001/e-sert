@@ -45,6 +45,7 @@ class Servicios:
     espejo: Optional[RegistroEspejo] = None
     difusor_espejo: Optional[DifusorEspejo] = None
     web: Optional["ServicioWeb"] = None
+    ritmo_pedido: Optional[float] = None  # lo fija el visor (/demo/ritmo o /demo/iniciar)
 
     def __post_init__(self) -> None:
         if self.web is None:
@@ -94,7 +95,7 @@ class Servicios:
     def respuesta_paso(self) -> e.RespuestaSnapshot:
         """Respuesta a `/sim/paso`: autos seguidos (teléfonos + app web) y órdenes de la app web."""
         return e.RespuestaSnapshot(espejos=sorted(set(self.espejo.espejos()) | set(self.web.seguidos())),
-                                   ordenes=self.web.tomar_ordenes())
+                                   ordenes=self.web.tomar_ordenes(), ritmo=self.ritmo_pedido)
 
 
 def servicios(request: Request) -> Servicios:

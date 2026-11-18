@@ -189,7 +189,7 @@ class GestorSimulacion:
                     self._generar_demanda(esc, f)
                 cmd = [self.python, "-u", "-m", "kpis.correr_una", "--id", esc.id,
                        "--duracion", str(esc.hasta_s), "--warmup", "0",
-                       "--publicar", self.url_backend, "--ritmo", str(esc.ritmo),
+                       "--publicar", self.url_backend, "--ritmo", str(esc.ritmo), "--peatones-solo-web",
                        "--subdir", f"demo_vps_{datetime.now():%Y%m%d_%H%M%S}"]
                 modelo = self.proyecto / "ia" / "modelos" / "rf_final.plano.npz"
                 if esc.clasificador == "rf" and modelo.exists():

@@ -102,8 +102,12 @@ class GestorPeatones:
     """Hook de `Controlador`: un peatón por cada llegada de un auto de búsqueda."""
 
     def __init__(self, destinos_csv: Path, semilla: int, p_regreso_corto: float = 0.15,
-                 p_espera_en_auto: float = 0.10, registrar_trayectorias: bool = False):
+                 p_espera_en_auto: float = 0.10, registrar_trayectorias: bool = False, solo_web: bool = False):
         self.rng = random.Random(semilla)
+        # Demo en línea (2026-11-18): solo bajan del auto los conductores de la app web. Los demás se
+        # quedan dentro (su teléfono va con el auto, como el caso `en_auto`) y se van al terminar
+        # su estadía. Ahorra CPU; los experimentos siguen con todos los peatones.
+        self.solo_web = solo_web
         self.destinos = leer_destinos(destinos_csv)
         self.p_regreso_corto = p_regreso_corto
         self.p_espera_en_auto = p_espera_en_auto
@@ -124,6 +128,8 @@ class GestorPeatones:
         tr = ctrl.traci
         for veh in tr.simulation.getParkingStartingVehiclesIDList():
             if parametro(ctrl, veh, "clase") == "busca" and veh not in self.activos:
+                if self.solo_web and tr.vehicle.getParameter(veh, "web") != "1":
+                    continue
                 self._llegada(ctrl, veh, t)
         self._revisar_regresos(ctrl, t)
         if self._registrar and round(t) % INTERVALO_TRAYECTORIA_S == 0:

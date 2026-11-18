@@ -192,7 +192,7 @@ def test_espejos_en_el_snapshot_mientras_hay_suscriptor(c, app):
             primero = leer(ws)  # al conectar llega el último estado conocido (del snapshot)
             assert isinstance(primero, e.MensajeEspejo) and primero.veh_id == "sim_veh42"
             r = c.post(SNAP, json=cuerpo(11.0), headers=CAB)
-            assert r.json() == {"aceptado": True, "espejos": ["sim_veh42"], "ordenes": []}  # el controlador sabe a quién detallar
+            assert r.json() == {"aceptado": True, "espejos": ["sim_veh42"], "ordenes": [], "ritmo": None}  # el controlador sabe a quién detallar
             snap = leer(visor)
             assert isinstance(snap, e.MensajeSnapshot) and snap.espejos == ["sim_veh42"]
         esperar(lambda: registro(app).espejos() == [])

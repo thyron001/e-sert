@@ -122,6 +122,7 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
            contar_eventos: bool = True, args_sumo: Sequence[str] = (), geo_local: bool = True,
            politica_datos_pobres: bool = True, ws_nulo: bool = False, guardar_csv: bool = True,
            instrumentar: Optional[Callable[[dict], None]] = None, espejo: bool = True,
+           peatones_solo_web: bool = False,
            ritmo: Optional[float] = None, volcar: Optional[Path] = None, gui: bool = False,
            captura: Optional[str] = None) -> dict:
     """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso.
@@ -141,7 +142,8 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
     cfg = preparar_escenario(pen, semilla)
     puente = PuenteNucleo(SUMO / "parqueos" / "puestos.csv", semilla=semilla)
     guia = Guia(puente, SUMO / "demanda" / "destinos.csv", "mapa")
-    peatones = GestorPeatones(SUMO / "demanda" / "destinos.csv", semilla=semilla, registrar_trayectorias=False)
+    peatones = GestorPeatones(SUMO / "demanda" / "destinos.csv", semilla=semilla, registrar_trayectorias=False,
+                              solo_web=peatones_solo_web)
     clasificador = ClasificadorUsuario()
     gps = EmuladorGPS(semilla=gps_semilla, sigma_m=sigma_m, p_perdida=p_perdida, rafaga_s=rafaga_s,
                       frac_rafaga=frac_rafaga)
@@ -207,7 +209,10 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
             if ritmo:
                 from .correr_guiado import Ritmo
 
-                ctrl.agregar_hook(Ritmo(ritmo).on_paso)
+                reloj_ritmo = Ritmo(ritmo)
+                ctrl.agregar_hook(reloj_ritmo.on_paso)
+                if snapshots is not None:
+                    snapshots.ritmo = reloj_ritmo  # el visor puede cambiarlo en vivo
             if captura:
                 ctrl.agregar_hook(_Captura(captura).on_paso)
             ctrl.agregar_hook(_detener_entre_pasos)
