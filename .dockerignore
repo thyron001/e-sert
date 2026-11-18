@@ -10,3 +10,5 @@ proyecto/app/
 proyecto/datos/
 .env
 .env.*
+proyecto/ia/modelos/*.joblib
+proyecto/kpis/resultados/demo_*

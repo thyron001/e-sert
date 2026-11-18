@@ -25,7 +25,8 @@
                 "example": {
                   "ok": true,
                   "contrato": 1,
-                  "t_sim": 1234.0
+                  "t_sim": 1234.0,
+                  "ts": "2026-11-14T15:00:00.123Z"
                 }
               }
             }
@@ -1660,6 +1661,294 @@
         }
       }
     },
+    "/api/v1/demo/estado": {
+      "get": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Estado de la simulación de la demo",
+        "operationId": "estado_api_v1_demo_estado_get",
+        "responses": {
+          "200": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": false,
+                  "fase": "inactiva",
+                  "ultimas_lineas": []
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/iniciar": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Arranca la simulación (🔑)",
+        "operationId": "iniciar_api_v1_demo_iniciar_post",
+        "parameters": [
+          {
+            "name": "x-clave-demo",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clave de la demo (ESERT_CLAVE_DEMO)",
+              "title": "X-Clave-Demo"
+            },
+            "description": "Clave de la demo (ESERT_CLAVE_DEMO)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ParametrosDemo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Params"
+              },
+              "examples": {
+                "demo": {
+                  "summary": "La demo de la exposición, en vivo",
+                  "value": {
+                    "penetracion": 50,
+                    "ritmo": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": true,
+                  "fase": "corriendo",
+                  "escenario": {
+                    "id": "p50_rf_s2",
+                    "penetracion": 50,
+                    "semilla": 2,
+                    "ritmo": 2.0,
+                    "hasta_s": 3600,
+                    "clasificador": "rf"
+                  },
+                  "inicio": "2026-11-18T00:13:59Z",
+                  "ultimas_lineas": [
+                    "Simulation version 1.12.0 started with time: 0.00"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "CLAVE_DEMO_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "CLAVE_DEMO_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_EN_CURSO": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_EN_CURSO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/detener": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Detiene la simulación (🔑)",
+        "operationId": "detener_api_v1_demo_detener_post",
+        "parameters": [
+          {
+            "name": "x-clave-demo",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clave de la demo (ESERT_CLAVE_DEMO)",
+              "title": "X-Clave-Demo"
+            },
+            "description": "Clave de la demo (ESERT_CLAVE_DEMO)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": false,
+                  "fase": "inactiva",
+                  "ultimas_lineas": []
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "CLAVE_DEMO_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "CLAVE_DEMO_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/salud": {
       "get": {
         "tags": [
@@ -1678,6 +1967,175 @@
                 "example": {
                   "ok": true,
                   "contrato": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pagos/preparar": {
+      "post": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Preparar una recarga con Payphone",
+        "operationId": "preparar_api_v1_pagos_preparar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PedidoPago"
+              },
+              "examples": {
+                "recarga": {
+                  "summary": "Recarga de $10",
+                  "value": {
+                    "usuario_id": "app_3f0c2b9e-8f6a-4c1e-9d2a-5b7e1c4d8a90",
+                    "monto": 10.0,
+                    "url_app": "esert://pagos/retorno"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Pago preparado: abrir pay_url",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagoPreparado"
+                },
+                "example": {
+                  "client_transaction_id": "rec_7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                  "payment_id": "23178284",
+                  "pay_url": "https://demo.e-sert.tesisucuenca.com/api/v1/pagos/ir/rec_7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                  "modo": "pruebas"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pagos/{client_transaction_id}": {
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Estado de una recarga",
+        "operationId": "consultar_api_v1_pagos__client_transaction_id__get",
+        "parameters": [
+          {
+            "name": "client_transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Transaction Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de la intención de pago",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Intencion"
+                },
+                "example": {
+                  "client_transaction_id": "rec_7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                  "usuario_id": "app_3f0c2b9e-8f6a-4c1e-9d2a-5b7e1c4d8a90",
+                  "monto": 10.0,
+                  "estado": "aprobado",
+                  "referencia_payphone": "23178284",
+                  "creada": "2026-10-27T15:45:00+00:00",
+                  "actualizada": "2026-10-27T15:45:20+00:00"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/asistente/interpretar": {
+      "post": {
+        "tags": [
+          "asistente"
+        ],
+        "summary": "Destino y duración a partir de una frase",
+        "description": "Con LLM si hay clave; si no (o si falla), por reglas. Si falta algo, la app usa el formulario.",
+        "operationId": "interpretar_texto_api_v1_asistente_interpretar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PedidoInterpretar"
+              },
+              "examples": {
+                "catedral": {
+                  "summary": "Frase típica",
+                  "value": {
+                    "texto": "cerca de la Catedral Nueva una hora"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Interpretación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaInterpretar"
+                },
+                "example": {
+                  "destino": {
+                    "nombre": "Catedral Nueva",
+                    "lat": -2.897443,
+                    "lon": -79.005237
+                  },
+                  "duracion_min": 60,
+                  "fuente": "llm",
+                  "confianza": 1.0,
+                  "avisos": []
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1896,6 +2354,9 @@
           "SESION_YA_CERRADA",
           "TRANSICION_INVALIDA",
           "RECARGA_MINIMA",
+          "CLAVE_DEMO_INVALIDA",
+          "DEMO_EN_CURSO",
+          "DEMO_NO_DISPONIBLE",
           "ERROR_INTERNO"
         ],
         "title": "CodigoError",
@@ -1979,6 +2440,29 @@
         ],
         "title": "Destino",
         "description": "Lugar al que va el conductor (de `destinos.csv` de Tyrone)."
+      },
+      "DestinoSalida": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre",
+          "lat",
+          "lon"
+        ],
+        "title": "DestinoSalida"
       },
       "DetalleError": {
         "properties": {
@@ -2146,6 +2630,44 @@
         "title": "DetalleEspejo",
         "description": "Lo que el controlador sabe de un vehículo seguido (bloque interno `espejo.detalle`)."
       },
+      "EscenarioDemo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "penetracion": {
+            "type": "integer",
+            "title": "Penetracion"
+          },
+          "semilla": {
+            "type": "integer",
+            "title": "Semilla"
+          },
+          "ritmo": {
+            "type": "number",
+            "title": "Ritmo"
+          },
+          "hasta_s": {
+            "type": "integer",
+            "title": "Hasta S"
+          },
+          "clasificador": {
+            "type": "string",
+            "title": "Clasificador"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "penetracion",
+          "semilla",
+          "ritmo",
+          "hasta_s",
+          "clasificador"
+        ],
+        "title": "EscenarioDemo"
+      },
       "EstadoActualSesion": {
         "properties": {
           "sesion_id": {
@@ -2166,6 +2688,99 @@
         ],
         "title": "EstadoActualSesion",
         "description": "Respuesta de `POST /sesiones/{id}/transicion`."
+      },
+      "EstadoDemo": {
+        "properties": {
+          "disponible": {
+            "type": "boolean",
+            "title": "Disponible",
+            "description": "El servidor puede correr SUMO y tiene la clave configurada"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo",
+            "description": "Por qué no está disponible"
+          },
+          "corriendo": {
+            "type": "boolean",
+            "title": "Corriendo"
+          },
+          "fase": {
+            "type": "string",
+            "enum": [
+              "inactiva",
+              "preparando",
+              "corriendo",
+              "deteniendo"
+            ],
+            "title": "Fase"
+          },
+          "escenario": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscenarioDemo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inicio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inicio"
+          },
+          "fin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fin"
+          },
+          "codigo_salida": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codigo Salida"
+          },
+          "ultimas_lineas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ultimas Lineas",
+            "description": "Final del log de la corrida"
+          }
+        },
+        "type": "object",
+        "required": [
+          "disponible",
+          "corriendo",
+          "fase"
+        ],
+        "title": "EstadoDemo"
       },
       "EstadoSesion": {
         "type": "string",
@@ -2355,6 +2970,73 @@
         ],
         "title": "Guia",
         "description": "Puesto libre asignado por `GET /guia`."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Intencion": {
+        "properties": {
+          "client_transaction_id": {
+            "type": "string",
+            "title": "Client Transaction Id"
+          },
+          "usuario_id": {
+            "type": "string",
+            "title": "Usuario Id"
+          },
+          "monto": {
+            "type": "number",
+            "title": "Monto"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "aprobado",
+              "rechazado"
+            ],
+            "title": "Estado"
+          },
+          "referencia_payphone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencia Payphone"
+          },
+          "creada": {
+            "type": "string",
+            "title": "Creada"
+          },
+          "actualizada": {
+            "type": "string",
+            "title": "Actualizada"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_transaction_id",
+          "usuario_id",
+          "monto",
+          "estado",
+          "creada",
+          "actualizada"
+        ],
+        "title": "Intencion"
       },
       "MensajeKpi": {
         "properties": {
@@ -2565,6 +3247,88 @@
         "title": "OrigenUbicacion",
         "description": "Quién produjo la ubicación."
       },
+      "PagoPreparado": {
+        "properties": {
+          "client_transaction_id": {
+            "type": "string",
+            "title": "Client Transaction Id"
+          },
+          "payment_id": {
+            "type": "string",
+            "title": "Payment Id"
+          },
+          "pay_url": {
+            "type": "string",
+            "title": "Pay Url"
+          },
+          "modo": {
+            "type": "string",
+            "enum": [
+              "mock",
+              "pruebas"
+            ],
+            "title": "Modo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_transaction_id",
+          "payment_id",
+          "pay_url",
+          "modo"
+        ],
+        "title": "PagoPreparado"
+      },
+      "ParametrosDemo": {
+        "properties": {
+          "penetracion": {
+            "type": "integer",
+            "enum": [
+              20,
+              50,
+              80
+            ],
+            "title": "Penetracion",
+            "description": "% de vehículos con app",
+            "default": 50
+          },
+          "semilla": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Semilla",
+            "default": 2
+          },
+          "ritmo": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.5,
+            "title": "Ritmo",
+            "description": "Veces el tiempo real (1 = en vivo)",
+            "default": 2.0
+          },
+          "hasta_s": {
+            "type": "integer",
+            "maximum": 4500.0,
+            "minimum": 300.0,
+            "title": "Hasta S",
+            "description": "Segundo de simulación final",
+            "default": 3600
+          },
+          "clasificador": {
+            "type": "string",
+            "enum": [
+              "rf",
+              "umbral"
+            ],
+            "title": "Clasificador",
+            "default": "rf"
+          }
+        },
+        "type": "object",
+        "title": "ParametrosDemo",
+        "description": "Escenario de la demo. Por defecto, el de `demo/config_demo.yaml` (`p50_rf_s2`, ritmo 2)."
+      },
       "PasoSimulacion": {
         "properties": {
           "t_sim": {
@@ -2604,6 +3368,20 @@
                 "type": "null"
               }
             ]
+          },
+          "puestos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OcupacionPuesto"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puestos"
           }
         },
         "additionalProperties": false,
@@ -2648,6 +3426,62 @@
         ],
         "title": "Peaton",
         "description": "Peatón simulado (el conductor que se bajó)."
+      },
+      "PedidoInterpretar": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Texto",
+            "examples": [
+              "cerca de la Catedral Nueva una hora"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "texto"
+        ],
+        "title": "PedidoInterpretar"
+      },
+      "PedidoPago": {
+        "properties": {
+          "usuario_id": {
+            "type": "string",
+            "pattern": "^(sim_.+|app_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Usuario Id",
+            "examples": [
+              "app_3f0c2b9e-8f6a-4c1e-9d2a-5b7e1c4d8a90"
+            ]
+          },
+          "monto": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Monto",
+            "examples": [
+              5.0
+            ]
+          },
+          "url_app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url App",
+            "description": "Deep link de vuelta (esert://, exp:// o exps://)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "usuario_id",
+          "monto"
+        ],
+        "title": "PedidoPago"
       },
       "Puesto": {
         "properties": {
@@ -2832,6 +3666,60 @@
         ],
         "title": "ReciboEspejo",
         "description": "Recibo dentro del bloque interno `espejo`: lleva el `sesion_id` para que el backend lo\nenvíe una sola vez por sesión. Al teléfono le llega como `Recibo` (sin `sesion_id`)."
+      },
+      "RespuestaInterpretar": {
+        "properties": {
+          "destino": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DestinoSalida"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duracion_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duracion Min"
+          },
+          "fuente": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "reglas"
+            ],
+            "title": "Fuente"
+          },
+          "confianza": {
+            "type": "number",
+            "title": "Confianza"
+          },
+          "avisos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Avisos",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "destino",
+          "duracion_min",
+          "fuente",
+          "confianza"
+        ],
+        "title": "RespuestaInterpretar",
+        "description": "POST /api/v1/asistente/interpretar (mensaje nuevo, pedido a Freddy para el contrato)."
       },
       "RespuestaSnapshot": {
         "properties": {
@@ -3254,6 +4142,46 @@
         "title": "TransicionSesion",
         "description": "`POST /sesiones/{id}/transicion`: el controlador informa un cambio de estado."
       },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
       "VehiculoSim": {
         "properties": {
           "id": {
@@ -3380,6 +4308,10 @@
     {
       "name": "espejo",
       "description": "Modo espejo: el teléfono sigue a un auto simulado."
+    },
+    {
+      "name": "demo",
+      "description": "Arranque y parada de la simulación de la demo en el servidor (🔑 clave)."
     }
   ]
 }

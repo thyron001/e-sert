@@ -119,6 +119,17 @@ def _dir_ia(preferida: Path, raiz: Path) -> Path:
     return raiz / "proyecto"
 
 
+def ruta_modelo(codigo: Path, relativa: str) -> Path:
+    """`relativa` dentro de `codigo/`; si no está (p. ej. `kpis/externo/`, que no se versiona), el
+    mismo archivo en `ia/modelos/`, donde está versionado desde el cierre de S4."""
+    ruta = codigo / relativa
+    if not ruta.exists():
+        versionado = codigo / "ia" / "modelos" / Path(relativa).name
+        if versionado.exists():
+            return versionado
+    return ruta
+
+
 def _preparar_paths(cfg: dict) -> dict:
     """Rutas absolutas de la corrida a partir de rutas relativas a `codigo/` y a la raíz."""
     raiz = raiz_repo()
@@ -130,7 +141,7 @@ def _preparar_paths(cfg: dict) -> dict:
         "sumo": sumo,
         "proyecto": raiz / cfg.get("dir_proyecto", "proyecto"),
         "ia": _dir_ia(codigo / cfg.get("dir_ia", "kpis/externo"), raiz),
-        "modelo": codigo / cfg["modelo_rf"] if cfg.get("modelo_rf") else None,
+        "modelo": ruta_modelo(codigo, cfg["modelo_rf"]) if cfg.get("modelo_rf") else None,
         "resultados": codigo / cfg.get("dir_resultados", "kpis/resultados"),
     }
 
@@ -246,6 +257,10 @@ def correr(cfg: dict) -> dict:
             ck.Controlador.agregar_hook = agregar_con_captura
         args_sumo += ["--gui-settings-file", str(rutas["sumo"] / "demanda" / "vista_gui.xml")] \
             if (rutas["sumo"] / "demanda" / "vista_gui.xml").exists() else []
+    vista = os.environ.get("ESERT_VISTA_GUI")
+    if cfg.get("gui") and vista and "--gui-settings-file" not in args_sumo:
+        # VPS: vista propia (cámara en la zona SERT) aunque no haya captura
+        args_sumo += ["--gui-settings-file", str(rutas["codigo"] / vista)]
     if cfg.get("gui") and cfg.get("delay_ms"):
         args_sumo += ["--delay", str(int(cfg["delay_ms"]))]
     if cfg.get("gui"):

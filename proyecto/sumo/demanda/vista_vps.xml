@@ -1,0 +1,10 @@
+<!-- Vista de sumo-gui en el VPS (https://sumo.tesisucuenca.com): mismo esquema que vista_gui.xml
+     y la cámara centrada en la zona SERT (centro de puestos.csv: x 1715, y 1080). -->
+<viewsettings>
+    <scheme name="esert">
+        <background backgroundColor="white" showGrid="0"/>
+        <vehicles vehicleMode="0" vehicleQuality="2" vehicle_minSize="1" vehicle_exaggeration="3.5" vehicle_constantSize="0" showBlinker="0"/>
+    </scheme>
+    <viewport zoom="130" x="1715" y="1080"/>
+    <delay value="0"/>
+</viewsettings>

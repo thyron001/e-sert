@@ -26,6 +26,8 @@ from . import errores
 from .dependencias import Servicios
 from .rutas import ROUTERS
 from ..espejo.ws_espejo import router as router_ws_espejo
+from ..simulador.gestor import GestorSimulacion
+from ..simulador.rutas import router as router_simulador
 from .ws import router as router_ws
 
 log = logging.getLogger("e-sert.api")
@@ -57,6 +59,7 @@ ETIQUETAS = [
     {"name": "billetera", "description": "Saldo, retenciones y recargas (libro de movimientos)."},
     {"name": "simulacion", "description": "[sim] Entrada del controlador TraCI (rutas 🔒 del contrato)."},
     {"name": "espejo", "description": "Modo espejo: el teléfono sigue a un auto simulado."},
+    {"name": "demo", "description": "Arranque y parada de la simulación de la demo en el servidor (🔑 clave)."},
 ]
 
 
@@ -91,6 +94,10 @@ class Config(BaseSettings):
     token_sim: Optional[str] = Field(None, validation_alias=AliasChoices("ESERT_TOKEN_SIM", "SIM_TOKEN"))
     visor_dir: Optional[str] = Field(default_factory=_visor_por_defecto,
                                      validation_alias=AliasChoices("ESERT_VISOR_DIR"))
+    clave_demo: Optional[str] = Field(None, validation_alias=AliasChoices("ESERT_CLAVE_DEMO"),
+                                      description="Clave para iniciar/detener la simulación desde el visor")
+    puerto: int = Field(8000, validation_alias=AliasChoices("ESERT_PUERTO"),
+                        description="Puerto local del backend: el controlador de la demo publica ahí")
 
     def origenes(self) -> List[str]:
         return [o.strip() for o in self.cors.split(",") if o.strip()] or ["*"]
@@ -169,16 +176,20 @@ def crear_app(config: Optional[Config] = None) -> FastAPI:
     async def ciclo(app: FastAPI):
         app.state.servicios.gestor.iniciar()
         yield
+        if app.state.simulador.corriendo():
+            app.state.simulador.detener()
         await app.state.servicios.gestor.detener()
 
     app = FastAPI(title="e-sert API", version=e.CONTRATO_VERSION, description=DESCRIPCION,
                   openapi_tags=ETIQUETAS, lifespan=ciclo)
     app.state.config = config
     app.state.servicios = Servicios.armar(config.db_url, config.puestos_csv, config.token_sim)
+    app.state.simulador = GestorSimulacion(f"http://127.0.0.1:{config.puerto}", config.token_sim)
 
     errores.registrar(app)
     for r in ROUTERS:
         app.include_router(r, prefix=PREFIJO)
+    app.include_router(router_simulador, prefix=PREFIJO)
     app.include_router(router_ws)
     app.include_router(router_ws_espejo)
 

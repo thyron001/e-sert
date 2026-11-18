@@ -12,6 +12,7 @@ import { estadisticaCuadros, siguienteEspera } from "./logica.js";
 import { PanelKpis } from "./panel_kpis.js";
 import { CapaEspejo } from "./capa_espejo.js";
 import { Presentacion } from "./presentacion.js";
+import { ControlDemo } from "./control_demo.js";
 
 const params = new URLSearchParams(location.search);
 const WS_URL = params.get("ws") ||
@@ -241,13 +242,14 @@ setInterval(() => {
 }, 500);
 
 document.addEventListener("keydown", (ev) => {
-  if (ev.target && ["INPUT", "TEXTAREA"].includes(ev.target.tagName)) return;
+  if (ev.target && ["INPUT", "TEXTAREA", "SELECT"].includes(ev.target.tagName)) return;
   if (ev.key === "d" || ev.key === "D") $("depuracion").hidden = !$("depuracion").hidden;
 });
 
 if (VER_VERDAD) $("verdad").hidden = false;
 leyenda();
+const controlDemo = new ControlDemo(API_BASE, $("control-demo"));
 cargarPuestos();
 conectar();
 requestAnimationFrame(medir);
-window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion };
+window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion, controlDemo };

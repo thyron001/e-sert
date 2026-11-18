@@ -1,0 +1,14 @@
+# Lo que necesita la simulación (SUMO + controlador TraCI + KPIs) dentro de la imagen del VPS.
+# Python 3.10 (Ubuntu 22.04), igual que el contenedor van3twin.
+numpy>=1.21
+lxml>=4.8
+pyproj>=3.3
+requests>=2.25
+pandas>=1.5
+pyyaml>=5.4
+scipy>=1.11
+# libsumo (SUMO dentro del proceso, como en van3twin): el paquete de Ubuntu no lo trae.
+# Versiones fijadas a 1.12.0 para que coincidan con el SUMO de Ubuntu 22.04.
+libsumo==1.12.0
+traci==1.12.0
+sumolib==1.12.0

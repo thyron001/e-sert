@@ -252,12 +252,16 @@ def test_bit_de_suscripcion_igual_a_isStoppedParking():
 
 @pytest.mark.sumo
 @pytest.mark.skipif(not EN_CONTENEDOR, reason="requiere el contenedor van3twin")
-def test_integracion_p50_rf_s1_escribe_el_json():
+def test_integracion_p50_rf_s2_escribe_el_json():
+    """Con el RF (`.npz` versionado en `ia/modelos/`), la semilla 2 cierra su primera sesión en
+    t = 1 014 s: hasta 1 200 s hay sesiones cerradas. Antes la prueba usaba s1 hasta 900 s, que solo
+    cerraba sesiones porque sin el `.npz` se caía al umbral."""
     from traci.correr_kpis import SALIDAS_KPI, main
 
-    main(["--id", "p50_rf_s1", "--hasta", "900"])
-    datos = json.loads((SALIDAS_KPI / "ejemplo_p50_rf_s1.json").read_text(encoding="utf-8"))
+    main(["--id", "p50_rf_s2", "--hasta", "1200"])
+    datos = json.loads((SALIDAS_KPI / "ejemplo_p50_rf_s2.json").read_text(encoding="utf-8"))
+    assert datos["clasificador_usado"] == "rf"
     kpis = datos["kpis"]
     assert set(CLAVES_RESUMEN) <= set(kpis)
-    assert kpis["n_sesiones"] > 0 and kpis["n_muestras_mapa"] == 15
+    assert kpis["n_sesiones"] > 0 and kpis["n_muestras_mapa"] == 20
     assert kpis["precision_mapa_app"] >= 0.95

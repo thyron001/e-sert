@@ -88,3 +88,16 @@ body.presentacion #leyenda .punto { width: 18px; height: 18px; }
 body.presentacion .halo-espejo .anillo { width: 34px; height: 34px; margin: -17px 0 0 -17px; border-width: 4px; }
 body.presentacion .halo-espejo .nucleo { width: 14px; height: 14px; margin: -7px 0 0 -7px; }
 body.presentacion .halo-espejo .etiqueta { font-size: 15px; left: 22px; top: -14px; }
+
+/* Control de la simulación en el servidor (control_demo.js) */
+.control-demo { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 8px; padding: 4px 10px 8px; margin-bottom: 10px; }
+.control-demo h2 { margin-top: 6px !important; }
+.demo-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 6px 0; }
+.demo-params label { font-size: .85em; color: var(--suave); }
+.control-demo input, .control-demo select { font: inherit; padding: 4px 6px; border: 1px solid var(--borde); border-radius: 6px; background: var(--fondo); color: var(--texto); }
+.control-demo input { flex: 1; min-width: 0; }
+.control-demo button { font: inherit; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--tyrone); background: var(--tyrone); color: #fff; cursor: pointer; }
+.control-demo button.secundario { background: transparent; color: var(--tyrone); }
+.control-demo button:disabled { opacity: .45; cursor: default; }
+.control-demo .nota { margin: 2px 0; }
+body.presentacion .control-demo { display: none; }

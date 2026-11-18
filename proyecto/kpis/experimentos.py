@@ -34,7 +34,7 @@ AQUI = Path(__file__).resolve().parent
 CODIGO = AQUI.parent
 sys.path.insert(0, str(CODIGO))
 
-from kpis.correr_una import COLUMNAS, id_corrida, nombre_escenario, raiz_repo, sha256_archivo  # noqa: E402
+from kpis.correr_una import COLUMNAS, id_corrida, nombre_escenario, raiz_repo, ruta_modelo, sha256_archivo  # noqa: E402
 
 RAPIDA = {"duracion_s": 600, "warmup_s": 120, "ids": ["p00_umbral_s1", "p50_rf_s1"]}
 
@@ -81,9 +81,9 @@ def hashes_entradas(matriz: dict) -> dict:
     h = {"red": sha256_archivo(sumo / "red" / "centro.net.xml"),
          "parqueos": sha256_archivo(sumo / "parqueos" / "parqueos.add.xml")}
     for clave in ("modelo_rf", "modelo_rf_joblib"):
-        if matriz.get(clave) and (CODIGO / matriz[clave]).exists():
-            h[clave] = sha256_archivo(CODIGO / matriz[clave])
-    info = CODIGO / "kpis" / "externo" / "rf_final.plano.json"
+        if matriz.get(clave) and ruta_modelo(CODIGO, matriz[clave]).exists():
+            h[clave] = sha256_archivo(ruta_modelo(CODIGO, matriz[clave]))
+    info = ruta_modelo(CODIGO, "kpis/externo/rf_final.plano.json")
     if "modelo_rf_joblib" not in h and info.exists():
         h["modelo_rf_joblib"] = json.loads(info.read_text())["joblib_sha256"]
     return h

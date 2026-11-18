@@ -46,6 +46,7 @@ export class Presentacion {
 
   tecla(ev) {
     if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    if (ev.target && ["INPUT", "TEXTAREA", "SELECT"].includes(ev.target.tagName)) return;  // p. ej. la clave de la demo
     const k = ev.key.toLowerCase();
     if (k === "p") this.activa ? this.salir() : this.entrar(true);
     else if (k === "e") this.alternarSeguir();

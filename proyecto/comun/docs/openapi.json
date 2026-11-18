@@ -1661,6 +1661,294 @@
         }
       }
     },
+    "/api/v1/demo/estado": {
+      "get": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Estado de la simulación de la demo",
+        "operationId": "estado_api_v1_demo_estado_get",
+        "responses": {
+          "200": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": false,
+                  "fase": "inactiva",
+                  "ultimas_lineas": []
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/iniciar": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Arranca la simulación (🔑)",
+        "operationId": "iniciar_api_v1_demo_iniciar_post",
+        "parameters": [
+          {
+            "name": "x-clave-demo",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clave de la demo (ESERT_CLAVE_DEMO)",
+              "title": "X-Clave-Demo"
+            },
+            "description": "Clave de la demo (ESERT_CLAVE_DEMO)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ParametrosDemo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Params"
+              },
+              "examples": {
+                "demo": {
+                  "summary": "La demo de la exposición, en vivo",
+                  "value": {
+                    "penetracion": 50,
+                    "ritmo": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": true,
+                  "fase": "corriendo",
+                  "escenario": {
+                    "id": "p50_rf_s2",
+                    "penetracion": 50,
+                    "semilla": 2,
+                    "ritmo": 2.0,
+                    "hasta_s": 3600,
+                    "clasificador": "rf"
+                  },
+                  "inicio": "2026-11-18T00:13:59Z",
+                  "ultimas_lineas": [
+                    "Simulation version 1.12.0 started with time: 0.00"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "CLAVE_DEMO_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "CLAVE_DEMO_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_EN_CURSO": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_EN_CURSO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/demo/detener": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Detiene la simulación (🔑)",
+        "operationId": "detener_api_v1_demo_detener_post",
+        "parameters": [
+          {
+            "name": "x-clave-demo",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clave de la demo (ESERT_CLAVE_DEMO)",
+              "title": "X-Clave-Demo"
+            },
+            "description": "Clave de la demo (ESERT_CLAVE_DEMO)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de la simulación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoDemo"
+                },
+                "example": {
+                  "disponible": true,
+                  "corriendo": false,
+                  "fase": "inactiva",
+                  "ultimas_lineas": []
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "CLAVE_DEMO_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "CLAVE_DEMO_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/salud": {
       "get": {
         "tags": [
@@ -2066,6 +2354,9 @@
           "SESION_YA_CERRADA",
           "TRANSICION_INVALIDA",
           "RECARGA_MINIMA",
+          "CLAVE_DEMO_INVALIDA",
+          "DEMO_EN_CURSO",
+          "DEMO_NO_DISPONIBLE",
           "ERROR_INTERNO"
         ],
         "title": "CodigoError",
@@ -2339,6 +2630,44 @@
         "title": "DetalleEspejo",
         "description": "Lo que el controlador sabe de un vehículo seguido (bloque interno `espejo.detalle`)."
       },
+      "EscenarioDemo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "penetracion": {
+            "type": "integer",
+            "title": "Penetracion"
+          },
+          "semilla": {
+            "type": "integer",
+            "title": "Semilla"
+          },
+          "ritmo": {
+            "type": "number",
+            "title": "Ritmo"
+          },
+          "hasta_s": {
+            "type": "integer",
+            "title": "Hasta S"
+          },
+          "clasificador": {
+            "type": "string",
+            "title": "Clasificador"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "penetracion",
+          "semilla",
+          "ritmo",
+          "hasta_s",
+          "clasificador"
+        ],
+        "title": "EscenarioDemo"
+      },
       "EstadoActualSesion": {
         "properties": {
           "sesion_id": {
@@ -2359,6 +2688,99 @@
         ],
         "title": "EstadoActualSesion",
         "description": "Respuesta de `POST /sesiones/{id}/transicion`."
+      },
+      "EstadoDemo": {
+        "properties": {
+          "disponible": {
+            "type": "boolean",
+            "title": "Disponible",
+            "description": "El servidor puede correr SUMO y tiene la clave configurada"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo",
+            "description": "Por qué no está disponible"
+          },
+          "corriendo": {
+            "type": "boolean",
+            "title": "Corriendo"
+          },
+          "fase": {
+            "type": "string",
+            "enum": [
+              "inactiva",
+              "preparando",
+              "corriendo",
+              "deteniendo"
+            ],
+            "title": "Fase"
+          },
+          "escenario": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscenarioDemo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inicio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inicio"
+          },
+          "fin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fin"
+          },
+          "codigo_salida": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codigo Salida"
+          },
+          "ultimas_lineas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ultimas Lineas",
+            "description": "Final del log de la corrida"
+          }
+        },
+        "type": "object",
+        "required": [
+          "disponible",
+          "corriendo",
+          "fase"
+        ],
+        "title": "EstadoDemo"
       },
       "EstadoSesion": {
         "type": "string",
@@ -2856,6 +3278,56 @@
           "modo"
         ],
         "title": "PagoPreparado"
+      },
+      "ParametrosDemo": {
+        "properties": {
+          "penetracion": {
+            "type": "integer",
+            "enum": [
+              20,
+              50,
+              80
+            ],
+            "title": "Penetracion",
+            "description": "% de vehículos con app",
+            "default": 50
+          },
+          "semilla": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Semilla",
+            "default": 2
+          },
+          "ritmo": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.5,
+            "title": "Ritmo",
+            "description": "Veces el tiempo real (1 = en vivo)",
+            "default": 2.0
+          },
+          "hasta_s": {
+            "type": "integer",
+            "maximum": 4500.0,
+            "minimum": 300.0,
+            "title": "Hasta S",
+            "description": "Segundo de simulación final",
+            "default": 3600
+          },
+          "clasificador": {
+            "type": "string",
+            "enum": [
+              "rf",
+              "umbral"
+            ],
+            "title": "Clasificador",
+            "default": "rf"
+          }
+        },
+        "type": "object",
+        "title": "ParametrosDemo",
+        "description": "Escenario de la demo. Por defecto, el de `demo/config_demo.yaml` (`p50_rf_s2`, ritmo 2)."
       },
       "PasoSimulacion": {
         "properties": {
@@ -3836,6 +4308,10 @@
     {
       "name": "espejo",
       "description": "Modo espejo: el teléfono sigue a un auto simulado."
+    },
+    {
+      "name": "demo",
+      "description": "Arranque y parada de la simulación de la demo en el servidor (🔑 clave)."
     }
   ]
 }

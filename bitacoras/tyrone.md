@@ -877,3 +877,35 @@ Sin verificador independiente: no es una sesión del plan.
 **Pendientes:**
 - Tag `v1.0` puesto en `main` con la confirmación de Tyrone.
 - Corregir el comando de B2.4 en `sesion-laptop.md` (`/ws/estado` en vez de `GET /puestos`) o hacer que `GET /puestos` también sume el mapa del controlador.
+
+## 2026-11-18 · Todo en el VPS: SUMO, demo con botón, sumo-gui en el navegador y van3twin propio
+**Estado:** hecho.
+**Qué hice:**
+- **Imagen única con SUMO** (`proyecto/backend/Dockerfile`): Ubuntu 22.04 con SUMO 1.12 y Python 3.10, igual que `van3twin`, más `libsumo`/`traci`/`sumolib` 1.12.0 de PyPI. Tiene tres etapas: `base`, `dev` (contenedor `van3twin` del VPS, con Node 20, cliente de Docker y `/opt/ia311` con Python 3.11 para `ia`) y la final (app `api`).
+- **Demo con botón:** `backend/simulador/` (`GestorSimulacion` + `/api/v1/demo/{estado,iniciar,detener}` con `X-Clave-Demo`). El backend lanza `kpis.correr_una` como subproceso, que publica en `127.0.0.1:8000`. Una corrida a la vez; la parada es SIGINT al grupo y SIGKILL a los 15 s. En el visor, la sección «Simulación en el servidor» (`visor/js/control_demo.js`). Códigos nuevos: `CLAVE_DEMO_INVALIDA` 401, `DEMO_EN_CURSO` 409 y `DEMO_NO_DISPONIBLE` 503 (en Python, TS y la app).
+- **sumo-gui en `https://sumo.tesisucuenca.com`:** `backend/arranque.sh` levanta Xvfb :99, fluxbox (ventanas maximizadas), x11vnc (solo localhost, solo ver, con contraseña) y noVNC en :6080. La demo abre `sumo-gui` ahí, con la cámara en la zona SERT (`sumo/demanda/vista_vps.xml`). Dominio añadido a la app `api` de Dokploy (puerto 6080, Let's Encrypt).
+- **Secretos nuevos en Dokploy:** `ESERT_CLAVE_DEMO` y `ESERT_CLAVE_VNC`, generados al azar. Copias en `/root/.esert_clave_demo` y `/root/.esert_clave_vnc` (600). Nunca se imprimieron.
+- **VPS:** swap de 2 GiB (`/swapfile`, swappiness 10). Repo de trabajo en `/root/van3twin-docker/results/e-sert`. Contenedor `van3twin` creado con `herramientas/van3twin_vps.sh` (1,5 GiB, 0,9 CPU, monta `docker.sock` y `host.docker.internal=127.0.0.1` para las e2e). Demanda de las semillas 1–5 generada.
+- **Arreglos que salieron al correr todo en el VPS:**
+  - `esquemas.ts` no tenía `PasoSimulacion.puestos` (v1.4): 2 fallos en `comun`;
+  - `kpis` buscaba el RF solo en `kpis/externo/` (no versionado): ahora usa `ia/modelos/` (`ruta_modelo`);
+  - la prueba de integración de `traci` esperaba sesiones cerradas en `p50_rf_s1` a 900 s, que solo ocurrían porque caía al umbral. Ahora usa `p50_rf_s2` hasta 1 200 s con RF (1 cerrada, 96 abiertas);
+  - la e2e de simulación completa tenía 240 s de límite (laptop); en el VPS tarda ~250 s. Ahora es 600 s (`ESERT_E2E_TIMEOUT_S`);
+  - los atajos del visor (P, E, T) se activaban al escribir en el campo de la clave.
+- **Documentación:** `CLAUDE.md` (todo corre en el VPS), `docs/DESPLIEGUE.md` (arquitectura nueva) y `docs/CONTRATO.md` (`/demo/*`).
+**Mediciones:**
+- 900 s simulados de `p50_rf_s2` sin GUI: 44 s y 352 MiB de pico.
+- Demo sin GUI a ritmo 5: 34 % de CPU y 390 MiB. Con `sumo-gui` a ritmo 2: 46 % de CPU y ~600 MiB.
+- Imagen: 1,55 GB.
+**Pruebas (en `van3twin` del VPS):**
+- Unitarias: comun 169, backend 259 (+11 de la demo), visor 11 + 12 JS, kpis 29, ia 156 (Python 3.11) y traci 91.
+- e2e: backend 11/11 y traci 21/21.
+- Contrato: sin diferencias; la app coincide con `comun` (`verificar_contrato.mjs`).
+- Ciclo completo con la imagen real: iniciar, autos en `/ws/estado` (t_sim 503, 73 vehículos, 15 ocupados), detener (sin procesos de SUMO vivos) y una corrida corta que termina sola (código 0). También `sumo-gui` capturado en la pantalla virtual.
+**Problemas encontrados:**
+- El paquete de Ubuntu no trae `libsumo`; se instaló el wheel 1.12.0 (con `traci` y `sumolib` 1.12.0, si no, choca).
+- `scikit-learn==1.9.1` no existe para Python 3.10: `ia` usa `/opt/ia311`.
+- Los puestos no son los reales del SERT: se generan por tipo de vía (610 áreas, 6 194 plazas, frente a ~1 424 plazas reales en el Centro Histórico según la prensa).
+**Pendientes:**
+- Pruebas `jest`/`tsc` de la app (falta `npm install` en `proyecto/app`).
+- Restringir los puestos a las calles SERT reales si se consigue la lista oficial.

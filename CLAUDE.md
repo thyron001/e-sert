@@ -7,7 +7,7 @@ Universidad de Cuenca), construida con SUMO, TraCI y un clasificador de movimien
 
 El trabajo en equipo terminó con la unificación final. Desde ahora:
 
-- **Una sola persona (Tyrone), una sola computadora y una sola sesión de Claude Code.**
+- **Una sola persona (Tyrone), una sola computadora (el VPS) y una sola sesión de Claude Code.**
 - **Una sola rama: `main`.** Se trabaja, se hace commit y se hace push directamente en `main`.
   No se crean ramas por persona, por semana ni por sesión, y no hay unificaciones.
 - **Se edita directamente en `proyecto/`.** Ya no existe la regla de copia por semana
@@ -63,74 +63,69 @@ módulo.
    `proyecto/ia/modelos/`, comprueba que `https://demo.e-sert.tesisucuenca.com/salud`
    responde `{"ok":true,...}`.
 
-## SUMO en el contenedor `van3twin`
+## Todo corre en el VPS (desde el 2026-11-18)
 
-Se usa el **SUMO del contenedor `van3twin`** (stack `van3twin-docker` de la
-materia), no un SUMO instalado en la computadora. El contenedor comparte con la computadora
-una sola carpeta: `results/`.
+La única computadora es el **VPS** (Dokploy, 1 vCPU, 3,8 GiB de RAM + 2 GiB de swap). Claude
+Code trabaja ahí, y ahí corren el backend, el visor, SUMO, las pruebas y los experimentos.
 
-| En la computadora | Dentro del contenedor |
+| Qué | Dónde |
 |---|---|
-| `<ruta>/van3twin-docker/results/` | `/home/vanet/results/` |
-| `<ruta>/van3twin-docker/results/e-sert/` (este repo) | `/home/vanet/results/e-sert/` |
+| Repo (clon de trabajo) | `/root/van3twin-docker/results/e-sert` |
+| SUMO para desarrollo, pruebas y experimentos | contenedor `van3twin` del VPS |
+| Demo en línea (backend + visor + SUMO) | app `api` de Dokploy, `https://demo.e-sert.tesisucuenca.com` |
+| Clave del botón de la demo | `/root/.esert_clave_demo` (no la imprimas) |
+| `sumo-gui` de la demo en el navegador | `https://sumo.tesisucuenca.com` (contraseña en `/root/.esert_clave_vnc`) |
 
-Por eso **el repo se clona dentro de `results/`**, en la misma computadora que tiene el
-contenedor (ver el README). Si `git rev-parse --show-toplevel` no termina en
-`/results/e-sert`, avisa al usuario antes de correr nada de SUMO: el contenedor no verá los
-archivos.
+### Contenedor `van3twin` del VPS
 
-Reparto del trabajo:
+Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
+(`SUMO_HOME=/usr/share/sumo`), **Python 3.10** y la carpeta `results/` montada en
+`/home/vanet/results/`. Además trae **Node 20** y todas las dependencias del proyecto
+(`proyecto/backend/requirements-*.txt`). Lo crea `herramientas/van3twin_vps.sh`, con la etapa
+`dev` de `proyecto/backend/Dockerfile`. Si cambian las dependencias, vuelve a correr ese script.
 
-- **En la computadora** (donde corre Claude Code): `git`, edición de archivos, backend, app,
-  IA y todo lo que no use SUMO.
-- **Dentro del contenedor**: todo lo que use SUMO, es decir `sumo`, `sumo-gui`, `netconvert`,
-  `polyconvert`, `duarouter`, `randomTrips.py` y cualquier script de Python que importe
-  `traci` o `sumolib`, o que lance SUMO. Se ejecuta así, desde la raíz del repo y con
-  rutas relativas:
+| En el VPS | Dentro del contenedor |
+|---|---|
+| `/root/van3twin-docker/results/` | `/home/vanet/results/` |
+| `/root/van3twin-docker/results/e-sert/` (este repo) | `/home/vanet/results/e-sert/` |
+
+- **Todo lo que sea Python o Node del proyecto se ejecuta dentro del contenedor** (el VPS no
+  tiene los paquetes del proyecto): SUMO, `netconvert`, `duarouter`, scripts con `traci` o
+  `sumolib`, `pytest`, `node --test`, gráficas, experimentos. Desde la raíz del repo y con rutas
+  relativas:
 
   ```bash
   docker exec -w /home/vanet/results/e-sert/<carpeta-relativa> van3twin bash -lc "<comando>"
   ```
 
-  Por ejemplo:
-  `docker exec -w /home/vanet/results/e-sert/proyecto/sumo/red van3twin bash -lc "python3 construir_red.py"`.
-  Las corridas largas van en segundo plano.
-- Si `docker ps` no muestra `van3twin`, pide al usuario que lo arranque
-  (`docker compose up -d van3twin` en su carpeta `van3twin-docker`). No instales SUMO en la
-  computadora como alternativa.
-
-Lo que trae el contenedor (y obliga a adaptarse):
-
-- **SUMO 1.12** con `SUMO_HOME=/usr/share/sumo`. `traci` y `sumolib` no están en el
-  `sys.path` de Python: los scripts añaden `os.path.join(os.environ["SUMO_HOME"], "tools")`
-  antes de importarlos. Si un prompt pide algo que no existe en 1.12, adáptalo con la
-  alternativa equivalente y anótalo en la bitácora.
-- **Python 3.10** con `numpy`, `matplotlib` y `lxml`. El código que corre en el
-  contenedor debe ser compatible con 3.10, también el que el controlador importa
-  directamente (por ejemplo `backend/nucleo/` en los experimentos). Las dependencias que falten (`pyproj`,
-  `requests`, `pandas`, `pyyaml`, `pydantic`…) se instalan en el contenedor con
-  `docker exec van3twin pip3 install --user -r <ruta-relativa>/requirements.txt`. No hay
-  `venv` (falta `ensurepip`). Si el contenedor se recrea, hay que reinstalarlas.
-- **`sumo-gui`** usa la pantalla virtual `:99` del contenedor. El usuario la ve con un
-  cliente VNC en `127.0.0.1:5901`. `traci.gui.screenshot` y `--screenshot` funcionan
-  aunque nadie la esté mirando, así que úsalos para las evidencias.
-- **Red:** el contenedor publica los puertos 8080 (todas las interfaces), 8090 (solo local)
-  y 5901 (VNC). El puerto de TraCI es interno: el controlador TraCI corre en el contenedor,
-  junto a SUMO. Si algo del contenedor necesita el backend de la computadora, el backend
-  escucha en `0.0.0.0` y, desde el contenedor, la computadora es
-  `host.docker.internal` (Docker Desktop en Windows o macOS) o la puerta de enlace
-  (Linux):
-  `HOST=$(getent hosts host.docker.internal | awk '{print $1}'); HOST=${HOST:-$(ip route | awk '/default/{print $3}')}`.
-- Los archivos que escribe el contenedor pertenecen al usuario `vanet` (uid 1000). Si en la
-  computadora `id -u` no es 1000 y aparecen errores de permisos, avisa al usuario.
+  Por ejemplo, las pruebas del backend:
+  `docker exec -w /home/vanet/results/e-sert/proyecto van3twin bash -lc "python3 -m pytest -q backend"`.
+- `git` y la edición de archivos se hacen en el VPS (fuera del contenedor).
+- Si `docker ps` no muestra `van3twin`: `herramientas/van3twin_vps.sh`.
+- **No hay `sumo-gui` ni VNC**: usa `--sin-gui` en `demo.py`. Para ver la simulación, el visor;
+  para evidencias, gráficas con matplotlib. `libsumo` sí está (wheel 1.12.0 de PyPI), así que
+  `--libsumo` y `libsumo: true` funcionan como en el `van3twin` de la materia.
+- **Recursos:** el contenedor está limitado a 1,5 GiB y 0,9 CPU, y el VPS comparte la CPU con
+  otras apps (tesis, n8n…). Las corridas largas van en segundo plano y los experimentos con
+  `--procesos 1`. No lances experimentos mientras corre la demo en línea.
+- El código que corre con SUMO debe ser compatible con Python 3.10. Los archivos que escribe
+  el contenedor son de `root`.
 - Las salidas de SUMO van en carpetas `sumo/salidas/` (ignoradas por git) y nunca se suben.
+
+### Demo en línea
+
+- Se arranca y se detiene desde el visor (sección «Simulación en el servidor»), o con
+  `POST /api/v1/demo/iniciar` y `/detener` con la cabecera `X-Clave-Demo`
+  (`backend/simulador/`). SUMO corre dentro del contenedor de la app `api` y publica en el
+  propio backend. Su `sumo-gui` se ve (solo ver) en `https://sumo.tesisucuenca.com`, por noVNC.
+  Detalles en `docs/DESPLIEGUE.md`.
+- La app `api` se construye con `proyecto/backend/Dockerfile` (Ubuntu 22.04 + SUMO). Un push a
+  `main` la redespliega y corta una simulación en curso.
 
 ## Entorno
 
-- En la computadora, Python 3.11 o superior con un entorno virtual por módulo
-  (`proyecto/<modulo>/.venv`, que está en `.gitignore`). Lo que corre en el contenedor usa su
-  Python 3.10 (ver arriba).
-- Las dependencias van en `requirements.txt` dentro de cada módulo.
-- SUMO: el del contenedor `van3twin` (1.12), según la sección anterior.
-- App: Node 20 LTS y Expo SDK estable, probada con Expo Go.
-- Los scripts deben funcionar en Windows y en Linux. Usa `pathlib` y nunca rutas absolutas.
+- Python 3.10 y Node 20 del contenedor `van3twin` para todo el proyecto.
+- Las dependencias van en `requirements.txt` dentro de cada módulo; las de la imagen, en
+  `proyecto/backend/requirements-servidor.txt`, `-sim.txt` y `-dev.txt`.
+- App: Expo SDK estable, probada con Expo Go (`EXPO_PUBLIC_API_URL` apuntando al VPS).
+- Usa `pathlib` y nunca rutas absolutas en el código.

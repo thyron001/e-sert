@@ -51,7 +51,9 @@ MAX_SEGUIDOS = 6
 # que llegan a CERRADA dentro de la corrida. Con el umbral las sesiones se cerraban (en falso) enseguida.
 MAX_POR_CERRAR = 4
 ESTADOS_POR_CERRAR = {e.EstadoSesion.REGRESANDO, e.EstadoSesion.SALIENDO}
-TIMEOUT_CORRIDA_S = 240
+# En la laptop bastaban 240 s; en el VPS (van3twin con 0,9 de 1 vCPU) 1 800 s simulados tardan
+# unos 300 s. Se puede ajustar con ESERT_E2E_TIMEOUT_S.
+TIMEOUT_CORRIDA_S = float(os.environ.get("ESERT_E2E_TIMEOUT_S", "600"))
 
 
 class Seguidor(threading.Thread):

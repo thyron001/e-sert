@@ -30,6 +30,9 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 | POST | `/pagos/preparar` | 201 | PedidoPago | PagoPreparado |
 | GET | `/pagos/{client_transaction_id}` | 200 | — | Intencion |
 | POST | `/asistente/interpretar` | 200 | PedidoInterpretar | RespuestaInterpretar |
+| GET | `/demo/estado` | 200 | — | EstadoDemo |
+| POST | 🔒 `/demo/iniciar` | 202 | ParametrosDemo | EstadoDemo |
+| POST | 🔒 `/demo/detener` | 200 | — | EstadoDemo |
 
 ## `GET /api/v1/salud`
 
@@ -818,6 +821,74 @@ Respuesta `200`: `RespuestaInterpretar`
 | `avisos` | [texto] | no |
 
 Otros códigos: `422`
+
+## `GET /api/v1/demo/estado`
+
+**Estado de la simulación de la demo.** 
+
+Respuesta `200`: `EstadoDemo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `disponible` | bool | sí |
+| `motivo` | texto \| null | no |
+| `corriendo` | bool | sí |
+| `fase` | "inactiva" \| "preparando" \| "corriendo" \| "deteniendo" | sí |
+| `escenario` | EscenarioDemo \| null | no |
+| `inicio` | texto \| null | no |
+| `fin` | texto \| null | no |
+| `codigo_salida` | entero \| null | no |
+| `ultimas_lineas` | [texto] | no |
+
+## 🔒 `POST /api/v1/demo/iniciar`
+
+**Arranca la simulación (🔑).** 
+
+Cuerpo: `ParametrosDemo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `penetracion` | "20" \| "50" \| "80" | no |
+| `semilla` | entero | no |
+| `ritmo` | número | no |
+| `hasta_s` | entero | no |
+| `clasificador` | "rf" \| "umbral" | no |
+
+Respuesta `202`: `EstadoDemo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `disponible` | bool | sí |
+| `motivo` | texto \| null | no |
+| `corriendo` | bool | sí |
+| `fase` | "inactiva" \| "preparando" \| "corriendo" \| "deteniendo" | sí |
+| `escenario` | EscenarioDemo \| null | no |
+| `inicio` | texto \| null | no |
+| `fin` | texto \| null | no |
+| `codigo_salida` | entero \| null | no |
+| `ultimas_lineas` | [texto] | no |
+
+Otros códigos: `401`, `409`, `422`, `503`
+
+## 🔒 `POST /api/v1/demo/detener`
+
+**Detiene la simulación (🔑).** 
+
+Respuesta `200`: `EstadoDemo`
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `disponible` | bool | sí |
+| `motivo` | texto \| null | no |
+| `corriendo` | bool | sí |
+| `fase` | "inactiva" \| "preparando" \| "corriendo" \| "deteniendo" | sí |
+| `escenario` | EscenarioDemo \| null | no |
+| `inicio` | texto \| null | no |
+| `fin` | texto \| null | no |
+| `codigo_salida` | entero \| null | no |
+| `ultimas_lineas` | [texto] | no |
+
+Otros códigos: `401`, `422`, `503`
 
 ## WebSockets (fuera de OpenAPI)
 

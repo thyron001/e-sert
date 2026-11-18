@@ -57,6 +57,9 @@ export type CodigoError =
   | 'SESION_YA_CERRADA'
   | 'TRANSICION_INVALIDA'
   | 'RECARGA_MINIMA'
+  | 'CLAVE_DEMO_INVALIDA'
+  | 'DEMO_EN_CURSO'
+  | 'DEMO_NO_DISPONIBLE'
   | 'ERROR_INTERNO';
 
 // --- IA (§2) ---
@@ -287,6 +290,8 @@ export interface PasoSimulacion {
   peatones: Peaton[];
   verdad: DatosVerdad;
   espejo?: BloqueEspejo | null;
+  /** v1.4: mapa estimado del controlador; el backend lo suma a `snapshot.puestos`. */
+  puestos?: OcupacionPuesto[] | null;
 }
 
 export interface RespuestaSnapshot {

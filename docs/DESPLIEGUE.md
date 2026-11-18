@@ -28,27 +28,49 @@ local, nunca en el repo.
    puestos y el auto que sigue el teléfono espejo, resaltado. Con un QR (solo un enlace
    abreviado) el profesor lo abre en su celular sin escribir la URL.
 
-## Arquitectura de la demo
+## Arquitectura de la demo (desde el 2026-11-18: todo en el VPS)
 
 ```
- Laptop (SUMO + sumo-gui + controlador TraCI)          VPS (Dokploy, HTTPS con Traefik)
- ───────────────────────────────────────────           ─────────────────────────────────
- traci/controlador.py --publicar https://demo...  ──►  POST /api/v1/interno/snapshot   (token)
-                                                       FastAPI + núcleo + SQLite (volumen)
- Teléfono espejo (Expo Go, quieto en la mano)   ──►    GET /api/v1/espejo/candidatos
-                                                ◄──    WS /ws/espejo/{veh_id} (guiado, sesión, costo)
- Proyector / cualquier navegador                ◄──    GET /visor  +  WS /ws/estado
- Payphone (modo de pruebas)                     ──►    GET /api/v1/pagos/retorno
+ VPS (Dokploy, HTTPS con Traefik) · contenedor de la app `api` (Ubuntu 22.04, SUMO 1.12, Python 3.10)
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+ Visor: botón «Iniciar» (X-Clave-Demo)  ──►  POST /api/v1/demo/iniciar
+                                             └─ subproceso: python3 -m kpis.correr_una (SUMO por TraCI),
+                                                publica en http://127.0.0.1:8000 con el token
+                                             FastAPI + núcleo + SQLite (volumen /data)
+ Teléfono espejo (Expo Go)              ──►  GET /api/v1/espejo/candidatos
+                                        ◄──  WS /ws/espejo/{veh_id} (guiado, sesión, costo)
+ Proyector / cualquier navegador        ◄──  GET /visor  +  WS /ws/estado
+ Payphone (modo de pruebas)             ──►  GET /api/v1/pagos/retorno
 ```
 
-**SUMO no corre en el VPS.** Corre en la laptop de la demo, con `sumo-gui` visible, y publica
-snapshots al backend en línea. El VPS solo sirve la API, el WebSocket y el visor; es liviano.
+- **SUMO corre en el VPS**, dentro del mismo contenedor que el backend. Se arranca y se detiene
+  desde el visor (`https://demo.e-sert.tesisucuenca.com/visor/`, sección «Simulación en el
+  servidor») con la clave `ESERT_CLAVE_DEMO`. En el VPS está en `/root/.esert_clave_demo`
+  (`cat` solo en tu terminal). Sin simulación corriendo, SUMO no gasta CPU ni RAM.
+- **`sumo-gui` en el navegador: `https://sumo.tesisucuenca.com`.** El contenedor levanta una
+  pantalla virtual (Xvfb :99 + fluxbox) y la publica con noVNC en el puerto 6080 (dominio
+  `sumo.tesisucuenca.com` de la app `api`, HTTPS). Cuando la demo corre, `sumo-gui` se abre ahí
+  maximizado y con la cámara en la zona SERT (`sumo/demanda/vista_vps.xml`). Es **solo para ver**
+  (no se puede pausar ni mover la cámara) y pide la contraseña `ESERT_CLAVE_VNC` (8 caracteres;
+  en el VPS está en `/root/.esert_clave_vnc`). Sin esa variable no se levanta la pantalla y la
+  demo corre con `sumo` sin GUI. Todo lo arranca `proyecto/backend/arranque.sh`.
+- **Una corrida a la vez.** Por defecto `p50_rf_s2`, ritmo 2, hasta t = 3 600 s (30 min reales);
+  en el visor se elige el % de usuarios con app y el ritmo. Termina sola o con «Detener».
+- **Consumo medido** (1 vCPU, 3,8 GiB): sin GUI, ~390 MiB y ~34 % de CPU a ritmo 5; con
+  `sumo-gui` a ritmo 2, ~600 MiB y ~46 % de CPU. El VPS tiene 2 GiB de swap (`/swapfile`) como margen.
+- Los logs de cada corrida quedan en `/tmp/esert-demo/` dentro del contenedor (se pierden al
+  redesplegar).
+- **Desarrollo, pruebas y experimentos** también son en el VPS, en el contenedor `van3twin`
+  (ver `CLAUDE.md` y `herramientas/van3twin_vps.sh`). La laptop ya no hace falta.
 
 ## Reglas
 
 - **Variables de entorno** (en Dokploy → Environment, nunca en el repo):
   - `ESERT_DB_URL=sqlite:////data/esert.db` (con el volumen `/data` montado en Dokploy);
-  - `ESERT_TOKEN_SIM` (token largo y aleatorio), que exige `POST /interno/snapshot`;
+  - `ESERT_TOKEN_SIM` (token largo y aleatorio), que exige `POST /interno/snapshot`; el
+    controlador de la demo lo recibe del propio backend;
+  - `ESERT_CLAVE_DEMO`: clave para iniciar y detener la simulación desde el visor;
+  - `ESERT_CLAVE_VNC`: contraseña para ver `sumo-gui` en `sumo.tesisucuenca.com`;
   - `ESERT_CORS_ORIGENES`;
   - `PAYPHONE_TOKEN` y `PAYPHONE_STORE_ID`, en modo de pruebas;
   - `ANTHROPIC_API_KEY`, si se usa el asistente LLM.
@@ -59,8 +81,9 @@ snapshots al backend en línea. El VPS solo sirve la API, el WebSocket y el viso
   - no se guardan datos personales más allá de un `usuario_id` aleatorio y la placa ficticia.
 - **Healthcheck:** `GET /salud` → `{"ok": true, "version": "...", "contrato": 1}`.
 - **Autodeploy On Push** a `main`: cada push a `main` actualiza la demo y el roadmap.
-- **Plan B:** todo debe funcionar también en local (`uvicorn` + visor en `localhost`), por si
-  falla la red en la exposición.
+- **Plan B:** si falla la red en la exposición, se proyecta el video del plan B. La demo local
+  (`./demo/demo.sh --local` en una computadora con `van3twin`) sigue funcionando, pero ya no es
+  la forma de trabajo.
 
 ## Configuración de `esert-demo` (app `api` en Dokploy)
 

@@ -176,6 +176,9 @@ Todo error HTTP (4xx/5xx) tiene este cuerpo:
 | `SESION_YA_CERRADA` | 409 | Transición o cierre sobre una sesión `CERRADA`. |
 | `TRANSICION_INVALIDA` | 409 | La transición pedida no es legal (§3). |
 | `RECARGA_MINIMA` | 422 | `monto` < `recarga_minima_usd`. |
+| `CLAVE_DEMO_INVALIDA` | 401 | `/demo/iniciar` o `/demo/detener` sin `X-Clave-Demo` correcta. |
+| `DEMO_EN_CURSO` | 409 | Ya hay una simulación de la demo corriendo en el servidor. |
+| `DEMO_NO_DISPONIBLE` | 503 | El servidor no tiene SUMO, el código de la simulación o `ESERT_CLAVE_DEMO`. |
 | `ERROR_INTERNO` | 500 | Cualquier otro fallo del servidor. |
 
 Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION` y
@@ -204,9 +207,18 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 | `POST /pagos/preparar` | `{usuario_id, monto, url_app?}` | `201 {client_transaction_id, payment_id, pay_url, modo}` o `422 RECARGA_MINIMA` | `PedidoPago` → `PagoPreparado` |
 | `GET /pagos/{client_transaction_id}` | — | `{client_transaction_id, usuario_id, monto, estado, referencia_payphone, creada, actualizada}` | `Intencion` |
 | `POST /asistente/interpretar` | `{texto}` | `{destino, duracion_min, fuente, confianza, avisos}` | `PedidoInterpretar` → `RespuestaInterpretar` |
+| `GET /demo/estado` | — | `{disponible, motivo, corriendo, fase, escenario, inicio, fin, codigo_salida, ultimas_lineas}` | `EstadoDemo` |
+| 🔒 `POST /demo/iniciar` | `{penetracion?, semilla?, ritmo?, hasta_s?, clasificador?}` (todo opcional) | `202 EstadoDemo`; `409 DEMO_EN_CURSO`; `503 DEMO_NO_DISPONIBLE` | `ParametrosDemo` → `EstadoDemo` |
+| 🔒 `POST /demo/detener` | — | `EstadoDemo` | → `EstadoDemo` |
 
 Detalles:
 
+- **Demo en el servidor (`/demo/*`, 2026-11-18, `backend/simulador/`):** aquí 🔒 no es el token
+  del controlador sino la cabecera `X-Clave-Demo`, igual a
+  `ESERT_CLAVE_DEMO` (si falta, `401 CLAVE_DEMO_INVALIDA`). `iniciar` lanza SUMO y el controlador
+  (`kpis.correr_una`) dentro del contenedor del backend, que publican en el propio backend con
+  `ESERT_TOKEN_SIM`. Una sola corrida a la vez; `detener` equivale a Ctrl+C. Por defecto,
+  `p50_rf_s2` a ritmo 2 hasta t = 3 600 s.
 - **Pagos (`/pagos/*`, v1.4):** `preparar` crea una intención de recarga y devuelve `pay_url`
   (Payphone en modo `pruebas`, o una página `mock` sin credenciales). Al aprobarse, el backend
   acredita la recarga en la billetera con `referencia_payphone`; la app consulta
