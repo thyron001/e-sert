@@ -312,7 +312,7 @@ body.panel #bar{right:calc(var(--panel) + 12px)}
         <tr><td>2</td><td>Lee la ocupación real de los 610 puestos</td><td><code>parkingarea.getVehicleCount</code></td></tr>
         <tr><td>3</td><td>El conductor de la app se baja y camina, y luego vuelve</td><td><code>person.add</code> · <code>appendWalkingStage</code></td></tr>
         <tr><td>4</td><td>GPS del teléfono con ruido (σ 3–15 m) → ventana de 30 s a la IA</td><td><code>vehicle.getPosition</code> · <code>convertGeo</code></td></tr>
-        <tr><td>5</td><td>Guía al puesto libre con la ruta de manejo más corta</td><td><code>findRoute</code> · <code>rerouteParkingArea</code></td></tr>
+        <tr><td>5</td><td>Guía al puesto libre (en vivo: el de ruta de manejo más corta)</td><td><code>findRoute</code> · <code>rerouteParkingArea</code></td></tr>
       </tbody>
     </table>
     <div class="dos" style="grid-template-columns:1fr 1fr;flex:none">
@@ -552,7 +552,7 @@ f_traci:{t:'TraCI, explicado desde cero', h:`
 <p>También usamos <b>libsumo</b>, que es TraCI dentro del mismo proceso, más rápido para los experimentos.</p>`},
 f_bucle:{t:'El bucle del controlador', h:`
 <p>Cada segundo simulado el controlador (<code>traci/correr_kpis.py</code> y sus módulos) hace estos pasos, en este orden.</p>
-<ul><li><b>Ocupación real:</b> cuántos autos hay en cada uno de los 610 puestos.</li><li><b>Peatones:</b> el conductor de la app se baja, camina hasta 200 m y vuelve a su auto.</li><li><b>GPS:</b> la posición del auto o del peatón pasa por un ruido AR(1) de 3 a 15 m, como el de un teléfono en calles estrechas.</li><li><b>IA:</b> cada 5 s, la ventana de 30 s va al Random Forest.</li><li><b>Guía:</b> si el auto busca, se elige el puesto libre y se le desvía.</li></ul>
+<ul><li><b>Ocupación real:</b> cuántos autos hay en cada uno de los 610 puestos.</li><li><b>Peatones:</b> el conductor de la app se baja, camina hasta 200 m y vuelve a su auto.</li><li><b>GPS:</b> la posición del auto o del peatón pasa por un ruido AR(1) de 3 a 15 m, como el de un teléfono en calles estrechas.</li><li><b>IA:</b> cada 5 s, la ventana de 30 s va al Random Forest.</li><li><b>Guía:</b> si el auto busca, se elige el puesto libre y se le desvía. En los experimentos de KPIs es el libre más cercano a su <b>destino</b>; en la app en vivo, que no pregunta destino, el de ruta de manejo más corta desde donde está.</li></ul>
 <h3>La mejora de esta semana</h3><p>Antes se elegía el puesto libre más cercano <b>en línea recta</b>. En el Centro, con calles de un solo sentido, ese puesto puede estar a varias cuadras por ruta y el auto daba vueltas. Ahora se comparan por <b>ruta de manejo</b> los 25 puestos libres más cercanos (y también el carril contrario al arrancar).</p>
 <p>Prueba en SUMO con 300 puntos al azar y 85 % de puestos llenos: de 478 m a 230 m de manejo en media; los casos de más de 500 m bajan de 105 a 18.</p>`},
 f_busqueda:{t:'Cómo leer el gráfico de búsqueda', h:`

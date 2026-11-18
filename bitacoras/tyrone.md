@@ -1037,6 +1037,19 @@ Sin verificador independiente: no es una sesión del plan.
 **Problemas encontrados:**
 - La corrida final de KPIs se hizo con la guía por línea recta, así que la cifra de −17,6 % con ocupación real no incluye la mejora por ruta. El informe lo declara como límite.
 - La captura 3D sin GPU (swiftshader) es lenta; en un navegador normal va fluida.
-**Pendientes:**
-- Crear la etiqueta `v1.0-interciclo`, que cita el informe.
-- Repetir la matriz con la guía por ruta, si hay tiempo.
+**Pendientes:** ninguno (resueltos en la entrada siguiente).
+
+## 2026-11-18 · Visor 3D más legible y cierre de pendientes del interciclo
+**Estado:** hecho.
+**Qué hice:**
+- **Visor 3D:**
+  - calzada de asfalto con línea central amarilla y líneas de carril;
+  - aceras y pasos de cebra de la red de SUMO;
+  - parques con árboles, canchas, río Tomebamba y parqueaderos;
+  - techos de teja;
+  - nombres de calles sin repetirse.
+- **Parque Calderón:** OSM lo trae como `tourism`/`farm` (polyconvert pierde la etiqueta de parque), así que esos tipos cuentan como zona verde. `historic` es el contorno de todo el Centro y no se dibuja.
+- **Matriz con guía por ruta:** no se repite. En los experimentos la guía va al libre más cercano al destino. La elección por ruta es solo de la app en vivo, que no tiene destino. Se corrigió el límite (v) del informe y la explicación de la diapositiva del bucle TraCI.
+- **Etiqueta:** `v1.0-interciclo`, creada en el commit evaluado.
+**Problemas encontrados:** ninguno nuevo.
+**Pendientes:** ninguno.
