@@ -32,6 +32,10 @@ from .controlador import parametro
 PARADA_EXTENDIDA_S = 86400
 ESPERA_CORTA_S = 60
 MIN_DILIGENCIA_S = 60
+# App web: el conductor camina hacia la ubicación que puso al buscar (su destino está cerca).
+DISTANCIA_MIN_WEB_M = 40      # más cerca que esto no se notaría que se bajó: se usa un lugar cercano
+DISTANCIA_MAX_WEB_M = 200     # y nunca más lejos que esto de ese punto
+MAX_CAMINATA_WEB_M = 250      # caminata máxima aceptada hasta el destino (salvo 3× la línea recta)
 MAX_INTENTOS_DESTINO = 20
 TIMEOUT_APARICION_S = 60  # si el peatón no aparece en la red en este tiempo, se libera el auto
 INTERVALO_TRAYECTORIA_S = 10
@@ -60,6 +64,42 @@ def _camino(tr, desde: str, hasta: str) -> Optional[Tuple[List[str], float]]:
     return list(ruta.edges), ruta.travelTime
 
 
+def _camino_web(tr, desde: str, hasta: str) -> Optional[Tuple[List[str], float]]:
+    """Camino a pie del peatón de la app web: primero el router intermodal (camina en ambos sentidos
+    y cruza la calle), y solo si falla, `_camino` (router de vehículos, que respeta el sentido de las
+    aristas y da vueltas a la manzana: 452 m frente a 125 m en un caso medido). Los experimentos
+    siguen usando `_camino`, así que no cambian."""
+    if desde == hasta:
+        return [desde], 0.0
+    try:
+        etapas = tr.simulation.findIntermodalRoute(desde, hasta, modes="")
+    except tr.exceptions.TraCIException:
+        etapas = []
+    aristas: List[str] = []
+    for etapa in etapas:
+        for e in etapa.edges:
+            if not aristas or aristas[-1] != e:
+                aristas.append(e)
+    if aristas and aristas[0] == desde and aristas[-1] == hasta and not any(e.startswith(":") for e in aristas):
+        return aristas, sum(e.travelTime for e in etapas)
+    return _camino(tr, desde, hasta)
+
+
+def aristas_peatonales_cerca(tr, x: float, y: float) -> List[Tuple[str, float]]:
+    """Aristas peatonales (sin cruces internos) alrededor de (x, y), de la más cercana a la más lejana."""
+    vistas, salida = set(), []
+    # los anillos de siempre (hasta 50 m) y otros más amplios: el punto puede caer dentro de una
+    # manzana, donde las aceras más cercanas son senderos sin salida
+    amplios = [(round(r * math.cos(k * math.pi / 6), 1), round(r * math.sin(k * math.pi / 6), 1))
+               for r in (75, 100, 130) for k in range(12)]
+    for dx, dy in DESPLAZAMIENTOS_M + amplios:
+        edge, pos = tr.simulation.convertRoad(x + dx, y + dy, vClass="pedestrian")[:2]
+        if not edge.startswith(":") and edge not in vistas:
+            vistas.add(edge)
+            salida.append((edge, pos))
+    return salida
+
+
 @dataclass
 class _Diligencia:
     """Una diligencia en curso: el peatón de un auto estacionado."""
@@ -69,6 +109,8 @@ class _Diligencia:
     t_inicio: float
     caso: str
     visto: bool = False
+    edge_auto: str = ""      # acera junto al auto: a donde vuelve el peatón web con «Me voy»
+    pos_auto: float = 0.0
 
 
 # Desplazamientos (m) que se prueban alrededor de un punto hasta encontrar una arista peatonal:
@@ -118,6 +160,7 @@ class GestorPeatones:
         self.liberados_sin_aparecer = 0
         self.sin_destino = 0
         self.casos: Counter = Counter()
+        self._volver_pendiente: set = set()   # «Me voy» que esperan a que el peatón salga de un cruce
         self._registrar = registrar_trayectorias
         self.trayectorias: List[Tuple[float, str, float, float, str]] = []
 
@@ -131,6 +174,8 @@ class GestorPeatones:
                 if self.solo_web and tr.vehicle.getParameter(veh, "web") != "1":
                     continue
                 self._llegada(ctrl, veh, t)
+        for veh in list(self._volver_pendiente):
+            self._volver_ya(ctrl, veh)
         self._revisar_regresos(ctrl, t)
         if self._registrar and round(t) % INTERVALO_TRAYECTORIA_S == 0:
             self._muestrear_trayectorias(ctrl, t)
@@ -148,8 +193,19 @@ class GestorPeatones:
         edge_auto, pos_auto = self._punto_peaton(tr, veh, pa)
         ped = f"ped_{veh}"
         tr.person.add(ped, edge_auto, pos_auto)
-        destino = self._destino_con_camino(tr, veh, edge_auto)
         web = tr.vehicle.getParameter(veh, "web") == "1"
+        if web:
+            destino = self._destino_web(tr, veh, edge_auto, pos_auto)
+            if destino is None:
+                # Sin acera cerca de la búsqueda alcanzable sin rodeo largo: se baja y se queda junto
+                # a su auto (nunca un destino al azar lejos). «Me voy» lo devuelve al auto igual.
+                tr.person.appendWaitingStage(ped, PARADA_EXTENDIDA_S, "junto_al_auto")
+                self.activos[veh] = _Diligencia(ped, pa, t, "web_cerca", edge_auto=edge_auto, pos_auto=pos_auto)
+                self.llegadas += 1
+                self.casos["web_cerca"] += 1
+                return
+        else:
+            destino = self._destino_con_camino(tr, veh, edge_auto)
         if web and destino is not None:
             # App web: siempre se baja y camina; espera hasta que el usuario pulse «Me voy» o se
             # acabe el tiempo máximo (orden `volver`), sin casos al azar.
@@ -157,7 +213,7 @@ class GestorPeatones:
             tr.person.appendWalkingStage(ped, ida, pos_dest)
             tr.person.appendWaitingStage(ped, PARADA_EXTENDIDA_S, "diligencia")
             tr.person.appendWalkingStage(ped, vuelta, pos_auto)
-            self.activos[veh] = _Diligencia(ped, pa, t, "web")
+            self.activos[veh] = _Diligencia(ped, pa, t, "web", edge_auto=edge_auto, pos_auto=pos_auto)
             self.llegadas += 1
             self.casos["web"] += 1
             return
@@ -221,6 +277,42 @@ class GestorPeatones:
                 return (arista, ida[0], ida[1], vuelta[0])
         return None
 
+    def _destino_web(self, tr, veh: str, edge_auto: str, pos_auto: float):
+        """Destino del conductor web: la acera junto a la ubicación de su búsqueda (`param destino`
+        = "lat,lon"). Si queda a menos de 40 m del auto, el lugar de `destinos.csv` más cercano a ese
+        punto (a ≤ 200 m), para que se baje y camine un poco. Mismo formato que `_destino_con_camino`.
+        """
+        try:
+            lat, lon = (float(v) for v in texto_traci(tr.vehicle.getParameter(veh, "destino")).split(","))
+        except ValueError:
+            return None
+        x, y = tr.simulation.convertGeo(lon, lat, fromGeo=True)
+        xa, ya = tr.vehicle.getPosition(veh)
+        candidatos = []
+        if math.hypot(x - xa, y - ya) >= DISTANCIA_MIN_WEB_M:
+            candidatos.append((x, y))
+        cercanos = []
+        for nombre, (dlat, dlon, _) in self.destinos.items():
+            dx, dy = tr.simulation.convertGeo(dlon, dlat, fromGeo=True)
+            del_punto, del_auto = math.hypot(dx - x, dy - y), math.hypot(dx - xa, dy - ya)
+            if del_punto <= DISTANCIA_MAX_WEB_M and del_auto >= DISTANCIA_MIN_WEB_M:
+                cercanos.append((del_punto, dx, dy))
+        candidatos += [(dx, dy) for _, dx, dy in sorted(cercanos)[:5]]
+        for cx, cy in candidatos:
+            # la acera más cercana puede ser un sendero suelto, sin conexión: se prueban varias
+            recta = math.hypot(cx - xa, cy - ya)
+            for arista in aristas_peatonales_cerca(tr, cx, cy):
+                ida = _camino_web(tr, edge_auto, arista[0])
+                vuelta = _camino_web(tr, arista[0], edge_auto)
+                if ida is None or vuelta is None:
+                    continue
+                # sin rodeos largos: la red peatonal de SUMO a veces solo conecta dando la vuelta
+                # a varias manzanas (a ~1,3 m/s, `ida[1]` segundos son ~1,3·ida[1] metros)
+                if 1.3 * ida[1] > max(MAX_CAMINATA_WEB_M, 3 * recta):
+                    continue
+                return (arista, ida[0], ida[1], vuelta[0])
+        return None
+
     def _arista_destino(self, tr, nombre: str) -> Optional[Tuple[str, float]]:
         """Arista peatonal del destino (cacheada), o None si no tiene acera cerca."""
         if nombre not in self._aristas:
@@ -245,22 +337,41 @@ class GestorPeatones:
     # ------------------------------------------------------------------ regreso
 
     def volver(self, ctrl, veh: str) -> bool:
-        """El conductor deja la diligencia y vuelve al auto ya (app web: «Me voy»).
+        """El conductor da media vuelta ya y camina al auto (app web: «Me voy» o tiempo máximo).
 
-        Quita la espera pendiente del itinerario del peatón: si está esperando, termina la espera;
-        si va caminando hacia el destino, al llegar da media vuelta. True si había algo que quitar.
+        Desde donde esté (caminando hacia su destino o esperando ahí), se le pone un tramo a pie
+        directo hasta el auto y se quita todo lo demás. Al llegar, `_revisar_regresos` reanuda el
+        auto y `AutosWeb` ya le dio una salida lejana: se va manejando y la IA lo ve salir.
+        Si en este paso cruza una intersección (arista interna), se reintenta en el siguiente.
         """
+        self._volver_pendiente.add(veh)
+        return self._volver_ya(ctrl, veh)
+
+    def _volver_ya(self, ctrl, veh: str) -> bool:
         d = self.activos.get(veh)
         tr = ctrl.traci
         if d is None or d.ped not in tr.person.getIDList():
+            self._volver_pendiente.discard(veh)
             return False
+        actual = tr.person.getRoadID(d.ped)
+        if not actual or actual.startswith(":"):
+            return False  # en un cruce: SUMO no deja empezar una caminata ahí
+        camino = _camino_web(tr, actual, d.edge_auto) if d.edge_auto else None
+        if camino is None:
+            # sin camino directo: al menos se quita la espera (vuelve al terminar la ida)
+            for i in range(tr.person.getRemainingStages(d.ped)):
+                if tr.person.getStage(d.ped, i).type == tr.constants.STAGE_WAITING:
+                    tr.person.removeStage(d.ped, i)
+                    break
+            self._volver_pendiente.discard(veh)
+            return True
         restantes = tr.person.getRemainingStages(d.ped)
-        for i in range(restantes):
-            etapa = tr.person.getStage(d.ped, i)
-            if etapa.type == tr.constants.STAGE_WAITING:
-                tr.person.removeStage(d.ped, i)
-                return True
-        return False
+        tr.person.appendWalkingStage(d.ped, camino[0], d.pos_auto)   # nuevo final: directo al auto
+        for _ in range(restantes - 1):
+            tr.person.removeStage(d.ped, 1)                            # lo que quedaba del itinerario
+        tr.person.removeStage(d.ped, 0)                                # corta la etapa actual: media vuelta
+        self._volver_pendiente.discard(veh)
+        return True
 
     def _revisar_regresos(self, ctrl, t: float) -> None:
         ids = set(ctrl.traci.person.getIDList())

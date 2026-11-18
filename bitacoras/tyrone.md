@@ -973,3 +973,15 @@ Sin verificador independiente: no es una sesión del plan.
 - El punto azul quedaba escondido bajo el lienzo de autos y puestos (z-index 450 frente a 400 de los marcadores de Leaflet). Ahora va en su propia capa.
 - El mapa centraba mal (el auto quedaba bajo la hoja) porque Leaflet no se enteraba de que la hoja inferior crece. Ahora un `ResizeObserver` llama a `invalidateSize()`.
 **Pruebas:** 270 passed (`traci`, backend y `comun` afectados) y visor 11. Recorrido real con teléfono simulado: el botón alterna y centra en el auto y en el peatón, sin errores JS.
+
+## 2026-11-18 · Peatón web: camina hacia su destino y «Me voy» lo devuelve al auto
+**Estado:** hecho.
+**Qué hice:**
+- **Destino:** el conductor web camina hacia la ubicación que puso al buscar (`param destino`), por una acera conectada cerca de ese punto (anillos de hasta 130 m). Si queda a menos de 40 m del auto, usa un lugar de `destinos.csv` a ≤ 200 m. Se descartan los caminos con rodeo largo (más de 250 m o de 3× la línea recta). Si no hay ninguno, se baja y se queda junto a su auto. Antes caía a un destino al azar de toda la zona (hasta 400+ m).
+- **«Me voy»:** media vuelta inmediata. Se añade un tramo a pie directo al auto, se quita el resto del itinerario y se corta la etapa actual (se reintenta si está en un cruce). Al llegar, el auto se reanuda y sale manejando hacia un punto a más de 600 m, y la IA cierra.
+- **Caminos a pie del peatón web** con el router intermodal (camina en ambos sentidos): el de vehículos respeta el sentido de las calles y rodea manzanas (452 m frente a 125 m en un caso). Los experimentos siguen con `_camino`.
+**Mediciones** (ritmo 5, API real):
+- «Me voy» → la distancia al auto baja desde el primer segundo en todos los casos (p. ej. 208 → 201 → 189 m) y la sesión se cierra en 32–56 s.
+- Al caminar, los casos normales terminan a 16–22 m del punto de búsqueda.
+**Problemas encontrados:** en un punto dentro de una manzana, la única acera conectada exigía un rodeo largo; ahora el conductor se queda junto al auto.
+**Pruebas:** 61 passed (peatones, guiado, ritmo, espejo, simulador y web).
