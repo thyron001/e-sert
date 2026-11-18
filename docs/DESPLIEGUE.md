@@ -37,6 +37,18 @@ local, nunca en el repo.
 - `https://e-sert.tesisucuenca.com/app` → app web (QR del visor).
 - `https://demo.e-sert.tesisucuenca.com/…` sigue funcionando igual (backend, `/visor`, `/app`).
 
+## Visor 3D y elección del puesto (2026-11-18)
+
+- El visor abre en **3D** (three.js, `visor/js/vista3d.js`): edificios de OpenStreetMap extruidos (2 o 3
+  pisos), calles, parques, puestos punteados, autos estacionados y en movimiento, y el nombre de cada
+  usuario de la app sobre su auto (clic en el nombre para seguirlo). Los botones 3D/2D de arriba a la
+  derecha cambian al mapa 2D; `?vista=2d` abre en 2D. La escena sale de
+  `sumo/red/exportar_3d.py` → `visor/datos/escena3d.json` (se regenera si cambia la red).
+- La app web elige el puesto libre con la **ruta de manejo más corta** (`traci/autos_web.py`): compara
+  por `findRoute` los 25 libres más cercanos en línea recta y prueba también el carril contrario. Antes
+  tomaba el más cercano en línea recta y en calles de un solo sentido el auto daba vueltas
+  (`informe_ieee/comparar_rutas.py`: de 478 m a 230 m de media).
+
 ## App web (`https://e-sert.tesisucuenca.com/app/`, 2026-11-18)
 
 Pestañas, con la estética de la app Expo anterior (negro y rojo): **Buscar** (mapa y sesión, con la

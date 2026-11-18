@@ -1016,3 +1016,27 @@ Sin verificador independiente: no es una sesión del plan.
 - sumo-gui 1.12 no acepta el esquema «esert» (autos 3,5× más grandes) ni por el archivo de vista ni por TraCI: queda «standard». Los colores se aplican, pero hay que acercarse con la rueda para verlos bien.
 - El GPS del navegador solo funciona con HTTPS (en la prueba local se usó `localhost`).
 **Pendientes:** la app Expo (`proyecto/app`) queda como historia, sin estos cambios.
+
+## 2026-11-18 · Visor 3D, puesto por ruta, presentación e informe IEEE del interciclo
+**Estado:** hecho.
+**Qué hice:**
+- **Dominios:**
+  - el visor se sirve en la raíz de `e-sert.tesisucuenca.com` (`/api` y `/ws` van al backend);
+  - el roadmap pasa a `/roadmap`, con `stripPath`.
+- **Visor 3D** con three.js (`visor/js/vista3d.js`): edificios OSM, calles, puestos, autos y el nombre de cada usuario. Se puede seguir un auto con la cámara, y el mapa 2D queda como respaldo.
+- **Puesto por ruta** (`traci/autos_web.py`): se elige el libre con la ruta de manejo más corta. En 300 puntos, la distancia media baja de 478 m a 230 m, y los casos de más de 500 m bajan de 105 a 18.
+- **Presentación** de 10 min (`presentacion_rvh/`, artefacto de claude.ai):
+  - un color por orador;
+  - diagrama de la app con zoom por etapa;
+  - gráficas de resultados;
+  - panel de explicación y notas.
+- **Informe IEEE** (`informe_ieee/`), de 6 páginas:
+  - estado del arte con seis artículos de 2019 a 2026 verificados en Crossref y su cuadro comparativo;
+  - énfasis en SUMO y TraCI;
+  - resultados frente a la línea base, discusión, replicabilidad y anexo de supuestos.
+**Problemas encontrados:**
+- La corrida final de KPIs se hizo con la guía por línea recta, así que la cifra de −17,6 % con ocupación real no incluye la mejora por ruta. El informe lo declara como límite.
+- La captura 3D sin GPU (swiftshader) es lenta; en un navegador normal va fluida.
+**Pendientes:**
+- Crear la etiqueta `v1.0-interciclo`, que cita el informe.
+- Repetir la matriz con la guía por ruta, si hay tiempo.

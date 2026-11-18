@@ -22,3 +22,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+proyecto/informe_ieee/*.aux
+proyecto/informe_ieee/*.log
+proyecto/informe_ieee/*.bbl
+proyecto/informe_ieee/*.blg
+proyecto/informe_ieee/*.out
