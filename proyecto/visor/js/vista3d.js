@@ -13,12 +13,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 const M_POR_GRADO = 111320;
-const ALTURA_CAMARA_INICIAL = 520;
+const CAMARA_INICIAL = [-190, 270, 300];
 const MAX_ESTACIONADOS = 7000;
 const MAX_MOVIMIENTO = 2500;
 const MAX_PEATONES = 400;
 const COLOR = {
-  cielo: 0xcfe0ee, suelo: 0xd9ddd3, calle: 0x8d949d, verde: 0x9fcb8f,
+  cielo: 0xcfe0ee, suelo: 0xe6e0d2, asfalto: 0x565c66, acera: 0xd3cfc6, parque: 0x86bf6e, cancha: 0x5fae6a,
+  terreno: 0xdde2c4, agua: 0x6fb0dc, parqueadero: 0xc4c8ce, cebra: 0xf5f5f0, centro: 0xf2c230, carril: 0xf5f5f0,
+  tronco: 0x7a5a3c, copa: 0x4a8a3a,
   libre: new THREE.Color("#22a559"), lleno: new THREE.Color("#e04848"), peaton: 0x2563eb, propio: 0xffd60a,
 };
 
@@ -107,14 +109,14 @@ export class Vista3D {
   // ------------------------------------------------------------------ montaje
 
   _montar() {
-    const r = this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.el.appendChild(r.domElement);
     const s = this.scene = new THREE.Scene();
     s.background = new THREE.Color(COLOR.cielo);
     s.fog = new THREE.Fog(COLOR.cielo, 1400, 3200);
     this.camara = new THREE.PerspectiveCamera(45, 1, 2, 6000);
-    this.camara.position.set(-260, ALTURA_CAMARA_INICIAL, 420);
+    this.camara.position.set(...CAMARA_INICIAL);
     const c = this.controles = new OrbitControls(this.camara, r.domElement);
     c.target.set(0, 0, 0);
     c.enableDamping = true;
@@ -122,10 +124,13 @@ export class Vista3D {
     c.minDistance = 25; c.maxDistance = 2600;
     c.screenSpacePanning = false;
     c.addEventListener("start", () => { this.siguiendo = null; });
-    s.add(new THREE.HemisphereLight(0xffffff, 0x8a9099, 1.1));
-    const sol = new THREE.DirectionalLight(0xffffff, 1.4);
-    sol.position.set(-300, 600, 200);
+    s.add(new THREE.HemisphereLight(0xffffff, 0x9a8f80, 1.0));
+    const sol = new THREE.DirectionalLight(0xfff4e0, 1.6);
+    sol.position.set(-350, 520, 260);
     s.add(sol);
+    const relleno = new THREE.DirectionalLight(0xdfe8ff, 0.45);
+    relleno.position.set(300, 200, -300);
+    s.add(relleno);
     const suelo = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000), new THREE.MeshLambertMaterial({ color: COLOR.suelo }));
     suelo.rotation.x = -Math.PI / 2;
     s.add(suelo);
@@ -148,7 +153,7 @@ export class Vista3D {
     this.el.appendChild(this.capaTexto);
     const credito = document.createElement("div");
     credito.className = "credito3d";
-    credito.textContent = "Edificios y calles © OpenStreetMap (red de SUMO) · three.js · arrastra para girar, rueda para acercar";
+    credito.textContent = "Edificios, parques y río © OpenStreetMap · calles de la red de SUMO · arrastra para girar, rueda para acercar";
     this.el.appendChild(credito);
     new ResizeObserver(() => this._tamano()).observe(this.el);
     this._tamano();
@@ -157,31 +162,65 @@ export class Vista3D {
   _escena(d) {
     this.origen = d.origen;
     this.cos0 = Math.cos(this.origen[0] * Math.PI / 180);
-    const edificios = [];
-    // fachadas del Centro Histórico: blancos, cremas y ocres claros
-    const tonos = ["#f4efe6", "#efe2c8", "#e9d3b4", "#f2e8d8", "#e6cfc0", "#ece6dc"].map((c) => new THREE.Color(c));
-    d.edificios.forEach((e, i) => {
-      const forma = new THREE.Shape(e.p.map(([x, y]) => new THREE.Vector2(x, y)));
-      const g = new THREE.ExtrudeGeometry(forma, { depth: e.h, bevelEnabled: false });
-      g.rotateX(-Math.PI / 2);
-      g.deleteAttribute("uv");
-      const c = tonos[i % tonos.length], n = g.attributes.position.count, col = new Float32Array(n * 3);
-      for (let k = 0; k < n; k++) { col[3 * k] = c.r; col[3 * k + 1] = c.g; col[3 * k + 2] = c.b; }
-      g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-      edificios.push(g);
-    });
-    if (edificios.length) {
-      const m = new THREE.Mesh(mergeGeometries(edificios), new THREE.MeshLambertMaterial({ vertexColors: true }));
-      this.scene.add(m);
-    }
-    const verdes = d.verdes.map((p) => {
-      const g = new THREE.ShapeGeometry(new THREE.Shape(p.map(([x, y]) => new THREE.Vector2(x, y))));
-      g.rotateX(-Math.PI / 2); g.translate(0, 0.03, 0); g.deleteAttribute("uv");
+    const s = this.scene;
+    const plano = (color) => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+    const agregar = (geos, mat) => { if (geos.length) s.add(new THREE.Mesh(mergeGeometries(geos), mat)); };
+    const poligonos = (lista, y) => lista.map((p) => {
+      const g = new THREE.ShapeGeometry(new THREE.Shape(p.map(([x, z]) => new THREE.Vector2(x, z))));
+      g.rotateX(-Math.PI / 2); g.translate(0, y, 0); g.deleteAttribute("uv"); g.deleteAttribute("normal");
       return g;
     });
-    if (verdes.length) this.scene.add(new THREE.Mesh(mergeGeometries(verdes), new THREE.MeshLambertMaterial({ color: COLOR.verde })));
-    const calles = d.calles.map((c) => cinta(c.p.map(([x, y]) => [x, -y]), c.w, 0.06));
-    if (calles.length) this.scene.add(new THREE.Mesh(mergeGeometries(calles), new THREE.MeshBasicMaterial({ color: COLOR.calle, side: THREE.DoubleSide })));
+    const linea = (p) => p.map(([x, y]) => [x, -y]);
+    // suelo: terrenos, parqueaderos, parques, canchas y el río
+    agregar(poligonos(d.terrenos || [], 0.02), plano(COLOR.terreno));
+    agregar(poligonos(d.parqueaderos || [], 0.03), plano(COLOR.parqueadero));
+    agregar(poligonos(d.parques || d.verdes || [], 0.04), plano(COLOR.parque));
+    agregar(poligonos(d.canchas || [], 0.05), plano(COLOR.cancha));
+    agregar(poligonos(d.agua || [], 0.05), plano(COLOR.agua));
+    // aceras, calzada, cebras y líneas
+    agregar((d.aceras || []).map((c) => cinta(linea(c.p), c.w, 0.07)), plano(COLOR.acera));
+    agregar(d.calles.map((c) => cinta(linea(c.p), c.w, 0.08)), plano(COLOR.asfalto));
+    const cebras = [];
+    for (const c of d.cruces || []) for (const tramo of punteada(linea(c.p), 0.55, 0.55)) cebras.push(cinta(tramo, c.w * 0.9, 0.1));
+    agregar(cebras, plano(COLOR.cebra));
+    agregar((d.centro || []).map((p) => cinta(linea(p), 0.2, 0.11)), plano(COLOR.centro));
+    const carriles = [];
+    for (const p of d.carriles || []) for (const tramo of punteada(linea(p), 3, 5)) carriles.push(cinta(tramo, 0.15, 0.11));
+    agregar(carriles, plano(COLOR.carril));
+    // edificios: fachadas claras y techos de teja (como en el Centro de Cuenca) o losa
+    const fachadas = ["#f4efe6", "#efe2c8", "#e9d3b4", "#f2e8d8", "#e6cfc0", "#ece6dc"].map((c) => new THREE.Color(c));
+    const tejas = ["#b85c3c", "#a9573a", "#c4704d", "#9e4f35"].map((c) => new THREE.Color(c));
+    const losa = new THREE.Color("#d6d1c8");
+    const edificios = d.edificios.map((e, i) => {
+      const g = new THREE.ExtrudeGeometry(new THREE.Shape(e.p.map(([x, y]) => new THREE.Vector2(x, y))), { depth: e.h, bevelEnabled: false });
+      g.rotateX(-Math.PI / 2);
+      g.deleteAttribute("uv");
+      const n = g.attributes.position.count, nor = g.attributes.normal, col = new Float32Array(n * 3);
+      const muro = fachadas[i % fachadas.length], techo = e.t ? losa : tejas[(i * 7) % tejas.length];
+      for (let k = 0; k < n; k++) {
+        const c = nor.getY(k) > 0.5 ? techo : muro;
+        col[3 * k] = c.r; col[3 * k + 1] = c.g; col[3 * k + 2] = c.b;
+      }
+      g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      return g;
+    });
+    agregar(edificios, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    // árboles de los parques
+    const arboles = d.arboles || [];
+    if (arboles.length) {
+      const tronco = new THREE.CylinderGeometry(0.25, 0.35, 2.4, 6); tronco.translate(0, 1.2, 0);
+      const copa = new THREE.IcosahedronGeometry(2.2, 0); copa.translate(0, 3.8, 0);
+      const mt = new THREE.InstancedMesh(tronco, new THREE.MeshLambertMaterial({ color: COLOR.tronco }), arboles.length);
+      const mc = new THREE.InstancedMesh(copa, new THREE.MeshLambertMaterial({ color: COLOR.copa }), arboles.length);
+      const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), esc = new THREE.Vector3();
+      arboles.forEach(([x, y], i) => {
+        const f = 0.8 + ((i * 37) % 10) / 20;
+        q.setFromEuler(e.set(0, i, 0));
+        m.compose(v.set(x, 0, -y), q, esc.set(f, f, f));
+        mt.setMatrixAt(i, m); mc.setMatrixAt(i, m);
+      });
+      s.add(mt, mc);
+    }
     this._puestos();
   }
 
@@ -354,11 +393,18 @@ export class Vista3D {
       });
       if (!this.divCalles.length) this.divCalles = null;
     }
+    // sin repetir la misma calle a menos de 260 px ni encimar dos nombres a menos de 70 px
+    const puestos = [];
     for (const c of this.divCalles || []) {
       v.set(c.x, 1, c.z).project(this.camara);
-      const visible = cerca && v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05;
+      let visible = cerca && v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05;
+      const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h;
+      if (visible) visible = !puestos.some(([n, x, y]) => Math.hypot(x - px, y - py) < (n === c.div.textContent ? 260 : 70));
       c.div.hidden = !visible;
-      if (visible) c.div.style.transform = `translate(-50%,-50%) translate(${(v.x + 1) / 2 * w}px,${(1 - v.y) / 2 * h}px)`;
+      if (visible) {
+        puestos.push([c.div.textContent, px, py]);
+        c.div.style.transform = `translate(-50%,-50%) translate(${px}px,${py}px)`;
+      }
     }
   }
 
@@ -366,6 +412,6 @@ export class Vista3D {
   encuadrar() {
     this.siguiendo = null;
     this.controles.target.set(0, 0, 0);
-    this.camara.position.set(-260, ALTURA_CAMARA_INICIAL, 420);
+    this.camara.position.set(...CAMARA_INICIAL);
   }
 }
