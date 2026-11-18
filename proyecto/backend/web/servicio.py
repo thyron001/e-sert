@@ -36,7 +36,19 @@ from ..nucleo.db import BaseDatos, PuestoTabla, SesionWeb
 from ..nucleo.errores import ErrorNucleo
 
 C = e.CodigoError
-SALDO_INICIAL_USD = 5.0
+SALDO_INICIAL_USD = 5.0          # usuario anónimo (crear_usuario)
+SALDO_PERFIL_USD = 10.0          # cada perfil fijo empieza con $10
+# Perfiles de la app (pestaña «Usuario»): el equipo y tres invitados. El id es fijo (uuid5 del
+# nombre), así cada perfil conserva su billetera y su historial entre teléfonos y visitas.
+PERFILES = ("Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez",
+            "Invitado 1", "Invitado 2", "Invitado 3")
+
+
+def id_perfil(nombre: str) -> str:
+    return f"app_{uuid.uuid5(uuid.NAMESPACE_URL, 'e-sert:perfil:' + nombre)}"
+
+
+NOMBRES = {id_perfil(n): n for n in PERFILES}
 OPCIONES_MIN = (30, 60, 90, 120)
 ESPERA_ELECCION_S = 300.0       # sin elegir tiempo en 5 min simulados → 30 min
 SIM_VIVA_S = 10.0               # sin pasos en 10 s reales, la simulación está detenida
@@ -175,6 +187,37 @@ class ServicioWeb:
         self.billetera.recargar(usuario, SALDO_INICIAL_USD, referencia_payphone="prueba_web")
         return usuario, SALDO_INICIAL_USD
 
+    def perfiles(self) -> List[dict]:
+        """Los perfiles fijos con su saldo; la primera vez reciben sus $10 iniciales."""
+        salida = []
+        for nombre in PERFILES:
+            usuario = id_perfil(nombre)
+            if not self.billetera.movimientos(usuario):
+                self.billetera.recargar(usuario, SALDO_PERFIL_USD, referencia_payphone="saldo_inicial")
+            salida.append({"usuario_id": usuario, "nombre": nombre,
+                           "saldo": self.billetera.estado(usuario)["saldo"]})
+        return salida
+
+    def historial(self, usuario: str) -> List[dict]:
+        """Sesiones terminadas del usuario, la más reciente primero."""
+        self._exigir_usuario(usuario)
+        with self.bd.transaccion() as s:
+            filas = s.scalars(select(SesionWeb).where(SesionWeb.usuario_id == usuario, SesionWeb.estado == "cerrada")
+                              .order_by(SesionWeb.creada.desc())).all()
+            return [{"id": f.id, "modo": f.modo, "puesto_id": f.puesto_id,
+                     "codigo": self.codigos.get(f.puesto_id) if f.puesto_id else None,
+                     "calle": self.puestos[f.puesto_id].calle if f.puesto_id in self.puestos else None,
+                     "fecha": f.creada.isoformat().replace("+00:00", "Z") if f.creada else None,
+                     "pagado_min": f.pagado_min, "debitado": tar.usd(f.debitado),
+                     "motivo": f.motivo, "mensaje": f.mensaje} for f in filas]
+
+    def activos(self) -> List[dict]:
+        """Autos de la app en la simulación, con el nombre de su usuario (etiquetas del visor)."""
+        with self.bd.transaccion() as s:
+            filas = s.scalars(select(SesionWeb).where(SesionWeb.estado.in_(ABIERTAS))).all()
+            return [{"veh_id": f.veh_id, "usuario_id": f.usuario_id,
+                     "nombre": NOMBRES.get(f.usuario_id, "Invitado"), "estado": f.estado} for f in filas]
+
     def _exigir_usuario(self, usuario: str) -> None:
         if not usuario.startswith("app_"):
             raise ErrorNucleo(C.VALIDACION, "Usuario inválido.")
@@ -310,7 +353,8 @@ class ServicioWeb:
                 datos = {c: getattr(ses, c) for c in ("id", "veh_id", "modo", "estado", "puesto_id", "pagado_min",
                                                        "pagado_hasta", "t_inicio", "t_llegada", "motivo", "mensaje")}
                 datos["debitado"] = tar.usd(ses.debitado)
-        respuesta = {"usuario_id": usuario, "saldo": billetera["saldo"], "t_sim": self.t_sim,
+        respuesta = {"usuario_id": usuario, "nombre": NOMBRES.get(usuario, "Invitado"),
+                     "saldo": billetera["saldo"], "t_sim": self.t_sim,
                      "sim_activa": self.sim_activa(), "sesion": None}
         if datos is None:
             return respuesta

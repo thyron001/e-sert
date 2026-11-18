@@ -7,7 +7,7 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 - Errores: `{"error": {"codigo", "mensaje", "detalle?"}}` (contrato §4.2).
 - Esquema completo: [`openapi.json`](openapi.json). WebSockets: al final.
 
-**Verificación contra `docs/CONTRATO.md` §4.3:** 8 diferencias (ver la salida del script).
+**Verificación contra `docs/CONTRATO.md` §4.3:** 12 diferencias (ver la salida del script).
 
 | Método | Ruta | Éxito | Cuerpo | Respuesta |
 |---|---|---|---|---|

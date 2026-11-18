@@ -205,6 +205,14 @@ export class CapaCalle extends L.Layer {
         ctx.fillStyle = "rgba(255,214,10,0.28)"; ctx.fill();
         ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,214,10,0.9)"; ctx.stroke();
         auto(ctx, q.x, q.y, v.rumbo, Math.max(largo * 1.6, 18), Math.max(ancho * 1.6, 8.5), v.color, "#0f172a", 2);
+        if (v.etiqueta) {  // nombre del usuario de la app (visor)
+          ctx.font = '700 12px system-ui, -apple-system, "Segoe UI", sans-serif';
+          ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+          const y = q.y - radio - 3, w = ctx.measureText(v.etiqueta).width + 10;
+          ctx.fillStyle = "rgba(0,0,0,0.75)";
+          ctx.beginPath(); ctx.roundRect(q.x - w / 2, y - 17, w, 18, 6); ctx.fill();
+          ctx.fillStyle = "#FFD60A"; ctx.fillText(v.etiqueta, q.x, y);
+        }
         continue;
       }
       auto(ctx, q.x, q.y, v.rumbo, largo, ancho, v.color, v.borde || "#0f172a", v.borde ? 2 : 1);

@@ -28,7 +28,26 @@ local, nunca en el repo.
    puestos y el auto que sigue el teléfono espejo, resaltado. Con un QR (solo un enlace
    abreviado) el profesor lo abre en su celular sin escribir la URL.
 
-## App web (`https://demo.e-sert.tesisucuenca.com/app/`, 2026-11-18)
+## Direcciones (desde el 2026-11-18)
+
+- `https://e-sert.tesisucuenca.com/` → **visor** (servicio `visor`); `/api` y `/ws` del mismo dominio
+  van al backend, así el visor funciona en la raíz.
+- `https://e-sert.tesisucuenca.com/roadmap` → roadmap (servicio `Frontend`; Traefik quita el
+  prefijo y Flask genera los enlaces con `ProxyFix`).
+- `https://e-sert.tesisucuenca.com/app` → app web (QR del visor).
+- `https://demo.e-sert.tesisucuenca.com/…` sigue funcionando igual (backend, `/visor`, `/app`).
+
+## App web (`https://e-sert.tesisucuenca.com/app/`, 2026-11-18)
+
+Pestañas, con la estética de la app Expo anterior (negro y rojo): **Buscar** (mapa y sesión, con la
+línea de progreso Buscando → Guiado → Estacionado → A pie → Regresando → Saliendo), **Historial**,
+**Billetera** (saldo, movimientos y «Recargar con Payphone», que vuelve a la app), **Probar IA** (el
+GPS real del teléfono clasificado por el RF cada 5 s) y **Usuario** (los siete perfiles, $10 cada
+uno). Al terminar una sesión la app vuelve a la pantalla inicial; el punto azul y el botón «Mi
+posición» solo aparecen en el puesto. En `sumo-gui` (`traci/colores_gui.py`) los autos de la app van
+en amarillo y resaltados, los que buscan en naranja/violeta/azul, el resto en gris, y los peatones de
+la app en azul.
+
 
 Reemplaza a la app Expo para la demo (la app Expo queda en `proyecto/app/` como historia). El
 visor muestra su QR; quien lo escanea la abre en el navegador del teléfono. Todo es simulado:

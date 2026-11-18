@@ -25,7 +25,9 @@ log = logging.getLogger("esert.pagos")
 PENDIENTE, APROBADO, RECHAZADO = "pendiente", "aprobado", "rechazado"
 URL_APP_POR_DEFECTO = "esert://pagos/retorno"
 # Deep links aceptados para volver a la app: esquema propio o Expo Go (exp:// y exps://).
-PATRON_URL_APP = re.compile(r"^(esert|exps?)://[^\s\"'<>]{1,200}$")
+# Deep links de la app Expo, o la app web en los dominios del proyecto (2026-11-18)
+PATRON_URL_APP = re.compile(r"^((esert|exps?)://[^\s\"'<>]{1,200}"
+                            r"|https://(demo\.)?e-sert\.tesisucuenca\.com/[^\s\"'<>]{0,200})$")
 
 
 class BasePagos(DeclarativeBase):

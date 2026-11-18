@@ -5,6 +5,6 @@
         <background backgroundColor="white" showGrid="0"/>
         <vehicles vehicleMode="0" vehicleQuality="2" vehicle_minSize="1" vehicle_exaggeration="3.5" vehicle_constantSize="0" showBlinker="0"/>
     </scheme>
-    <viewport zoom="130" x="1715" y="1080"/>
+    <viewport zoom="260" x="1715" y="1080"/>
     <delay value="0"/>
 </viewsettings>

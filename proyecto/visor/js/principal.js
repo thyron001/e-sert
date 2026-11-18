@@ -41,6 +41,18 @@ calle.cargar().then(() => pintarOcupacion());
 
 const puestos = new Map();
 const vehiculos = calle.vehiculos;
+// Usuarios de la app web con auto en la simulación: su nombre va encima de su auto.
+const nombresApp = new Map();
+async function cargarNombresApp() {
+  try {
+    const r = await fetch(API_BASE + "/web/activos");
+    if (!r.ok) return;
+    nombresApp.clear();
+    for (const a of await r.json()) nombresApp.set(a.veh_id, a.nombre);
+  } catch { /* sin backend: sin nombres */ }
+}
+cargarNombresApp();
+setInterval(cargarNombresApp, 3000);
 const peatones = calle.peatones;
 
 const panel = new PanelKpis($("tarjetas"), $("nota-base"), params.get("base") || "./datos/base.json");
@@ -129,7 +141,7 @@ function onSnapshot(msg) {
   const seguidos = new Set(msg.espejos || []);
   calle.fijarVehiculos(msg.vehiculos.map((v) => ({
     id: v.id, lat: v.lat, lon: v.lon, color: seguidos.has(v.id) ? COLORES.propio : (COLORES[v.estado] || COLORES.null),
-    borde: v.con_app ? "#0f172a" : null, halo: seguidos.has(v.id),
+    borde: v.con_app ? "#0f172a" : null, halo: seguidos.has(v.id), etiqueta: nombresApp.get(v.id),
   })));
   calle.fijarPeatones(msg.peatones || []);
   for (const p of msg.puestos) {

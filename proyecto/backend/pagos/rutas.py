@@ -66,7 +66,7 @@ class PedidoPago(BaseModel):
     @classmethod
     def _url_app(cls, valor: Optional[str]) -> Optional[str]:
         if valor is not None and not it.PATRON_URL_APP.match(valor):
-            raise ValueError("url_app debe ser un deep link esert://, exp:// o exps://")
+            raise ValueError("url_app debe ser esert://, exp://, exps:// o la app web (https://…e-sert.tesisucuenca.com/)")
         return valor
 
 
@@ -119,8 +119,8 @@ def enlace_app(deep_link: str, user_agent: str) -> str:
     """En Android, ``intent://...#Intent;scheme=<esquema>;end``: Chrome y los navegadores
     basados en Chromium (Brave, Edge) no abren un esquema propio (``exp://``, ``esert://``)
     desde un enlace o un ``location.href``, pero sí un intent. En iOS se deja el deep link."""
-    if "android" not in user_agent.lower() or "://" not in deep_link:
-        return deep_link
+    if "android" not in user_agent.lower() or "://" not in deep_link or deep_link.startswith("https://"):
+        return deep_link  # la app web (https) se abre como cualquier enlace
     esquema, resto = deep_link.split("://", 1)
     return f"intent://{resto}#Intent;scheme={esquema};end"
 

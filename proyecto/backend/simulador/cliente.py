@@ -48,5 +48,14 @@ class ClienteSimulacion:
     def detener(self) -> Estado:
         return self._pedir("POST", "/detener")
 
+    def clasificar(self, muestras: list) -> dict:
+        try:
+            r = self.http.post("/clasificar", json={"muestras": muestras}, headers=self.cabeceras)
+        except httpx.HTTPError as exc:
+            raise LookupError(f"el servicio de simulación no responde ({type(exc).__name__})") from exc
+        if r.status_code >= 400:
+            raise LookupError(f"servicio de simulación: {r.status_code}")
+        return r.json()
+
     def corriendo(self) -> bool:
         return self.estado().corriendo

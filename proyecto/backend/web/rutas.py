@@ -6,7 +6,7 @@ billetera es de prueba y nadie paga dinero real.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Body, Depends, Path, Request
 from pydantic import BaseModel, Field
@@ -109,6 +109,56 @@ def extender(usuario_id: str = USUARIO, cuerpo: Extension = Body(..., openapi_ex
              responses=_resp(200, _EJ_ESTADO, "SESION_NO_EXISTE", "TRANSICION_INVALIDA", "VALIDACION"))
 def me_voy(usuario_id: str = USUARIO, w: ServicioWeb = Depends(web)) -> dict:
     return w.me_voy(usuario_id)
+
+
+@router.get("/perfiles", summary="Perfiles de la app (equipo e invitados) con su saldo",
+            responses=_resp(200, [{"usuario_id": _EJ_ESTADO["usuario_id"], "nombre": "Tyrone Novillo", "saldo": 10.0}]))
+def perfiles(w: ServicioWeb = Depends(web)) -> List[dict]:
+    return w.perfiles()
+
+
+@router.get("/usuarios/{usuario_id}/historial", summary="Sesiones terminadas del usuario",
+            responses=_resp(200, [{"id": "web_1a2b3c4d", "modo": "buscar", "puesto_id": "pa_337277973#1_0",
+                                   "codigo": "123", "calle": "Simón Bolívar", "fecha": "2026-11-18T03:00:00Z",
+                                   "pagado_min": 60, "debitado": 0.5, "motivo": "me_voy",
+                                   "mensaje": "Saliste del puesto. ¡Buen viaje!"}], "VALIDACION"))
+def historial(usuario_id: str = USUARIO, w: ServicioWeb = Depends(web)) -> List[dict]:
+    return w.historial(usuario_id)
+
+
+@router.get("/activos", summary="Autos de la app en la simulación, con el nombre de su usuario",
+            responses=_resp(200, [{"veh_id": "sim_web_1a2b3c4d", "usuario_id": _EJ_ESTADO["usuario_id"],
+                                   "nombre": "Tyrone Novillo", "estado": "yendo"}]))
+def activos(w: ServicioWeb = Depends(web)) -> List[dict]:
+    return w.activos()
+
+
+class PuntoIA(BaseModel):
+    t: float = Field(..., description="Segundos (reloj del teléfono)")
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    precision_m: Optional[float] = Field(None, ge=0)
+
+
+class VentanaIA(BaseModel):
+    muestras: List[PuntoIA] = Field(..., min_length=1, max_length=200, description="GPS de los últimos ~30 s")
+
+
+@router.post("/ia/clasificar", summary="Probar IA: clasifica el GPS real del teléfono (RF)",
+             responses=_resp(200, {"modo": "a_pie", "confianza": 0.91, "fuente": "rf", "muestras": 28},
+                             "DEMO_NO_DISPONIBLE", "VALIDACION"))
+def clasificar(request: Request, cuerpo: VentanaIA = Body(..., openapi_examples={
+        "caminando": {"summary": "Tres muestras de GPS", "value": {"muestras": [
+            {"t": 0, "lat": -2.8975, "lon": -79.0045, "precision_m": 8},
+            {"t": 1, "lat": -2.89751, "lon": -79.00449, "precision_m": 8},
+            {"t": 2, "lat": -2.89752, "lon": -79.00448, "precision_m": 8}]}}})) -> dict:
+    """La ventana va al servicio `sim` (tiene el modelo RF y numpy); el backend no carga la IA."""
+    from ..nucleo.errores import ErrorNucleo
+    try:
+        r = request.app.state.simulador.clasificar([m.model_dump() for m in cuerpo.muestras])
+    except LookupError as exc:
+        raise ErrorNucleo(e.CodigoError.DEMO_NO_DISPONIBLE, str(exc)) from exc
+    return {**r, "muestras": len(cuerpo.muestras)}
 
 
 @router.get("/puestos", summary="Puestos con su código y la ocupación real de la simulación",

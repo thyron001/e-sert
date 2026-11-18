@@ -72,6 +72,25 @@ def estado_desde_dict(d: dict) -> "Estado":
                   codigo_salida=d.get("codigo_salida"), ultimas_lineas=list(d.get("ultimas_lineas") or []))
 
 
+_INFERENCIA = None
+
+
+def clasificar_ventana(muestras: List[dict]) -> dict:
+    """`ia.inferencia.clasificar` con el RF exportado a `.npz` (el que usa el controlador)."""
+    global _INFERENCIA
+    if _INFERENCIA is None:
+        if str(PROYECTO) not in sys.path:
+            sys.path.insert(0, str(PROYECTO))
+        import ia.inferencia as inf  # noqa: E402
+        from traci.modelo_plano import instalar_si_falta  # noqa: E402
+        instalar_si_falta(inf)
+        _INFERENCIA = inf
+    ventana = sorted(({"t": float(m["t"]), "lat": float(m["lat"]), "lon": float(m["lon"]),
+                       "precision_m": m.get("precision_m")} for m in muestras), key=lambda m: m["t"])
+    r = _INFERENCIA.clasificar(ventana)
+    return {"modo": r["modo"], "confianza": round(float(r["confianza"]), 3), "fuente": r["fuente"]}
+
+
 def _ahora() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -96,6 +115,12 @@ class GestorSimulacion:
         self._fin: Optional[str] = None
         self._codigo: Optional[int] = None
         self._log: Optional[Path] = None
+
+    # ------------------------------------------------------------------ IA («Probar IA» de la app)
+
+    def clasificar(self, muestras: List[dict]) -> dict:
+        """Clasifica una ventana de GPS real con el RF del proyecto (`.npz`, sin scikit-learn)."""
+        return clasificar_ventana(muestras)
 
     # ------------------------------------------------------------------ disponibilidad
     def motivo_no_disponible(self) -> Optional[str]:

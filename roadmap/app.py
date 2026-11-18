@@ -26,6 +26,7 @@ from pathlib import Path
 import markdown as md
 import yaml
 from flask import Flask, abort, jsonify, render_template, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 from markupsafe import Markup
 
 # --------------------------------------------------------------------------------------
@@ -70,6 +71,9 @@ ESTADOS = {
 }
 
 app = Flask(__name__)
+# Desde el 2026-11-18 el roadmap vive en e-sert.tesisucuenca.com/roadmap: Traefik quita el prefijo y
+# lo manda en X-Forwarded-Prefix; ProxyFix hace que url_for() genere /roadmap/...
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 
 # --------------------------------------------------------------------------------------

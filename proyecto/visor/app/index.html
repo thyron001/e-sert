@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
+  <meta name="theme-color" content="#000000">
   <title>e-sert · Parqueo SERT</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -12,22 +12,47 @@
 </head>
 <body>
   <header class="barra">
-    <div class="marca">e-sert <span>Parqueo SERT · Cuenca</span></div>
-    <div class="saldo" id="saldo">$—</div>
+    <h1 id="titulo">Buscar</h1>
+    <button id="chip-usuario" class="chip" type="button">—</button>
   </header>
-  <div id="mapa"></div>
-  <div id="aviso-sim" class="aviso-sim" hidden></div>
-  <button id="b-enfoque" class="boton-mapa" type="button" hidden></button>
-  <section id="hoja" class="hoja" aria-live="polite"></section>
+
+  <main>
+    <section id="t-buscar" class="pestana pestana-mapa">
+      <div id="mapa"></div>
+      <div id="aviso-sim" class="aviso-sim" hidden></div>
+      <button id="b-enfoque" class="boton-mapa" type="button" hidden></button>
+      <section id="hoja" class="hoja" aria-live="polite"></section>
+    </section>
+    <section id="t-historial" class="pestana" hidden></section>
+    <section id="t-billetera" class="pestana" hidden></section>
+    <section id="t-ia" class="pestana" hidden></section>
+    <section id="t-usuario" class="pestana" hidden></section>
+  </main>
+
+  <nav class="pestanas" aria-label="Menú">
+    <button type="button" data-pestana="buscar" class="activa">
+      <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 2.2 6 2v11.6l-6-2V6.2Z"/></svg>Buscar</button>
+    <button type="button" data-pestana="historial">
+      <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 1-8.5 6h2.2A7 7 0 1 0 12 5V3Zm-1 4h2v5.4l3.6 2.1-1 1.7L11 13.6V7ZM3 3l4 .5L5.5 7 3 3Z"/></svg>Historial</button>
+    <button type="button" data-pestana="billetera">
+      <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h11v3h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0v1h9V6H6Zm0 3v9h12v-3h-4a2 2 0 0 1 0-4h4V9H6Zm8 4h4v0h-4Z"/></svg>Billetera</button>
+    <button type="button" data-pestana="ia">
+      <svg viewBox="0 0 24 24"><path d="M9 2h2v3h2V2h2v3h2a2 2 0 0 1 2 2v2h3v2h-3v2h3v2h-3v2a2 2 0 0 1-2 2h-2v3h-2v-3h-2v3H9v-3H7a2 2 0 0 1-2-2v-2H2v-2h3v-2H2V9h3V7a2 2 0 0 1 2-2h2V2Zm-2 5v10h10V7H7Zm2 2h6v6H9V9Z"/></svg>Probar IA</button>
+    <button type="button" data-pestana="usuario">
+      <svg viewBox="0 0 24 24"><path d="M12 3a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Zm0 9c4.4 0 8 2.2 8 5v2H4v-2c0-2.8 3.6-5 8-5Zm0 2c-3.3 0-6 1.5-6 3h12c0-1.5-2.7-3-6-3Z"/></svg>Usuario</button>
+  </nav>
+
   <div id="alerta" class="alerta" role="alertdialog" hidden>
     <div class="alerta-caja">
       <p id="alerta-texto"></p>
       <div class="fila-botones">
-        <button id="alerta-extender" class="principal" type="button">Extender 30 min · $0,25</button>
-        <button id="alerta-cerrar" class="secundario" type="button">Entendido</button>
+        <button id="alerta-extender" class="rojo" type="button">Extender 30 min · $0,25</button>
+        <button id="alerta-cerrar" class="gris" type="button">Entendido</button>
       </div>
     </div>
   </div>
+  <div id="aviso" class="aviso" hidden></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script type="module" src="./app.js"></script>

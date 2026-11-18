@@ -192,3 +192,40 @@ def test_un_regresando_pasajero_no_cierra_la_sesion(entorno):
     sim.paso(t=305, detalle={veh: "REGRESANDO"})
     sim.paso(t=360, detalle={veh: "A_PIE"})
     assert estado(c, uid)["sesion"]["estado"] == "activa"
+
+
+# --------------------------------------------------------------------------- perfiles, historial, IA
+
+def test_perfiles_fijos_con_10_dolares_una_sola_vez():
+    from backend.web.servicio import PERFILES, id_perfil
+    app = crear_app(Config(db_url="sqlite:///:memory:"))
+    with TestClient(app) as c:
+        p = c.get("/api/v1/web/perfiles").json()
+        assert [x["nombre"] for x in p] == list(PERFILES) and all(x["saldo"] == 10.0 for x in p)
+        assert c.get("/api/v1/web/perfiles").json()[0]["saldo"] == 10.0   # no se recarga otra vez
+        uid = id_perfil("Tyrone Novillo")
+        assert p[0]["usuario_id"] == uid and c.get(f"/api/v1/web/usuarios/{uid}").json()["nombre"] == "Tyrone Novillo"
+
+
+def test_historial_y_activos(entorno):
+    c, sim, uid = entorno
+    sim.paso()
+    veh = c.post(f"/api/v1/web/usuarios/{uid}/buscar", json={"lat": LAT, "lon": LON}).json()["sesion"]["veh_id"]
+    assert c.get("/api/v1/web/activos").json()[0]["veh_id"] == veh
+    sim.paso(web=[{"tipo": "sin_puesto", "veh_id": veh}])
+    assert c.get("/api/v1/web/activos").json() == []
+    h = c.get(f"/api/v1/web/usuarios/{uid}/historial").json()
+    assert len(h) == 1 and h[0]["motivo"] == "sin_puesto"
+
+
+def test_probar_ia_clasifica_con_el_rf():
+    app = crear_app(Config(db_url="sqlite:///:memory:"))
+    # 30 s caminando hacia el norte a ~1,3 m/s, y 30 s en auto a ~10 m/s
+    a_pie = [{"t": i, "lat": -2.9 + i * 1.3 / 111320, "lon": -79.0, "precision_m": 5} for i in range(30)]
+    auto = [{"t": i, "lat": -2.9 + i * 10 / 111320, "lon": -79.0, "precision_m": 5} for i in range(30)]
+    with TestClient(app) as c:
+        r1 = c.post("/api/v1/web/ia/clasificar", json={"muestras": a_pie}).json()
+        r2 = c.post("/api/v1/web/ia/clasificar", json={"muestras": auto}).json()
+        assert c.post("/api/v1/web/ia/clasificar", json={"muestras": []}).status_code == 422
+    assert r1["modo"] == "a_pie" and r1["fuente"] == "rf" and r1["muestras"] == 30
+    assert r2["modo"] == "vehiculo"

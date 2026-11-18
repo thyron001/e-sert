@@ -229,6 +229,15 @@ es de prueba.
 - `POST /web/usuarios/{id}/me-voy` → el conductor vuelve al auto.
 - `GET /web/puestos` → `[{puesto_id, codigo, calle, lat, lon, capacidad, ocupados}]` con la
   ocupación real. El `codigo` (001…) sigue el orden alfabético de los `puesto_id`.
+- `GET /web/perfiles` → `[{usuario_id, nombre, saldo}]`: Tyrone Novillo, Pablo Calle, Miguel Bermeo,
+  Freddy Lopez e Invitados 1–3; id fijo (uuid5 del nombre) y $10 iniciales la primera vez.
+- `GET /web/usuarios/{id}/historial` → sesiones terminadas (puesto, código, calle, fecha,
+  `pagado_min`, `debitado`, `motivo`).
+- `GET /web/activos` → `[{veh_id, usuario_id, nombre, estado}]`: el visor pone el nombre sobre cada
+  auto de la app.
+- `POST /web/ia/clasificar` `{muestras: [{t, lat, lon, precision_m?}]}` → `{modo, confianza,
+  fuente, muestras}`: «Probar IA» con el GPS real del teléfono; lo ejecuta el servicio `sim` (RF).
+- Payphone acepta además como `url_app` la propia app web (`https://…e-sert.tesisucuenca.com/…`).
 
 Con el controlador: el backend pone las órdenes en `RespuestaSnapshot.ordenes` (`OrdenSim`:
 `buscar`, `estacionado`, `volver`) y sigue a los autos web en `espejos`; el controlador responde

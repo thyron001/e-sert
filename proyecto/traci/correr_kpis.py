@@ -206,6 +206,11 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
 
                     snapshots.web = AutosWeb(guia, peatones)
                     ctrl.agregar_hook(snapshots.web.on_paso)
+            if ctrl.config.gui:  # también cuando lo activa kpis.correr_una (demo con sumo-gui)
+                # sumo-gui con la paleta del visor: espejos, peatones de la app y autos buscando
+                from .colores_gui import ColoresGui
+
+                ctrl.agregar_hook(ColoresGui(guia).on_paso)
             if ritmo:
                 from .correr_guiado import Ritmo
 

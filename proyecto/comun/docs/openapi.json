@@ -3036,6 +3036,254 @@
         }
       }
     },
+    "/api/v1/web/perfiles": {
+      "get": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Perfiles de la app (equipo e invitados) con su saldo",
+        "operationId": "perfiles_api_v1_web_perfiles_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Perfiles Api V1 Web Perfiles Get"
+                },
+                "example": [
+                  {
+                    "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                    "nombre": "Tyrone Novillo",
+                    "saldo": 10.0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/historial": {
+      "get": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Sesiones terminadas del usuario",
+        "operationId": "historial_api_v1_web_usuarios__usuario_id__historial_get",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Historial Api V1 Web Usuarios  Usuario Id  Historial Get"
+                },
+                "example": [
+                  {
+                    "id": "web_1a2b3c4d",
+                    "modo": "buscar",
+                    "puesto_id": "pa_337277973#1_0",
+                    "codigo": "123",
+                    "calle": "Simón Bolívar",
+                    "fecha": "2026-11-18T03:00:00Z",
+                    "pagado_min": 60,
+                    "debitado": 0.5,
+                    "motivo": "me_voy",
+                    "mensaje": "Saliste del puesto. ¡Buen viaje!"
+                  }
+                ]
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/activos": {
+      "get": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Autos de la app en la simulación, con el nombre de su usuario",
+        "operationId": "activos_api_v1_web_activos_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Activos Api V1 Web Activos Get"
+                },
+                "example": [
+                  {
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                    "nombre": "Tyrone Novillo",
+                    "estado": "yendo"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/ia/clasificar": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Probar IA: clasifica el GPS real del teléfono (RF)",
+        "description": "La ventana va al servicio `sim` (tiene el modelo RF y numpy); el backend no carga la IA.",
+        "operationId": "clasificar_api_v1_web_ia_clasificar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VentanaIA"
+              },
+              "examples": {
+                "caminando": {
+                  "summary": "Tres muestras de GPS",
+                  "value": {
+                    "muestras": [
+                      {
+                        "t": 0,
+                        "lat": -2.8975,
+                        "lon": -79.0045,
+                        "precision_m": 8
+                      },
+                      {
+                        "t": 1,
+                        "lat": -2.89751,
+                        "lon": -79.00449,
+                        "precision_m": 8
+                      },
+                      {
+                        "t": 2,
+                        "lat": -2.89752,
+                        "lon": -79.00448,
+                        "precision_m": 8
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Clasificar Api V1 Web Ia Clasificar Post"
+                },
+                "example": {
+                  "modo": "a_pie",
+                  "confianza": 0.91,
+                  "fuente": "rf",
+                  "muestras": 28
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                },
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/web/puestos": {
       "get": {
         "tags": [
@@ -4871,6 +5119,46 @@
         "title": "PuestoEspejo",
         "description": "Puesto asignado al vehículo seguido, con la distancia que le falta."
       },
+      "PuntoIA": {
+        "properties": {
+          "t": {
+            "type": "number",
+            "title": "T",
+            "description": "Segundos (reloj del teléfono)"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          },
+          "precision_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "t",
+          "lat",
+          "lon"
+        ],
+        "title": "PuntoIA"
+      },
       "Recarga": {
         "properties": {
           "monto": {
@@ -5636,6 +5924,25 @@
         ],
         "title": "VehiculoSim",
         "description": "Vehículo en `/sim/paso`: lo del snapshot más datos para el espejo (solo con app)."
+      },
+      "VentanaIA": {
+        "properties": {
+          "muestras": {
+            "items": {
+              "$ref": "#/components/schemas/PuntoIA"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Muestras",
+            "description": "GPS de los últimos ~30 s"
+          }
+        },
+        "type": "object",
+        "required": [
+          "muestras"
+        ],
+        "title": "VentanaIA"
       }
     }
   },

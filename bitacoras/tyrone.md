@@ -995,3 +995,24 @@ Sin verificador independiente: no es una sesión del plan.
 - Las pruebas del comportamiento de los peatones piden ese modo explícitamente.
 - `test_robustez` aún esperaba la tarifa vieja (10 min = $0,08); ahora un bloque, $0,25.
 **Pruebas:** traci 90 + peatones/robustez 15, kpis 29, e2e backend 11 y e2e traci 21.
+
+## 2026-11-18 · App web con menú, usuarios, historial, Payphone y Probar IA; visor en la raíz
+**Estado:** hecho (dominios y verificación en producción al final).
+**Qué hice:**
+- **App** (`visor/app/`), con la estética de la app Expo (negro, títulos y botones rojos, barra de pestañas):
+  - Buscar, Historial, Billetera, Probar IA y Usuario;
+  - siete perfiles fijos con $10 (`/web/perfiles`);
+  - recarga con Payphone que vuelve a la app (`url_app` https permitido);
+  - Probar IA con el GPS real (`/web/ia/clasificar` → servicio `sim` → RF);
+  - al cerrar la sesión, vuelve a la pantalla inicial;
+  - el punto azul y «Mi posición» solo aparecen en el puesto.
+- **Visor:** el nombre de cada usuario sobre su auto (`/web/activos`). Se sirve en la raíz de `e-sert.tesisucuenca.com`; el roadmap pasa a `/roadmap` (ProxyFix en Flask).
+- **sumo-gui:** colores por tipo de auto y peatones de la app (`traci/colores_gui.py`), y la vista inicial más cerca (zoom 260).
+**Pruebas:**
+- 472 passed (backend, comun, visor y peatones/ritmo) y 12 JS.
+- Recorrido con teléfono simulado y dos usuarios (Tyrone por la app, Pablo por API): guiado sin punto azul; al llegar, con punto azul y botón; pago y cierre por la IA con vuelta al inicio; visor con los dos nombres.
+- Probar IA con GPS simulado: caminando → «Caminando» (RF 51 %); a ~39 km/h → «En vehículo» (RF 92 %).
+**Problemas encontrados:**
+- sumo-gui 1.12 no acepta el esquema «esert» (autos 3,5× más grandes) ni por el archivo de vista ni por TraCI: queda «standard». Los colores se aplican, pero hay que acercarse con la rueda para verlos bien.
+- El GPS del navegador solo funciona con HTTPS (en la prueba local se usó `localhost`).
+**Pendientes:** la app Expo (`proyecto/app`) queda como historia, sin estos cambios.

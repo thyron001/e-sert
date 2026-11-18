@@ -24,7 +24,7 @@
     <nav>
       <a href="{{ url_for('inicio') }}" class="{{ 'activo' if request.endpoint == 'inicio' else '' }}">Roadmap</a>
       <a href="{{ url_for('doc', clave='plan') }}" class="{{ 'activo' if request.endpoint == 'doc' else '' }}">Documentos</a>
-      <a href="https://demo.e-sert.tesisucuenca.com/visor/" target="_blank" rel="noopener" title="Visor en vivo de la simulación">Demo en vivo</a>
+      <a href="https://e-sert.tesisucuenca.com/" target="_blank" rel="noopener" title="Visor en vivo de la simulación">Demo en vivo</a>
       <span class="nav-personas">
         {% for n, pi in PERSONAS.items() %}
         <a class="nav-p {{ 'activo' if request.view_args and request.view_args.get('nombre', '')|capitalize == n else '' }}"

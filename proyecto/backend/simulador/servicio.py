@@ -62,6 +62,16 @@ def crear_app(gestor: Optional[GestorSimulacion] = None, token: Optional[str] = 
             raise HTTPException(409, str(exc)) from exc
         return estado_a_dict(g.estado())
 
+    @app.post("/clasificar", dependencies=[Depends(exigir_token)])
+    def clasificar(cuerpo: dict = Body(...)) -> dict:
+        muestras = cuerpo.get("muestras") or []
+        if not isinstance(muestras, list) or not muestras:
+            raise HTTPException(422, "faltan muestras")
+        try:
+            return g.clasificar(muestras)
+        except (KeyError, TypeError, ValueError) as exc:
+            raise HTTPException(422, f"muestras inválidas: {exc}") from exc
+
     @app.post("/detener", dependencies=[Depends(exigir_token)])
     def detener() -> dict:
         return estado_a_dict(g.detener())
