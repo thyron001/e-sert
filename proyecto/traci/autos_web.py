@@ -29,6 +29,7 @@ from .puente_nucleo import distancia_m
 PARADA_LARGA_S = 86400          # el auto no se va solo: vuelve cuando el conductor regresa
 PERIODO_REVISION_S = 5.0
 MARGEN_FRENADO_M = 15.0
+CANDIDATOS = 25                  # puestos libres que se comparan por ruta al elegir
 DISTANCIA_SALIDA_M = 600.0       # al irse, el auto maneja al menos esto (la IA lo ve salir)
 TIPO_VEHICULO = "auto"
 
@@ -109,7 +110,14 @@ class AutosWeb:
         arista, pos, carril = tr.simulation.convertRoad(lon, lat, isGeo=True, vClass="passenger")
         largo = tr.lane.getLength(f"{arista}_{carril}")
         pos = min(max(pos, 1.0), largo - 1.0)
-        pid, ruta = self._elegir(ctrl, (lat, lon), arista, pos)
+        pid, ruta, costo = self._elegir(ctrl, (lat, lon), arista, pos, con_costo=True)
+        # En una calle de doble sentido, el auto puede arrancar en el carril contrario si así llega antes.
+        contraria = arista[1:] if arista.startswith("-") else f"-{arista}"
+        if contraria in self._aristas(tr):
+            pos_c = min(max(tr.lane.getLength(f"{contraria}_0") - pos, 1.0), tr.lane.getLength(f"{contraria}_0") - 1.0)
+            pid_c, ruta_c, costo_c = self._elegir(ctrl, (lat, lon), contraria, pos_c, con_costo=True)
+            if pid_c is not None and costo_c < costo:
+                pid, ruta, pos = pid_c, ruta_c, pos_c
         if pid is None:
             self._evento("sin_puesto", veh, detalle="no hay puestos libres alcanzables")
             return
@@ -150,22 +158,40 @@ class AutosWeb:
         reservadas = sum(1 for v, p in self.reservas.items() if p == pid and v != sin)
         return self.guia.puestos[pid][2] - ctrl.traci.parkingarea.getVehicleCount(pid) - reservadas
 
-    def _elegir(self, ctrl, punto, arista: str, pos: float, sin: Optional[str] = None, excluir=()):
-        """(puesto, ruta) del puesto libre alcanzable más cercano a `punto`, o (None, None)."""
+    def _elegir(self, ctrl, punto, arista: str, pos: float, sin: Optional[str] = None, excluir=(),
+                con_costo: bool = False):
+        """(puesto, ruta) del puesto libre con la **ruta de manejo más corta**, o (None, None).
+
+        Antes se tomaba el más cercano en línea recta, pero en el Centro Histórico (calles de un solo
+        sentido) ese puesto puede quedar a varias cuadras de vuelta. Ahora se miran los
+        `CANDIDATOS` libres más cercanos en línea recta y se elige el de menor distancia por ruta.
+        """
         tr = ctrl.traci
         orden = sorted(self.guia.puestos.items(), key=lambda kv: distancia_m(punto[0], punto[1], kv[1][0], kv[1][1]))
-        for pid, _ in orden:
+        mejor = (None, None, float("inf"))
+        vistos = 0
+        for pid, (plat, plon, _) in orden:
+            if vistos >= CANDIDATOS or (mejor[0] and distancia_m(punto[0], punto[1], plat, plon) > mejor[2]):
+                break  # la línea recta ya supera la mejor ruta: ninguno más lejano puede ganar
             if pid in excluir or self._libres(ctrl, pid, sin) <= 0:
                 continue
             destino = tr.lane.getEdgeID(tr.parkingarea.getLaneID(pid))
-            if destino == arista:
-                if tr.parkingarea.getStartPos(pid) <= pos + MARGEN_FRENADO_M:
-                    continue  # está detrás del auto o sin espacio para frenar
-                return pid, [arista]
-            ruta = tr.simulation.findRoute(arista, destino).edges
-            if ruta:
-                return pid, list(ruta)
-        return None, None
+            inicio = tr.parkingarea.getStartPos(pid)
+            if destino == arista and inicio > pos + MARGEN_FRENADO_M:
+                costo, ruta = inicio - pos, [arista]
+            else:
+                if destino == arista:
+                    continue  # está detrás del auto: habría que dar la vuelta a la manzana
+                etapa = tr.simulation.findRoute(arista, destino)
+                if not etapa.edges:
+                    continue
+                largo_destino = tr.lane.getLength(tr.parkingarea.getLaneID(pid))
+                costo = etapa.length - pos - (largo_destino - inicio)
+                ruta = list(etapa.edges)
+            vistos += 1
+            if costo < mejor[2]:
+                mejor = (pid, ruta, costo)
+        return mejor if con_costo else (mejor[0], mejor[1])
 
     def _revisar(self, ctrl, t: float) -> None:
         """Si el puesto de un auto en camino se llenó, lo reasigna al siguiente libre."""
@@ -211,6 +237,11 @@ class AutosWeb:
                 return
 
     # ------------------------------------------------------------------ auxiliares
+
+    def _aristas(self, tr) -> set:
+        if not hasattr(self, "_cache_aristas"):
+            self._cache_aristas = set(tr.edge.getIDList())
+        return self._cache_aristas
 
     @staticmethod
     def _tipo(tr) -> str:
