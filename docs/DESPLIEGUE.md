@@ -50,10 +50,12 @@ local, nunca en el repo.
 - **`sumo-gui` en el navegador: `https://sumo.tesisucuenca.com`.** El contenedor levanta una
   pantalla virtual (Xvfb :99 + fluxbox) y la publica con noVNC en el puerto 6080 (dominio
   `sumo.tesisucuenca.com` de la app `api`, HTTPS). Cuando la demo corre, `sumo-gui` se abre ahí
-  maximizado y con la cámara en la zona SERT (`sumo/demanda/vista_vps.xml`). Es **solo para ver**
-  (no se puede pausar ni mover la cámara) y pide la contraseña `ESERT_CLAVE_VNC` (8 caracteres;
+  maximizado y con la cámara en la zona SERT (`sumo/demanda/vista_vps.xml`). Tiene **control
+  completo** (pausar, cambiar el retardo, mover la cámara, inspeccionar autos) y pide la contraseña `ESERT_CLAVE_VNC` (8 caracteres;
   en el VPS está en `/root/.esert_clave_vnc`). Sin esa variable no se levanta la pantalla y la
   demo corre con `sumo` sin GUI. Todo lo arranca `proyecto/backend/arranque.sh`.
+  Con el control vienen dos efectos: **pausar** en `sumo-gui` congela también la demo (el
+  controlador espera a SUMO), y **cerrar la ventana** de `sumo-gui` termina la corrida con error.
 - **Una corrida a la vez.** Por defecto `p50_rf_s2`, ritmo 2, hasta t = 3 600 s (30 min reales);
   en el visor se elige el % de usuarios con app y el ritmo. Termina sola o con «Detener».
 - **Consumo medido** (1 vCPU, 3,8 GiB): sin GUI, ~390 MiB y ~34 % de CPU a ritmo 5; con

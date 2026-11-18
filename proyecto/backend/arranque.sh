@@ -3,7 +3,7 @@
 #
 # Con ESERT_GUI=1 (por defecto) levanta además una pantalla virtual para ver sumo-gui en el
 # navegador (https://sumo.tesisucuenca.com):
-#   Xvfb :99 → fluxbox → x11vnc (solo localhost, solo ver, con contraseña) → noVNC en :6080
+#   Xvfb :99 → fluxbox → x11vnc (solo localhost, con contraseña, con control) → noVNC en :6080
 # La simulación de la demo (POST /api/v1/demo/iniciar) abre sumo-gui en esa pantalla.
 # La contraseña de VNC es ESERT_CLAVE_VNC (VNC solo usa los primeros 8 caracteres). Sin ella no se
 # levanta la pantalla: nunca se publica un VNC sin contraseña.
@@ -20,12 +20,12 @@ if [ "${ESERT_GUI:-1}" = "1" ] && [ -n "${ESERT_CLAVE_VNC:-}" ]; then
   fluxbox >/tmp/fluxbox.log 2>&1 &
   mkdir -p /root/.vnc
   x11vnc -storepasswd "$ESERT_CLAVE_VNC" /root/.vnc/clave >/dev/null 2>&1
-  x11vnc -display :99 -rfbauth /root/.vnc/clave -localhost -rfbport 5900 -forever -shared -viewonly \
+  x11vnc -display :99 -rfbauth /root/.vnc/clave -localhost -rfbport 5900 -forever -shared \
          -noxdamage -quiet -bg -o /tmp/x11vnc.log
   # index.html → vnc.html con reconexión automática y escalado a la ventana
   cat > /tmp/novnc_index.html <<'HTML'
 <!doctype html><meta charset="utf-8"><title>e-sert · SUMO</title>
-<meta http-equiv="refresh" content="0; url=vnc.html?autoconnect=1&resize=scale&reconnect=1&view_only=1">
+<meta http-equiv="refresh" content="0; url=vnc.html?autoconnect=1&resize=scale&reconnect=1">
 HTML
   mkdir -p /tmp/novnc && cp -r /usr/share/novnc/. /tmp/novnc/ && cp /tmp/novnc_index.html /tmp/novnc/index.html
   websockify --web /tmp/novnc 6080 localhost:5900 >/tmp/websockify.log 2>&1 &

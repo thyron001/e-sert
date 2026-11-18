@@ -117,7 +117,7 @@ Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
 - Se arranca y se detiene desde el visor (sección «Simulación en el servidor»), o con
   `POST /api/v1/demo/iniciar` y `/detener` con la cabecera `X-Clave-Demo`
   (`backend/simulador/`). SUMO corre dentro del contenedor de la app `api` y publica en el
-  propio backend. Su `sumo-gui` se ve (solo ver) en `https://sumo.tesisucuenca.com`, por noVNC.
+  propio backend. Su `sumo-gui` se ve y se controla en `https://sumo.tesisucuenca.com`, por noVNC.
   Detalles en `docs/DESPLIEGUE.md`.
 - La app `api` se construye con `proyecto/backend/Dockerfile` (Ubuntu 22.04 + SUMO). Un push a
   `main` la redespliega y corta una simulación en curso.
