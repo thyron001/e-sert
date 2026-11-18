@@ -267,8 +267,8 @@ def test_sesion_en_curso_y_recibo_al_cerrar(tmp_path):
     rec = det["recibo"]
     ReciboEspejo.model_validate(rec)
     assert rec["sesion_id"] == sid
-    assert rec["minutos_cobrados"] == 20
-    assert rec["cobrado_usd"] == pytest.approx(0.17, abs=0.01)
+    assert rec["minutos_cobrados"] == 30  # bloque de 30 min (2026-11-18)
+    assert rec["cobrado_usd"] == 0.25
     assert rec["tarjeta_sert_usd"] == 0.25
     assert rec["ahorro_usd"] == round(rec["tarjeta_sert_usd"] - rec["cobrado_usd"], 2)
     assert det["billetera"]["disponible"] == det["billetera"]["saldo"]  # retención liberada
@@ -332,7 +332,7 @@ def test_publicador_snapshots_sin_espejo(tmp_path):
     m = MundoEspejo(tmp_path)
     pub = PublicadorFalso()
     snap = PublicadorSnapshots(pub, m.sesiones, m.guia, m.registro, SimpleNamespace(activos={}), m.red)
-    assert pub.al_responder is None
+    assert callable(pub.al_responder)  # siempre escucha: la respuesta trae las órdenes de la app web
     snap.on_paso(m.ctrl, 1.0)
     assert "espejo" not in pub.cuerpos[0]
     PasoSimulacion.model_validate(pub.cuerpos[0])

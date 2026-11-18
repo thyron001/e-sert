@@ -112,6 +112,35 @@ class SesionParqueo(Base):
     motivo_cierre: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
 
+class SesionWeb(Base):
+    """Sesión de la app web (`/app/`, 2026-11-18): prepago por bloques de 30 min.
+
+    Los tiempos van en segundos **simulados** (`t_sim`): el temporizador corre con la simulación.
+    Los cobros son movimientos `debito` sin sesión del núcleo, con `referencia_payphone=web:<id>`.
+    """
+
+    __tablename__ = "sesiones_web"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), index=True)
+    veh_id: Mapped[str] = mapped_column(String, index=True)
+    modo: Mapped[str] = mapped_column(String)            # buscar | estacionado
+    estado: Mapped[str] = mapped_column(String)          # pendiente | yendo | llego | activa | volviendo | cerrada
+    lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    lon: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    puesto_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    creada: Mapped[datetime] = mapped_column(UTC, default=ahora_utc)
+    t_llegada: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    t_inicio: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    pagado_min: Mapped[int] = mapped_column(Integer, default=0)
+    pagado_hasta: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    alerta_para: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # pagado_hasta ya avisado
+    debitado: Mapped[int] = mapped_column(Integer, default=0)  # centavos
+    t_fin: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    motivo: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    mensaje: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+
 class PuestoTabla(Base):
     """Un puesto (`parkingArea`) con su capacidad, cargado de `puestos.csv`."""
 

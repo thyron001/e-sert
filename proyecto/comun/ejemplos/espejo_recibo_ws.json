@@ -16,15 +16,15 @@
   "ruta": [],
   "sesion": null,
   "billetera": {
-    "saldo": 4.58,
-    "disponible": 4.58
+    "saldo": 4.5,
+    "disponible": 4.5
   },
   "avisos": [],
   "recibo": {
     "minutos_reales": 47.0,
-    "minutos_cobrados": 50,
-    "cobrado_usd": 0.42,
+    "minutos_cobrados": 60,
+    "cobrado_usd": 0.5,
     "tarjeta_sert_usd": 0.5,
-    "ahorro_usd": 0.08
+    "ahorro_usd": 0.0
   }
 }

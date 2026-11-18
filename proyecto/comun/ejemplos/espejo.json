@@ -33,7 +33,7 @@
       "billetera": {"saldo": 4.47, "disponible": 4.47},
       "avisos": ["saldo_bajo"],
       "recibo": {"sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d", "minutos_reales": 42.3,
-                 "minutos_cobrados": 45, "cobrado_usd": 0.38, "tarjeta_sert_usd": 0.5, "ahorro_usd": 0.12}
+                 "minutos_cobrados": 60, "cobrado_usd": 0.5, "tarjeta_sert_usd": 0.5, "ahorro_usd": 0.0}
     }
   },
   "fin": false

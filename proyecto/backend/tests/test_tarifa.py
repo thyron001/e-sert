@@ -5,15 +5,15 @@ import pytest
 from backend.nucleo import tarifa as tar
 
 
-@pytest.mark.parametrize("reales,cobrados", [(12, 15), (3, 10), (0, 10), (10, 10), (30, 30), (47, 50), (120, 120)])
+@pytest.mark.parametrize("reales,cobrados", [(12, 30), (3, 30), (0, 30), (10, 30), (30, 30), (31, 60), (47, 60), (120, 120)])
 def test_minutos_cobrables(reales, cobrados):
     assert tar.minutos_cobrables(reales) == cobrados
 
 
 def test_costo_y_retencion():
-    assert tar.costo(12) == 0.13  # 15 min · 0,50/60 = 0,125 → 0,13
-    assert tar.costo(3) == 0.08  # mínimo 10 min
-    assert tar.costo(47) == 0.42
+    assert tar.costo(12) == 0.25  # bloques de 30 min a $0,25 (2026-11-18)
+    assert tar.costo(3) == 0.25   # al menos un bloque
+    assert tar.costo(47) == 0.50
     assert tar.retencion() == 0.25
     assert tar.costo_en_curso(12.5) == 0.10
 

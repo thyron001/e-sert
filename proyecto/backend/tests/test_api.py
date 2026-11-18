@@ -80,10 +80,10 @@ def test_flujo_feliz_47_minutos(cliente):
     r = cliente.post(f"{PREF}/sesiones/{sid}/cerrar", json={"ts": "2026-10-20T14:47:00Z", "motivo": "manual"})
     cerrada = e.SesionCerrada.model_validate(r.json())
     # 47 min → 50 cobrados (fracciones de 5) → 50 · 0,50 / 60 = 0,4167 → $0,42
-    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado, cerrada.saldo) == (47.0, 50, 0.42, 4.58)
+    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado, cerrada.saldo) == (47.0, 60, 0.50, 4.50)
 
     b = e.Billetera.model_validate(cliente.get(f"{PREF}/billetera/sim_veh42").json())
-    assert (b.saldo, b.retenido, b.disponible, b.bloqueada) == (4.58, 0.0, 4.58, False)
+    assert (b.saldo, b.retenido, b.disponible, b.bloqueada) == (4.50, 0.0, 4.50, False)
     assert sorted(m.tipo.value for m in b.movimientos) == ["debito", "liberacion", "recarga", "retencion"]
     assert cliente.get(f"{PREF}/sesiones/{sid}").json()["estado"] == "CERRADA"
     assert cliente.get(f"{PREF}/puestos").json()[0]["ocupados"] == 0
@@ -99,7 +99,7 @@ def test_cobro_con_t_sim_y_ciclo_de_deteccion(cliente):
     # El reloj de SUMO manda: 100 s → 1300 s son 20 min aunque `ts` diga otra cosa.
     r = cliente.post(f"{PREF}/sesiones/{sid}/cerrar",
                      json={"ts": "2026-10-20T18:00:00Z", "t_sim": 1300.0, "motivo": "deteccion"})
-    assert r.json()["minutos_reales"] == 20.0 and r.json()["debitado"] == round(20 * 0.5 / 60 + 1e-9, 2)
+    assert r.json()["minutos_reales"] == 20.0 and r.json()["debitado"] == 0.25  # un bloque de 30 min
     ses = cliente.get(f"{PREF}/sesiones/{sid}").json()
     assert ses["t_sim_inicio"] == 100.0 and ses["t_sim_fin"] == 1300.0
 

@@ -299,7 +299,7 @@ def test_reglas_duracion_en_texto(texto, minutos):
         ("una hora", 60, False),
         # 150 > tope de 120: se recorta con aviso
         ("2 horas y media", 120, True),
-        ("5 min", 10, True),  # por debajo del cobro mínimo: se sube con aviso
+        ("5 min", 30, True),  # por debajo del cobro mínimo (un bloque de 30 min): se sube con aviso
     ],
 )
 def test_reglas_interpretacion_con_recorte(texto, minutos, con_aviso):
@@ -310,15 +310,15 @@ def test_reglas_interpretacion_con_recorte(texto, minutos, con_aviso):
 
 
 def test_recortar_duracion_limites():
-    assert (MINIMO_MIN, MAXIMO_MIN) == (10, 120)
+    assert (MINIMO_MIN, MAXIMO_MIN) == (30, 120)
     assert recortar_duracion(None) == (None, None)
     assert recortar_duracion(60) == (60, None)
     assert recortar_duracion(120) == (120, None)
-    assert recortar_duracion(10) == (10, None)
+    assert recortar_duracion(30) == (30, None)
     minutos, aviso = recortar_duracion(150)
     assert minutos == 120 and "recort" in aviso
     minutos, aviso = recortar_duracion(5)
-    assert minutos == 10 and "mínimo" in aviso
+    assert minutos == 30 and "mínimo" in aviso
 
 
 def test_reglas_hola_sin_nada():

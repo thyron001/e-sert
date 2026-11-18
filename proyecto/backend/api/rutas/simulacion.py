@@ -24,7 +24,7 @@ def sim_paso(paso: e.PasoSimulacion = Body(..., openapi_examples=_EJ_PASO),
     """Actualiza el mundo y difunde `snapshot` y `verdad` por `/ws/estado`. El bloque interno
     `espejo` queda en el registro del espejo; la respuesta dice qué autos sigue algún teléfono."""
     s.publicar_snapshot(paso)
-    return e.RespuestaSnapshot(espejos=s.espejo.espejos())
+    return s.respuesta_paso()
 
 
 @router.post("/interno/snapshot", tags=["simulacion"], status_code=status.HTTP_202_ACCEPTED,
@@ -34,7 +34,7 @@ def interno_snapshot(paso: e.PasoSimulacion = Body(..., openapi_examples=_EJ_PAS
                      s: dep.Servicios = Depends(dep.servicios)) -> e.RespuestaSnapshot:
     """Igual que `/sim/paso` (ver `comun/CONTRATO.propuesto.md`). Acepta `Authorization: Bearer`."""
     s.publicar_snapshot(paso)
-    return e.RespuestaSnapshot(espejos=s.espejo.espejos())
+    return s.respuesta_paso()
 
 
 _EJ_KPI = ej.cuerpo("kpi_ws", "KPIs de sistema de la corrida")

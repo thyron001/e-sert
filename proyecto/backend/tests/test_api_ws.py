@@ -156,7 +156,7 @@ def test_interno_snapshot_exige_token(app_token):
             assert c.post("/api/v1/interno/snapshot", json=EJEMPLO,
                           headers={"X-Sim-Token": "otro"}).status_code == 401
             r = c.post("/api/v1/interno/snapshot", json=EJEMPLO, headers={"Authorization": f"Bearer {TOKEN}"})
-            assert r.status_code == 202 and r.json() == {"aceptado": True, "espejos": []}
+            assert r.status_code == 202 and r.json() == {"aceptado": True, "espejos": [], "ordenes": []}
             snap = e.leer_mensaje_ws(ws.receive_text())
             assert isinstance(snap, e.MensajeSnapshot) and snap.t_sim == 1234.0
             r = c.post("/api/v1/interno/snapshot", json=paso(1300.0), headers={"X-Sim-Token": TOKEN})

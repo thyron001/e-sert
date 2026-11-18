@@ -501,6 +501,33 @@ class PasoSimulacion(Modelo):
     # su núcleo en memoria). Solo puestos con ocupados > 0. El backend lo suma a su propio mapa
     # (sesiones creadas por HTTP) para `snapshot.puestos`; sin él, el visor marcaba 0/610.
     puestos: Optional[List[OcupacionPuesto]] = None
+    # 2026-11-18 (app web): qué pasó con las órdenes de la app web (`RespuestaSnapshot.ordenes`).
+    web: Optional[List["EventoWeb"]] = None
+
+
+class OrdenSim(Modelo):
+    """Orden del backend al controlador, en la respuesta de `/sim/paso` (app web, 2026-11-18).
+
+    - `buscar`: crear un auto `veh_id` en `lat, lon` y guiarlo al puesto libre más cercano
+      (ocupación real de SUMO más las reservas de otros autos web);
+    - `estacionado`: crear el auto ya estacionado en `puesto_id` (el usuario puso el código);
+    - `volver`: el conductor deja la diligencia y vuelve al auto («Me voy» o tiempo máximo).
+    """
+
+    tipo: Literal["buscar", "estacionado", "volver"]
+    veh_id: VehiculoId
+    lat: Optional[Latitud] = None
+    lon: Optional[Longitud] = None
+    puesto_id: Optional[PuestoId] = None
+
+
+class EventoWeb(Modelo):
+    """Lo que informa el controlador sobre un auto de la app web (en `PasoSimulacion.web`)."""
+
+    tipo: Literal["asignado", "sin_puesto", "puesto_lleno", "error"]
+    veh_id: VehiculoId
+    puesto_id: Optional[PuestoId] = None
+    detalle: Optional[str] = None
 
 
 class RespuestaSnapshot(Modelo):
@@ -509,6 +536,7 @@ class RespuestaSnapshot(Modelo):
 
     aceptado: Literal[True] = True
     espejos: List[VehiculoId] = Field(default_factory=list)
+    ordenes: List[OrdenSim] = Field(default_factory=list, description="Órdenes de la app web (2026-11-18)")
 
 
 class PuestoEspejo(Modelo):

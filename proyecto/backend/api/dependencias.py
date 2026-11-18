@@ -7,6 +7,8 @@ nuevos e independientes.
 
 from __future__ import annotations
 
+import logging
+
 import hmac
 from dataclasses import dataclass
 from typing import Optional, Union
@@ -26,6 +28,9 @@ from ..nucleo.sesiones import ServicioSesiones
 from .ws import GestorConexiones
 
 
+log = logging.getLogger(__name__)
+
+
 @dataclass
 class Servicios:
     """Todo lo que las rutas necesitan, construido una vez por app."""
@@ -39,8 +44,12 @@ class Servicios:
     token_sim: Optional[str] = None
     espejo: Optional[RegistroEspejo] = None
     difusor_espejo: Optional[DifusorEspejo] = None
+    web: Optional["ServicioWeb"] = None
 
     def __post_init__(self) -> None:
+        if self.web is None:
+            from ..web.servicio import ServicioWeb
+            self.web = ServicioWeb(self.bd, self.billetera)
         if self.espejo is None:
             self.espejo = RegistroEspejo()
         if self.difusor_espejo is None:
@@ -68,7 +77,11 @@ class Servicios:
             return True
         # S3-3: el bloque interno `espejo` va al registro y se quita del paso antes de seguir;
         # `snapshot` nunca lo copia, y así tampoco queda en `mundo.ultimo_paso`.
-        self.mundo.espejos = set(self.espejo.aplicar(mensaje))
+        try:  # app web: eventos, IA y temporizadores (antes de quitar el bloque `espejo`)
+            self.web.on_paso(mensaje)
+        except Exception:  # noqa: BLE001 - un fallo de la app web no debe tumbar el paso
+            log.exception("app web: error procesando el paso")
+        self.mundo.espejos = set(self.espejo.aplicar(mensaje)) | set(self.web.seguidos())
         mensaje.espejo = None
         difusion = self.mundo.aplicar_paso(mensaje)
         if difusion is None:
@@ -76,6 +89,12 @@ class Servicios:
         self.gestor.publicar(difusion.snapshot)
         self.gestor.publicar(difusion.verdad)
         return True
+
+
+    def respuesta_paso(self) -> e.RespuestaSnapshot:
+        """Respuesta a `/sim/paso`: autos seguidos (teléfonos + app web) y órdenes de la app web."""
+        return e.RespuestaSnapshot(espejos=sorted(set(self.espejo.espejos()) | set(self.web.seguidos())),
+                                   ordenes=self.web.tomar_ordenes())
 
 
 def servicios(request: Request) -> Servicios:

@@ -195,7 +195,7 @@ def test_tarifa_carga_y_coincide_con_contrato(tarifa):
 
 @pytest.mark.parametrize(
     "reales,cobrados",
-    [(0, 10), (3, 10), (10, 10), (10.01, 15), (12, 15), (15, 15), (47, 50), (120, 120)],
+    [(0, 30), (3, 30), (10, 30), (30, 30), (30.01, 60), (47, 60), (90, 90), (120, 120)],
 )
 def test_minutos_cobrados(tarifa, reales, cobrados):
     assert t.minutos_cobrados(reales, tarifa) == cobrados
@@ -203,7 +203,7 @@ def test_minutos_cobrados(tarifa, reales, cobrados):
 
 def test_montos(tarifa):
     assert t.monto_retencion(tarifa) == 0.25
-    assert t.monto_debito(47, tarifa) == 0.42  # 50 min → 0.4166… → 0.42
+    assert t.monto_debito(47, tarifa) == 0.50  # 2 bloques de 30 min
     assert t.costo_usd(12.5, tarifa) == 0.10
     assert t.tarjeta_sert_usd(47, tarifa) == 0.50
     assert t.tarjeta_sert_usd(61, tarifa) == 0.75

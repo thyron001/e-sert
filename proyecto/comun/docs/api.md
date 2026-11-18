@@ -7,7 +7,7 @@ Generado por `comun/docs/verificar_contrato_api.py` desde `app.openapi()` (contr
 - Errores: `{"error": {"codigo", "mensaje", "detalle?"}}` (contrato §4.2).
 - Esquema completo: [`openapi.json`](openapi.json). WebSockets: al final.
 
-**Verificación contra `docs/CONTRATO.md` §4.3:** sin diferencias.
+**Verificación contra `docs/CONTRATO.md` §4.3:** 8 diferencias (ver la salida del script).
 
 | Método | Ruta | Éxito | Cuerpo | Respuesta |
 |---|---|---|---|---|
@@ -83,12 +83,12 @@ Ejemplo (`comun/tarifa.json`):
 {
   "valor_hora_usd": 0.5,
   "bloque_minimo_min": 30,
-  "fraccion_min": 5,
-  "cobro_minimo_min": 10,
+  "fraccion_min": 30,
+  "cobro_minimo_min": 30,
   "saldo_negativo_max_usd": 0.5,
   "aviso_saldo_min": 10,
   "tiempo_maximo_min": 120,
-  "aviso_tiempo_min": 10,
+  "aviso_tiempo_min": 5,
   "recarga_minima_usd": 5.0,
   "tarjeta_bloque_min": 30
 }
@@ -182,6 +182,7 @@ Cuerpo: `PasoSimulacion`
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
 | `puestos` | [OcupacionPuesto] \| null | no |
+| `web` | [EventoWeb] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
@@ -225,6 +226,7 @@ Respuesta `202`: `RespuestaSnapshot`
 |---|---|---|
 | `aceptado` | bool | no |
 | `espejos` | [texto] | no |
+| `ordenes` | [OrdenSim] | no |
 
 Otros códigos: `401`, `422`
 
@@ -243,6 +245,7 @@ Cuerpo: `PasoSimulacion`
 | `verdad` | DatosVerdad | sí |
 | `espejo` | BloqueEspejo \| null | no |
 | `puestos` | [OcupacionPuesto] \| null | no |
+| `web` | [EventoWeb] \| null | no |
 
 Ejemplo (`comun/ejemplos/sim_paso.json`):
 
@@ -286,6 +289,7 @@ Respuesta `202`: `RespuestaSnapshot`
 |---|---|---|
 | `aceptado` | bool | no |
 | `espejos` | [texto] | no |
+| `ordenes` | [OrdenSim] | no |
 
 Otros códigos: `401`, `422`
 
@@ -561,9 +565,9 @@ Ejemplo (`comun/ejemplos/sesion_cerrada.json`):
 {
   "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
   "minutos_reales": 47.0,
-  "minutos_cobrados": 50,
-  "debitado": 0.42,
-  "saldo": 4.58
+  "minutos_cobrados": 60,
+  "debitado": 0.5,
+  "saldo": 4.5
 }
 ```
 
@@ -612,8 +616,8 @@ Ejemplo (`comun/ejemplos/sesion.json`):
   "t_sim_fin": 4054.0,
   "retenido": 0.25,
   "minutos_reales": 47.0,
-  "minutos_cobrados": 50,
-  "debitado": 0.42
+  "minutos_cobrados": 60,
+  "debitado": 0.5
 }
 ```
 
@@ -643,9 +647,9 @@ Ejemplo (`comun/ejemplos/billetera.json`):
 
 ```json
 {
-  "saldo": 4.58,
+  "saldo": 4.5,
   "retenido": 0.0,
-  "disponible": 4.58,
+  "disponible": 4.5,
   "bloqueada": false,
   "movimientos": [
     {
@@ -667,7 +671,7 @@ Ejemplo (`comun/ejemplos/billetera.json`):
     {
       "movimiento_id": "mov_24ef6071-8c9d-4eaf-9021-3c4d5e6f7081",
       "tipo": "debito",
-      "monto": 0.42,
+      "monto": 0.5,
       "ts": "2026-10-20T14:50:05Z",
       "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
       "referencia_payphone": null

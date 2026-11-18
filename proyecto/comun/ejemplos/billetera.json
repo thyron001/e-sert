@@ -1,7 +1,7 @@
 {
-  "saldo": 4.58,
+  "saldo": 4.5,
   "retenido": 0.0,
-  "disponible": 4.58,
+  "disponible": 4.5,
   "bloqueada": false,
   "movimientos": [
     {
@@ -23,7 +23,7 @@
     {
       "movimiento_id": "mov_24ef6071-8c9d-4eaf-9021-3c4d5e6f7081",
       "tipo": "debito",
-      "monto": 0.42,
+      "monto": 0.5,
       "ts": "2026-10-20T14:50:05Z",
       "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
       "referencia_payphone": null

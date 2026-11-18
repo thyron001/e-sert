@@ -292,11 +292,29 @@ export interface PasoSimulacion {
   espejo?: BloqueEspejo | null;
   /** v1.4: mapa estimado del controlador; el backend lo suma a `snapshot.puestos`. */
   puestos?: OcupacionPuesto[] | null;
+  /** 2026-11-18 (app web): qué pasó con las órdenes de `RespuestaSnapshot.ordenes`. */
+  web?: EventoWeb[] | null;
+}
+
+export interface OrdenSim {
+  tipo: 'buscar' | 'estacionado' | 'volver';
+  veh_id: VehiculoId;
+  lat?: number | null;
+  lon?: number | null;
+  puesto_id?: PuestoId | null;
+}
+
+export interface EventoWeb {
+  tipo: 'asignado' | 'sin_puesto' | 'puesto_lleno' | 'error';
+  veh_id: VehiculoId;
+  puesto_id?: PuestoId | null;
+  detalle?: string | null;
 }
 
 export interface RespuestaSnapshot {
   aceptado: true;
   espejos?: VehiculoId[];
+  ordenes?: OrdenSim[];
 }
 
 export interface PuestoEspejo {

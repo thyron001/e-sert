@@ -84,13 +84,16 @@ class Guia:
         self.reasignaciones: Counter = Counter()
         self._ultima_revision: Dict[str, float] = {}
         self.contadores: Counter = Counter()
+        # Autos de la app web (2026-11-18): los guía `AutosWeb` con la ocupación real; aquí solo
+        # se lleva su estado y su puesto para el espejo.
+        self.web: set = set()
 
     # ------------------------------------------------------------------ hook
 
     def on_paso(self, ctrl, t: float) -> None:
         tr = ctrl.traci
         for veh in tr.simulation.getDepartedIDList():
-            if parametro(ctrl, veh, "clase") != "busca" or parametro(ctrl, veh, "con_app") != "1":
+            if veh in self.web or parametro(ctrl, veh, "clase") != "busca" or parametro(ctrl, veh, "con_app") != "1":
                 continue
             self.puente.registrar(f"sim_{veh}")
             self.estado[veh] = "BUSCANDO"
@@ -99,7 +102,7 @@ class Guia:
             if veh in self.estado:
                 self.estado[veh] = "ESTACIONADO"
         for veh, est in list(self.estado.items()):
-            if est == "GUIADO" and t - self._ultima_revision[veh] >= self.periodo_s:
+            if est == "GUIADO" and veh not in self.web and t - self._ultima_revision[veh] >= self.periodo_s:
                 self._revisar(ctrl, veh, t)
 
     # ------------------------------------------------------------------ decisiones

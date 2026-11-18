@@ -211,6 +211,30 @@ Reservados **solo para el cliente** (nunca los envía el backend): `SIN_CONEXION
 | 🔒 `POST /demo/iniciar` | `{penetracion?, semilla?, ritmo?, hasta_s?, clasificador?}` (todo opcional) | `202 EstadoDemo`; `409 DEMO_EN_CURSO`; `503 DEMO_NO_DISPONIBLE` | `ParametrosDemo` → `EstadoDemo` |
 | 🔒 `POST /demo/detener` | — | `EstadoDemo` | → `EstadoDemo` |
 
+**App web (`/web/*`, 2026-11-18, `backend/web/`).** La usa `https://demo.e-sert.tesisucuenca.com/app/`.
+Sin autenticación: el `usuario_id` (`app_<uuid>`) que guarda el navegador es la llave; la billetera
+es de prueba.
+
+- `POST /web/usuarios` → `201 {usuario_id, saldo}`: usuario nuevo con $5 de prueba.
+- `GET /web/usuarios/{id}` → `{usuario_id, saldo, t_sim, sim_activa, sesion}`; `sesion` trae
+  `estado` (`pendiente`, `yendo`, `llego`, `activa`, `volviendo`, `cerrada`), `puesto` (con
+  `codigo`), `auto` (posición y ruta de su auto en SUMO), `pagado_min`, `restante_s`, `alerta`,
+  `puede_extender`, `debitado` y `mensaje`. La app lo consulta cada segundo.
+- `POST /web/usuarios/{id}/buscar` `{lat, lon}` → crea un auto en SUMO y lo guía al puesto
+  libre más cercano (ocupación real + reservas web).
+- `POST /web/usuarios/{id}/estacionado` `{codigo}` → el auto aparece ya estacionado en ese puesto.
+- `POST /web/usuarios/{id}/tiempo` `{minutos: 30|60|90|120}` y `/extender` `{minutos}` → se
+  debita de inmediato.
+- `POST /web/usuarios/{id}/me-voy` → el conductor vuelve al auto.
+- `GET /web/puestos` → `[{puesto_id, codigo, calle, lat, lon, capacidad, ocupados}]` con la
+  ocupación real. El `codigo` (001…) sigue el orden alfabético de los `puesto_id`.
+
+Con el controlador: el backend pone las órdenes en `RespuestaSnapshot.ordenes` (`OrdenSim`:
+`buscar`, `estacionado`, `volver`) y sigue a los autos web en `espejos`; el controlador responde
+en `PasoSimulacion.web` (`EventoWeb`: `asignado`, `sin_puesto`, `puesto_lleno`, `error`). La IA
+(RF sobre el GPS emulado, máquina de estados de §3) da el estado del auto: `ESTACIONADO`/`A_PIE`
+→ llegó; `REGRESANDO`/`SALIENDO`/`CERRADA` → se fue.
+
 Detalles:
 
 - **Demo en el servidor (`/demo/*`, 2026-11-18, `backend/simulador/`):** aquí 🔒 no es el token
@@ -295,30 +319,35 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
 
 ```json
 {
-  "valor_hora_usd": 0.50,
+  "valor_hora_usd": 0.5,
   "bloque_minimo_min": 30,
-  "fraccion_min": 5,
-  "cobro_minimo_min": 10,
-  "saldo_negativo_max_usd": 0.50,
+  "fraccion_min": 30,
+  "cobro_minimo_min": 30,
+  "saldo_negativo_max_usd": 0.5,
   "aviso_saldo_min": 10,
   "tiempo_maximo_min": 120,
-  "aviso_tiempo_min": 10,
-  "recarga_minima_usd": 5.00,
+  "aviso_tiempo_min": 5,
+  "recarga_minima_usd": 5.0,
   "tarjeta_bloque_min": 30
 }
 ```
 
-Valores provisionales hasta que Miguel confirme la tarifa SERT vigente. `comun/tarifa.py`
+**Desde el 2026-11-18 se cobra por bloques de 30 min: $0,25 cada uno**, sin fracciones menores
+ni descuentos por salir antes (con `fraccion_min = cobro_minimo_min = 30`). `comun/tarifa.py`
 carga y valida el archivo (`cargar_tarifa()`) y ofrece las funciones de cálculo, que son las
-**únicas** que deben usar el backend y la app (la app las replica en TS):
+**únicas** que deben usar el backend y la app:
 
-- `minutos_cobrados = max(cobro_minimo_min, ⌈minutos_reales / fraccion_min⌉ · fraccion_min)`.
-- `costo_usd(m) = redondeo_centavo(m · valor_hora_usd / 60)`.
+- `minutos_cobrados = max(cobro_minimo_min, ⌈minutos_reales / fraccion_min⌉ · fraccion_min)`:
+  bloques de 30 min completos, al menos uno.
+- `costo_usd(m) = redondeo_centavo(m · valor_hora_usd / 60)` → $0,25 por bloque.
 - **Retención** al crear la sesión: `costo_usd(bloque_minimo_min)` ($0,25).
 - **Débito** al cerrar: `costo_usd(minutos_cobrados)`; se libera toda la retención.
-- **Tarjeta SERT equivalente** (para el recibo): tarjetas de `tarjeta_bloque_min` (30 min)
-  pagadas por adelantado, `⌈minutos_reales / tarjeta_bloque_min⌉ · costo_usd(tarjeta_bloque_min)`,
-  con al menos un bloque. `ahorro_usd = tarjeta − cobrado`.
+- **App web** (`/app/`, §4.3 `/web/*`): prepago. El usuario elige 30, 60, 90 o 120 min y se
+  debita de inmediato; puede extender en bloques de 30 min hasta `tiempo_maximo_min`. A
+  `aviso_tiempo_min` (5 min) del final se avisa, y al llegar a 0 se renueva sola (+30 min,
+  +$0,25) mientras no pase de 120 min; en el máximo, el conductor vuelve al auto y se va.
+- `tarjeta_bloque_min` y los campos `tarjeta_sert_usd`/`ahorro_usd` del recibo se mantienen solo
+  por compatibilidad con la app Expo histórica: con bloques de 30 min el ahorro siempre es 0.
 - **Saldo negativo:** el débito se aplica completo aunque deje el saldo negativo (el auto ya
   estuvo estacionado). Mientras `saldo < 0` la billetera queda `bloqueada` y `POST /sesiones`
   responde `403 SESIONES_BLOQUEADAS`. `saldo_negativo_max_usd` es el margen tolerado: cuando

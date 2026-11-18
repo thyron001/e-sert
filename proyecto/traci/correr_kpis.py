@@ -198,6 +198,12 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
                 snapshots = PublicadorSnapshots(pub_paso, sesiones, guia, registro, peatones, net, kpis=kpis,
                                                 espejo=pub_espejo)
                 ctrl.agregar_hook(snapshots.on_paso)
+                if publicar:
+                    # App web (2026-11-18): el backend ordena crear y mover autos propios en SUMO.
+                    from .autos_web import AutosWeb
+
+                    snapshots.web = AutosWeb(guia, peatones)
+                    ctrl.agregar_hook(snapshots.web.on_paso)
             if ritmo:
                 from .correr_guiado import Ritmo
 

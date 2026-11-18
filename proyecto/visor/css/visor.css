@@ -101,3 +101,16 @@ body.presentacion .halo-espejo .etiqueta { font-size: 15px; left: 22px; top: -14
 .control-demo button:disabled { opacity: .45; cursor: default; }
 .control-demo .nota { margin: 2px 0; }
 body.presentacion .control-demo { display: none; }
+
+/* QR de la app (app_qr.js): visible también en modo presentación, para que el público lo escanee */
+.app-qr { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 8px; padding: 4px 10px 8px; margin-bottom: 10px; }
+.app-qr h2 { margin-top: 6px !important; }
+.qr-app { background: #fff; border-radius: 6px; padding: 6px; width: calc(190px * var(--escala)); max-width: 100%; margin: 4px auto; }
+.qr-app svg { display: block; width: 100%; height: auto; }
+.app-qr .enlace-app { font-family: ui-monospace, monospace; font-size: .72em; word-break: break-all; }
+
+/* Leyenda del mapa satelital (mapa_esert.js) */
+.punto.linea { width: 16px; height: 0; border-radius: 0; background: none !important; border-top: 3px dashed currentColor; }
+.punto.auto { width: 8px; height: 14px; border-radius: 3px; border: 1px solid #0f172a; }
+.punto.halo { box-shadow: 0 0 0 4px rgba(255, 214, 10, .45); }
+.capa-calle { pointer-events: none; }

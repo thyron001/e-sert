@@ -10,6 +10,6 @@
   "t_sim_fin": 4054.0,
   "retenido": 0.25,
   "minutos_reales": 47.0,
-  "minutos_cobrados": 50,
-  "debitado": 0.42
+  "minutos_cobrados": 60,
+  "debitado": 0.5
 }

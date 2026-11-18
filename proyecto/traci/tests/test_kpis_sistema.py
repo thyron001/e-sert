@@ -161,10 +161,10 @@ def test_estadia_de_47_min_cobrada_por_el_nucleo_error_cero(mundo):
     cerrar(nucleo, sid, t_salida)  # cierre en el mismo paso de la salida: minutos reales = 47
     fila = kpis.detalle_sesiones().iloc[0] if _hay_pandas() else kpis._filas()[0]
     assert fila["minutos_reales_sumo"] == pytest.approx(47.0)
-    assert fila["debitado"] == pytest.approx(0.42)  # ⌈47/5⌉·5 = 50 min a 0,50 USD/h
+    assert fila["debitado"] == pytest.approx(0.50)  # 2 bloques de 30 min a $0,25
     r = kpis.resumen()
     assert r["error_fact_medio_usd"] == 0.0 and r["error_fact_abs_max_usd"] == 0.0
-    assert r["ahorro_vs_tarjeta_medio_usd"] == pytest.approx(0.50 - 0.42)  # 2 tarjetas de 30 min
+    assert r["ahorro_vs_tarjeta_medio_usd"] == pytest.approx(0.0)  # misma tarifa por bloques: sin ahorro
 
 
 def test_precision_del_mapa_calculada_a_mano(mundo):

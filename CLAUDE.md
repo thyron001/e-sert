@@ -124,6 +124,9 @@ Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
   `POST /api/v1/demo/iniciar` y `/detener` con la cabecera `X-Clave-Demo`. El backend le pasa la
   orden a `sim` (`ESERT_URL_SIM`). Su `sumo-gui` se ve y se controla en
   `https://sumo.tesisucuenca.com`, por noVNC.
+- **App web** en `https://demo.e-sert.tesisucuenca.com/app/` (QR en el visor): `visor/app/`,
+  `backend/web/` y `traci/autos_web.py`. Tarifa: $0,25 por bloque de 30 min, prepago de 30 a
+  120 min, con renovación automática (`docs/DESPLIEGUE.md`, «App web»).
 - **Antes de un push que redespliegue `sim` o `api`**, comprueba que no haya una demo en curso:
   `curl -s https://demo.e-sert.tesisucuenca.com/api/v1/demo/estado` (fase `inactiva`).
 - La API de Dokploy se usa con la clave de `/root/.dokploy_api_key` (cabecera `x-api-key`,

@@ -81,11 +81,11 @@ class PublicadorSnapshots:
         # dice qué autos sigue algún teléfono (`espejos`) y solo de esos se arma el detalle.
         self.espejo = espejo
         self.espejos: frozenset = frozenset()
+        self.web = None  # AutosWeb (app web): eventos en el cuerpo, órdenes en la respuesta
         self._ultimo_cuerpo: Optional[dict] = None
         self._ultima_pos: dict = {}
         self.posiciones_invalidas = 0
-        if espejo is not None:
-            publicador.al_responder = self._al_responder
+        publicador.al_responder = self._al_responder
         # S3-1: con `kpis` (KPIsSistema), el campo `verdad` lleva la ocupación real de SUMO, los
         # autos con app estacionados y las falsas liberaciones del paso (contrato §4.4 y §6).
         self.kpis = kpis
@@ -136,12 +136,18 @@ class PublicadorSnapshots:
                                  for o in puente.mapa.ocupacion() if o.ocupados > 0]
         if self.espejo is not None:
             cuerpo["espejo"] = self.espejo.bloque(ctrl, t, self.espejos)
+        if self.web is not None:
+            eventos = self.web.eventos()
+            if eventos:
+                cuerpo["web"] = eventos
         self._ultimo_cuerpo = cuerpo
         self.publicador.publicar(cuerpo)
 
     def _al_responder(self, respuesta: dict) -> None:
-        """Hilo del publicador: guarda la lista `espejos` que devolvió el backend."""
+        """Hilo del publicador: guarda la lista `espejos` y encola las órdenes de la app web."""
         self.espejos = frozenset(respuesta.get("espejos") or ())
+        if self.web is not None:
+            self.web.recibir(respuesta.get("ordenes"))
 
     def fin_corrida(self) -> None:
         """Último snapshot con `espejo.fin`: los teléfonos reciben `espejo_fin` (`fin_simulacion`)."""

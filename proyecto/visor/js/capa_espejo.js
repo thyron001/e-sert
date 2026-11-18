@@ -95,7 +95,7 @@ export class CapaEspejo {
     if (d && d.destino) filas.push(`Destino: ${d.destino.nombre}`);
     if (d && d.puesto) filas.push(`Puesto: ${d.puesto.puesto_id} (${numero(d.puesto.distancia_m)} m al destino)`);
     if (d && d.sesion) filas.push(`Sesión: ${numero(d.sesion.minutos, 1)} min · $${numero(d.sesion.costo_usd, 2)}`);
-    if (d && d.recibo) filas.push(`Recibo: $${numero(d.recibo.cobrado_usd, 2)} (tarjeta SERT $${numero(d.recibo.tarjeta_sert_usd, 2)})`);
+    if (d && d.recibo) filas.push(`Recibo: $${numero(d.recibo.cobrado_usd, 2)}`);
     if (!d) filas.push("<i>Abre ?espejo=" + id + " para ver ruta, puesto y costo</i>");
     return filas.join("<br>");
   }

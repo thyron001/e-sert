@@ -143,7 +143,19 @@ class GestorPeatones:
         ped = f"ped_{veh}"
         tr.person.add(ped, edge_auto, pos_auto)
         destino = self._destino_con_camino(tr, veh, edge_auto)
-        if self.rng.random() < self.p_espera_en_auto or destino is None:
+        web = tr.vehicle.getParameter(veh, "web") == "1"
+        if web and destino is not None:
+            # App web: siempre se baja y camina; espera hasta que el usuario pulse «Me voy» o se
+            # acabe el tiempo máximo (orden `volver`), sin casos al azar.
+            (edge_dest, pos_dest), ida, t_ida, vuelta = destino
+            tr.person.appendWalkingStage(ped, ida, pos_dest)
+            tr.person.appendWaitingStage(ped, PARADA_EXTENDIDA_S, "diligencia")
+            tr.person.appendWalkingStage(ped, vuelta, pos_auto)
+            self.activos[veh] = _Diligencia(ped, pa, t, "web")
+            self.llegadas += 1
+            self.casos["web"] += 1
+            return
+        if (not web and self.rng.random() < self.p_espera_en_auto) or destino is None:
             tr.person.appendWaitingStage(ped, max(MIN_DILIGENCIA_S, t_estadia), "en_auto")
             caso = "en_auto" if destino is not None else "sin_camino"
         else:
@@ -225,6 +237,24 @@ class GestorPeatones:
         return self.rng.choices(validos, weights=pesos)[0]
 
     # ------------------------------------------------------------------ regreso
+
+    def volver(self, ctrl, veh: str) -> bool:
+        """El conductor deja la diligencia y vuelve al auto ya (app web: «Me voy»).
+
+        Quita la espera pendiente del itinerario del peatón: si está esperando, termina la espera;
+        si va caminando hacia el destino, al llegar da media vuelta. True si había algo que quitar.
+        """
+        d = self.activos.get(veh)
+        tr = ctrl.traci
+        if d is None or d.ped not in tr.person.getIDList():
+            return False
+        restantes = tr.person.getRemainingStages(d.ped)
+        for i in range(restantes):
+            etapa = tr.person.getStage(d.ped, i)
+            if etapa.type == tr.constants.STAGE_WAITING:
+                tr.person.removeStage(d.ped, i)
+                return True
+        return False
 
     def _revisar_regresos(self, ctrl, t: float) -> None:
         ids = set(ctrl.traci.person.getIDList())

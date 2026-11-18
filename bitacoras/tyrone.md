@@ -930,3 +930,34 @@ Sin verificador independiente: no es una sesión del plan.
   - uvicorn era el PID 1 y no recogía huérfanos. Ahora `tini` es el PID 1 de `sim`.
   Con la imagen nueva, dos rondas de iniciar y detener con `sumo-gui`: código −2, sin procesos de SUMO y sin zombis.
 - **Parada sin cortar TraCI:** en producción el controlador seguía saliendo con código 1, porque el Ctrl+C llegaba en mitad de un intercambio TraCI y `traci.close()` leía basura. `kpis.correr_una` ahora instala el mismo manejador que `traci.correr_kpis` (S4-3): el Ctrl+C se anota y la corrida se corta entre dos pasos. Probado con la imagen real deteniendo en t≈10, 40 y 90 s: código 130, sin tracebacks, sin procesos ni zombis. `sim` se actualiza en modo stop-first (antes start-first: durante un relevo había dos `sim` y una petición podía ir al viejo).
+
+## 2026-11-18 · App web en línea, tarifa por bloques de 30 min y mapa satelital
+**Estado:** hecho (la verificación en producción va al final de la entrada).
+**Qué hice:**
+- **Tarifa:** $0,25 por bloque de 30 min, sin fracciones ni descuentos (`comun/tarifa.json`: `fraccion_min = cobro_minimo_min = 30`, aviso a 5 min). Se ajustaron los ejemplos del contrato y las pruebas que asumían fracciones de 5 min. El recibo conserva `tarjeta_sert_usd`/`ahorro_usd` solo por compatibilidad con la app Expo (siempre 0 de ahorro).
+- **App web** (`visor/app/`, `https://demo.e-sert.tesisucuenca.com/app/`, QR en el visor). Reemplaza a la app Expo en la demo; la app Expo queda como historia.
+  - Cada navegador es `app_<uuid>` con $5 de prueba.
+  - «Buscar parqueadero cercano» desde una ubicación simulada (toque en el mapa) → auto propio en SUMO por la ruta real al puesto libre más cercano.
+  - «Ya estacioné» con el código del puesto → auto estacionado ahí.
+  - La IA (RF + máquina de estados) detecta la llegada (pide 30/60/90/120 min, débito inmediato) y la salida tras «Me voy».
+  - Alerta a 5 min y renovación automática hasta 120 min; en el máximo, el conductor vuelve solo.
+- **Backend:**
+  - `backend/web/` (`/api/v1/web/*`): tabla `sesiones_web` y `Billetera.cobrar` (débito sin sesión del núcleo);
+  - el temporizador corre en tiempo simulado;
+  - órdenes al controlador en `RespuestaSnapshot.ordenes` y eventos de vuelta en `PasoSimulacion.web` (`OrdenSim`, `EventoWeb` en `comun/esquemas.py` y `.ts`).
+- **Controlador:** `traci/autos_web.py` crea los autos, elige el puesto con la ocupación real más las reservas web y reasigna si se llena. La `Guia` ya no guía ni revisa los autos web; `GestorPeatones` hace una diligencia larga para el conductor web y tiene `volver()` para «Me voy».
+- **Mapa compartido** (`visor/js/mapa_esert.js`), usado por el visor y la app:
+  - fondo satelital Esri;
+  - nombres de calles dibujados desde la red de SUMO (la capa de etiquetas de CARTO ahora pide clave);
+  - puestos en líneas punteadas junto a la acera (verde/rojo), autos estacionados en sus plazas y autos orientados por su rumbo.
+  - La geometría sale de `sumo/parqueos/exportar_puestos_geo.py` → `visor/datos/{puestos,calles}_geo.json`.
+**Problemas encontrados:**
+- El disco del VPS se llenó (99 %) con imágenes y caché de compilación; se liberaron ~10 GB (imágenes de prueba, huérfanas y caché de más de 2 h).
+- **Bloqueo de toques:** en la prueba con teléfono (Playwright), el cuadro de alerta oculto tapaba toda la app (`display: grid` anulaba `hidden`). Arreglado con `[hidden] { display: none !important; }`.
+- **Toques en el mapa:** tocar el mapa cerca de un puesto cambiaba al modo «Ya estacioné». Ahora solo mueve la ubicación; los puestos se eligen dentro de «Ya estacioné».
+- **Cierre en falso:** la sesión web se cerraba con un `REGRESANDO` pasajero de la máquina de estados (conductor quieto a 21 m del auto, que el RF corrigió a `A_PIE` 55 s después). Ahora solo cierra con `SALIENDO`/`CERRADA`.
+**Pruebas:**
+- `comun`, backend y lo afectado de `traci`: 482 passed.
+- App web: 10 pruebas nuevas.
+- Recorrido real con teléfono simulado (390×844) contra `api` + `sim` + `visor`: buscar → asignado en 3 s → la IA detectó la llegada en 60 s → pago de 30 min ($4,75).
+**Pendientes:** pruebas de unidad de `AutosWeb` con un controlador falso (hoy se cubre con el recorrido real).

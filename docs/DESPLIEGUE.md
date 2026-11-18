@@ -28,6 +28,30 @@ local, nunca en el repo.
    puestos y el auto que sigue el teléfono espejo, resaltado. Con un QR (solo un enlace
    abreviado) el profesor lo abre en su celular sin escribir la URL.
 
+## App web (`https://demo.e-sert.tesisucuenca.com/app/`, 2026-11-18)
+
+Reemplaza a la app Expo para la demo (la app Expo queda en `proyecto/app/` como historia). El
+visor muestra su QR; quien lo escanea la abre en el navegador del teléfono. Todo es simulado:
+
+- **Usuario:** cada navegador es un usuario `app_<uuid>` con **$5 de prueba**.
+- **Buscar parqueadero cercano:** toca el mapa para poner su ubicación simulada; el backend ordena
+  crear un auto propio en SUMO, que va por la **ruta real** al puesto libre más cercano (ocupación
+  real de SUMO + reservas de otros usuarios web). El auto se ve en amarillo con su ruta.
+- **Ya estacioné:** el número del puesto (o tocarlo en el mapa): el auto aparece estacionado ahí y
+  el puesto queda reservado.
+- **La IA:** el conductor del auto lleva el GPS emulado y el clasificador RF decide cuándo
+  estacionó y se bajó (la app pide el tiempo) y cuándo volvió a manejar tras «Me voy» (se cierra).
+- **Tarifa:** $0,25 por bloque de 30 min, prepago: 30, 60, 90 o 120 min, debitado al elegir. A 5
+  min del final, alerta; en 0, se renueva sola (+30 min, +$0,25) hasta 120 min; en el máximo, el
+  conductor vuelve y se va. Si no elige en 5 min simulados, se cobran 30 min.
+- **El temporizador corre en tiempo simulado**: a ritmo 2, 30 min son 15 min reales.
+- La simulación tiene que estar corriendo (botón «Iniciar» del visor).
+- Código: `proyecto/visor/app/` (página), `proyecto/backend/web/` (API `/api/v1/web/*`),
+  `proyecto/traci/autos_web.py` (autos en SUMO). Mapa compartido con el visor:
+  `proyecto/visor/js/mapa_esert.js` (satélite, nombres de calles de la red de SUMO, puestos en
+  líneas punteadas, autos estacionados en sus plazas y autos orientados). La geometría sale de
+  `sumo/parqueos/exportar_puestos_geo.py` → `visor/datos/{puestos,calles}_geo.json`.
+
 ## Arquitectura de la demo (desde el 2026-11-18: servicios separados en el VPS)
 
 El proyecto `e-sert` de Dokploy (entorno `production`) tiene cuatro servicios. Cada uno tiene
@@ -36,7 +60,7 @@ El proyecto `e-sert` de Dokploy (entorno `production`) tiene cuatro servicios. C
 | Servicio (appName) | Qué hace | Imagen | Dominio | Se redespliega si cambia |
 |---|---|---|---|---|
 | `api` (`esert-api-ya3sai`) | Backend FastAPI: API, WebSocket, billetera, pagos, asistente; SQLite en el volumen `/data` | `proyecto/backend/Dockerfile` (python:3.11-slim, ~230 MB) | `demo.e-sert.tesisucuenca.com` | `proyecto/backend/**`, `proyecto/comun/**`, `puestos.csv`, `destinos.csv` |
-| `visor` (`esert-visor-p5kz4t`) | Visor web estático (nginx) | `proyecto/visor/Dockerfile` (~55 MB) | `demo.e-sert.tesisucuenca.com/visor` | `proyecto/visor/**` |
+| `visor` (`esert-visor-p5kz4t`) | Visor web y app web, estáticos (nginx) | `proyecto/visor/Dockerfile` (~55 MB) | `demo.e-sert.tesisucuenca.com/visor` y `/app` | `proyecto/visor/**` |
 | `sim` (`esert-sim-ygqubj`) | SUMO 1.12 + controlador TraCI + `sumo-gui` (Xvfb + noVNC) + servicio de control en :8100 | `proyecto/sim/Dockerfile` (Ubuntu 22.04, ~1,5 GB) | `sumo.tesisucuenca.com` (puerto 6080) | `proyecto/sim/**`, `traci/**`, `kpis/**`, `sumo/**`, `ia/**`, `backend/nucleo/**`, `backend/simulador/**`, `comun/**` |
 | `Frontend` (`esert-frontend-klfae6`) | Roadmap | `Dockerfile` (raíz) | `e-sert.tesisucuenca.com` | `Dockerfile`, `roadmap/**`, `docs/**`, `bitacoras/**`, `semanas/**` |
 

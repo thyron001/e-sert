@@ -73,6 +73,17 @@ class Billetera:
             _verificar_duenio(tx, usuario, sesion_id)
             return self._asentar(usuario, TM.debito, centavos, sesion_id, ts, None, tx)
 
+    def cobrar(self, usuario: str, centavos: int, referencia: str, ts: Optional[datetime] = None,
+               s: Optional[Session] = None) -> str:
+        """Débito sin sesión del núcleo (prepago de la app web). Exige disponible suficiente."""
+        with self.bd.transaccion(s) as tx:
+            disponible = self.estado_centavos(usuario, tx)["disponible"]
+            if centavos > disponible:
+                raise ErrorNucleo(e.CodigoError.SALDO_INSUFICIENTE,
+                                  f"Tu saldo (${tar.usd(disponible):.2f}) no alcanza para ${tar.usd(centavos):.2f}.",
+                                  {"disponible": tar.usd(disponible), "monto": tar.usd(centavos)})
+            return self._asentar(usuario, TM.debito, centavos, None, ts, referencia, tx)
+
     def liberar(self, usuario: str, centavos: int, sesion_id: str, ts: Optional[datetime] = None,
                 s: Optional[Session] = None) -> str:
         """Devuelve al disponible lo retenido para `sesion_id` (nunca más de lo retenido)."""

@@ -13,6 +13,8 @@ import { PanelKpis } from "./panel_kpis.js";
 import { CapaEspejo } from "./capa_espejo.js";
 import { Presentacion } from "./presentacion.js";
 import { ControlDemo } from "./control_demo.js";
+import { AppQR, urlApp } from "./app_qr.js";
+import { crearMapa, CapaCalle, COLORES } from "./mapa_esert.js";
 
 const params = new URLSearchParams(location.search);
 const WS_URL = params.get("ws") ||
@@ -31,19 +33,15 @@ export const COLOR_ESTADO = {
 const COLOR_PEATON = "#111827";
 const $ = (id) => document.getElementById(id);
 
-// --- Mapa (canvas: miles de circleMarker sin DOM por marcador) -------------------------------
+// --- Mapa: satélite con nombres de calles; puestos, plazas y autos en un único lienzo ----------
 const lienzo = L.canvas({ padding: 0.3 });
-const mapa = L.map("mapa", { preferCanvas: true, renderer: lienzo, zoomSnap: 0.25 }).setView([-2.8974, -79.0045], 16);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(mapa);
-const capaPuestos = L.layerGroup().addTo(mapa);
-const capaVehiculos = L.layerGroup().addTo(mapa);
-const capaPeatones = L.layerGroup().addTo(mapa);
+const mapa = crearMapa("mapa", { preferCanvas: true, renderer: lienzo });
+const calle = new CapaCalle({ datos: "./datos/puestos_geo.json" }).addTo(mapa);
+calle.cargar().then(() => pintarOcupacion());
 
 const puestos = new Map();
-const vehiculos = new Map();
-const peatones = new Map();
+const vehiculos = calle.vehiculos;
+const peatones = calle.peatones;
 
 const panel = new PanelKpis($("tarjetas"), $("nota-base"), params.get("base") || "./datos/base.json");
 const espejo = new CapaEspejo(mapa, { wsBase: WS_BASE, vehInicial: params.get("espejo") });
@@ -51,16 +49,15 @@ const presentacion = new Presentacion(mapa, { puestos, espejo, inicial: params.g
 
 function leyenda() {
   const filas = [
-    ["Puesto con lugar", COLOR_PUESTO.libre, ""],
-    [OCUPACION_REAL ? "Puesto lleno (ocupación real de SUMO)" : "Puesto lleno (mapa del sistema)", COLOR_PUESTO.lleno, ""],
-    ["Auto sin app (color = estado)", "#ffffff", ""], ["Auto con app (borde negro)", "#ffffff", "app"],
-    ["Buscando", COLOR_ESTADO.BUSCANDO, ""], ["Guiado por la app", COLOR_ESTADO.GUIADO, ""],
-    ["Estacionado", COLOR_ESTADO.ESTACIONADO, ""], ["A pie / regresando", COLOR_ESTADO.A_PIE, ""],
-    ["Sin búsqueda (paso)", COLOR_ESTADO.null, ""], ["Peatón", COLOR_PEATON, ""],
-    ["Vehículo espejo", "#FFD60A", "halo"],
+    ["Puesto con plazas libres", COLORES.libre, "linea"],
+    [OCUPACION_REAL ? "Puesto lleno (ocupación real de SUMO)" : "Puesto lleno (mapa del sistema)", COLORES.lleno, "linea"],
+    ["Auto estacionado", COLORES.estacionado, "auto"],
+    ["Buscando", COLORES.BUSCANDO, "auto"], ["Guiado por la app", COLORES.GUIADO, "auto"],
+    ["Estacionado (con app)", COLORES.ESTACIONADO, "auto"], ["A pie / regresando", COLORES.A_PIE, "auto"],
+    ["Peatón", COLORES.peaton, ""], ["Usuario de la app / espejo", COLORES.propio, "auto halo"],
   ];
   $("leyenda").innerHTML = filas.map(([t, c, cl]) =>
-    `<li><span class="punto ${cl}" style="background:${c}"></span>${t}</li>`).join("");
+    `<li><span class="punto ${cl}" style="background:${c};color:${c}"></span>${t}</li>`).join("");
   $("ws-url").textContent = WS_URL;
 }
 
@@ -80,11 +77,8 @@ function contarLlenos() {
   $("n-llenos").textContent = `${llenos} / ${total}`;
 }
 
-function pintarPuesto(id) {
-  const p = puestos.get(id);
-  if (!p || !p.marcador) return;
-  const color = ocupadosMostrados(p) < p.capacidad ? COLOR_PUESTO.libre : COLOR_PUESTO.lleno;
-  if (p.color !== color) { p.marcador.setStyle({ color, fillColor: color }); p.color = color; }
+function pintarOcupacion() {
+  calle.fijarOcupacion([...puestos.entries()].map(([id, p]) => ({ puesto_id: id, ocupados: ocupadosMostrados(p) || 0 })));
 }
 
 async function cargarPuestos() {
@@ -97,17 +91,10 @@ async function cargarPuestos() {
         lat: p.lat, lon: p.lon, calle: p.calle, capacidad: p.capacidad,
         ocupados: previo.ocupados !== undefined ? previo.ocupados : p.ocupados,
       });
-      if (!dato.marcador) {
-        dato.marcador = L.circleMarker([p.lat, p.lon], { renderer: lienzo, radius: 5, weight: 1, fillOpacity: 0.85 })
-          .bindPopup(() => {
-            let t = `${dato.calle || p.puesto_id} · ${dato.ocupados}/${dato.capacidad}`;
-            if (VER_VERDAD && dato.real !== undefined) t += ` (real ${dato.real})`;
-            return t;
-          }).addTo(capaPuestos);
-      }
+      dato.cargado = true;
       puestos.set(p.puesto_id, dato);
-      pintarPuesto(p.puesto_id);
     }
+    pintarOcupacion();
     espejo.puestos = puestos;
     presentacion.puestosCargados();
   } catch (err) {
@@ -139,19 +126,18 @@ function actualizarMarcadores(mapaIds, capa, lista, estilo) {
 const proc = []; // ms de procesamiento por snapshot
 function onSnapshot(msg) {
   const t0 = performance.now();
-  actualizarMarcadores(vehiculos, capaVehiculos, msg.vehiculos, (v) => {
-    const c = COLOR_ESTADO[v.estado] || COLOR_ESTADO.null;
-    return { radius: v.con_app ? 5 : 3.5, color: v.con_app ? "#000000" : c, fillColor: c,
-             weight: v.con_app ? 2.5 : 1, fillOpacity: 0.95 };
-  });
-  actualizarMarcadores(peatones, capaPeatones, msg.peatones || [], () => (
-    { radius: 2, color: COLOR_PEATON, fillColor: COLOR_PEATON, weight: 0, fillOpacity: 0.9 }));
+  const seguidos = new Set(msg.espejos || []);
+  calle.fijarVehiculos(msg.vehiculos.map((v) => ({
+    id: v.id, lat: v.lat, lon: v.lon, color: seguidos.has(v.id) ? COLORES.propio : (COLORES[v.estado] || COLORES.null),
+    borde: v.con_app ? "#0f172a" : null, halo: seguidos.has(v.id),
+  })));
+  calle.fijarPeatones(msg.peatones || []);
   for (const p of msg.puestos) {
     const dato = puestos.get(p.puesto_id) || {};
     dato.ocupados = p.ocupados; dato.capacidad = p.capacidad;
     puestos.set(p.puesto_id, dato);
-    pintarPuesto(p.puesto_id);
   }
+  if (!OCUPACION_REAL) pintarOcupacion();
   espejo.onSnapshot(msg);
   panel.onSnapshot(msg);
   $("n-vehiculos").textContent = msg.vehiculos.length;
@@ -173,8 +159,8 @@ function onVerdad(msg) {
     dato.real = p.ocupados;
     if (dato.capacidad === undefined) dato.capacidad = p.capacidad;
     if (dato.ocupados !== p.ocupados) difieren++;
-    if (OCUPACION_REAL) pintarPuesto(p.puesto_id);
   }
+  if (OCUPACION_REAL) pintarOcupacion();
   window.visorVerdadRecibida = (window.visorVerdadRecibida || 0) + 1;
   if (OCUPACION_REAL) { contarLlenos(); panel.onVerdad(msg); }
   if (!VER_VERDAD) return;
@@ -205,7 +191,7 @@ function conectar() {
   ws.onopen = () => {
     espera = 1; estadoConexion("conectado", "conectado");
     window.visorReconexiones = (window.visorReconexiones || 0) + 1;
-    if (!puestos.size || ![...puestos.values()].some((p) => p.marcador)) cargarPuestos();
+    if (!puestos.size || ![...puestos.values()].some((p) => p.cargado)) cargarPuestos();
   };
   ws.onmessage = onMensaje;
   ws.onclose = reintentar;
@@ -249,7 +235,8 @@ document.addEventListener("keydown", (ev) => {
 if (VER_VERDAD) $("verdad").hidden = false;
 leyenda();
 const controlDemo = new ControlDemo(API_BASE, $("control-demo"));
+const appQR = new AppQR($("app-qr"), urlApp(ORIGEN));
 cargarPuestos();
 conectar();
 requestAnimationFrame(medir);
-window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion, controlDemo };
+window.visor = { mapa, puestos, vehiculos, espejo, panel, presentacion, controlDemo, appQR };

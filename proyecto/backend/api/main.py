@@ -29,6 +29,7 @@ from ..espejo.ws_espejo import router as router_ws_espejo
 from ..simulador.cliente import ClienteSimulacion
 from ..simulador.gestor import GestorSimulacion
 from ..simulador.rutas import router as router_simulador
+from ..web.rutas import router as router_web
 from .ws import router as router_ws
 
 log = logging.getLogger("e-sert.api")
@@ -61,6 +62,7 @@ ETIQUETAS = [
     {"name": "simulacion", "description": "[sim] Entrada del controlador TraCI (rutas 🔒 del contrato)."},
     {"name": "espejo", "description": "Modo espejo: el teléfono sigue a un auto simulado."},
     {"name": "demo", "description": "Arranque y parada de la simulación de la demo en el servidor (🔑 clave)."},
+    {"name": "web", "description": "App web (`/app/`): usuarios de prueba, prepago por bloques de 30 min y autos propios en SUMO."},
 ]
 
 
@@ -195,6 +197,7 @@ def crear_app(config: Optional[Config] = None) -> FastAPI:
     for r in ROUTERS:
         app.include_router(r, prefix=PREFIJO)
     app.include_router(router_simulador, prefix=PREFIJO)
+    app.include_router(router_web, prefix=PREFIJO)
     app.include_router(router_ws)
     app.include_router(router_ws_espejo)
 

@@ -53,12 +53,12 @@
                 "example": {
                   "valor_hora_usd": 0.5,
                   "bloque_minimo_min": 30,
-                  "fraccion_min": 5,
-                  "cobro_minimo_min": 10,
+                  "fraccion_min": 30,
+                  "cobro_minimo_min": 30,
                   "saldo_negativo_max_usd": 0.5,
                   "aviso_saldo_min": 10,
                   "tiempo_maximo_min": 120,
-                  "aviso_tiempo_min": 10,
+                  "aviso_tiempo_min": 5,
                   "recarga_minima_usd": 5.0,
                   "tarjeta_bloque_min": 30
                 }
@@ -582,8 +582,8 @@
                   "t_sim_fin": 4054.0,
                   "retenido": 0.25,
                   "minutos_reales": 47.0,
-                  "minutos_cobrados": 50,
-                  "debitado": 0.42
+                  "minutos_cobrados": 60,
+                  "debitado": 0.5
                 }
               }
             }
@@ -874,9 +874,9 @@
                 "example": {
                   "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
                   "minutos_reales": 47.0,
-                  "minutos_cobrados": 50,
-                  "debitado": 0.42,
-                  "saldo": 4.58
+                  "minutos_cobrados": 60,
+                  "debitado": 0.5,
+                  "saldo": 4.5
                 }
               }
             }
@@ -986,9 +986,9 @@
                   "$ref": "#/components/schemas/Billetera"
                 },
                 "example": {
-                  "saldo": 4.58,
+                  "saldo": 4.5,
                   "retenido": 0.0,
-                  "disponible": 4.58,
+                  "disponible": 4.5,
                   "bloqueada": false,
                   "movimientos": [
                     {
@@ -1007,7 +1007,7 @@
                     {
                       "movimiento_id": "mov_24ef6071-8c9d-4eaf-9021-3c4d5e6f7081",
                       "tipo": "debito",
-                      "monto": 0.42,
+                      "monto": 0.5,
                       "ts": "2026-10-20T14:50:05Z",
                       "sesion_id": "ses_91ab3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d"
                     },
@@ -1949,6 +1949,993 @@
         }
       }
     },
+    "/api/v1/web/usuarios": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Usuario nuevo con $5 de prueba",
+        "operationId": "crear_usuario_api_v1_web_usuarios_post",
+        "responses": {
+          "201": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Crear Usuario Api V1 Web Usuarios Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 5.0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}": {
+      "get": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Estado completo para la app (sondeo cada segundo)",
+        "operationId": "estado_api_v1_web_usuarios__usuario_id__get",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Estado Api V1 Web Usuarios  Usuario Id  Get"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/buscar": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Buscar el parqueadero libre más cercano",
+        "operationId": "buscar_api_v1_web_usuarios__usuario_id__buscar_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ubicacion"
+              },
+              "examples": {
+                "parque": {
+                  "summary": "Junto al Parque Calderón",
+                  "value": {
+                    "lat": -2.8975,
+                    "lon": -79.0045
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Buscar Api V1 Web Usuarios  Usuario Id  Buscar Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SALDO_INSUFICIENTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SALDO_INSUFICIENTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_ACTIVA": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_ACTIVA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/estacionado": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Ya estacioné: pagar con el código",
+        "operationId": "estacionado_api_v1_web_usuarios__usuario_id__estacionado_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodigoPuesto"
+              },
+              "examples": {
+                "codigo": {
+                  "summary": "Puesto 123",
+                  "value": {
+                    "codigo": "123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Estacionado Api V1 Web Usuarios  Usuario Id  Estacionado Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "PUESTO_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "PUESTO_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "PUESTO_LLENO": {
+                    "value": {
+                      "error": {
+                        "codigo": "PUESTO_LLENO",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  },
+                  "SESION_ACTIVA": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_ACTIVA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SALDO_INSUFICIENTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SALDO_INSUFICIENTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "DEMO_NO_DISPONIBLE": {
+                    "value": {
+                      "error": {
+                        "codigo": "DEMO_NO_DISPONIBLE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/tiempo": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Elegir el tiempo al llegar (se debita ya)",
+        "operationId": "tiempo_api_v1_web_usuarios__usuario_id__tiempo_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Tiempo"
+              },
+              "examples": {
+                "hora": {
+                  "summary": "Una hora ($0,50)",
+                  "value": {
+                    "minutos": 60
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Tiempo Api V1 Web Usuarios  Usuario Id  Tiempo Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SALDO_INSUFICIENTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SALDO_INSUFICIENTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TRANSICION_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "TRANSICION_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/extender": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Extender el tiempo (se debita ya)",
+        "operationId": "extender_api_v1_web_usuarios__usuario_id__extender_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Extension"
+              },
+              "examples": {
+                "media": {
+                  "summary": "Media hora más ($0,25)",
+                  "value": {
+                    "minutos": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Extender Api V1 Web Usuarios  Usuario Id  Extender Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SALDO_INSUFICIENTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SALDO_INSUFICIENTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TRANSICION_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "TRANSICION_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/usuarios/{usuario_id}/me-voy": {
+      "post": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Me voy: el conductor vuelve al auto",
+        "operationId": "me_voy_api_v1_web_usuarios__usuario_id__me_voy_post",
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[0-9a-f-]{36}$",
+              "description": "`app_<uuid>` que guarda el navegador",
+              "title": "Usuario Id"
+            },
+            "description": "`app_<uuid>` que guarda el navegador"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Me Voy Api V1 Web Usuarios  Usuario Id  Me Voy Post"
+                },
+                "example": {
+                  "usuario_id": "app_0b7c3f5e-1d2a-4c3b-9e8f-7a6b5c4d3e2f",
+                  "saldo": 4.5,
+                  "t_sim": 1200.0,
+                  "sim_activa": true,
+                  "sesion": {
+                    "id": "web_1a2b3c4d",
+                    "veh_id": "sim_web_1a2b3c4d",
+                    "modo": "buscar",
+                    "estado": "activa",
+                    "puesto_id": "pa_337277973#1_0",
+                    "pagado_min": 60,
+                    "pagado_hasta": 4200.0,
+                    "t_inicio": 600.0,
+                    "t_llegada": 590.0,
+                    "debitado": 0.5,
+                    "restante_s": 3000,
+                    "puede_extender": true,
+                    "opciones_min": [
+                      30,
+                      60,
+                      90,
+                      120
+                    ],
+                    "puesto": {
+                      "puesto_id": "pa_337277973#1_0",
+                      "codigo": "123",
+                      "calle": "Simón Bolívar",
+                      "lat": -2.8973,
+                      "lon": -79.0044
+                    },
+                    "auto": {
+                      "lat": -2.8974,
+                      "lon": -79.0043,
+                      "estado": "A_PIE",
+                      "modo": "a_pie",
+                      "ruta": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SESION_NO_EXISTE": {
+                    "value": {
+                      "error": {
+                        "codigo": "SESION_NO_EXISTE",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TRANSICION_INVALIDA": {
+                    "value": {
+                      "error": {
+                        "codigo": "TRANSICION_INVALIDA",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error del contrato (§4.2)",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "VALIDACION": {
+                    "value": {
+                      "error": {
+                        "codigo": "VALIDACION",
+                        "mensaje": "Mensaje legible en español"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CuerpoError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/puestos": {
+      "get": {
+        "tags": [
+          "web"
+        ],
+        "summary": "Puestos con su código y la ocupación real de la simulación",
+        "operationId": "puestos_api_v1_web_puestos_get",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Puestos Api V1 Web Puestos Get"
+                },
+                "example": [
+                  {
+                    "puesto_id": "pa_337277973#1_0",
+                    "codigo": "123",
+                    "calle": "Simón Bolívar",
+                    "lat": -2.8973,
+                    "lon": -79.0044,
+                    "capacidad": 10,
+                    "ocupados": 7
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/salud": {
       "get": {
         "tags": [
@@ -2361,6 +3348,21 @@
         ],
         "title": "CodigoError",
         "description": "Códigos de error del backend (§4.2)."
+      },
+      "CodigoPuesto": {
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "pattern": "^\\s*\\d{1,3}\\s*$",
+            "title": "Codigo",
+            "description": "Número del puesto pintado en la calle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo"
+        ],
+        "title": "CodigoPuesto"
       },
       "CuerpoError": {
         "properties": {
@@ -2925,6 +3927,70 @@
         "title": "EventoUbicacion",
         "description": "`POST /eventos/ubicacion`: una posición GPS (con ruido si viene del emulador)."
       },
+      "EventoWeb": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "asignado",
+              "sin_puesto",
+              "puesto_lleno",
+              "error"
+            ],
+            "title": "Tipo"
+          },
+          "veh_id": {
+            "type": "string",
+            "pattern": "^sim_.+$",
+            "title": "Veh Id",
+            "description": "sim_<vehId>"
+          },
+          "puesto_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^pa_.+_\\d+$",
+                "description": "pa_<edgeId>_<n>"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puesto Id"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "veh_id"
+        ],
+        "title": "EventoWeb",
+        "description": "Lo que informa el controlador sobre un auto de la app web (en `PasoSimulacion.web`)."
+      },
+      "Extension": {
+        "properties": {
+          "minutos": {
+            "type": "integer",
+            "title": "Minutos",
+            "description": "Múltiplo de 30; el total no pasa de 120",
+            "default": 30
+          }
+        },
+        "type": "object",
+        "title": "Extension"
+      },
       "FuenteModo": {
         "type": "string",
         "enum": [
@@ -3238,6 +4304,72 @@
         "title": "OcupacionPuesto",
         "description": "Ocupación de un puesto (estimada en `snapshot`, real en `verdad`)."
       },
+      "OrdenSim": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "buscar",
+              "estacionado",
+              "volver"
+            ],
+            "title": "Tipo"
+          },
+          "veh_id": {
+            "type": "string",
+            "pattern": "^sim_.+$",
+            "title": "Veh Id",
+            "description": "sim_<vehId>"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": -90.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "puesto_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^pa_.+_\\d+$",
+                "description": "pa_<edgeId>_<n>"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Puesto Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "veh_id"
+        ],
+        "title": "OrdenSim",
+        "description": "Orden del backend al controlador, en la respuesta de `/sim/paso` (app web, 2026-11-18).\n\n- `buscar`: crear un auto `veh_id` en `lat, lon` y guiarlo al puesto libre más cercano\n  (ocupación real de SUMO más las reservas de otros autos web);\n- `estacionado`: crear el auto ya estacionado en `puesto_id` (el usuario puso el código);\n- `volver`: el conductor deja la diligencia y vuelve al auto («Me voy» o tiempo máximo)."
+      },
       "OrigenUbicacion": {
         "type": "string",
         "enum": [
@@ -3382,6 +4514,20 @@
               }
             ],
             "title": "Puestos"
+          },
+          "web": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EventoWeb"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Web"
           }
         },
         "additionalProperties": false,
@@ -3737,6 +4883,14 @@
             },
             "type": "array",
             "title": "Espejos"
+          },
+          "ordenes": {
+            "items": {
+              "$ref": "#/components/schemas/OrdenSim"
+            },
+            "type": "array",
+            "title": "Ordenes",
+            "description": "Órdenes de la app web (2026-11-18)"
           }
         },
         "additionalProperties": false,
@@ -4098,6 +5252,20 @@
         "title": "Tarifa",
         "description": "Parámetros de cobro (`tarifa.json`, §5)."
       },
+      "Tiempo": {
+        "properties": {
+          "minutos": {
+            "type": "integer",
+            "title": "Minutos",
+            "description": "30, 60, 90 o 120"
+          }
+        },
+        "type": "object",
+        "required": [
+          "minutos"
+        ],
+        "title": "Tiempo"
+      },
       "TipoMovimiento": {
         "type": "string",
         "enum": [
@@ -4141,6 +5309,30 @@
         ],
         "title": "TransicionSesion",
         "description": "`POST /sesiones/{id}/transicion`: el controlador informa un cambio de estado."
+      },
+      "Ubicacion": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "maximum": -2.885,
+            "minimum": -2.91,
+            "title": "Lat",
+            "description": "Latitud simulada (zona SERT)"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": -78.99,
+            "minimum": -79.02,
+            "title": "Lon",
+            "description": "Longitud simulada (zona SERT)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "Ubicacion"
       },
       "ValidationError": {
         "properties": {
@@ -4312,6 +5504,10 @@
     {
       "name": "demo",
       "description": "Arranque y parada de la simulación de la demo en el servidor (🔑 clave)."
+    },
+    {
+      "name": "web",
+      "description": "App web (`/app/`): usuarios de prueba, prepago por bloques de 30 min y autos propios en SUMO."
     }
   ]
 }

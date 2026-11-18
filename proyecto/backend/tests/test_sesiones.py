@@ -55,15 +55,15 @@ def test_regla3_recargar_iniciar_cerrar_47_min(sistema):
     srv.transicion(sid, E.A_PIE, en(2))
     srv.transicion(sid, E.REGRESANDO, en(44))
     cerrada = _salir(srv, sid, 47)
-    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado, cerrada.saldo) == (47, 50, 0.42, 4.58)
-    assert bil.estado(U) == {"saldo": 4.58, "retenido": 0.0, "disponible": 4.58, "bloqueada": False}
+    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado, cerrada.saldo) == (47, 60, 0.50, 4.50)
+    assert bil.estado(U) == {"saldo": 4.50, "retenido": 0.0, "disponible": 4.50, "bloqueada": False}
     assert srv.mapa.ocupados("pa_mock0_0") == 0
     tipos = [m.tipo.value for m in bil.movimientos(U)]
     assert tipos == ["recarga", "retencion", "debito", "liberacion"]
     recibo = srv.recibo(sid)
-    assert (recibo.tarjeta_sert_usd, recibo.ahorro_usd) == (0.50, 0.08)
+    assert (recibo.tarjeta_sert_usd, recibo.ahorro_usd) == (0.50, 0.0)  # bloques de 30 min: sin ahorro
     ses = srv.obtener(sid)
-    assert ses.estado is E.CERRADA and ses.debitado == 0.42 and ses.fin == en(47)
+    assert ses.estado is E.CERRADA and ses.debitado == 0.50 and ses.fin == en(47)
 
 
 def test_regla3_cobro_minimo_3_min(sistema):
@@ -71,7 +71,7 @@ def test_regla3_cobro_minimo_3_min(sistema):
     bil.recargar(U, 5)
     sid = srv.iniciar(U, "SIM-0042", "pa_mock0_0", en(0)).sesion_id
     cerrada = _salir(srv, sid, 3)
-    assert (cerrada.minutos_cobrados, cerrada.debitado) == (10, 0.08)
+    assert (cerrada.minutos_cobrados, cerrada.debitado) == (30, 0.25)  # al menos un bloque
 
 
 def test_regla3_duracion_con_t_sim(sistema):
@@ -80,7 +80,7 @@ def test_regla3_duracion_con_t_sim(sistema):
     bil.recargar(U, 5)
     sid = srv.iniciar(U, "SIM-0042", "pa_mock0_0", en(0), t_sim=1000.0).sesion_id
     cerrada = _salir(srv, sid, 1, t_sim=1000.0 + 12 * 60)
-    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado) == (12, 15, 0.13)
+    assert (cerrada.minutos_reales, cerrada.minutos_cobrados, cerrada.debitado) == (12, 30, 0.25)
 
 
 # --- Regla 4: saldo negativo permitido, bloqueo hasta recargar y aviso de saldo bajo -----
@@ -122,8 +122,8 @@ def test_regla5_tope_de_tiempo(sistema):
     _, bil, srv = sistema
     bil.recargar(U, 10)
     sid = srv.iniciar(U, "SIM-0042", "pa_mock0_0", en(0), t_sim=0.0).sesion_id
-    assert srv.avisos(sid, t_sim=109 * 60) == []
-    assert srv.avisos(sid, t_sim=110 * 60) == [A.tiempo_maximo_cerca]
+    assert srv.avisos(sid, t_sim=114 * 60) == []
+    assert srv.avisos(sid, t_sim=115 * 60) == [A.tiempo_maximo_cerca]  # aviso a 5 min
     assert srv.avisos(sid, t_sim=121 * 60) == [A.tiempo_maximo_superado]
 
 
