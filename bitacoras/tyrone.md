@@ -961,3 +961,4 @@ Sin verificador independiente: no es una sesión del plan.
 - App web: 10 pruebas nuevas.
 - Recorrido real con teléfono simulado (390×844) contra `api` + `sim` + `visor`: buscar → asignado en 3 s → la IA detectó la llegada en 60 s → pago de 30 min ($4,75).
 **Pendientes:** pruebas de unidad de `AutosWeb` con un controlador falso (hoy se cubre con el recorrido real).
+- **2026-11-18 · Ritmo 10×:** el selector del visor ofrece ahora 1×, 2×, 5× y 10× (el backend ya aceptaba hasta 10).

@@ -29,7 +29,7 @@ export class ControlDemo {
         <span id="demo-esc" class="nota"></span></div>
       <div class="demo-fila demo-params">
         <label>Usuarios con app <select id="demo-pen"><option>20</option><option selected>50</option><option>80</option></select> %</label>
-        <label>Ritmo <select id="demo-ritmo"><option value="1">1×</option><option value="2" selected>2×</option><option value="5">5×</option></select></label>
+        <label>Ritmo <select id="demo-ritmo"><option value="1">1×</option><option value="2" selected>2×</option><option value="5">5×</option><option value="10">10×</option></select></label>
       </div>
       <div class="demo-fila">
         <input id="demo-clave" type="password" placeholder="Clave de la demo" autocomplete="current-password">
