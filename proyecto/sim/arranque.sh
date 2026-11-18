@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Arranque del contenedor de la app `api` en el VPS.
+# Arranque del servicio `sim` de Dokploy (SUMO + controlador + sumo-gui por noVNC).
 #
 # Con ESERT_GUI=1 (por defecto) levanta además una pantalla virtual para ver sumo-gui en el
 # navegador (https://sumo.tesisucuenca.com):
 #   Xvfb :99 → fluxbox → x11vnc (solo localhost, con contraseña, con control) → noVNC en :6080
-# La simulación de la demo (POST /api/v1/demo/iniciar) abre sumo-gui en esa pantalla.
+# La simulación de la demo (POST /iniciar de este servicio, que llama el backend) abre sumo-gui ahí.
 # La contraseña de VNC es ESERT_CLAVE_VNC (VNC solo usa los primeros 8 caracteres). Sin ella no se
 # levanta la pantalla: nunca se publica un VNC sin contraseña.
 set -euo pipefail
@@ -34,4 +34,5 @@ else
   echo "sin pantalla de sumo-gui (ESERT_GUI=${ESERT_GUI:-1}, ESERT_CLAVE_VNC $( [ -n "${ESERT_CLAVE_VNC:-}" ] && echo definida || echo vacía ))"
 fi
 
-exec python3 -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips "*"
+# Servicio de control (solo red interna de Dokploy; exige ESERT_TOKEN_SIM)
+exec python3 -m uvicorn backend.simulador.servicio:app --host 0.0.0.0 --port 8100

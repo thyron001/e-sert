@@ -18,7 +18,7 @@ import subprocess
 import sys
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, List, Optional
@@ -52,6 +52,24 @@ class Estado:
     fin: Optional[str] = None
     codigo_salida: Optional[int] = None
     ultimas_lineas: List[str] = field(default_factory=list)
+
+
+def estado_a_dict(est: "Estado") -> dict:
+    """Para el JSON del servicio `sim` (`servicio.py`)."""
+    d = asdict(est)
+    if est.escenario is not None:
+        d["escenario"]["id"] = est.escenario.id
+    return d
+
+
+def estado_desde_dict(d: dict) -> "Estado":
+    """Inverso de `estado_a_dict` (lo usa el backend al hablar con el servicio `sim`)."""
+    esc = d.get("escenario")
+    if esc:
+        esc = Escenario(**{k: v for k, v in esc.items() if k != "id"})
+    return Estado(disponible=d["disponible"], motivo=d.get("motivo"), corriendo=d["corriendo"],
+                  fase=d["fase"], escenario=esc, inicio=d.get("inicio"), fin=d.get("fin"),
+                  codigo_salida=d.get("codigo_salida"), ultimas_lineas=list(d.get("ultimas_lineas") or []))
 
 
 def _ahora() -> str:

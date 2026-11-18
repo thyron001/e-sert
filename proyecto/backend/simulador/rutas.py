@@ -125,5 +125,8 @@ def iniciar(request: Request, params: Optional[ParametrosDemo] = Body(None, open
              dependencies=[Depends(exigir_clave)],
              responses=_resp(200, _EJ_INACTIVA, "CLAVE_DEMO_INVALIDA", "DEMO_NO_DISPONIBLE"))
 def detener(request: Request, g: GestorSimulacion = Depends(gestor)) -> EstadoDemo:
-    g.detener()
+    try:
+        g.detener()
+    except LookupError as exc:
+        raise ErrorNucleo(e.CodigoError.DEMO_NO_DISPONIBLE, str(exc)) from exc
     return _a_respuesta(request, g)

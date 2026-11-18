@@ -72,7 +72,7 @@ Code trabaja ahí, y ahí corren el backend, el visor, SUMO, las pruebas y los e
 |---|---|
 | Repo (clon de trabajo) | `/root/van3twin-docker/results/e-sert` |
 | SUMO para desarrollo, pruebas y experimentos | contenedor `van3twin` del VPS |
-| Demo en línea (backend + visor + SUMO) | app `api` de Dokploy, `https://demo.e-sert.tesisucuenca.com` |
+| Demo en línea | servicios `api`, `visor` y `sim` del proyecto `e-sert` de Dokploy, `https://demo.e-sert.tesisucuenca.com` |
 | Clave del botón de la demo | `/root/.esert_clave_demo` (no la imprimas) |
 | `sumo-gui` de la demo en el navegador | `https://sumo.tesisucuenca.com` (contraseña en `/root/.esert_clave_vnc`) |
 
@@ -82,7 +82,7 @@ Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
 (`SUMO_HOME=/usr/share/sumo`), **Python 3.10** y la carpeta `results/` montada en
 `/home/vanet/results/`. Además trae **Node 20** y todas las dependencias del proyecto
 (`proyecto/backend/requirements-*.txt`). Lo crea `herramientas/van3twin_vps.sh`, con la etapa
-`dev` de `proyecto/backend/Dockerfile`. Si cambian las dependencias, vuelve a correr ese script.
+`dev` de `proyecto/sim/Dockerfile`. Si cambian las dependencias, vuelve a correr ese script.
 
 | En el VPS | Dentro del contenedor |
 |---|---|
@@ -114,18 +114,25 @@ Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
 
 ### Demo en línea
 
-- Se arranca y se detiene desde el visor (sección «Simulación en el servidor»), o con
-  `POST /api/v1/demo/iniciar` y `/detener` con la cabecera `X-Clave-Demo`
-  (`backend/simulador/`). SUMO corre dentro del contenedor de la app `api` y publica en el
-  propio backend. Su `sumo-gui` se ve y se controla en `https://sumo.tesisucuenca.com`, por noVNC.
-  Detalles en `docs/DESPLIEGUE.md`.
-- La app `api` se construye con `proyecto/backend/Dockerfile` (Ubuntu 22.04 + SUMO). Un push a
-  `main` la redespliega y corta una simulación en curso.
+- Cuatro servicios en Dokploy, cada uno con **Watch Paths** (detalle en `docs/DESPLIEGUE.md`):
+  `api` (backend, `proyecto/backend/Dockerfile`, ligero), `visor` (nginx,
+  `proyecto/visor/Dockerfile`), `sim` (SUMO + `sumo-gui` + noVNC, `proyecto/sim/Dockerfile`,
+  pesado) y `Frontend` (roadmap). Un push solo redespliega los servicios cuyas carpetas
+  cambiaron; **`sim` solo se reconstruye si cambian `proyecto/sim/`, `traci/`, `kpis/`, `sumo/`,
+  `ia/`, `backend/nucleo/`, `backend/simulador/` o `comun/`**, y eso corta una simulación en curso.
+- La demo se arranca y se detiene desde el visor (sección «Simulación en el servidor»), o con
+  `POST /api/v1/demo/iniciar` y `/detener` con la cabecera `X-Clave-Demo`. El backend le pasa la
+  orden a `sim` (`ESERT_URL_SIM`). Su `sumo-gui` se ve y se controla en
+  `https://sumo.tesisucuenca.com`, por noVNC.
+- **Antes de un push que redespliegue `sim` o `api`**, comprueba que no haya una demo en curso:
+  `curl -s https://demo.e-sert.tesisucuenca.com/api/v1/demo/estado` (fase `inactiva`).
+- La API de Dokploy se usa con la clave de `/root/.dokploy_api_key` (cabecera `x-api-key`,
+  `http://127.0.0.1:3000/api/...`); no la imprimas.
 
 ## Entorno
 
 - Python 3.10 y Node 20 del contenedor `van3twin` para todo el proyecto.
-- Las dependencias van en `requirements.txt` dentro de cada módulo; las de la imagen, en
-  `proyecto/backend/requirements-servidor.txt`, `-sim.txt` y `-dev.txt`.
+- Las dependencias van en `requirements.txt` dentro de cada módulo; las de las imágenes, en
+  `proyecto/backend/requirements-servidor.txt` y `proyecto/sim/requirements-{sim,dev}.txt`.
 - App: Expo SDK estable, probada con Expo Go (`EXPO_PUBLIC_API_URL` apuntando al VPS).
 - Usa `pathlib` y nunca rutas absolutas en el código.

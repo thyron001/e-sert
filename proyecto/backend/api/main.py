@@ -26,6 +26,7 @@ from . import errores
 from .dependencias import Servicios
 from .rutas import ROUTERS
 from ..espejo.ws_espejo import router as router_ws_espejo
+from ..simulador.cliente import ClienteSimulacion
 from ..simulador.gestor import GestorSimulacion
 from ..simulador.rutas import router as router_simulador
 from .ws import router as router_ws
@@ -98,6 +99,8 @@ class Config(BaseSettings):
                                       description="Clave para iniciar/detener la simulación desde el visor")
     puerto: int = Field(8000, validation_alias=AliasChoices("ESERT_PUERTO"),
                         description="Puerto local del backend: el controlador de la demo publica ahí")
+    url_sim: Optional[str] = Field(None, validation_alias=AliasChoices("ESERT_URL_SIM"),
+                                   description="Servicio `sim` (SUMO) en otra app de Dokploy; sin ella, SUMO local")
 
     def origenes(self) -> List[str]:
         return [o.strip() for o in self.cors.split(",") if o.strip()] or ["*"]
@@ -176,15 +179,17 @@ def crear_app(config: Optional[Config] = None) -> FastAPI:
     async def ciclo(app: FastAPI):
         app.state.servicios.gestor.iniciar()
         yield
-        if app.state.simulador.corriendo():
-            app.state.simulador.detener()
+        sim = app.state.simulador
+        if isinstance(sim, GestorSimulacion) and sim.corriendo():   # el servicio `sim` remoto sigue solo
+            sim.detener()
         await app.state.servicios.gestor.detener()
 
     app = FastAPI(title="e-sert API", version=e.CONTRATO_VERSION, description=DESCRIPCION,
                   openapi_tags=ETIQUETAS, lifespan=ciclo)
     app.state.config = config
     app.state.servicios = Servicios.armar(config.db_url, config.puestos_csv, config.token_sim)
-    app.state.simulador = GestorSimulacion(f"http://127.0.0.1:{config.puerto}", config.token_sim)
+    app.state.simulador = (ClienteSimulacion(config.url_sim, config.token_sim) if config.url_sim
+                           else GestorSimulacion(f"http://127.0.0.1:{config.puerto}", config.token_sim))
 
     errores.registrar(app)
     for r in ROUTERS:

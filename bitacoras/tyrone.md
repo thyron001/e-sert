@@ -909,3 +909,19 @@ Sin verificador independiente: no es una sesión del plan.
 **Pendientes:**
 - Pruebas `jest`/`tsc` de la app (falta `npm install` en `proyecto/app`).
 - Restringir los puestos a las calles SERT reales si se consigue la lista oficial.
+
+## 2026-11-18 · Servicios separados en Dokploy: api, visor y sim, con Watch Paths
+**Estado:** hecho (falta verificar en producción tras el despliegue).
+**Qué hice:**
+- **Control en `sumo-gui`:** x11vnc y noVNC sin modo solo-ver (commit `3a7b792`). Ese push redesplegó la app cuando había una demo corriendo y la cortó: no comprobé el estado antes.
+- **Separación en servicios del proyecto `e-sert`** (creados con la API de Dokploy, clave en `/root/.dokploy_api_key`):
+  - `api`: backend solo, `python:3.11-slim` (227 MB, ~25 s de build); antes era la imagen de 1,55 GB con SUMO;
+  - `visor` (`esert-visor-p5kz4t`): nginx con los estáticos en `/visor` (54 MB);
+  - `sim` (`esert-sim-ygqubj`): SUMO + controlador + `sumo-gui`/noVNC + servicio de control en :8100 (`backend/simulador/servicio.py`, `proyecto/sim/Dockerfile`, `proyecto/sim/arranque.sh`).
+- El backend habla con `sim` con `ClienteSimulacion` (`ESERT_URL_SIM`, autenticado con `ESERT_TOKEN_SIM`). Las rutas `/api/v1/demo/*` y el botón del visor no cambian. Sin `ESERT_URL_SIM`, el backend usa el gestor local.
+- **Watch Paths:** `api` ← `backend/**`, `comun/**` y los CSV; `visor` ← `visor/**`; `sim` ← `sim/**`, `traci/**`, `kpis/**`, `sumo/**`, `ia/**`, `backend/nucleo/**`, `backend/simulador/**`, `comun/**`; `Frontend` ← `Dockerfile`, `roadmap/**`, `docs/**`, `bitacoras/**`, `semanas/**`.
+- Variables: `ESERT_URL_SIM` en `api`; `ESERT_CLAVE_VNC` pasa de `api` a `sim`; `sim` tiene además `ESERT_TOKEN_SIM` y `ESERT_URL_BACKEND`.
+**Pruebas:**
+- backend 268 passed (8 nuevas del servicio y del cliente); visor 11 + 12 JS; contrato sin diferencias.
+- Los tres servicios juntos en una red Docker de prueba: 77 snapshots de `sim` llegaron al backend, `sumo-gui` abierto y parada limpia. Consumo: api 82 MiB, visor 3 MiB y sim 613 MiB con la demo corriendo.
+**Pendientes:** verificar en producción y mover los dominios (`sumo.tesisucuenca.com` a `sim`; `/visor` a `visor`).
