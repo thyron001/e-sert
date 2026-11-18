@@ -78,7 +78,8 @@ def main() -> None:
     args = ap.parse_args()
     SALIDAS.mkdir(parents=True, exist_ok=True)
     ruta = SALIDAS / f"episodios_s{args.semilla}.csv"
-    peatones = GestorPeatones(CFG.parent / "demanda" / "destinos.csv", semilla=args.semilla)
+    # el dataset del RF se grabó con todos los conductores caminando
+    peatones = GestorPeatones(CFG.parent / "demanda" / "destinos.csv", semilla=args.semilla, solo_web=False)
     grab = GrabadorEpisodios(ruta, args.semilla)
     config = ConfigControlador(cfg=CFG, semilla=args.semilla, etiqueta=f"s3_episodios_{args.semilla}")
     try:

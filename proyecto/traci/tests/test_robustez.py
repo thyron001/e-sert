@@ -152,7 +152,7 @@ def test_telefono_apagado_no_libera_y_cierra_al_tope(tmp_path):
     assert len(mundo.cerradas) == 1 and ses.falsas_liberaciones == 0
     cierre = mundo.cerradas[0]
     assert cierre["motivo"] == "timeout_sin_senal" and cierre["t_fin"] == 600
-    assert cierre["minutos_reales"] == pytest.approx(10.0) and cierre["debitado"] == pytest.approx(0.08)
+    assert cierre["minutos_reales"] == pytest.approx(10.0) and cierre["debitado"] == pytest.approx(0.25)
 
 
 def test_sin_telefono_apagado_la_salida_sin_deteccion_es_manual(tmp_path):

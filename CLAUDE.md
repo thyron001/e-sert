@@ -111,6 +111,9 @@ Reemplaza al `van3twin` de la materia con la misma interfaz: **SUMO 1.12**
 - El código que corre con SUMO debe ser compatible con Python 3.10. Los archivos que escribe
   el contenedor son de `root`.
 - Las salidas de SUMO van en carpetas `sumo/salidas/` (ignoradas por git) y nunca se suben.
+- **Peatones:** por defecto solo bajan del auto los conductores de la app web. Los resultados del
+  proyecto (KPIs, informe) ya están hechos con todos los peatones y no se regeneran; para
+  reproducirlos, `--todos-los-peatones`.
 
 ### Demo en línea
 

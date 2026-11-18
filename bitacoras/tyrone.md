@@ -985,3 +985,13 @@ Sin verificador independiente: no es una sesión del plan.
 - Al caminar, los casos normales terminan a 16–22 m del punto de búsqueda.
 **Problemas encontrados:** en un punto dentro de una manzana, la única acera conectada exigía un rodeo largo; ahora el conductor se queda junto al auto.
 **Pruebas:** 61 passed (peatones, guiado, ritmo, espejo, simulador y web).
+
+## 2026-11-18 · Sin peatones simulados salvo los de la app, en todo el proyecto
+**Estado:** hecho.
+**Qué hice:**
+- Por defecto (`GestorPeatones(solo_web=True)`, `peatones_solo_web=True`) solo bajan del auto los conductores de la app web. Vale para la demo en línea, la demo local y los experimentos.
+- Los demás se quedan en el auto y se van al terminar su estadía; la IA cierra con ESTACIONADO → SALIENDO.
+- Los resultados del proyecto ya se generaron con todos los peatones y no se regeneran. `--todos-los-peatones` (en `kpis.correr_una` y `traci.correr_kpis`) los reproduce. `ia/grabar_episodios.py` (dataset del RF) sigue con todos.
+- Las pruebas del comportamiento de los peatones piden ese modo explícitamente.
+- `test_robustez` aún esperaba la tarifa vieja (10 min = $0,08); ahora un bloque, $0,25.
+**Pruebas:** traci 90 + peatones/robustez 15, kpis 29, e2e backend 11 y e2e traci 21.

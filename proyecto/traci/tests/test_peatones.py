@@ -34,7 +34,8 @@ def test_todos_los_peatones_vuelven_y_ningun_auto_queda_parado(
     from traci.peatones import GestorPeatones
 
     gestor = GestorPeatones(ESCENARIO / "demanda" / "destinos.csv", semilla=1,
-                            p_regreso_corto=p_regreso_corto, p_espera_en_auto=p_espera_en_auto)
+                            p_regreso_corto=p_regreso_corto, p_espera_en_auto=p_espera_en_auto,
+                            solo_web=False)  # se prueba el modo con todos los peatones (resultados)
     sesiones = ControlSesiones(EmuladorGPS(semilla=1), tmp_path, "mini")
     try:
         with Controlador(ConfigControlador(cfg=escenario_mini, etiqueta="s2_mini")) as ctrl:
@@ -53,3 +54,11 @@ def test_todos_los_peatones_vuelven_y_ningun_auto_queda_parado(
     assert r["casos"] == {caso_esperado: 5}
     assert paradas == []
     assert sesiones.llegadas == 5
+
+
+
+def test_por_defecto_solo_bajan_los_conductores_web():
+    """Desde el 2026-11-18: sin `solo_web=False`, los conductores simulados no se bajan."""
+    from traci.peatones import GestorPeatones
+
+    assert GestorPeatones(ESCENARIO / "demanda" / "destinos.csv", semilla=1).solo_web is True

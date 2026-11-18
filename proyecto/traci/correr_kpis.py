@@ -122,7 +122,7 @@ def correr(id_corrida: str, hasta: float = 900, con_kpis: bool = True, publicar:
            contar_eventos: bool = True, args_sumo: Sequence[str] = (), geo_local: bool = True,
            politica_datos_pobres: bool = True, ws_nulo: bool = False, guardar_csv: bool = True,
            instrumentar: Optional[Callable[[dict], None]] = None, espejo: bool = True,
-           peatones_solo_web: bool = False,
+           peatones_solo_web: bool = True,
            ritmo: Optional[float] = None, volcar: Optional[Path] = None, gui: bool = False,
            captura: Optional[str] = None) -> dict:
     """Una corrida. Devuelve el resumen (con `kpis` si `con_kpis`) y el tiempo por paso.
@@ -396,6 +396,8 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
     ap.add_argument("--captura", default=None, help="ruta.png@T: captura de sumo-gui en el segundo simulado T")
     ap.add_argument("--libsumo", action="store_true",
                     help="SUMO en el mismo proceso, sin socket TraCI (sin GUI; S4-3: e2e más rápido)")
+    ap.add_argument("--todos-los-peatones", action="store_true",
+                    help="todos los conductores se bajan y caminan, como en los resultados del proyecto")
     ap.add_argument("--volcar", type=Path, default=None,
                     help="JSON con libro de billeteras y sesiones (pruebas e2e, S4-1)")
     ap.add_argument("--medir-costo", type=int, default=0, metavar="N",
@@ -420,7 +422,7 @@ def main(argv: Optional[Sequence[str]] = None) -> dict:
 
     salida = correr(args.id, args.hasta, publicar=args.publicar, sufijo=args.sufijo, espejo=not args.sin_espejo,
                     ritmo=args.ritmo, volcar=args.volcar, gui=args.gui, captura=args.captura,
-                    libsumo=args.libsumo)
+                    libsumo=args.libsumo, peatones_solo_web=not args.todos_los_peatones)
     (SALIDAS_KPI / f"ejemplo_{args.id}{args.sufijo}.json").write_text(_json(salida), encoding="utf-8")
     print(_json(salida))
     return salida

@@ -4,17 +4,17 @@
   "clasificador_pedido": "rf",
   "clasificador_usado": "rf",
   "ventanas_por_fuente": {
-    "rf": 7867
+    "rf": 7892
   },
   "t_sim_final": 1200.0,
   "pasos": 1200,
-  "tiempo_real_s": 68.71,
-  "ms_por_paso": 57.257,
+  "tiempo_real_s": 52.36,
+  "ms_por_paso": 43.63,
   "sesiones_maquina": {
     "coords_invalidas": 0,
-    "sesiones": 97,
+    "sesiones": 96,
     "cerradas": 1,
-    "abiertas_al_final": 96,
+    "abiertas_al_final": 95,
     "falsas_liberaciones": 0,
     "falsas_por_100_sesiones": 0.0,
     "falsas_con_datos_pobres": 0,
@@ -26,7 +26,7 @@
     "cierres_timeout_sin_senal": 0,
     "clasificador": "/home/vanet/results/e-sert/proyecto",
     "ventanas_por_fuente": {
-      "rf": 7867
+      "rf": 7892
     }
   },
   "espejo": null,
@@ -47,29 +47,29 @@
     "politica_datos_pobres": true
   },
   "costo_kpis": {
-    "s_en_kpis": 0.827,
-    "s_resto": 67.881,
-    "sobrecosto_pct": 1.22
+    "s_en_kpis": 0.853,
+    "s_resto": 51.503,
+    "sobrecosto_pct": 1.66
   },
   "kpis": {
     "falsas_lib_100": 0.0,
     "n_sesiones": 1,
     "n_falsas": 0,
-    "sin_cierre": 96,
+    "sin_cierre": 95,
     "retardo_cierre_mediana_s": 15.0,
     "retardo_cierre_p90_s": 15.0,
     "error_fact_medio_usd": 0.0,
     "error_fact_abs_max_usd": 0.0,
-    "ahorro_vs_tarjeta_medio_usd": 0.12,
-    "precision_mapa": 0.8085245901639345,
+    "ahorro_vs_tarjeta_medio_usd": 0.0,
+    "precision_mapa": 0.8090163934426229,
     "precision_mapa_app": 1.0,
-    "libres_fantasma_medio": 116.8,
+    "libres_fantasma_medio": 116.5,
     "retardo_cierre_max_s": 15.0,
     "error_fact_abs_medio_usd": 0.0,
     "n_cierre_manual": 0,
     "n_sin_estadia_real": 0,
-    "mae_mapa": 7.705655737704918,
-    "mae_mapa_app": 0.0,
+    "mae_mapa": 7.705,
+    "mae_mapa_app": 8.19672131147541e-05,
     "libres_fantasma_app_medio": 0.0,
     "n_muestras_mapa": 20
   }

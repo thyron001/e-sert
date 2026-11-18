@@ -48,9 +48,11 @@ visor muestra su QR; quien lo escanea la abre en el navegador del teléfono. Tod
 - **Ritmo en vivo:** el selector del visor (1×, 2×, 5×, 10×) cambia la velocidad en plena corrida
   (`POST /api/v1/demo/ritmo`; viaja al controlador en `RespuestaSnapshot.ritmo`). Medido con
   `sumo-gui`: 1× → 1,0×, 5× → 4,5×, **10× → 6,2× real** (tope de la CPU del VPS).
-- **Peatones solo de la app:** en la demo en línea (`--peatones-solo-web`) solo bajan del auto los
+- **Peatones solo de la app (en todo el proyecto, desde el 2026-11-18):** solo bajan del auto los
   conductores de la app web; los demás se quedan dentro y se van al terminar su estadía (la IA
-  sigue con su teléfono en el auto). Los experimentos siguen con todos los peatones.
+  sigue con su teléfono en el auto y cierra con ESTACIONADO → SALIENDO). Vale para la demo en
+  línea, la demo local y los experimentos. Los resultados del proyecto ya se generaron con todos
+  los peatones; `--todos-los-peatones` (en `kpis.correr_una` y `traci.correr_kpis`) los reproduce.
 - **Mi posición:** en la app, el teléfono del conductor es un punto azul que late; el botón
   flotante alterna el centro del mapa entre «Mi vehículo» y «Mi posición».
 - La simulación tiene que estar corriendo (botón «Iniciar» del visor).

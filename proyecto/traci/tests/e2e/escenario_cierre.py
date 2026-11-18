@@ -77,7 +77,7 @@ def correr(hasta_s: float = 16000, guardar: Path = None, sigma_m: float = 5.0) -
         cfg = escenario_mini(SUMO, tmp)
         puente = PuenteNucleo(SUMO / "parqueos" / "puestos.csv", semilla=1)
         peatones = GestorPeatones(SUMO / "demanda" / "destinos.csv", semilla=1, p_regreso_corto=0.0,
-                                  p_espera_en_auto=0.0)
+                                  p_espera_en_auto=0.0, solo_web=False)  # todos los peatones
         sesiones = ControlSesiones(EmuladorGPS(semilla=1, sigma_m=sigma_m), tmp, "e2e_cierre", puente=puente)
 
         def recargar(ctrl, t):
