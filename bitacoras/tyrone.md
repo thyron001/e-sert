@@ -925,3 +925,7 @@ Sin verificador independiente: no es una sesión del plan.
 - backend 268 passed (8 nuevas del servicio y del cliente); visor 11 + 12 JS; contrato sin diferencias.
 - Los tres servicios juntos en una red Docker de prueba: 77 snapshots de `sim` llegaron al backend, `sumo-gui` abierto y parada limpia. Consumo: api 82 MiB, visor 3 MiB y sim 613 MiB con la demo corriendo.
 **Pendientes:** verificar en producción y mover los dominios (`sumo.tesisucuenca.com` a `sim`; `/visor` a `visor`).
+- **Verificación en producción y arreglo de la parada (2026-11-18):** los cuatro servicios quedaron sanos y los dominios movidos (`sumo.tesisucuenca.com` → `sim`; `demo.e-sert.tesisucuenca.com/visor` → `visor`, servido por nginx). Al detener la primera demo en producción, el controlador salió con código 1 y `sumo-gui` quedó zombi:
+  - el Ctrl+C iba a todo el grupo y `sumo-gui` moría antes que el controlador. Ahora va solo al controlador, y después se termina lo que quede del grupo;
+  - uvicorn era el PID 1 y no recogía huérfanos. Ahora `tini` es el PID 1 de `sim`.
+  Con la imagen nueva, dos rondas de iniciar y detener con `sumo-gui`: código −2, sin procesos de SUMO y sin zombis.

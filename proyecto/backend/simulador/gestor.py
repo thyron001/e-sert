@@ -243,24 +243,30 @@ class GestorSimulacion:
             if proc is None:
                 return self.estado()
             self._fase = "deteniendo"
-        self._senal(proc, signal.SIGINT)
+        # Ctrl+C solo al controlador: cierra TraCI y SUMO limpio. Si se manda al grupo, sumo-gui
+        # muere a la vez y el controlador falla leyendo de TraCI (salía con código 1).
+        grupo = proc.pid                       # start_new_session: el grupo es el pid del controlador
+        try:
+            proc.send_signal(signal.SIGINT)
+        except ProcessLookupError:
+            pass
         limite = time.monotonic() + espera_s
         while proc.poll() is None and time.monotonic() < limite:
             time.sleep(0.2)
         if proc.poll() is None:
-            self._senal(proc, signal.SIGKILL)
+            self._senal_grupo(grupo, signal.SIGKILL)
             try:
                 proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 pass
+        # Lo que quede del grupo (sumo/sumo-gui si el controlador no lo cerró) se termina también,
+        # para que nunca quede SUMO vivo.
+        self._senal_grupo(grupo, signal.SIGTERM)
         return self.estado()
 
     @staticmethod
-    def _senal(proc: subprocess.Popen, sig: int) -> None:
+    def _senal_grupo(grupo: int, sig: int) -> None:
         try:
-            os.killpg(os.getpgid(proc.pid), sig)
+            os.killpg(grupo, sig)
         except (ProcessLookupError, PermissionError, OSError):
-            try:
-                proc.send_signal(sig)
-            except Exception:  # noqa: BLE001
-                pass
+            pass
