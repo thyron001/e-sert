@@ -29,7 +29,9 @@ import json
 import math
 import os
 import re
+import signal
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -212,6 +214,10 @@ def correr(cfg: dict) -> dict:
     if str(rutas["proyecto"]) not in sys.path:
         sys.path.append(str(rutas["proyecto"]))  # después de codigo/: `kpis` es esta copia
     from traci import correr_kpis as ck  # noqa: E402  (controlador de Freddy)
+    if cfg.get("sigint_entre_pasos") and threading.current_thread() is threading.main_thread():
+        # Ctrl+C (o el «Detener» de la demo) corta la corrida entre dos pasos, con TraCI limpio;
+        # si llega a mitad de un intercambio con SUMO, `traci.close()` falla y sale con código 1.
+        signal.signal(signal.SIGINT, ck.pedir_detencion)
 
     modelo_info = None
     if clf == "rf":
@@ -345,9 +351,16 @@ def main(argv=None) -> None:
                   "warmup_s": args.warmup, "modelo_rf": args.modelo, "publicar": args.publicar,
                   "ritmo": args.ritmo, "gui": args.gui, "subdir_salidas": args.subdir,
                   "captura_gui": args.captura_gui, "delay_ms": args.delay_ms, "libsumo": args.libsumo,
+                  "sigint_entre_pasos": True,
                   "dir_resultados": f"kpis/resultados/{args.subdir}" if args.subdir else "kpis/resultados"})
     print(json.dumps(out, indent=1, ensure_ascii=False))
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:  # noqa: BLE001
+        if type(exc).__name__ != "CorridaDetenida":   # traci.correr_kpis.CorridaDetenida
+            raise
+        print(f"corrida {exc}; TraCI y SUMO cerrados", flush=True)
+        sys.exit(130)

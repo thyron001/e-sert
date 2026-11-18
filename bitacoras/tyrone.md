@@ -929,3 +929,4 @@ Sin verificador independiente: no es una sesión del plan.
   - el Ctrl+C iba a todo el grupo y `sumo-gui` moría antes que el controlador. Ahora va solo al controlador, y después se termina lo que quede del grupo;
   - uvicorn era el PID 1 y no recogía huérfanos. Ahora `tini` es el PID 1 de `sim`.
   Con la imagen nueva, dos rondas de iniciar y detener con `sumo-gui`: código −2, sin procesos de SUMO y sin zombis.
+- **Parada sin cortar TraCI:** en producción el controlador seguía saliendo con código 1, porque el Ctrl+C llegaba en mitad de un intercambio TraCI y `traci.close()` leía basura. `kpis.correr_una` ahora instala el mismo manejador que `traci.correr_kpis` (S4-3): el Ctrl+C se anota y la corrida se corta entre dos pasos. Probado con la imagen real deteniendo en t≈10, 40 y 90 s: código 130, sin tracebacks, sin procesos ni zombis. `sim` se actualiza en modo stop-first (antes start-first: durante un relevo había dos `sim` y una petición podía ir al viejo).
