@@ -8,7 +8,7 @@
 :root{
   --texto:#1E2A38; --texto2:#4B5A6B; --escenario:#20262d;
   --principal:#1E63D6; --claro:#E8F0FC; --oscuro:#0B2540;
-  --mal:#B3261E; --malBg:#FBEAEA;
+  --mal:#B3261E; --malBg:#FBEAEA; --ok:#1E7E45; --okBg:#E6F4EC; --fondores:#F5F8FE;
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -41,6 +41,13 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 .dolor svg{flex:none}
 .dolor h4{font-size:22px;line-height:1.2;margin-bottom:4px}
 .dolor p{font-size:17.5px;line-height:1.35;color:var(--texto2)}
+/* beneficios */
+.benef{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;flex:1}
+.bf{border-radius:14px;padding:18px 22px;display:flex;gap:18px;align-items:center;background:var(--fondores);border:1.5px solid var(--claro)}
+.bf b.n{font-size:50px;font-weight:800;color:var(--ok);line-height:1;min-width:190px;font-variant-numeric:tabular-nums}
+.bf b.n.az{color:var(--principal)}
+.bf h4{font-size:23px;margin-bottom:4px}
+.bf p{font-size:17.5px;line-height:1.35;color:var(--texto2)}
 /* notas y barra */
 #notes{position:fixed;left:0;right:0;bottom:0;background:#1E2A38;color:#eef2f6;font-size:16px;line-height:1.45;padding:12px 22px 14px;display:none;z-index:40;max-height:34vh;overflow:auto}
 #notes.open{display:block}
@@ -71,7 +78,7 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 
 <!-- ===================== EL PROBLEMA ===================== -->
 <section class="slide" data-sec="El problema"
-  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.|Las cifras salen de una simulación del Centro; por eso al final les pedimos datos reales.|Siguiente: botón «Ir al visor» (abajo a la derecha). Mientras alguien usa la app, contar: 18 % menos tiempo buscando, 118 kg de CO₂ menos por hora pico, control y cobro sin tarjetas; y cerrar pidiendo la ocupación real por calle y hora, el inventario oficial de puestos y un piloto.">
+  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.|Las cifras salen de una simulación del Centro; por eso al final les pedimos datos reales.">
   <div class="frametitle">Encontrar parqueo en el Centro cuesta tiempo, tráfico y aire limpio</div>
   <div class="body" style="justify-content:center;gap:24px">
     <div class="cifras">
@@ -89,6 +96,22 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
         <div><h4>Control puesto por puesto</h4><p>Saber qué puesto está pagado exige revisar cada auto en la calle.</p></div></div>
     </div>
     <div class="nota">Cifras de una simulación del Centro Histórico en hora pico (1 800 autos por hora), hecha con la red real de calles. No son mediciones de campo.</div>
+  </div>
+  <div class="footline"></div>
+</section>
+
+<!-- ===================== RESULTADOS ===================== -->
+<section class="slide" data-sec="Nuestra propuesta"
+  data-notas="Lo que gana la ciudad, medido en la simulación con información real de ocupación.|18 % menos tiempo buscando y 16 % menos recorrido; incluso quienes no usan la app buscan menos.|118 kg de CO₂ menos por cada hora pico en el Centro.|Y para la EMOV: control en tiempo real de qué puesto está pagado, y recaudo digital.|Luego: botón «Ir al visor» (abajo a la derecha) y que alguien use la app. Cerrar pidiendo la ocupación real por calle y hora, el inventario oficial de puestos y un piloto en un sector del Centro.">
+  <div class="frametitle">Lo que gana la ciudad y la EMOV</div>
+  <div class="body" style="justify-content:center">
+    <div class="benef">
+      <div class="bf"><b class="n">−18 %</b><div><h4>Menos tiempo buscando</h4><p>De 7,2 a 6 minutos por auto. Hasta quienes no usan la app buscan menos, porque baja la competencia por los puestos.</p></div></div>
+      <div class="bf"><b class="n">−118 kg</b><div><h4>Menos CO₂ cada hora pico</h4><p>Y 16 % menos recorrido dando vueltas en el Centro Histórico.</p></div></div>
+      <div class="bf"><b class="n az">En vivo</b><div><h4>Control puesto por puesto</h4><p>La EMOV ve qué puesto está pagado y hasta qué hora, y los agentes van directo a los que no lo están.</p></div></div>
+      <div class="bf"><b class="n az">Digital</b><div><h4>Recaudo sin tarjetas</h4><p>Cobro al instante y por el tiempo real de uso, con la tarifa vigente de $0,25 por media hora.</p></div></div>
+    </div>
+    <div class="nota">Resultados de simulaciones de la hora pico (5 repeticiones por escenario), con la mitad de los conductores usando la app y la ocupación real de los puestos.</div>
   </div>
   <div class="footline"></div>
 </section>
