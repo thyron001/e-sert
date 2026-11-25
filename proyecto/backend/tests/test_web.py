@@ -196,12 +196,14 @@ def test_un_regresando_pasajero_no_cierra_la_sesion(entorno):
 
 # --------------------------------------------------------------------------- perfiles, historial, IA
 
-def test_perfiles_fijos_con_10_dolares_una_sola_vez():
+def test_perfiles_fijos_con_saldo_inicial_una_sola_vez():
     from backend.web.servicio import PERFILES, id_perfil
     app = crear_app(Config(db_url="sqlite:///:memory:"))
     with TestClient(app) as c:
         p = c.get("/api/v1/web/perfiles").json()
-        assert [x["nombre"] for x in p] == list(PERFILES) and all(x["saldo"] == 10.0 for x in p)
+        assert [x["nombre"] for x in p] == list(PERFILES) and len(p) == 9
+        assert [x["saldo"] for x in p] == [10.0] * 4 + [5.0] * 5   # equipo $10, cinco invitados $5
+        assert len({x["usuario_id"] for x in p}) == 9
         assert c.get("/api/v1/web/perfiles").json()[0]["saldo"] == 10.0   # no se recarga otra vez
         uid = id_perfil("Tyrone Novillo")
         assert p[0]["usuario_id"] == uid and c.get(f"/api/v1/web/usuarios/{uid}").json()["nombre"] == "Tyrone Novillo"

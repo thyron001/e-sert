@@ -37,15 +37,20 @@ from ..nucleo.errores import ErrorNucleo
 
 C = e.CodigoError
 SALDO_INICIAL_USD = 5.0          # usuario anónimo (crear_usuario)
-SALDO_PERFIL_USD = 10.0          # cada perfil fijo empieza con $10
-# Perfiles de la app (pestaña «Usuario»): el equipo y tres invitados. El id es fijo (uuid5 del
+SALDO_PERFIL_USD = 10.0          # cada integrante del equipo empieza con $10
+SALDO_INVITADO_USD = 5.0         # cada invitado empieza con $5
+# Perfiles de la app (pestaña «Usuario»): el equipo y cinco invitados. El id es fijo (uuid5 del
 # nombre), así cada perfil conserva su billetera y su historial entre teléfonos y visitas.
-PERFILES = ("Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez",
-            "Invitado 1", "Invitado 2", "Invitado 3")
+EQUIPO = ("Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez")
+INVITADOS = tuple(f"Invitado {i}" for i in range(1, 6))
+PERFILES = EQUIPO + INVITADOS
 
 
 def id_perfil(nombre: str) -> str:
-    return f"app_{uuid.uuid5(uuid.NAMESPACE_URL, 'e-sert:perfil:' + nombre)}"
+    # Los invitados usan otra semilla desde que son cinco con $5: así empiezan con billeteras
+    # nuevas y no heredan las de los tres invitados de $10.
+    semilla = "e-sert:invitado:" if nombre in INVITADOS else "e-sert:perfil:"
+    return f"app_{uuid.uuid5(uuid.NAMESPACE_URL, semilla + nombre)}"
 
 
 NOMBRES = {id_perfil(n): n for n in PERFILES}
@@ -188,12 +193,14 @@ class ServicioWeb:
         return usuario, SALDO_INICIAL_USD
 
     def perfiles(self) -> List[dict]:
-        """Los perfiles fijos con su saldo; la primera vez reciben sus $10 iniciales."""
+        """Los perfiles fijos con su saldo; la primera vez reciben su saldo inicial ($10 el equipo,
+        $5 los invitados)."""
         salida = []
         for nombre in PERFILES:
             usuario = id_perfil(nombre)
             if not self.billetera.movimientos(usuario):
-                self.billetera.recargar(usuario, SALDO_PERFIL_USD, referencia_payphone="saldo_inicial")
+                inicial = SALDO_INVITADO_USD if nombre in INVITADOS else SALDO_PERFIL_USD
+                self.billetera.recargar(usuario, inicial, referencia_payphone="saldo_inicial")
             salida.append({"usuario_id": usuario, "nombre": nombre,
                            "saldo": self.billetera.estado(usuario)["saldo"]})
         return salida

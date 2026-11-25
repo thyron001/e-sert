@@ -63,8 +63,8 @@ const vehiculos = calle.vehiculos;
 // Usuarios de la app web con auto en la simulación: su nombre va encima de su auto.
 const nombresApp = new Map();
 // Un color por usuario, el mismo de su avatar en la app (visor/app/usuario.js).
-const PERFILES = ["Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez", "Invitado 1", "Invitado 2", "Invitado 3"];
-const COLORES_USUARIO = ["#1E63D6", "#2E9E4F", "#C62828", "#FF7043", "#8e24aa", "#00897b", "#6d4c41"];
+const PERFILES = ["Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez", "Invitado 1", "Invitado 2", "Invitado 3", "Invitado 4", "Invitado 5"];
+const COLORES_USUARIO = ["#1E63D6", "#2E9E4F", "#C62828", "#FF7043", "#8e24aa", "#00897b", "#6d4c41", "#c2185b", "#9e9d24"];
 function colorUsuario(veh) {
   const nombre = nombresApp.get(veh);
   if (!nombre) return null;

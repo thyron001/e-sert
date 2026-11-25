@@ -1071,3 +1071,13 @@ Sin verificador independiente: no es una sesión del plan.
 - **Presentación DGM:** portada y problema, y un botón «Ir al visor» en los controles. Se quitó la copia del visor que corría dentro del artefacto.
 **Problemas encontrados:** el visor redibujaba los botones de usuarios cada 3 s y se podía perder un clic; ahora solo se redibujan si cambian.
 **Pendientes:** el informe IEEE describe la versión del interciclo (aviso a 5 min, etiqueta `v1.0-interciclo`); no se cambió.
+
+## 2026-11-25 · Cinco invitados con $5 en la app
+**Estado:** hecho (sin push: la demo estaba corriendo)
+**Qué hice:**
+- `backend/web/servicio.py`: perfiles = equipo (4, $10) + Invitado 1 a 5 ($5 cada uno, `SALDO_INVITADO_USD`).
+- Los invitados usan otra semilla de uuid5, así empiezan con billetera nueva de $5 y no heredan las de los tres invitados de $10.
+- App (`visor/app/usuario.js`) y visor (`visor/js/principal.js`): nueve perfiles y dos colores más.
+- Test `test_perfiles_fijos_con_saldo_inicial_una_sola_vez`; 283 pruebas del backend pasan.
+**Problemas encontrados:** ninguno.
+**Pendientes:** push cuando la demo esté inactiva.

@@ -1,8 +1,8 @@
-// Pestaña Usuario: el equipo y tres invitados, cada uno con su billetera ($10 iniciales).
+// Pestaña Usuario: el equipo ($10 iniciales) y cinco invitados ($5), cada uno con su billetera.
 import { ORIGEN, api, dinero, escapar } from "./comun.js";
 
 const CLAVE = "esert.perfil";
-const COLORES = ["#1E63D6", "#2E9E4F", "#C62828", "#FF7043", "#8e24aa", "#00897b", "#6d4c41"];
+const COLORES = ["#1E63D6", "#2E9E4F", "#C62828", "#FF7043", "#8e24aa", "#00897b", "#6d4c41", "#c2185b", "#9e9d24"];
 
 export function perfilGuardado() {
   try { return localStorage.getItem(CLAVE); } catch { return null; }
@@ -16,7 +16,7 @@ const iniciales = (n) => n.split(" ").map((p) => p[0]).join("").slice(0, 2).toUp
 
 export async function pintarUsuarios(el, app) {
   el.innerHTML = `<h2 class="titulo">¿Quién eres?</h2>
-    <p class="sub">Cada usuario tiene su propia billetera (empieza con $10) y su historial. Varios pueden usar la
+    <p class="sub">Cada usuario tiene su propia billetera y su historial. Varios pueden usar la
       app a la vez: en el visor se ve el auto de cada uno.</p><div id="lista-perfiles"><p class="vacio puntos">Cargando</p></div>`;
   let perfiles;
   try {
