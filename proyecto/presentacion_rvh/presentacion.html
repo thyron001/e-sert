@@ -25,7 +25,7 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 .nota{font-size:14px;color:var(--texto2)}
 /* portada */
 .portada .franja{background:linear-gradient(120deg,#0B2540 0%,#1E63D6 100%);color:#fff;height:62%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 70px 46px;position:relative;overflow:hidden}
-.portada .franja svg{position:absolute;right:-40px;top:-30px;opacity:.16}
+.portada .franja .marca-agua{position:absolute;right:-60px;top:30px;width:780px;height:auto;filter:brightness(0) invert(1);opacity:.16}
 .portada .lab{font-size:17px;font-weight:700;letter-spacing:.07em;color:#BFD3F5;margin-bottom:14px}
 .portada h1{font-size:54px;line-height:1.1;font-weight:800;max-width:1040px;text-wrap:balance}
 .portada .materia{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 70px;gap:6px;position:relative}
@@ -70,7 +70,7 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 <section class="slide portada"
   data-notas="Buenas tardes. Somos estudiantes de Telecomunicaciones de la Universidad de Cuenca.|Primero el problema y luego e-sert funcionando en vivo.">
   <div class="franja">
-    <svg width="520" height="520" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="6"/><path d="M38 72V28h16a13 13 0 0 1 0 26H38" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg>
+    <img class="marca-agua" src="img/emov.png" alt="" aria-hidden="true" width="780" height="194">
     <div class="lab">PROPUESTA PARA LA DIRECCIÓN GENERAL DE MOVILIDAD · ZONA SERT</div>
     <h1>e-sert: parquear en el Centro Histórico sin dar vueltas y sin tarjetas</h1>
   </div>
