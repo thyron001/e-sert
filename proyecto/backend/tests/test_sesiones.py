@@ -122,8 +122,8 @@ def test_regla5_tope_de_tiempo(sistema):
     _, bil, srv = sistema
     bil.recargar(U, 10)
     sid = srv.iniciar(U, "SIM-0042", "pa_mock0_0", en(0), t_sim=0.0).sesion_id
-    assert srv.avisos(sid, t_sim=114 * 60) == []
-    assert srv.avisos(sid, t_sim=115 * 60) == [A.tiempo_maximo_cerca]  # aviso a 5 min
+    assert srv.avisos(sid, t_sim=109 * 60) == []
+    assert srv.avisos(sid, t_sim=110 * 60) == [A.tiempo_maximo_cerca]  # aviso a 10 min
     assert srv.avisos(sid, t_sim=121 * 60) == [A.tiempo_maximo_superado]
 
 

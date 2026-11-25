@@ -338,7 +338,7 @@ el backend necesita para el `snapshot`, el `espejo` y la `verdad`:
   "saldo_negativo_max_usd": 0.5,
   "aviso_saldo_min": 10,
   "tiempo_maximo_min": 120,
-  "aviso_tiempo_min": 5,
+  "aviso_tiempo_min": 10,
   "recarga_minima_usd": 5.0,
   "tarjeta_bloque_min": 30
 }
@@ -356,7 +356,7 @@ carga y valida el archivo (`cargar_tarifa()`) y ofrece las funciones de cálculo
 - **Débito** al cerrar: `costo_usd(minutos_cobrados)`; se libera toda la retención.
 - **App web** (`/app/`, §4.3 `/web/*`): prepago. El usuario elige 30, 60, 90 o 120 min y se
   debita de inmediato; puede extender en bloques de 30 min hasta `tiempo_maximo_min`. A
-  `aviso_tiempo_min` (5 min) del final se avisa, y al llegar a 0 se renueva sola (+30 min,
+  `aviso_tiempo_min` (10 min) del final se avisa, y al llegar a 0 se renueva sola (+30 min,
   +$0,25) mientras no pase de 120 min; en el máximo, el conductor vuelve al auto y se va.
 - `tarjeta_bloque_min` y los campos `tarjeta_sert_usd`/`ahorro_usd` del recibo se mantienen solo
   por compatibilidad con la app Expo histórica: con bloques de 30 min el ahorro siempre es 0.

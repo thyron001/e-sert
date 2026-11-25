@@ -98,22 +98,46 @@ export class CapaCalle extends L.Layer {
     this.redibujar();
   }
 
-  /** `lista`: [{id, lat, lon, color, borde?, halo?}]. El rumbo se calcula con la posición previa. */
+  /** `lista`: [{id, lat, lon, color, borde?, halo?}]. El rumbo se calcula con la posición previa;
+   *  un auto que todavía no se ha movido (p. ej. estacionado) toma el del puesto más cercano. */
   fijarVehiculos(lista) {
     const vistos = new Set();
     for (const v of lista) {
       vistos.add(v.id);
       const previo = this.vehiculos.get(v.id);
-      let rumbo = previo ? previo.rumbo : 0;
+      let rumbo = previo ? previo.rumbo : null, movido = previo ? previo.movido : false;
       if (previo) {
         const dy = (v.lat - previo.lat) * 111320;
         const dx = (v.lon - previo.lon) * 111320 * Math.cos(v.lat * Math.PI / 180);
-        if (Math.hypot(dx, dy) > 0.6) rumbo = Math.atan2(dx, dy);
+        if (Math.hypot(dx, dy) > 0.6) { rumbo = Math.atan2(dx, dy); movido = true; }
       }
-      this.vehiculos.set(v.id, Object.assign({}, v, { rumbo }));
+      if (!movido) { const r = this.rumboPlaza(v.lat, v.lon); if (r !== null) rumbo = r; }
+      this.vehiculos.set(v.id, Object.assign({}, v, { rumbo: rumbo ?? 0, movido }));
     }
     for (const id of [...this.vehiculos.keys()]) if (!vistos.has(id)) this.vehiculos.delete(id);
     this.redibujar();
+  }
+
+  /** Rumbo (rad) de la plaza de parqueo más cercana a menos de 8 m, o null. */
+  rumboPlaza(lat, lon) {
+    if (!this._plazas) {
+      if (!this.puestos.size) return null;
+      this._plazas = new Map();
+      for (const p of this.puestos.values()) for (const [la, lo, r] of p.plazas || []) {
+        const k = `${Math.round(la * 1e4)},${Math.round(lo * 1e4)}`;
+        if (!this._plazas.has(k)) this._plazas.set(k, []);
+        this._plazas.get(k).push([la, lo, r * Math.PI / 180]);
+      }
+    }
+    const ci = Math.round(lat * 1e4), cj = Math.round(lon * 1e4), cos = Math.cos(lat * Math.PI / 180);
+    let mejor = null, dmin = 8;
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+      for (const [la, lo, r] of this._plazas.get(`${ci + i},${cj + j}`) || []) {
+        const d = Math.hypot((la - lat) * 111320, (lo - lon) * 111320 * cos);
+        if (d < dmin) { dmin = d; mejor = r; }
+      }
+    }
+    return mejor;
   }
 
   fijarPeatones(lista) { this.peatones = lista || []; this.redibujar(); }
@@ -187,9 +211,10 @@ export class CapaCalle extends L.Layer {
       }
     }
     // Peatones
-    ctx.fillStyle = COLORES.peaton; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
     for (const ped of this.peatones) {
       if (!limites.contains([ped.lat, ped.lon])) continue;
+      ctx.fillStyle = ped.color || COLORES.peaton;
       const q = pt(ped.lat, ped.lon);
       ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(4.5, 1.2 / mpp), 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
     }
@@ -202,16 +227,16 @@ export class CapaCalle extends L.Layer {
         // el auto propio (app) o el seguido (espejo): grande y con halo, visible a cualquier zoom
         const radio = Math.max(largo * 1.3, 20);
         ctx.beginPath(); ctx.arc(q.x, q.y, radio, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(255,214,10,0.28)"; ctx.fill();
-        ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,214,10,0.9)"; ctx.stroke();
+        ctx.globalAlpha = 0.28; ctx.fillStyle = v.color; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.lineWidth = 2; ctx.strokeStyle = v.color; ctx.stroke();
         auto(ctx, q.x, q.y, v.rumbo, Math.max(largo * 1.6, 18), Math.max(ancho * 1.6, 8.5), v.color, "#0f172a", 2);
         if (v.etiqueta) {  // nombre del usuario de la app (visor)
           ctx.font = '700 12px system-ui, -apple-system, "Segoe UI", sans-serif';
           ctx.textAlign = "center"; ctx.textBaseline = "bottom";
           const y = q.y - radio - 3, w = ctx.measureText(v.etiqueta).width + 10;
-          ctx.fillStyle = "rgba(0,0,0,0.75)";
+          ctx.fillStyle = v.color;
           ctx.beginPath(); ctx.roundRect(q.x - w / 2, y - 17, w, 18, 6); ctx.fill();
-          ctx.fillStyle = "#FFD60A"; ctx.fillText(v.etiqueta, q.x, y);
+          ctx.fillStyle = "#fff"; ctx.fillText(v.etiqueta, q.x, y);
         }
         continue;
       }

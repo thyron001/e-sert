@@ -1053,3 +1053,21 @@ Sin verificador independiente: no es una sesión del plan.
 - **Etiqueta:** `v1.0-interciclo`, creada en el commit evaluado.
 **Problemas encontrados:** ninguno nuevo.
 **Pendientes:** ninguno.
+
+## 2026-11-25 · Visor para la DGM: usuarios, colores, leyenda y aviso a 10 minutos
+**Estado:** hecho.
+**Qué hice:**
+- **Panel del visor:**
+  - el orden es QR, indicadores, leyenda y, al final, «Simulación en el servidor»;
+  - la sección «Escena» quedó oculta;
+  - el QR ya no tiene texto de prueba;
+  - la etiqueta de la hora dice «Hora».
+- **Mapa:** título «e-Sert» con la descripción arriba a la izquierda, leyenda mínima (Libre, Ocupado, Usuario e-Sert) y botones para ir a la posición de cada usuario: su auto, o él si va a pie. La cámara deja de seguirlo si se arrastra el mapa.
+- **Colores:** cada usuario tiene el color de su avatar de la app, en el auto, el anillo, la etiqueta y el peatón.
+- **Autos estacionados:** toman la orientación del puesto más cercano; antes quedaban cruzados.
+- **Escena 3D:** se descartó un polígono de agua mal cerrado que tapaba manzanas, y las capas del suelo quedaron más separadas.
+- **Aviso:** pasa de 5 a 10 minutos antes del fin (`aviso_tiempo_min`), con los mensajes de la app y el contrato actualizados.
+- **Payphone:** sin «modo de pruebas, sin dinero real» en pantalla.
+- **Presentación DGM:** portada y problema, y un botón «Ir al visor» en los controles. Se quitó la copia del visor que corría dentro del artefacto.
+**Problemas encontrados:** el visor redibujaba los botones de usuarios cada 3 s y se podía perder un clic; ahora solo se redibujan si cambian.
+**Pendientes:** el informe IEEE describe la versión del interciclo (aviso a 5 min, etiqueta `v1.0-interciclo`); no se cambió.

@@ -142,6 +142,8 @@ export class Vista3D {
     this.peatones = new THREE.InstancedMesh(geometriaPeaton(), new THREE.MeshLambertMaterial({ color: COLOR.peaton }), MAX_PEATONES);
     for (const m of [this.estacionados, this.movimiento, this.peatones]) { m.count = 0; m.frustumCulled = false; s.add(m); }
     this.estacionados.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_ESTACIONADOS * 3), 3);
+    this.peatones.material.color.set(0xffffff);
+    this.peatones.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_PEATONES * 3), 3);
     this.movimiento.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_MOVIMIENTO * 3), 3);
     // autos de la app: más grandes, amarillos y con un anillo
     this.anillos = new THREE.Group();
@@ -322,7 +324,7 @@ export class Vista3D {
       if (k >= MAX_MOVIMIENTO) continue;
       q.setFromEuler(e.set(0, -m.r, 0));
       this.movimiento.setMatrixAt(k, mtx.compose(new THREE.Vector3(m.x, 0, m.z), q, m.halo ? grande : uno));
-      this.movimiento.setColorAt(k, color.set(m.halo ? COLOR.propio : m.color || "#e5e7eb"));
+      this.movimiento.setColorAt(k, color.set(m.color || (m.halo ? COLOR.propio : "#e5e7eb")));
       k++;
       if (m.halo) halos.push([id, m]);
     }
@@ -334,22 +336,27 @@ export class Vista3D {
     while (this.anillos.children.length < halos.length) this.anillos.add(new THREE.Mesh(this.geoAnillo, this.matAnillo));
     this.anillos.children.forEach((a, i) => {
       a.visible = i < halos.length;
-      if (a.visible) { a.position.set(halos[i][1].x, 0.2, halos[i][1].z); a.scale.setScalar(pulso); }
+      if (a.visible) {
+        a.position.set(halos[i][1].x, 0.5, halos[i][1].z); a.scale.setScalar(pulso);
+        a.material = this._matAnillo(halos[i][1].color);   // el anillo, del color del usuario
+      }
     });
     // peatones de la app
     let p = 0;
     for (const ped of this.calle.peatones) {
       if (p >= MAX_PEATONES) break;
       const [x, z] = this.local(ped.lat, ped.lon);
+      this.peatones.setColorAt(p, color.set(ped.color || COLOR.peaton));
       this.peatones.setMatrixAt(p++, mtx.compose(new THREE.Vector3(x, 0, z), q.identity(), grande));
     }
     this.peatones.count = p;
     this.peatones.instanceMatrix.needsUpdate = true;
-    // cámara que sigue a un auto de la app
+    if (this.peatones.instanceColor) this.peatones.instanceColor.needsUpdate = true;
+    // cámara que sigue a un auto (o al peatón) de un usuario de la app
     if (this.siguiendo) {
-      const m = this.moviles.get(this.siguiendo);
-      if (m) {
-        const d = new THREE.Vector3(m.x, 0, m.z).sub(this.controles.target);
+      const pos = this.posicion(this.siguiendo);
+      if (pos) {
+        const d = new THREE.Vector3(pos[0], 0, pos[1]).sub(this.controles.target);
         this.controles.target.add(d); this.camara.position.add(d);
       } else this.siguiendo = null;
     }
@@ -376,6 +383,7 @@ export class Vista3D {
         this.etiquetas.set(id, div);
       }
       div.textContent = (this.siguiendo === id ? "◉ " : "") + m.etiqueta;
+      if (m.color) { div.style.background = m.color; div.style.color = "#fff"; }
       v.set(m.x, 9, m.z).project(this.camara);
       div.hidden = v.z > 1;
       div.style.transform = `translate(-50%,-100%) translate(${(v.x + 1) / 2 * w}px,${(1 - v.y) / 2 * h}px)`;
@@ -406,6 +414,36 @@ export class Vista3D {
         c.div.style.transform = `translate(-50%,-50%) translate(${px}px,${py}px)`;
       }
     }
+  }
+
+  /** [x, z] de un auto (interpolado) o de un peatón, o null si no está en la escena. */
+  posicion(id) {
+    const m = this.moviles.get(id);
+    if (m) return [m.x, m.z];
+    const ped = (this.calle.peatones || []).find((p) => p.id === id);
+    return ped ? this.local(ped.lat, ped.lon) : null;
+  }
+
+  /** La cámara va hacia `id` (auto o peatón) y lo sigue; con `acercar`, desde unos 120 m. */
+  seguir(id, acercar = true) {
+    const pos = this.posicion(id);
+    if (!pos) return false;
+    this.siguiendo = id;
+    this.controles.autoRotate = false;
+    if (acercar) {
+      this.controles.target.set(pos[0], 0, pos[1]);
+      this.camara.position.set(pos[0] - 55, 75, pos[1] + 85);
+    }
+    return true;
+  }
+
+  _matAnillo(color) {
+    if (!color) return this.matAnillo;
+    this._anillos = this._anillos || new Map();
+    if (!this._anillos.has(color)) {
+      this._anillos.set(color, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+    }
+    return this._anillos.get(color);
   }
 
   /** Vuelve a la vista general de la zona. */

@@ -89,7 +89,7 @@ Ejemplo (`comun/tarifa.json`):
   "saldo_negativo_max_usd": 0.5,
   "aviso_saldo_min": 10,
   "tiempo_maximo_min": 120,
-  "aviso_tiempo_min": 5,
+  "aviso_tiempo_min": 10,
   "recarga_minima_usd": 5.0,
   "tarjeta_bloque_min": 30
 }

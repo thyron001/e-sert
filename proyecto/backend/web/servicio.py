@@ -9,7 +9,7 @@ estaciona, un auto propio en SUMO (`sim_web_<id>`). Flujo de una sesión (`Sesio
     volviendo ──(la IA detecta que volvió a manejar)──► cerrada
 
 - **Tarifa:** $0,25 por bloque de 30 min (`comun/tarifa.json`), prepago, sin devolución.
-- **Temporizador en tiempo simulado.** A 5 min del final se avisa (`alerta`); al llegar a 0 se
+- **Temporizador en tiempo simulado.** A 10 min del final (`aviso_tiempo_min`) se avisa (`alerta`); al llegar a 0 se
   renueva sola (+30 min, +$0,25) mientras no pase de 120 min. En el máximo, o si el saldo no
   alcanza, se ordena al conductor volver.
 - Si el usuario no elige el tiempo en 5 min simulados desde que llegó, se cobran 30 min.
@@ -365,9 +365,10 @@ class ServicioWeb:
         datos["restante_s"] = None if restante is None else round(restante)
         datos["alerta"] = None
         if datos["estado"] == "activa" and restante is not None and restante <= aviso:
-            datos["alerta"] = ("Faltan 5 min y llegarás al máximo de 120 min: retira el vehículo."
+            avisar = tar.tarifa_vigente().aviso_tiempo_min
+            datos["alerta"] = (f"Faltan {avisar} min y llegarás al máximo de {maximo} min: retira el vehículo."
                                if datos["pagado_min"] >= maximo else
-                               "Faltan 5 min: si no te vas, se debitarán $0,25 por otra media hora.")
+                               f"Faltan {avisar} min: si no te vas, se debitarán $0,25 por otra media hora.")
         datos["puede_extender"] = datos["estado"] == "activa" and datos["pagado_min"] < maximo
         datos["opciones_min"] = list(OPCIONES_MIN)
         datos["eleccion_restante_s"] = (None if datos["estado"] != "llego" or datos["t_llegada"] is None

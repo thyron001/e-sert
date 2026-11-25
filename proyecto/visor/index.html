@@ -22,6 +22,12 @@
       <p>Una app que muestra en tiempo real dónde hay parqueo libre, lleva al conductor hasta el puesto y
         cobra desde el celular, sin tarjetas SERT físicas.</p>
     </div>
+    <nav class="usuarios-mapa" id="usuarios-mapa" aria-label="Ir a la posición de un usuario" hidden></nav>
+    <div class="leyenda-mapa" aria-label="Leyenda del mapa">
+      <span><i class="raya libre"></i>Libre</span>
+      <span><i class="raya ocupado"></i>Ocupado</span>
+      <span><i class="punto-usuario"></i>Usuario e-Sert</span>
+    </div>
     <div class="cambio-vista" role="group" aria-label="Vista del mapa">
       <button type="button" data-vista="3d">3D</button><button type="button" data-vista="2d">2D</button>
       <button type="button" id="b-encuadrar" title="Volver a la vista de toda la zona">⌂</button>
@@ -32,12 +38,12 @@
       <h1>e-sert <span class="sub">zona SERT · Cuenca</span></h1>
       <div id="conexion" class="estado desconectado">desconectado</div>
     </header>
-    <div class="reloj"><span class="etq">t_sim</span> <span id="reloj">--:--:--</span></div>
-    <section id="control-demo" class="control-demo" aria-label="Simulación en el servidor"></section>
+    <div class="reloj"><span class="etq">Hora</span> <span id="reloj">--:--:--</span></div>
     <section id="app-qr" class="app-qr" aria-label="QR de la app" hidden></section>
-    <section id="tarjetas" class="tarjetas" aria-label="KPIs en vivo"></section>
-    <p class="nota" id="nota-base"></p>
-    <section class="controles">
+    <section id="tarjetas" class="tarjetas" aria-label="Indicadores en vivo"></section>
+    <p class="nota" id="nota-base" hidden></p>
+    <!-- La sección «Escena» (conteos de depuración) queda oculta: principal.js sigue escribiendo en ella. -->
+    <section class="controles" hidden>
       <h2>Escena</h2>
       <dl>
         <dt>Vehículos</dt><dd id="n-vehiculos">0</dd>
@@ -55,6 +61,7 @@
     </section>
     <h2 class="titulo-leyenda">Leyenda</h2>
     <ul id="leyenda"></ul>
+    <section id="control-demo" class="control-demo" aria-label="Simulación en el servidor"></section>
   </aside>
   <div id="ayuda" class="ayuda" hidden>
     <h2>Teclas</h2>

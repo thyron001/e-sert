@@ -102,6 +102,18 @@ def main():
     def libre(x, y):
         return not any(dentro(x, y, b) for b in celdas.get((int(x // 50), int(y // 50)), []))
 
+    # polyconvert a veces cierra mal el río (relaciones de OSM): un «agua» que cubre manzanas con
+    # casas no es el río. Se descarta si contiene más de 3 centros de edificios.
+    centros = [(sum(q[0] for q in e["p"]) / len(e["p"]), sum(q[1] for q in e["p"]) / len(e["p"])) for e in escena["edificios"]]
+    agua = []
+    for w in escena["agua"]:
+        xs, ys = [q[0] for q in w], [q[1] for q in w]
+        dentro_bbox = [c for c in centros if min(xs) <= c[0] <= max(xs) and min(ys) <= c[1] <= max(ys)]
+        if sum(1 for c in dentro_bbox if dentro(c[0], c[1], w)) <= 3:
+            agua.append(w)
+    print(f"agua: {len(agua)} de {len(escena['agua'])} polígonos (descartados los que cubren casas)")
+    escena["agua"] = agua
+
     rng = random.Random(42)
     for p in escena["parques"]:
         xs, ys = [q[0] for q in p], [q[1] for q in p]

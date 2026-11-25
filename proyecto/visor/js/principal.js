@@ -41,6 +41,8 @@ const calle = new CapaCalle({ datos: "./datos/puestos_geo.json" }).addTo(mapa);
 // Vista 3D (por defecto) encima del mapa 2D; ?vista=2d o el botón «2D» vuelven al mapa.
 let vista3d = null;
 try { vista3d = new Vista3D($("vista3d"), calle); } catch (e) { console.warn("Sin vista 3D (WebGL):", e); }
+// si alguien mueve la cámara a mano, se deja de seguir al usuario
+if (vista3d) vista3d.controles.addEventListener("start", () => { if (usuarioSeguido) { usuarioSeguido = null; pintarUsuarios(); } });
 function elegirVista(v) {
   if (!vista3d) v = "2d";
   vista3d && vista3d.mostrar(v === "3d");
@@ -60,12 +62,64 @@ const puestos = new Map();
 const vehiculos = calle.vehiculos;
 // Usuarios de la app web con auto en la simulación: su nombre va encima de su auto.
 const nombresApp = new Map();
+// Un color por usuario, el mismo de su avatar en la app (visor/app/usuario.js).
+const PERFILES = ["Tyrone Novillo", "Pablo Calle", "Miguel Bermeo", "Freddy Lopez", "Invitado 1", "Invitado 2", "Invitado 3"];
+const COLORES_USUARIO = ["#1E63D6", "#2E9E4F", "#C62828", "#FF7043", "#8e24aa", "#00897b", "#6d4c41"];
+function colorUsuario(veh) {
+  const nombre = nombresApp.get(veh);
+  if (!nombre) return null;
+  let i = PERFILES.indexOf(nombre);
+  if (i < 0) i = [...nombre].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return COLORES_USUARIO[i % COLORES_USUARIO.length];
+}
+const iniciales = (n) => n.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
+// Botones a la izquierda del mapa: ir a la posición de cada usuario (su auto, o a él si va a pie).
+let usuarioSeguido = null;
+function objetivoDe(veh) {
+  const ped = calle.peatones.find((p) => p.id === "ped_" + veh);
+  return ped ? ped.id : veh;
+}
+function irAUsuario(veh) {
+  usuarioSeguido = veh;
+  const obj = objetivoDe(veh);
+  if (vista3d && !$("vista3d").hidden) vista3d.seguir(obj);
+  else {
+    const pos = calle.peatones.find((p) => p.id === obj) || calle.vehiculos.get(veh);
+    if (pos) mapa.flyTo([pos.lat, pos.lon], 18.5, { duration: 1 });
+  }
+  pintarUsuarios();
+}
+function vistaGeneral() {
+  usuarioSeguido = null;
+  if (vista3d && !$("vista3d").hidden) vista3d.encuadrar();
+  else mapa.setView([-2.8974, -79.0045], 16);
+  pintarUsuarios();
+}
+function pintarUsuarios() {
+  const el = $("usuarios-mapa");
+  if (usuarioSeguido && !nombresApp.has(usuarioSeguido)) usuarioSeguido = null;
+  if (!nombresApp.size) { el.hidden = true; el.innerHTML = ""; el._html = ""; return; }
+  const filas = [...nombresApp.entries()].map(([veh, nombre]) => {
+    const pie = calle.peatones.some((p) => p.id === "ped_" + veh);
+    return `<button type="button" data-veh="${veh}" class="${veh === usuarioSeguido ? "on" : ""}" style="--c:${colorUsuario(veh)}">
+      <span class="av">${iniciales(nombre)}</span><span>${nombre}<small>${pie ? "a pie" : "en su auto"}</small></span></button>`;
+  });
+  const html = `<h2>Usuarios</h2>${filas.join("")}<button type="button" class="general" data-general="1">⌂ Toda la zona</button>`;
+  el.hidden = false;
+  if (html === el._html) return;   // sin cambios: no se redibuja (un clic no se pierde)
+  el._html = html;
+  el.innerHTML = html;
+  for (const b of el.querySelectorAll("button[data-veh]")) b.onclick = () => irAUsuario(b.dataset.veh);
+  el.querySelector("[data-general]").onclick = vistaGeneral;
+}
 async function cargarNombresApp() {
   try {
     const r = await fetch(API_BASE + "/web/activos");
     if (!r.ok) return;
     nombresApp.clear();
     for (const a of await r.json()) nombresApp.set(a.veh_id, a.nombre);
+    pintarUsuarios();
   } catch { /* sin backend: sin nombres */ }
 }
 cargarNombresApp();
@@ -83,7 +137,7 @@ function leyenda() {
     ["Auto estacionado", COLORES.estacionado, "auto"],
     ["Buscando", COLORES.BUSCANDO, "auto"], ["Guiado por la app", COLORES.GUIADO, "auto"],
     ["Estacionado (con app)", COLORES.ESTACIONADO, "auto"], ["A pie / regresando", COLORES.A_PIE, "auto"],
-    ["Peatón", COLORES.peaton, ""], ["Usuario de la app / espejo", COLORES.propio, "auto halo"],
+    ["Peatón (usuario a pie)", COLORES.peaton, ""], ["Usuario de la app (un color por usuario)", COLORES.propio, "auto halo"],
   ];
   $("leyenda").innerHTML = filas.map(([t, c, cl]) =>
     `<li><span class="punto ${cl}" style="background:${c};color:${c}"></span>${t}</li>`).join("");
@@ -157,10 +211,17 @@ function onSnapshot(msg) {
   const t0 = performance.now();
   const seguidos = new Set(msg.espejos || []);
   calle.fijarVehiculos(msg.vehiculos.map((v) => ({
-    id: v.id, lat: v.lat, lon: v.lon, color: seguidos.has(v.id) ? COLORES.propio : (COLORES[v.estado] || COLORES.null),
+    id: v.id, lat: v.lat, lon: v.lon,
+    color: seguidos.has(v.id) ? (colorUsuario(v.id) || COLORES.propio) : (COLORES[v.estado] || COLORES.null),
     borde: v.con_app ? "#0f172a" : null, halo: seguidos.has(v.id), etiqueta: nombresApp.get(v.id),
   })));
-  calle.fijarPeatones(msg.peatones || []);
+  calle.fijarPeatones((msg.peatones || []).map((p) => Object.assign({}, p, {
+    color: colorUsuario(String(p.id).replace(/^ped_/, "")) || COLORES.peaton })));
+  // si el usuario seguido se baja del auto (o vuelve a él), la cámara pasa a seguir a quien corresponde
+  if (usuarioSeguido && vista3d && !$("vista3d").hidden) {
+    const obj = objetivoDe(usuarioSeguido);
+    if (vista3d.siguiendo !== obj) vista3d.seguir(obj, false);
+  }
   for (const p of msg.puestos) {
     const dato = puestos.get(p.puesto_id) || {};
     dato.ocupados = p.ocupados; dato.capacidad = p.capacidad;

@@ -35,7 +35,7 @@ export async function pintarBilletera(el, usuario) {
       <div class="grande">${dinero(b.disponible)}</div>
       <div class="etq">Saldo ${dinero(b.saldo)} · Retenido ${dinero(b.retenido)}</div>
     </div>
-    <p class="etq">Recargar con Payphone (modo de pruebas, sin dinero real):</p>
+    <p class="etq">Recargar con Payphone:</p>
     <div class="fila-botones" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px">
       ${MONTOS.map((m) => `<button type="button" class="borde" data-monto="${m}">${dinero(m)}</button>`).join("")}
     </div>

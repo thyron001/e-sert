@@ -6,7 +6,7 @@
 // Buscar: el usuario pone su ubicación simulada y pulsa «Buscar parqueadero cercano»; el backend
 // ordena crear un auto propio en SUMO, que va por la ruta real al puesto libre más cercano. La IA
 // (RF sobre el GPS emulado) detecta cuándo estacionó y se bajó → la app pide el tiempo (30/60/90/120
-// min, se debita ya). A 5 min del final avisa; en 0 se renueva sola. «Me voy»: el conductor vuelve,
+// min, se debita ya). A 10 min del final avisa; en 0 se renueva sola. «Me voy»: el conductor vuelve,
 // la IA detecta la salida y la app vuelve a la pantalla inicial.
 //
 // Estado propio: GET /api/v1/web/usuarios/{id} cada segundo. Mundo: WebSocket /ws/estado.
@@ -62,7 +62,7 @@ const calle = new CapaCalle({ datos: "../datos/puestos_geo.json", alTocarPuesto:
 calle.cargar();
 const pin = L.marker(CENTRO, {
   draggable: true, icon: L.divIcon({ className: "", html: '<div class="pin-ubicacion"></div>', iconSize: [26, 26], iconAnchor: [13, 26] }),
-}).addTo(mapa).bindTooltip("Tu ubicación simulada", { direction: "top", offset: [0, -24] });
+}).addTo(mapa).bindTooltip("Tu ubicación", { direction: "top", offset: [0, -24] });
 const ruta = L.polyline([], { color: COLORES.propio, weight: 5, opacity: 0.9 }).addTo(mapa);
 // Mi posición (solo en el puesto): el teléfono del conductor, en una capa encima del lienzo.
 const yo = (() => {
@@ -193,7 +193,7 @@ function pintar(forzar = false) {
 
 function dinamicos(s) {
   const r = $("d-reloj");
-  if (r && s) { r.textContent = reloj(s.restante_s); r.classList.toggle("cerca", s.restante_s != null && s.restante_s <= 300); }
+  if (r && s) { r.textContent = reloj(s.restante_s); r.classList.toggle("cerca", s.restante_s != null && s.restante_s <= 600); }
   const el = $("d-eleccion");
   if (el && s) el.textContent = reloj(s.eleccion_restante_s);
 }
@@ -252,7 +252,7 @@ function contenido(s, hay) {
         </div>`;
     }
     return `<h2>Parquear en el Centro</h2>
-      <p>Toca el mapa o arrastra el pin para poner <span class="dato">tu ubicación simulada</span>.
+      <p>Toca el mapa o arrastra el pin para poner <span class="dato">tu ubicación</span>.
          La app te lleva al puesto SERT libre más cercano.</p>
       ${err}
       <div class="pila">
@@ -328,7 +328,7 @@ function enlazar() {
   if (entrada) entrada.oninput = () => { codigoElegido = entrada.value.replace(/\D/g, "").slice(0, 3); entrada.value = codigoElegido; };
 }
 
-// --- Alerta de los 5 minutos ---------------------------------------------------------------------
+// --- Alerta de los 10 minutos ---------------------------------------------------------------------
 function pedirNotificaciones() {
   try { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission(); } catch { /* */ }
 }

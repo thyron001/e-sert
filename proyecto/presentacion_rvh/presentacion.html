@@ -3,8 +3,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
-/* Presentación para la Dirección General de Movilidad: portada, problema y el visor de e-sert.
-   Diapositivas de 1280×720 escaladas; la tercera es la página del visor (copia sin servidor). */
+/* Presentación para la Dirección General de Movilidad: portada y problema. Después, el botón
+   «Ir al visor» de los controles abre el visor de e-sert en vivo (e-sert.tesisucuenca.com). */
 :root{
   --texto:#1E2A38; --texto2:#4B5A6B; --escenario:#20262d;
   --principal:#1E63D6; --claro:#E8F0FC; --oscuro:#0B2540;
@@ -41,21 +41,6 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 .dolor svg{flex:none}
 .dolor h4{font-size:22px;line-height:1.2;margin-bottom:4px}
 .dolor p{font-size:17.5px;line-height:1.35;color:var(--texto2)}
-/* visor: la página del visor ocupa toda la diapositiva */
-.slide.visor{background:#cfe0ee}
-#marcoVisor{position:absolute;inset:0;width:1280px;height:720px;border:0;background:#cfe0ee}
-#respaldo{position:absolute;inset:0}
-#respaldo .escena{position:absolute;inset:0}
-#respaldo canvas{display:block}
-.rotulos3d{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.rotulo-usuario{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;border:0;background:rgba(0,0,0,.8);color:#FFD60A;font:700 14px system-ui,sans-serif;padding:3px 9px;border-radius:7px;white-space:nowrap}
-.rotulo-calle{position:absolute;left:0;top:0;color:#1f2937;font:600 12px system-ui,sans-serif;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
-.rotulo-usuario[hidden],.rotulo-calle[hidden]{display:none}
-.credito3d{position:absolute;right:6px;bottom:4px;font-size:11px;color:#4b5563;background:rgba(255,255,255,.7);padding:1px 6px;border-radius:4px}
-.titulo-esert{position:absolute;left:12px;top:12px;z-index:5;max-width:380px;pointer-events:none;background:rgba(255,255,255,.95);border-radius:12px;padding:12px 16px;box-shadow:0 4px 16px rgba(11,37,64,.18)}
-.titulo-esert b{display:block;font-size:30px;line-height:1.05;color:#1E63D6;font-weight:800}
-.titulo-esert p{margin:6px 0 0;font-size:14.5px;line-height:1.4;color:#0b2540;font-family:system-ui,sans-serif}
-.enlace-vivo{position:absolute;right:12px;top:12px;z-index:5;background:var(--oscuro);color:#fff;text-decoration:none;font-weight:700;border-radius:8px;padding:8px 12px;font-size:15px}
 /* notas y barra */
 #notes{position:fixed;left:0;right:0;bottom:0;background:#1E2A38;color:#eef2f6;font-size:16px;line-height:1.45;padding:12px 22px 14px;display:none;z-index:40;max-height:34vh;overflow:auto}
 #notes.open{display:block}
@@ -63,10 +48,9 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 #notes li{margin-left:18px}
 #bar{position:fixed;right:10px;bottom:10px;display:flex;gap:6px;z-index:45;opacity:.55;transition:opacity .2s;flex-wrap:wrap;justify-content:flex-end}
 #bar:hover{opacity:1}
-body.en-visor #bar{opacity:0}
-body.en-visor #bar:hover{opacity:1}
-#bar button{font:inherit;font-size:13px;background:#2b333c;color:#dfe6ee;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
-#bar button:focus-visible{outline:2px solid #FFD60A;outline-offset:2px}
+#bar button,#bar a{text-decoration:none;font:inherit;font-size:13px;background:#2b333c;color:#dfe6ee;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+#bar button:focus-visible,#bar a:focus-visible{outline:2px solid #FFD60A;outline-offset:2px}
+#bVisor{background:#1E63D6!important;color:#fff!important;font-weight:700}
 #reloj{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -75,7 +59,7 @@ body.en-visor #bar:hover{opacity:1}
 
 <!-- ===================== PORTADA ===================== -->
 <section class="slide portada"
-  data-notas="Buenas tardes. Somos estudiantes de Telecomunicaciones de la Universidad de Cuenca.|Primero el problema y luego e-sert funcionando: mientras alguien lo usa, vamos contando qué gana la ciudad y qué datos necesitamos de la EMOV.">
+  data-notas="Buenas tardes. Somos estudiantes de Telecomunicaciones de la Universidad de Cuenca.|Primero el problema y luego e-sert funcionando en vivo.">
   <div class="franja">
     <svg width="520" height="520" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="6"/><path d="M38 72V28h16a13 13 0 0 1 0 26H38" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg>
     <div class="lab">PROPUESTA PARA LA DIRECCIÓN GENERAL DE MOVILIDAD · ZONA SERT</div>
@@ -87,7 +71,7 @@ body.en-visor #bar:hover{opacity:1}
 
 <!-- ===================== EL PROBLEMA ===================== -->
 <section class="slide" data-sec="El problema"
-  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.|Las cifras salen de una simulación del Centro; por eso al final les pedimos datos reales.">
+  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.|Las cifras salen de una simulación del Centro; por eso al final les pedimos datos reales.|Siguiente: botón «Ir al visor» (abajo a la derecha). Mientras alguien usa la app, contar: 18 % menos tiempo buscando, 118 kg de CO₂ menos por hora pico, control y cobro sin tarjetas; y cerrar pidiendo la ocupación real por calle y hora, el inventario oficial de puestos y un piloto.">
   <div class="frametitle">Encontrar parqueo en el Centro cuesta tiempo, tráfico y aire limpio</div>
   <div class="body" style="justify-content:center;gap:24px">
     <div class="cifras">
@@ -109,23 +93,13 @@ body.en-visor #bar:hover{opacity:1}
   <div class="footline"></div>
 </section>
 
-<!-- ===================== EL VISOR (LA PROPUESTA) ===================== -->
-<section class="slide visor" id="sVisor"
-  data-notas="Esta es la propuesta: la página del visor de e-sert, el Centro Histórico en 3D.|Verde: puesto con espacio. Rojo: lleno. El auto amarillo es un usuario de e-Sert.|Pedir a alguien que escanee el QR del panel y use la app; mientras tanto contar: 18 % menos tiempo buscando, 118 kg de CO₂ menos por hora pico, control y cobro sin tarjetas.|Cerrar con lo que necesitamos: la ocupación real por calle y hora, el inventario oficial de puestos y un piloto en un sector del Centro.">
-  <iframe id="marcoVisor" src="visor/index.html" title="Visor de e-sert" loading="eager"></iframe>
-  <div id="respaldo" hidden>
-    <div class="escena" id="escenaRespaldo"></div>
-    <div class="titulo-esert"><b>e-Sert</b><p>Una app que muestra en tiempo real dónde hay parqueo libre, lleva al conductor hasta el puesto y cobra desde el celular, sin tarjetas SERT físicas.</p></div>
-    <a class="enlace-vivo" href="https://e-sert.tesisucuenca.com/" target="_blank" rel="noopener">Abrir el visor en vivo ↗</a>
-  </div>
-</section>
-
 </div></div>
 
 <div id="notes"></div>
 <div id="bar">
   <button id="bPrev" aria-label="Anterior">◀</button><button id="bNext" aria-label="Siguiente">▶</button>
   <button id="bReloj" title="Cronómetro de 5 minutos (R para reiniciar)"><span id="reloj">5:00</span></button>
+  <a id="bVisor" href="https://e-sert.tesisucuenca.com/" target="_blank" rel="noopener">Ir al visor ↗</a>
   <button id="bNotas">Notas (N)</button><button id="bFull">Pantalla completa (F)</button>
 </div>
 
@@ -141,7 +115,6 @@ let cur=0;
 function ir(i){
   cur=Math.max(0,Math.min(TOTAL-1,i));
   slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
-  document.body.classList.toggle('en-visor', slides[cur].id==='sVisor');
   try{ history.replaceState(null,'','#d'+(cur+1)); }catch(e){}
   const n=slides[cur].dataset.notas;
   document.getElementById('notes').innerHTML='<h4>Notas · diapositiva '+(cur+1)+'</h4>'+(n?'<ul>'+n.split('|').map(x=>'<li>'+x+'</li>').join('')+'</ul>':'');
@@ -173,56 +146,8 @@ document.getElementById('bNext').onclick=()=>{arrancarReloj();ir(cur+1);};
 document.getElementById('bFull').onclick=pantalla;
 document.getElementById('bNotas').onclick=()=>document.getElementById('notes').classList.toggle('open');
 
-/* El visor avisa cuando ya muestra la simulación y reenvía las flechas aunque tenga el foco.
-   Si no llega a abrir (por ejemplo, si el navegador bloquea el marco), se usa el respaldo 3D. */
-let visorListo=false;
-addEventListener('message',e=>{ const d=e.data||{};
-  if(d.esert==='listo') visorListo=true;
-  else if(d.esert==='tecla') tecla(d.key); });
-function usarRespaldo(){ if(visorListo||!document.getElementById('respaldo').hidden) return;
-  document.getElementById('marcoVisor').remove(); document.getElementById('respaldo').hidden=false;
-  window.dispatchEvent(new Event('respaldo')); }
-document.addEventListener('securitypolicyviolation',e=>{ if(/frame/.test(e.violatedDirective||'')) usarRespaldo(); });
-setTimeout(usarRespaldo,25000);
 </script>
 
-<script type="importmap">
-{"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-             "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
-</script>
-<script type="module">
-/* Respaldo: si el visor no abre dentro de la presentación, la misma vista 3D del visor con la grabación. */
-import { Vista3D } from "./visor/js/vista3d.js";
-const COLOR_ESTADO = { BUSCANDO:"#FF9F1C", GUIADO:"#a78bfa", ESTACIONADO:"#60a5fa", A_PIE:"#2dd4bf", REGRESANDO:"#f0abfc", SALIENDO:"#d6b48c", CERRADA:"#9ca3af", null:"#e5e7eb" };
-class CalleGrabada {
-  constructor(){ this.puestos=new Map(); this.vehiculos=new Map(); this.peatones=[]; this.rotulos=[]; }
-  fijarOcupacion(lista){ for(const o of lista){ const p=this.puestos.get(o.puesto_id); if(p) p.ocupados=Math.min(o.ocupados,p.capacidad); } }
-  fijarVehiculos(lista){ const vistos=new Set();
-    for(const v of lista){ vistos.add(v.id); const pr=this.vehiculos.get(v.id); let r=pr?pr.rumbo:0;
-      if(pr){ const dy=(v.lat-pr.lat)*111320, dx=(v.lon-pr.lon)*111320*Math.cos(v.lat*Math.PI/180); if(Math.hypot(dx,dy)>0.6) r=Math.atan2(dx,dy); }
-      this.vehiculos.set(v.id,Object.assign({},v,{rumbo:r})); }
-    for(const id of [...this.vehiculos.keys()]) if(!vistos.has(id)) this.vehiculos.delete(id); }
-}
-async function respaldo(){
-  const cont=document.getElementById('escenaRespaldo'), calle=new CalleGrabada();
-  const [puestos, rotulos, rep] = await Promise.all(["visor/datos/puestos_geo.json","visor/datos/calles_geo.json","visor/datos/repeticion.json"].map(u=>fetch(u).then(r=>r.json())));
-  for(const p of puestos) calle.puestos.set(p.id, Object.assign(p,{ocupados:0}));
-  calle.rotulos=rotulos;
-  const vista=new Vista3D(cont, calle, { datos:"visor/datos/escena3d.json" });
-  const destacado=rep.destacados[0];
-  let k=0;
-  function paso(){ const f=rep.frames[k]; if(k===0) vista.moviles.clear();
-    calle.fijarOcupacion(rep.puestos.map((id,i)=>({puesto_id:id, ocupados:f.o[i]})));
-    calle.fijarVehiculos(f.v.map(([i,lat,lon,e])=>{ const id=rep.ids[i], h=id===destacado;
-      return {id, lat, lon, color: h?'#FFD60A':(COLOR_ESTADO[rep.estados[e]]||COLOR_ESTADO.null), halo:h, etiqueta: h?'Usuario e-Sert':undefined}; }));
-    k=(k+1)%rep.frames.length; }
-  paso(); setInterval(paso,1000);
-  const activa=()=>{ const si=document.getElementById('sVisor').classList.contains('active'); vista.activa=si;
-    if(si){ vista.renderer.setPixelRatio(Math.min(2,(devicePixelRatio||1)*escalaActual)); vista._tamano(); } };
-  addEventListener('diapositiva',activa); addEventListener('escala',activa); activa();
-}
-addEventListener('respaldo',()=>respaldo().catch(e=>console.warn('Respaldo 3D:',e)));
-</script>
 <script>
 const h=parseInt((location.hash||'').replace('#d',''),10);
 ir(isNaN(h)?0:h-1);
