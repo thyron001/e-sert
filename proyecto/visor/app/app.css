@@ -26,6 +26,9 @@ main { flex: 1; min-height: 0; position: relative; }
          padding: calc(8px + env(safe-area-inset-top)) 16px 8px; min-height: var(--barra); background: var(--fondo);
          border-bottom: 1px solid #161616; z-index: 1000; }
 .barra h1 { margin: 0; font-size: 20px; font-weight: 600; }
+.marca { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo-emov { height: 18px; width: auto; flex: none; display: block; }
+.marca h1 { padding-left: 12px; border-left: 1px solid #333; }
 .chip { width: auto; min-height: 0; padding: 6px 12px; border-radius: 999px; background: var(--tarjeta);
         border: 1px solid var(--borde); color: var(--texto); font-weight: 600; font-size: 13px; }
 .pestanas { display: grid; grid-template-columns: repeat(5, 1fr); background: #0a0a0a; border-top: 1px solid #1e1e1e;
