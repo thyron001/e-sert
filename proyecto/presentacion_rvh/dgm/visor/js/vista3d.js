@@ -172,20 +172,20 @@ export class Vista3D {
     });
     const linea = (p) => p.map(([x, y]) => [x, -y]);
     // suelo: terrenos, parqueaderos, parques, canchas y el río
-    agregar(poligonos(d.terrenos || [], 0.02), plano(COLOR.terreno));
-    agregar(poligonos(d.parqueaderos || [], 0.03), plano(COLOR.parqueadero));
-    agregar(poligonos(d.parques || d.verdes || [], 0.04), plano(COLOR.parque));
-    agregar(poligonos(d.canchas || [], 0.05), plano(COLOR.cancha));
-    agregar(poligonos(d.agua || [], 0.05), plano(COLOR.agua));
+    agregar(poligonos(d.terrenos || [], 0.05), plano(COLOR.terreno));
+    agregar(poligonos(d.parqueaderos || [], 0.1), plano(COLOR.parqueadero));
+    agregar(poligonos(d.parques || d.verdes || [], 0.15), plano(COLOR.parque));
+    agregar(poligonos(d.canchas || [], 0.2), plano(COLOR.cancha));
+    agregar(poligonos(d.agua || [], 0.2), plano(COLOR.agua));
     // aceras, calzada, cebras y líneas
-    agregar((d.aceras || []).map((c) => cinta(linea(c.p), c.w, 0.07)), plano(COLOR.acera));
-    agregar(d.calles.map((c) => cinta(linea(c.p), c.w, 0.08)), plano(COLOR.asfalto));
+    agregar((d.aceras || []).map((c) => cinta(linea(c.p), c.w, 0.25)), plano(COLOR.acera));
+    agregar(d.calles.map((c) => cinta(linea(c.p), c.w, 0.3)), plano(COLOR.asfalto));
     const cebras = [];
-    for (const c of d.cruces || []) for (const tramo of punteada(linea(c.p), 0.55, 0.55)) cebras.push(cinta(tramo, c.w * 0.9, 0.1));
+    for (const c of d.cruces || []) for (const tramo of punteada(linea(c.p), 0.55, 0.55)) cebras.push(cinta(tramo, c.w * 0.9, 0.36));
     agregar(cebras, plano(COLOR.cebra));
-    agregar((d.centro || []).map((p) => cinta(linea(p), 0.2, 0.11)), plano(COLOR.centro));
+    agregar((d.centro || []).map((p) => cinta(linea(p), 0.2, 0.36)), plano(COLOR.centro));
     const carriles = [];
-    for (const p of d.carriles || []) for (const tramo of punteada(linea(p), 3, 5)) carriles.push(cinta(tramo, 0.15, 0.11));
+    for (const p of d.carriles || []) for (const tramo of punteada(linea(p), 3, 5)) carriles.push(cinta(tramo, 0.15, 0.36));
     agregar(carriles, plano(COLOR.carril));
     // edificios: fachadas claras y techos de teja (como en el Centro de Cuenca) o losa
     const fachadas = ["#f4efe6", "#efe2c8", "#e9d3b4", "#f2e8d8", "#e6cfc0", "#ece6dc"].map((c) => new THREE.Color(c));
@@ -248,7 +248,7 @@ export class Vista3D {
     for (const p of this.calle.puestos.values()) {
       const inicio = n;
       for (const tramo of punteada(p.linea.map(([la, lo]) => this.local(la, lo)), 3, 2)) {
-        const g = cinta(tramo, 1.1, 0.15);
+        const g = cinta(tramo, 1.1, 0.42);
         n += g.attributes.position.count;
         geos.push(g);
       }

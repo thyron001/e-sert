@@ -12,3 +12,5 @@ reproduciendo en bucle un minuto grabado de la simulación (`dgm/datos/repeticio
 `visor/datos/snapshots_muestra.jsonl`), con un popup que explica qué es e-sert y un botón al visor en vivo.
 
 Teclas: flechas para avanzar, **N** notas, **E** explicación, **F** pantalla completa, **R** cronómetro.
+
+`armar_visor.py` arma `dgm/visor/`: la página del visor tal cual, alimentada por `grabacion.js` (un minuto grabado) en lugar del servidor, para mostrarla dentro del artefacto.

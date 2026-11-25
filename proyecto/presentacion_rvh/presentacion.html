@@ -3,12 +3,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
-/* Presentación de 5 minutos para la Dirección General de Movilidad: diapositivas de 1280×720 escaladas.
-   Un solo color de marca (azul e-sert); la diapositiva 3 es el visor 3D con un popup. */
+/* Presentación para la Dirección General de Movilidad: portada, problema y el visor de e-sert.
+   Diapositivas de 1280×720 escaladas; la tercera es la página del visor (copia sin servidor). */
 :root{
-  --texto:#1E2A38; --texto2:#4B5A6B; --aux:#B7C3D0; --escenario:#20262d;
-  --principal:#1E63D6; --claro:#E8F0FC; --fondores:#F5F8FE; --oscuro:#0B2540;
-  --ok:#1E7E45; --okBg:#E6F4EC; --mal:#B3261E; --malBg:#FBEAEA;
+  --texto:#1E2A38; --texto2:#4B5A6B; --escenario:#20262d;
+  --principal:#1E63D6; --claro:#E8F0FC; --oscuro:#0B2540;
+  --mal:#B3261E; --malBg:#FBEAEA;
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -23,7 +23,6 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 .footline{flex:none;height:30px;background:var(--claro);color:var(--principal);font-size:14px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 34px}
 .footline .c{text-align:center}.footline .r{text-align:right;font-variant-numeric:tabular-nums}
 .nota{font-size:14px;color:var(--texto2)}
-.resultado{background:var(--claro);color:var(--principal);font-weight:700;border-radius:10px;padding:12px 18px;font-size:22px;line-height:1.35}
 /* portada */
 .portada .franja{background:linear-gradient(120deg,#0B2540 0%,#1E63D6 100%);color:#fff;height:62%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 70px 46px;position:relative;overflow:hidden}
 .portada .franja svg{position:absolute;right:-40px;top:-30px;opacity:.16}
@@ -34,97 +33,40 @@ html,body{height:100%;background:var(--escenario);overflow:hidden;font-family:"S
 .portada .materia span{font-size:20px;color:var(--texto2)}
 /* problema */
 .cifras{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.cifra{border-radius:12px;padding:16px 18px;background:var(--malBg)}
-.cifra b{display:block;font-size:52px;line-height:1;color:var(--mal);font-weight:800;font-variant-numeric:tabular-nums}
-.cifra span{display:block;font-size:18px;line-height:1.3;margin-top:8px;color:var(--texto)}
+.cifra{border-radius:12px;padding:18px 18px;background:var(--malBg)}
+.cifra b{display:block;font-size:56px;line-height:1;color:var(--mal);font-weight:800;font-variant-numeric:tabular-nums}
+.cifra span{display:block;font-size:19px;line-height:1.3;margin-top:8px;color:var(--texto)}
 .dolores{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.dolor{display:flex;gap:14px;align-items:flex-start;border:1.5px solid #e3e8ee;border-radius:12px;padding:14px 16px}
+.dolor{display:flex;gap:14px;align-items:flex-start;border:1.5px solid #e3e8ee;border-radius:12px;padding:16px 16px}
 .dolor svg{flex:none}
-.dolor h4{font-size:21px;line-height:1.2;margin-bottom:4px}
-.dolor p{font-size:17px;line-height:1.35;color:var(--texto2)}
-/* visor */
+.dolor h4{font-size:22px;line-height:1.2;margin-bottom:4px}
+.dolor p{font-size:17.5px;line-height:1.35;color:var(--texto2)}
+/* visor: la página del visor ocupa toda la diapositiva */
 .slide.visor{background:#cfe0ee}
-#escena3d{position:absolute;inset:0}
-#escena3d canvas{display:block}
+#marcoVisor{position:absolute;inset:0;width:1280px;height:720px;border:0;background:#cfe0ee}
+#respaldo{position:absolute;inset:0}
+#respaldo .escena{position:absolute;inset:0}
+#respaldo canvas{display:block}
 .rotulos3d{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.rotulo-usuario{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;border:0;background:rgba(0,0,0,.8);color:#FFD60A;font:700 15px "Source Sans 3",sans-serif;padding:3px 10px;border-radius:7px;white-space:nowrap}
-.rotulo-calle{position:absolute;left:0;top:0;color:#1f2937;font:600 13px "Source Sans 3",sans-serif;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
+.rotulo-usuario{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;border:0;background:rgba(0,0,0,.8);color:#FFD60A;font:700 14px system-ui,sans-serif;padding:3px 9px;border-radius:7px;white-space:nowrap}
+.rotulo-calle{position:absolute;left:0;top:0;color:#1f2937;font:600 12px system-ui,sans-serif;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
 .rotulo-usuario[hidden],.rotulo-calle[hidden]{display:none}
-.credito3d{position:absolute;left:12px;bottom:8px;font-size:12px;color:#4b5563;background:rgba(255,255,255,.75);padding:1px 7px;border-radius:4px}
-.chip3d{position:absolute;left:22px;top:20px;background:var(--principal);color:#fff;border-radius:10px;padding:10px 16px;box-shadow:0 4px 16px rgba(11,37,64,.25)}
-.chip3d b{display:block;font-size:26px;line-height:1.1}
-.chip3d span{font-size:15px;opacity:.9}
-.chip3d i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#4ade80;margin-right:6px;animation:latido 1.6s infinite}
-@keyframes latido{50%{opacity:.25}}
-.popup{position:absolute;right:22px;top:20px;width:400px;background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(11,37,64,.32);overflow:hidden;transform-origin:top right}
-.popup.entra{animation:entra .55s cubic-bezier(.2,.8,.2,1) both}
-@keyframes entra{from{opacity:0;transform:translateY(-10px) scale(.94)}to{opacity:1;transform:none}}
-.popup header{background:var(--principal);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
-.popup header b{font-size:22px}
-.popup header button{background:none;border:0;color:#fff;font-size:24px;cursor:pointer;line-height:1}
-.popup .pc{padding:14px 18px 16px;display:flex;flex-direction:column;gap:11px}
-.popup .lead{font-size:18.5px;line-height:1.4}
-.popup ul{list-style:none;display:flex;flex-direction:column;gap:7px}
-.popup li{display:flex;gap:10px;align-items:flex-start;font-size:16.5px;line-height:1.3}
-.popup li svg{flex:none;margin-top:1px}
-.popup .met{display:flex;gap:10px}
-.popup .met div{flex:1;background:var(--okBg);border-radius:9px;padding:7px 10px}
-.popup .met b{display:block;font-size:26px;color:var(--ok);line-height:1.05}
-.popup .met span{font-size:13px;color:var(--texto2);line-height:1.2;display:block}
-.popup .ley{display:flex;gap:12px;flex-wrap:wrap;font-size:13.5px;color:var(--texto2)}
-.popup .ley i{display:inline-block;width:18px;height:5px;border-radius:2px;vertical-align:middle;margin-right:5px}
-.popup a.vivo{display:block;text-align:center;background:var(--oscuro);color:#fff;text-decoration:none;font-weight:700;border-radius:9px;padding:9px;font-size:16px}
-.popup-min{position:absolute;right:22px;top:20px;background:var(--principal);color:#fff;border:0;border-radius:10px;padding:9px 14px;font:700 16px "Source Sans 3",sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(11,37,64,.3)}
-.cargando3d{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:var(--texto2)}
-/* cómo funciona */
-.pasos3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;flex:1;min-height:0}
-.paso{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
-.tel{width:172px;height:372px;border-radius:26px;border:7px solid #111827;overflow:hidden;box-shadow:0 10px 28px rgba(11,37,64,.25);background:#000}
-.tel img{width:100%;height:100%;object-fit:cover;display:block}
-.paso h4{font-size:23px;display:flex;align-items:center;gap:10px;justify-content:center}
-.paso h4 em{font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--principal);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px}
-.paso p{font-size:17.5px;line-height:1.35;color:var(--texto2);max-width:330px}
-/* beneficios */
-.benef{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;flex:1}
-.bf{border-radius:14px;padding:18px 22px;display:flex;gap:18px;align-items:center;background:var(--fondores);border:1.5px solid var(--claro)}
-.bf b.n{font-size:50px;font-weight:800;color:var(--ok);line-height:1;min-width:190px;font-variant-numeric:tabular-nums}
-.bf b.n.az{color:var(--principal)}
-.bf h4{font-size:23px;margin-bottom:4px}
-.bf p{font-size:17.5px;line-height:1.35;color:var(--texto2)}
-/* datos que necesitamos */
-table.datos{border-collapse:collapse;width:100%;font-size:18.5px}
-table.datos th,table.datos td{padding:10px 12px;text-align:left;vertical-align:top}
-table.datos thead tr{border-top:2px solid var(--texto);border-bottom:1px solid var(--texto)}
-table.datos th{font-weight:600;color:var(--texto2);font-size:16px}
-table.datos tbody tr{border-bottom:1px solid #e3e8ee}
-table.datos tbody tr:last-child{border-bottom:2px solid var(--texto)}
-table.datos td:first-child{font-weight:700;color:var(--principal);width:32%}
-table.datos tr.clave td{background:var(--okBg)}
-table.datos tr.clave td:first-child{color:var(--ok)}
-.prio{display:inline-block;font-size:12.5px;font-weight:700;border-radius:9px;padding:1px 8px;margin-left:6px;background:var(--ok);color:#fff;vertical-align:2px}
-/* paneles, notas y barra */
-:root{--panel:min(36vw,540px)}
-#expl{position:fixed;top:0;right:0;bottom:0;width:var(--panel);display:none;z-index:50;box-shadow:-6px 0 24px rgba(0,0,0,.25)}
-#expl.open{display:flex}
-#expl .box{background:#fff;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;color:#1E2A38}
-body.panel #viewport{right:var(--panel)}
-body.panel #bar{right:calc(var(--panel) + 12px)}
-#expl .head{background:var(--principal);color:#fff;padding:14px 22px;font-size:21px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:12px}
-#expl .head button{border:0;background:none;color:#fff;font-size:26px;cursor:pointer;line-height:1}
-#expl .cuerpo{overflow:auto;padding:16px 22px 28px;font-size:16px;line-height:1.55;flex:1}
-#expl h3{font-size:17.5px;color:var(--principal);margin:16px 0 4px}
-#expl h3:first-child{margin-top:0}
-#expl p{margin:4px 0 8px}
-#expl ul{margin:4px 0 8px 22px}
-#expl .preg{border-left:4px solid var(--principal);padding:4px 10px;margin:8px 0;background:#f6f8fa}
+.credito3d{position:absolute;right:6px;bottom:4px;font-size:11px;color:#4b5563;background:rgba(255,255,255,.7);padding:1px 6px;border-radius:4px}
+.titulo-esert{position:absolute;left:12px;top:12px;z-index:5;max-width:380px;pointer-events:none;background:rgba(255,255,255,.95);border-radius:12px;padding:12px 16px;box-shadow:0 4px 16px rgba(11,37,64,.18)}
+.titulo-esert b{display:block;font-size:30px;line-height:1.05;color:#1E63D6;font-weight:800}
+.titulo-esert p{margin:6px 0 0;font-size:14.5px;line-height:1.4;color:#0b2540;font-family:system-ui,sans-serif}
+.enlace-vivo{position:absolute;right:12px;top:12px;z-index:5;background:var(--oscuro);color:#fff;text-decoration:none;font-weight:700;border-radius:8px;padding:8px 12px;font-size:15px}
+/* notas y barra */
 #notes{position:fixed;left:0;right:0;bottom:0;background:#1E2A38;color:#eef2f6;font-size:16px;line-height:1.45;padding:12px 22px 14px;display:none;z-index:40;max-height:34vh;overflow:auto}
 #notes.open{display:block}
 #notes h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9fb0c2;margin-bottom:4px}
 #notes li{margin-left:18px}
-#bar{position:fixed;right:10px;top:10px;display:flex;gap:6px;z-index:45;opacity:.6;transition:opacity .2s;flex-wrap:wrap;justify-content:flex-end}
+#bar{position:fixed;right:10px;bottom:10px;display:flex;gap:6px;z-index:45;opacity:.55;transition:opacity .2s;flex-wrap:wrap;justify-content:flex-end}
 #bar:hover{opacity:1}
+body.en-visor #bar{opacity:0}
+body.en-visor #bar:hover{opacity:1}
 #bar button{font:inherit;font-size:13px;background:#2b333c;color:#dfe6ee;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
-#bar button:focus-visible,.popup a:focus-visible,.popup button:focus-visible{outline:2px solid #FFD60A;outline-offset:2px}
+#bar button:focus-visible{outline:2px solid #FFD60A;outline-offset:2px}
 #reloj{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -132,8 +74,8 @@ body.panel #bar{right:calc(var(--panel) + 12px)}
 <div id="viewport"><div id="stage">
 
 <!-- ===================== PORTADA ===================== -->
-<section class="slide portada" data-expl="portada"
-  data-notas="Buenas tardes. Somos estudiantes de Telecomunicaciones de la Universidad de Cuenca.|En 5 minutos: el problema, nuestra propuesta funcionando y qué datos necesitamos de ustedes para llevarla a la calle.">
+<section class="slide portada"
+  data-notas="Buenas tardes. Somos estudiantes de Telecomunicaciones de la Universidad de Cuenca.|Primero el problema y luego e-sert funcionando: mientras alguien lo usa, vamos contando qué gana la ciudad y qué datos necesitamos de la EMOV.">
   <div class="franja">
     <svg width="520" height="520" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="6"/><path d="M38 72V28h16a13 13 0 0 1 0 26H38" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg>
     <div class="lab">PROPUESTA PARA LA DIRECCIÓN GENERAL DE MOVILIDAD · ZONA SERT</div>
@@ -143,11 +85,11 @@ body.panel #bar{right:calc(var(--panel) + 12px)}
   <div class="footline"></div>
 </section>
 
-<!-- ===================== 1. EL PROBLEMA ===================== -->
-<section class="slide" data-sec="El problema" data-expl="problema"
-  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.">
+<!-- ===================== EL PROBLEMA ===================== -->
+<section class="slide" data-sec="El problema"
+  data-notas="En hora pico casi 9 de cada 10 puestos del Centro están ocupados.|Un conductor da vueltas unos 7 minutos y 1,5 km antes de encontrar puesto.|Además no sabe dónde hay espacio, paga con tarjeta física y el control es puesto por puesto.|Las cifras salen de una simulación del Centro; por eso al final les pedimos datos reales.">
   <div class="frametitle">Encontrar parqueo en el Centro cuesta tiempo, tráfico y aire limpio</div>
-  <div class="body" style="justify-content:center;gap:22px">
+  <div class="body" style="justify-content:center;gap:24px">
     <div class="cifras">
       <div class="cifra"><b>87 %</b><span>de los puestos ocupados en la hora pico</span></div>
       <div class="cifra"><b>7 min</b><span>dando vueltas, en promedio, hasta encontrar puesto</span></div>
@@ -167,120 +109,42 @@ body.panel #bar{right:calc(var(--panel) + 12px)}
   <div class="footline"></div>
 </section>
 
-<!-- ===================== 2. LA SOLUCIÓN: EL VISOR ===================== -->
-<section class="slide visor" data-sec="Nuestra propuesta" data-expl="visor" id="sVisor"
-  data-notas="Esta es la propuesta funcionando: el Centro Histórico en 3D.|Verde: puesto con espacio. Rojo: lleno. Cada auto tiene el color de lo que está haciendo.|El auto amarillo es un conductor con e-sert: la app lo lleva al puesto libre más cercano.|Se puede girar con el mouse. El botón abre el sistema en vivo.">
-  <div id="escena3d"><div class="cargando3d">Cargando el Centro Histórico en 3D…</div></div>
-  <div class="chip3d"><b>e-sert en el Centro Histórico</b><span><i></i>Simulación del Centro · arrastra para girar</span></div>
-  <div class="popup" id="popup">
-    <header><b>¿Qué es e-sert?</b><button type="button" id="popCerrar" aria-label="Minimizar">–</button></header>
-    <div class="pc">
-      <div class="lead">Una app que muestra <b>en tiempo real</b> dónde hay parqueo libre, lleva al conductor hasta el puesto y cobra desde el celular, <b>sin tarjetas SERT físicas</b>.</div>
-      <ul>
-        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#1E63D6"/><path d="M6 10l3 3 5-6" fill="none" stroke="#fff" stroke-width="2"/></svg>Guía al puesto libre más cercano, por la ruta más corta</li>
-        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#1E63D6"/><path d="M6 10l3 3 5-6" fill="none" stroke="#fff" stroke-width="2"/></svg>Pago desde el celular: $0,25 la media hora, recarga con Payphone</li>
-        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#1E63D6"/><path d="M6 10l3 3 5-6" fill="none" stroke="#fff" stroke-width="2"/></svg>Avisa antes de que se acabe el tiempo y se cierra sola al irse</li>
-      </ul>
-      <div class="met"><div><b>−18 %</b><span>tiempo buscando parqueo</span></div><div><b>−118 kg</b><span>de CO₂ por hora pico en el Centro</span></div></div>
-      <div class="ley"><span><i style="background:#22a559"></i>con espacio</span><span><i style="background:#e04848"></i>lleno</span><span><i style="background:#FFD60A"></i>conductor con e-sert</span></div>
-      <a class="vivo" href="https://e-sert.tesisucuenca.com/" target="_blank" rel="noopener">Abrir el visor en vivo ↗</a>
-    </div>
+<!-- ===================== EL VISOR (LA PROPUESTA) ===================== -->
+<section class="slide visor" id="sVisor"
+  data-notas="Esta es la propuesta: la página del visor de e-sert, el Centro Histórico en 3D.|Verde: puesto con espacio. Rojo: lleno. El auto amarillo es un usuario de e-Sert.|Pedir a alguien que escanee el QR del panel y use la app; mientras tanto contar: 18 % menos tiempo buscando, 118 kg de CO₂ menos por hora pico, control y cobro sin tarjetas.|Cerrar con lo que necesitamos: la ocupación real por calle y hora, el inventario oficial de puestos y un piloto en un sector del Centro.">
+  <iframe id="marcoVisor" src="visor/index.html" title="Visor de e-sert" loading="eager"></iframe>
+  <div id="respaldo" hidden>
+    <div class="escena" id="escenaRespaldo"></div>
+    <div class="titulo-esert"><b>e-Sert</b><p>Una app que muestra en tiempo real dónde hay parqueo libre, lleva al conductor hasta el puesto y cobra desde el celular, sin tarjetas SERT físicas.</p></div>
+    <a class="enlace-vivo" href="https://e-sert.tesisucuenca.com/" target="_blank" rel="noopener">Abrir el visor en vivo ↗</a>
   </div>
-  <button type="button" class="popup-min" id="popAbrir" hidden>¿Qué es e-sert?</button>
-</section>
-
-<!-- ===================== 3. CÓMO FUNCIONA ===================== -->
-<section class="slide" data-sec="Nuestra propuesta" data-expl="como"
-  data-notas="Para el conductor son tres pasos desde el celular; se abre con un QR, sin instalar nada.|Busca: la app lo lleva al puesto libre.|Paga: elige el tiempo y se cobra al instante; puede extenderlo desde donde esté.|Se va: la app detecta que va manejando y cierra la sesión; el puesto queda libre en el mapa.">
-  <div class="frametitle">Para el conductor: tres pasos desde el celular</div>
-  <div class="body" style="gap:10px">
-    <div class="pasos3">
-      <div class="paso"><div class="tel"><img src="img/guiado.jpg" alt="La app guía al conductor al puesto 411 de la calle Benigno Malo"></div><h4><em>1</em>Busca</h4><p>Toca «Buscar parqueadero» y la app lo lleva al puesto libre más cercano, que queda reservado.</p></div>
-      <div class="paso"><div class="tel"><img src="img/activa.jpg" alt="Sesión activa de 30 minutos con débito de 0,25 dólares"></div><h4><em>2</em>Paga</h4><p>Elige de 30 a 120 minutos y se cobra al instante. Puede extender el tiempo desde donde esté.</p></div>
-      <div class="paso"><div class="tel"><img src="img/billetera.jpg" alt="Billetera con saldo y recarga con Payphone"></div><h4><em>3</em>Se va</h4><p>La app detecta que ya va manejando y cierra la sesión. El saldo se recarga con Payphone.</p></div>
-    </div>
-    <div class="nota" style="text-align:center">Se abre con un código QR en el navegador, sin instalar nada · e-sert.tesisucuenca.com/app</div>
-  </div>
-  <div class="footline"></div>
-</section>
-
-<!-- ===================== 4. BENEFICIOS ===================== -->
-<section class="slide" data-sec="Nuestra propuesta" data-expl="beneficios"
-  data-notas="Lo que gana la ciudad, medido en la simulación con información real de ocupación.|18 % menos tiempo buscando y 16 % menos recorrido; incluso quienes no usan la app buscan menos.|118 kg de CO₂ menos por cada hora pico en el Centro.|Y para la EMOV: control en tiempo real de qué puesto está pagado, y recaudo digital.">
-  <div class="frametitle">Lo que gana la ciudad y la EMOV</div>
-  <div class="body" style="justify-content:center">
-    <div class="benef">
-      <div class="bf"><b class="n">−18 %</b><div><h4>Menos tiempo buscando</h4><p>De 7,2 a 6 minutos por auto. Hasta quienes no usan la app buscan menos, porque baja la competencia por los puestos.</p></div></div>
-      <div class="bf"><b class="n">−118 kg</b><div><h4>Menos CO₂ cada hora pico</h4><p>Y 16 % menos recorrido dando vueltas en el Centro Histórico.</p></div></div>
-      <div class="bf"><b class="n az">En vivo</b><div><h4>Control puesto por puesto</h4><p>La EMOV ve qué puesto está pagado y hasta qué hora, y los agentes van directo a los que no lo están.</p></div></div>
-      <div class="bf"><b class="n az">Digital</b><div><h4>Recaudo sin tarjetas</h4><p>Cobro al instante y por el tiempo real de uso, con la tarifa vigente de $0,25 por media hora.</p></div></div>
-    </div>
-    <div class="nota">Resultados de simulaciones de la hora pico (5 repeticiones por escenario), con la mitad de los conductores usando la app y la ocupación real de los puestos.</div>
-  </div>
-  <div class="footline"></div>
-</section>
-
-<!-- ===================== 5. QUÉ DATOS NECESITAMOS ===================== -->
-<section class="slide" data-sec="Oportunidades de mejora" data-expl="datos"
-  data-notas="Para pasar de la simulación a la calle necesitamos datos reales de la EMOV.|El más importante es la ocupación: con ella la app reduce la búsqueda 18 %; si solo conoce a sus propios usuarios, no mejora.|Les proponemos un piloto en un sector del Centro con estos datos.">
-  <div class="frametitle">Qué datos reales necesitamos para llevarlo a la calle</div>
-  <div class="body" style="gap:14px">
-    <table class="datos">
-      <thead><tr><th>Dato de la EMOV / DGM</th><th>Para qué sirve</th><th>Hoy usamos</th></tr></thead>
-      <tbody>
-        <tr><td>Ubicación, código y capacidad de cada puesto SERT</td><td>Que el mapa y los códigos de la app sean los oficiales</td><td>6 194 puestos estimados con reglas sobre el mapa</td></tr>
-        <tr class="clave"><td>Ocupación por calle y hora <span class="prio">CLAVE</span></td><td>Saber dónde hay espacio de verdad: es lo que da el −18 %. Sin ella, la app no mejora la búsqueda.</td><td>Ocupación simulada</td></tr>
-        <tr><td>Ventas de tarjetas y tiempos de estadía</td><td>Ajustar la demanda, la rotación y los avisos de fin de tiempo</td><td>Estadía media supuesta de 45 min</td></tr>
-        <tr><td>Conteos de tráfico en el Centro en hora pico</td><td>Que la simulación tenga el tráfico real de cada calle</td><td>1 800 autos por hora calibrados</td></tr>
-        <tr><td>Integración con recaudo y control de agentes</td><td>Pasar de pagos de prueba a pagos reales y apoyar el control en la calle</td><td>Payphone en modo de pruebas</td></tr>
-      </tbody>
-    </table>
-    <div class="resultado">Propuesta: un piloto en un sector del Centro con estos datos, para medir en la calle cuánto baja la búsqueda.</div>
-  </div>
-  <div class="footline"></div>
 </section>
 
 </div></div>
 
-<div id="expl" role="dialog" aria-modal="false" aria-labelledby="eTit"><div class="box"><div class="head"><span id="eTit"></span><button id="eClose" aria-label="Cerrar">×</button></div><div class="cuerpo" id="eBody"></div></div></div>
 <div id="notes"></div>
 <div id="bar">
   <button id="bPrev" aria-label="Anterior">◀</button><button id="bNext" aria-label="Siguiente">▶</button>
   <button id="bReloj" title="Cronómetro de 5 minutos (R para reiniciar)"><span id="reloj">5:00</span></button>
-  <button id="bNotas">Notas (N)</button><button id="bExpl">Explicación (E)</button>
-  <button id="bFull">Pantalla completa (F)</button>
+  <button id="bNotas">Notas (N)</button><button id="bFull">Pantalla completa (F)</button>
 </div>
 
 <script>
 const TITULO_CORTO = 'e-sert · Propuesta para la DGM';
-const EXPL = {
-portada:{t:'Cómo usar esta presentación', h:`<h3>Duración</h3><p>5 minutos: problema (1 min), visor y cómo funciona (2 min), beneficios (1 min) y datos que necesitamos (1 min).</p><h3>Teclas</h3><ul><li><b>← →</b> o espacio: avanzar.</li><li><b>N</b>: notas de lo que se dice.</li><li><b>E</b>: este panel.</li><li><b>F</b>: pantalla completa · <b>R</b>: reiniciar el cronómetro.</li></ul><h3>Público</h3><p>Directivos de movilidad: hablar de tráfico, control y recaudo, no de tecnología. Evitar nombres de herramientas.</p>`},
-problema:{t:'De dónde salen las cifras', h:`<p>Son de una simulación de la hora pico del Centro Histórico con la red real de calles, 1 800 autos por hora y 5 repeticiones.</p><ul><li>87,4 % de ocupación media.</li><li>433 s (7,2 min) de búsqueda media.</li><li>1 456 m recorridos buscando.</li><li>838 g de CO₂ por auto mientras busca.</li></ul><div class="preg">Si preguntan si es real: es una simulación calibrada; justamente pedimos los datos de la EMOV para medirlo en la calle.</div><p>Referencia internacional: Shoup (2006) reunió 16 estudios en los que encontrar puesto tomaba de 3,5 a 14 minutos.</p>`},
-visor:{t:'El visor 3D', h:`<p>Es el mismo visor que está en línea en <b>e-sert.tesisucuenca.com</b>. Aquí reproduce un minuto grabado de la simulación, en bucle, porque la presentación no puede conectarse al servidor.</p><ul><li>Verde: puesto con espacio. Rojo: lleno.</li><li>Autos de colores: naranja buscando, violeta guiado por la app, azul estacionado.</li><li>Amarillo con nombre: conductor con e-sert. Clic en el nombre para seguirlo con la cámara.</li></ul><p>«Abrir el visor en vivo» abre la simulación real en una pestaña nueva; si se arranca la demo antes de la reunión, se ve en vivo.</p>`},
-como:{t:'Cómo lo usa el conductor', h:`<p>Capturas reales de la app web. Dos formas de empezar: buscar parqueo cercano, o escribir el código del puesto donde ya estacionó.</p><ul><li>Tarifa: $0,25 por 30 min, de 30 a 120 min (ordenanza SERT).</li><li>Aviso 5 min antes; renueva sola hasta 120 min.</li><li>Payphone en modo de pruebas (sin dinero real).</li></ul>`},
-beneficios:{t:'Cómo se midieron los beneficios', h:`<p>Simulación con la mitad de los conductores usando la app y conociendo la ocupación real de los puestos:</p><ul><li>Búsqueda: 433 → 357 s (−17,6 %).</li><li>Recorrido: −16,4 %.</li><li>CO₂ de búsqueda en la zona: 779 → 661 kg por hora (−118 kg).</li><li>Sin app, en la misma simulación: 405 s en vez de 433 s.</li></ul><div class="preg">Control y recaudo digital son capacidades del prototipo (qué puesto está pagado y hasta cuándo), no cifras medidas.</div>`},
-datos:{t:'Por qué la ocupación es el dato clave', h:`<p>Probamos la app con un mapa que solo conoce a sus propios usuarios: acierta el 57 % de los puestos y la búsqueda no baja (+0,4 % a +4,1 %). Con la ocupación real, baja 17,6 %.</p><p>Por eso el dato más valioso es la ocupación: registros de la tarjeta SERT por calle y hora, o sensores en un sector piloto.</p><div class="preg">Si preguntan qué se necesita para el piloto: el inventario oficial de puestos del sector y su ocupación (aunque sea por hora), y acceso a un ambiente de pagos.</div>`}
-};
-
-/* ============ MONTAJE Y NAVEGACIÓN ============ */
 const slides=[...document.querySelectorAll('.slide')], TOTAL=slides.length;
-const explEl=document.getElementById('expl');
 slides.forEach((s,i)=>{
   const ft=s.querySelector('.frametitle');
   if(s.dataset.sec&&ft){ const sp=document.createElement('span'); sp.className='sec'; sp.textContent=s.dataset.sec; ft.appendChild(sp); }
   const f=s.querySelector('.footline'); if(f) f.innerHTML=`<span>${TITULO_CORTO}</span><span class="c">Universidad de Cuenca</span><span class="r">${i+1} / ${TOTAL}</span>`;
 });
-function abrirExpl(s){ const x=EXPL[s.dataset.expl]; if(!x) return; document.getElementById('eTit').textContent=x.t; const b=document.getElementById('eBody'); b.innerHTML=x.h; b.scrollTop=0; explEl.classList.add('open'); document.body.classList.add('panel'); escala(); }
-function cerrarExpl(){ explEl.classList.remove('open'); document.body.classList.remove('panel'); escala(); }
-document.getElementById('eClose').onclick=cerrarExpl;
 let cur=0;
 function ir(i){
   cur=Math.max(0,Math.min(TOTAL-1,i));
   slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  document.body.classList.toggle('en-visor', slides[cur].id==='sVisor');
   try{ history.replaceState(null,'','#d'+(cur+1)); }catch(e){}
   const n=slides[cur].dataset.notas;
   document.getElementById('notes').innerHTML='<h4>Notas · diapositiva '+(cur+1)+'</h4>'+(n?'<ul>'+n.split('|').map(x=>'<li>'+x+'</li>').join('')+'</ul>':'');
-  if(explEl.classList.contains('open')) abrirExpl(slides[cur]);
   window.dispatchEvent(new CustomEvent('diapositiva',{detail:slides[cur]}));
 }
 let escalaActual=1;
@@ -293,11 +157,12 @@ function pintarReloj(){ const rest=t0?Math.max(0,300-(Date.now()-t0)/1000):300, 
 function arrancarReloj(){ if(!t0){ t0=Date.now(); relojId=setInterval(pintarReloj,500); } }
 function reiniciarReloj(){ t0=null; clearInterval(relojId); pintarReloj(); }
 document.getElementById('bReloj').onclick=()=>{ t0?reiniciarReloj():arrancarReloj(); };
+function tecla(k){
+  if(['ArrowRight','PageDown',' '].includes(k)){ arrancarReloj(); ir(cur+1); }
+  else if(['ArrowLeft','PageUp'].includes(k)) ir(cur-1);
+}
 addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ if(explEl.classList.contains('open')) cerrarExpl(); return; }
-  if(e.key==='e'||e.key==='E'){ explEl.classList.contains('open')?cerrarExpl():abrirExpl(slides[cur]); return; }
-  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();arrancarReloj();ir(cur+1);}
-  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ir(cur-1);}
+  if(['ArrowRight','PageDown',' ','ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); tecla(e.key); }
   else if(e.key==='Home') ir(0); else if(e.key==='End') ir(TOTAL-1);
   else if(e.key==='n'||e.key==='N') document.getElementById('notes').classList.toggle('open');
   else if(e.key==='f'||e.key==='F') pantalla();
@@ -307,13 +172,18 @@ document.getElementById('bPrev').onclick=()=>ir(cur-1);
 document.getElementById('bNext').onclick=()=>{arrancarReloj();ir(cur+1);};
 document.getElementById('bFull').onclick=pantalla;
 document.getElementById('bNotas').onclick=()=>document.getElementById('notes').classList.toggle('open');
-document.getElementById('bExpl').onclick=()=>{ explEl.classList.contains('open')?cerrarExpl():abrirExpl(slides[cur]); };
-/* popup del visor: entra cada vez que se llega a la diapositiva */
-const pop=document.getElementById('popup'), popAbrir=document.getElementById('popAbrir');
-function mostrarPopup(){ pop.hidden=false; popAbrir.hidden=true; pop.classList.remove('entra'); void pop.offsetWidth; pop.classList.add('entra'); }
-document.getElementById('popCerrar').onclick=()=>{ pop.hidden=true; popAbrir.hidden=false; };
-popAbrir.onclick=mostrarPopup;
-addEventListener('diapositiva',e=>{ if(e.detail.id==='sVisor') mostrarPopup(); });
+
+/* El visor avisa cuando ya muestra la simulación y reenvía las flechas aunque tenga el foco.
+   Si no llega a abrir (por ejemplo, si el navegador bloquea el marco), se usa el respaldo 3D. */
+let visorListo=false;
+addEventListener('message',e=>{ const d=e.data||{};
+  if(d.esert==='listo') visorListo=true;
+  else if(d.esert==='tecla') tecla(d.key); });
+function usarRespaldo(){ if(visorListo||!document.getElementById('respaldo').hidden) return;
+  document.getElementById('marcoVisor').remove(); document.getElementById('respaldo').hidden=false;
+  window.dispatchEvent(new Event('respaldo')); }
+document.addEventListener('securitypolicyviolation',e=>{ if(/frame/.test(e.violatedDirective||'')) usarRespaldo(); });
+setTimeout(usarRespaldo,25000);
 </script>
 
 <script type="importmap">
@@ -321,9 +191,8 @@ addEventListener('diapositiva',e=>{ if(e.detail.id==='sVisor') mostrarPopup(); }
              "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
 </script>
 <script type="module">
-/* Visor 3D dentro de la diapositiva: la misma Vista3D del visor de e-sert, alimentada con un minuto
-   grabado de la simulación (datos/repeticion.json) en lugar del WebSocket del servidor. */
-import { Vista3D } from "./js/vista3d.js";
+/* Respaldo: si el visor no abre dentro de la presentación, la misma vista 3D del visor con la grabación. */
+import { Vista3D } from "./visor/js/vista3d.js";
 const COLOR_ESTADO = { BUSCANDO:"#FF9F1C", GUIADO:"#a78bfa", ESTACIONADO:"#60a5fa", A_PIE:"#2dd4bf", REGRESANDO:"#f0abfc", SALIENDO:"#d6b48c", CERRADA:"#9ca3af", null:"#e5e7eb" };
 class CalleGrabada {
   constructor(){ this.puestos=new Map(); this.vehiculos=new Map(); this.peatones=[]; this.rotulos=[]; }
@@ -334,33 +203,25 @@ class CalleGrabada {
       this.vehiculos.set(v.id,Object.assign({},v,{rumbo:r})); }
     for(const id of [...this.vehiculos.keys()]) if(!vistos.has(id)) this.vehiculos.delete(id); }
 }
-const cont=document.getElementById('escena3d');
-async function iniciar(){
-  const calle=new CalleGrabada();
-  const [puestos, rotulos, rep] = await Promise.all(["datos/puestos_geo.json","datos/calles_geo.json","datos/repeticion.json"].map(u=>fetch(u).then(r=>r.json())));
+async function respaldo(){
+  const cont=document.getElementById('escenaRespaldo'), calle=new CalleGrabada();
+  const [puestos, rotulos, rep] = await Promise.all(["visor/datos/puestos_geo.json","visor/datos/calles_geo.json","visor/datos/repeticion.json"].map(u=>fetch(u).then(r=>r.json())));
   for(const p of puestos) calle.puestos.set(p.id, Object.assign(p,{ocupados:0}));
   calle.rotulos=rotulos;
-  cont.innerHTML='';
-  const vista=new Vista3D(cont, calle, { datos:"datos/escena3d.json" });
-  vista.controles.autoRotate=true; vista.controles.autoRotateSpeed=0.35;
-  vista.controles.addEventListener('start',()=>{ vista.controles.autoRotate=false; });
-  const destacado=new Set(rep.destacados.slice(0,1));
+  const vista=new Vista3D(cont, calle, { datos:"visor/datos/escena3d.json" });
+  const destacado=rep.destacados[0];
   let k=0;
-  function paso(){
-    const f=rep.frames[k];
-    if(k===0) vista.moviles.clear();
+  function paso(){ const f=rep.frames[k]; if(k===0) vista.moviles.clear();
     calle.fijarOcupacion(rep.puestos.map((id,i)=>({puesto_id:id, ocupados:f.o[i]})));
-    calle.fijarVehiculos(f.v.map(([i,lat,lon,e,app])=>{ const id=rep.ids[i], h=destacado.has(id);
-      return {id, lat, lon, color: h?'#FFD60A':(COLOR_ESTADO[rep.estados[e]]||COLOR_ESTADO.null), halo:h, etiqueta: h?'Conductor con e-sert':undefined}; }));
-    k=(k+1)%rep.frames.length;
-  }
+    calle.fijarVehiculos(f.v.map(([i,lat,lon,e])=>{ const id=rep.ids[i], h=id===destacado;
+      return {id, lat, lon, color: h?'#FFD60A':(COLOR_ESTADO[rep.estados[e]]||COLOR_ESTADO.null), halo:h, etiqueta: h?'Usuario e-Sert':undefined}; }));
+    k=(k+1)%rep.frames.length; }
   paso(); setInterval(paso,1000);
   const activa=()=>{ const si=document.getElementById('sVisor').classList.contains('active'); vista.activa=si;
     if(si){ vista.renderer.setPixelRatio(Math.min(2,(devicePixelRatio||1)*escalaActual)); vista._tamano(); } };
   addEventListener('diapositiva',activa); addEventListener('escala',activa); activa();
-  window.vista3d=vista;
 }
-iniciar().catch(e=>{ cont.innerHTML='<div class="cargando3d">No se pudo cargar la vista 3D. Usa «Abrir el visor en vivo».</div>'; console.warn(e); });
+addEventListener('respaldo',()=>respaldo().catch(e=>console.warn('Respaldo 3D:',e)));
 </script>
 <script>
 const h=parseInt((location.hash||'').replace('#d',''),10);
